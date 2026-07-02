@@ -1214,6 +1214,35 @@ class SensorViewModel : ViewModel() {
     }
 
     /**
+     * AiDex "Disconnect" action.
+     *
+     * When [breakPairing] is true, first send the protocol unpair (deleteBond) to the
+     * sensor — the same thing the "Unpair" button does — so the sensor is freed to pair
+     * with another device, and only then do the normal local teardown + remove the
+     * entry. When false, keep the sensor's pairing/keys (old disconnect behaviour).
+     *
+     * The unpair must run (and complete) before terminate, because terminate tears the
+     * vendor stack down and there would be nothing left to send deleteBond with.
+     */
+    fun disconnectAiDexSensor(serial: String, breakPairing: Boolean) {
+        val gatt = findGatt(serial)
+        if (!breakPairing || gatt !is tk.glucodata.drivers.aidex.AiDexDriver) {
+            terminateSensor(serial)
+            return
+        }
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val success = runCatching { gatt.unpairSensor() }.getOrElse {
+                android.util.Log.e("SensorVM", "disconnectAiDexSensor unpairSensor failed: ${it.message}")
+                false
+            }
+            android.util.Log.i("SensorVM", "AiDex disconnect (breakPairing): unpairSensor result=$success")
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                terminateSensor(serial)
+            }
+        }
+    }
+
+    /**
      * Re-pair with the AiDex sensor: clear keys and restart vendor stack for fresh pairing.
      */
     fun rePairAiDexSensor(serial: String) {
