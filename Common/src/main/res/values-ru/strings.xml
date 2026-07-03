@@ -498,7 +498,7 @@
 
     <!-- Newly Extracted Strings -->
     <string name="import_history">Импорт истории</string>
-    <string name="import_history_desc">Импорт данных глюкозы из CSV файла</string>
+    <string name="import_history_desc">Импорт данных сахара из файла экспорта JugglucoNG</string>
     <string name="get_started_desc">Начните с добавления вашего сенсора</string>
     <string name="select_sensor">Выберите тип сенсора</string>
     <string name="select_sibionics_type">Выберите тип сенсора</string>
@@ -541,7 +541,7 @@
     <string name="export_history_title">Экспорт истории</string>
     <string name="export_history_sub">Сохранить показания в CSV или текст</string>
     <string name="import_history_title">Импорт истории</string>
-    <string name="import_history_sub">Восстановить показания из CSV файла</string>
+    <string name="import_history_sub">Восстановить показания из файла экспорта JugglucoNG</string>
     <string name="clear_history_title">Очистить историю?</string>
     <string name="clear_history_confirmation">Это удалит все показания глюкозы из базы данных. Это действие необратимо.</string>
     <string name="delete_reading_title">Удалить показание?</string>
@@ -989,6 +989,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="gap_width_value">Ширина зазора: %1$s</string>
     <string name="glucose_with_unit">Глюкоза (%1$s)</string>
     <string name="import_failed_with_error">Не удалось импортировать: %1$s.</string>
+    <string name="import_no_glucose">В файле нет данных сахара</string>
+    <string name="import_unsupported_file">Неподдерживаемый файл. Выберите файл экспорта JugglucoNG (JSON).</string>
     <string name="import_summary">Импортировано: %1$d, пропущено: %2$d, заменено: %3$d.</string>
     <string name="imported_readings_count">Импортированные показания %1$d</string>
     <string name="mirror_error_with_code">Ошибка зеркала (%1$d)</string>
