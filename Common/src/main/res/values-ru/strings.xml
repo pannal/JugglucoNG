@@ -457,8 +457,8 @@
     <!-- Sensor Management Strings -->
     <string name="disconnect_sensor_title">Отключить датчик?</string>
     <string name="disconnect_sensor_desc">Это навсегда остановит сессию датчика.</string>
-    <string name="disconnect_sensor_aidex_desc">Датчик будет отключён и удалён из списка. Если разорвать сопряжение, датчик освободится для другого устройства; иначе ключи сохранятся для повторного подключения.</string>
-    <string name="break_pairing">Разорвать сопряжение</string>
+    <string name="disconnect_sensor_aidex_desc">Датчик будет отключён и удалён из списка. Если отвязать сенсор, датчик освободится для другого устройства; иначе ключи сохранятся для повторного подключения.</string>
+    <string name="break_pairing">Отвязать сенсор</string>
     <string name="remove_sensor_title">Удалить датчик?</string>
     <string name="remove_sensor_desc">Это безвозвратно удалит датчик, сотрёт ключи сопряжения и остановит сессию. Для повторного использования потребуется новое сопряжение.</string>
     <string name="remove">Удалить</string>

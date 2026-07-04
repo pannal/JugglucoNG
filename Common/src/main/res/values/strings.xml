@@ -607,8 +607,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- Sensor Management Strings -->
     <string name="disconnect_sensor_title">Disconnect Sensor?</string>
     <string name="disconnect_sensor_desc">This will permanently stop the sensor session.</string>
-    <string name="disconnect_sensor_aidex_desc">The sensor will be disconnected and removed from the list. If pairing is broken, the sensor is freed to pair with another device; otherwise its keys are kept so you can reconnect later.</string>
-    <string name="break_pairing">Break pairing</string>
+    <string name="disconnect_sensor_aidex_desc">The sensor will be disconnected and removed from the list. If you unbind the sensor, it is freed to pair with another device; otherwise its keys are kept so you can reconnect later.</string>
+    <string name="break_pairing">Unbind sensor</string>
     <string name="remove_sensor_title">Remove Sensor?</string>
     <string name="remove_sensor_desc">This will permanently remove the sensor, wipe pairing keys, and stop the session. The sensor must be re-paired to use again.</string>
     <string name="remove">Remove</string>
