@@ -298,15 +298,15 @@ class SibionicsAlgorithmContext(
     private var replayPollDeltaMmol = Float.NaN
     private var liveBadValueStreak = 0
     private var replayBadValueStreak = 0
-    private val abnormalJudgment = AbnormalJudgmentState()
-    private val currentCorrection = CurrentCorrectionState()
-    private val kalman = KalmanState()
-    private val temperature = TemperatureState()
-    private val filters = FunctionFilters()
-    private val clipping = ClippingFilterState()
-    private val degradation = DegradationTracker()
-    private val esa = EsaState()
-    private val deconvolution = DeconvolutionState()
+    private var abnormalJudgment = AbnormalJudgmentState()
+    private var currentCorrection = CurrentCorrectionState()
+    private var kalman = KalmanState()
+    private var temperature = TemperatureState()
+    private var filters = FunctionFilters()
+    private var clipping = ClippingFilterState()
+    private var degradation = DegradationTracker()
+    private var esa = EsaState()
+    private var deconvolution = DeconvolutionState()
 
     fun configure(shortCode: String, sensitivity: Float) {
         this.shortCode = shortCode
@@ -318,6 +318,7 @@ class SibionicsAlgorithmContext(
         replayPollDeltaMmol = Float.NaN
         liveBadValueStreak = 0
         replayBadValueStreak = 0
+        resetProcessingState()
     }
 
     fun displayUsingCurrentLiveDelta(rawMmol: Float): Float =
@@ -335,10 +336,18 @@ class SibionicsAlgorithmContext(
                 if (candidate != null && candidate > 1f) {
                     livePollDeltaMmol = candidate - rawMmol
                     candidate
-                } else if (livePollDeltaMmol.isFinite() && abs(livePollDeltaMmol) < 40f) {
-                    nativeRound(rawMmol + livePollDeltaMmol)
                 } else {
-                    rawMmol
+                    val fallbackDelta = when {
+                        livePollDeltaMmol.isFinite() && abs(livePollDeltaMmol) < 40f -> livePollDeltaMmol
+                        replayPollDeltaMmol.isFinite() && abs(replayPollDeltaMmol) < 40f -> replayPollDeltaMmol
+                        else -> Float.NaN
+                    }
+                    if (fallbackDelta.isFinite()) {
+                        livePollDeltaMmol = fallbackDelta
+                        nativeRound(rawMmol + fallbackDelta)
+                    } else {
+                        rawMmol
+                    }
                 }
             }
             SibionicsAlgorithmMode.REPLAY -> {
@@ -355,10 +364,29 @@ class SibionicsAlgorithmContext(
         val invalidHigh = display > 50f
         if (invalidHigh) {
             if (mode == SibionicsAlgorithmMode.LIVE) liveBadValueStreak++ else replayBadValueStreak++
+            if (liveBadValueStreak >= 5 || replayBadValueStreak >= 5) {
+                resetProcessingState()
+                livePollDeltaMmol = Float.NaN
+                replayPollDeltaMmol = Float.NaN
+                liveBadValueStreak = 0
+                replayBadValueStreak = 0
+            }
             return rawMmol
         }
         if (mode == SibionicsAlgorithmMode.LIVE) liveBadValueStreak = 0 else replayBadValueStreak = 0
         return max(display, 0f)
+    }
+
+    private fun resetProcessingState() {
+        abnormalJudgment = AbnormalJudgmentState()
+        currentCorrection = CurrentCorrectionState()
+        kalman = KalmanState()
+        temperature = TemperatureState()
+        filters = FunctionFilters()
+        clipping = ClippingFilterState()
+        degradation = DegradationTracker()
+        esa = EsaState()
+        deconvolution = DeconvolutionState()
     }
 
     private fun processCandidate(rawMmol: Float, temperatureC: Float, index: Int): Float? {

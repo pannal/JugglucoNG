@@ -91,6 +91,7 @@ class SibionicsBleManager(
     @Volatile private var uiPaused: Boolean = false
 
     @Volatile private var lastIndex: Int = 0
+    @Volatile private var lastIndexDirty: Boolean = false
     @Volatile private var lastLiveIndexSeen: Int = -1
     @Volatile private var startTimeMs: Long = 0L
     @Volatile private var latestReadingTimeMs: Long = 0L
@@ -227,18 +228,42 @@ class SibionicsBleManager(
         val name = SibionicsConstants.normalizeBleName(deviceName)
         if (name.isBlank()) return false
         val rec = record ?: SibionicsRegistry.findRecord(Applic.app, SerialNumber)
+        val bleAlias = SibionicsConstants.normalizeBleName(rec?.bleName)
+        if (matchesBleNameAlias(name, bleAlias)) return true
+        val embeddedBle = SibionicsRegistry.deriveBleName(rec?.displayName)
+            ?: SibionicsRegistry.deriveBleName(SibionicsConstants.stripManagedPrefix(SerialNumber))
+        if (matchesBleNameAlias(name, embeddedBle)) return true
         val display = SibionicsConstants.normalizeBleName(rec?.displayName)
         val stripped = SibionicsConstants.normalizeBleName(SibionicsConstants.stripManagedPrefix(SerialNumber))
+        if (matchesQrShortName(name, display) || matchesQrShortName(name, stripped)) return true
         return display.isNotBlank() && (
             name.equals(display, ignoreCase = true) ||
+                display.contains(name, ignoreCase = true) ||
                 name.endsWith(display.takeLast(6), ignoreCase = true) ||
                 display.endsWith(name.takeLast(6), ignoreCase = true)
             ) ||
             stripped.isNotBlank() && (
                 name.equals(stripped, ignoreCase = true) ||
+                    stripped.contains(name, ignoreCase = true) ||
                     name.endsWith(stripped.takeLast(6), ignoreCase = true) ||
                     stripped.endsWith(name.takeLast(6), ignoreCase = true)
                 )
+    }
+
+    private fun matchesBleNameAlias(advertisedName: String, alias: String?): Boolean {
+        val normalizedAlias = SibionicsConstants.normalizeBleName(alias)
+        if (advertisedName.length < 6 || normalizedAlias.length < 6) return false
+        return advertisedName.equals(normalizedAlias, ignoreCase = true) ||
+            advertisedName.endsWith(normalizedAlias.takeLast(6), ignoreCase = true) ||
+            normalizedAlias.endsWith(advertisedName.takeLast(6), ignoreCase = true)
+    }
+
+    private fun matchesQrShortName(advertisedName: String, qrShortName: String?): Boolean {
+        val normalizedQr = SibionicsConstants.normalizeBleName(qrShortName)
+        if (advertisedName.length < 8 || normalizedQr.length < 8) return false
+        // Native QR identity uses the trailing 11-char SI name; some BLE local names embed
+        // that SI name's first four chars as their suffix (e.g. QR 46HU804EBJ4 ↔ ...46HU).
+        return advertisedName.endsWith(normalizedQr.take(4), ignoreCase = true)
     }
 
     override fun setDeviceAddress(address: String?) {
@@ -547,18 +572,21 @@ class SibionicsBleManager(
             return
         }
         val now = System.currentTimeMillis()
-        val emitted = entries.mapNotNull { entry ->
-            val eventMs = sanitizeSampleTime(entry.eventTimeMs(now))
-            processEntry(
-                index = entry.index,
-                rawMmol = entry.rawMmol,
-                rawMgdl = entry.rawMgdl,
-                temperatureC = entry.temperatureC,
-                impedance = entry.rawImpedance.toFloat(),
-                eventMs = eventMs,
-                live = entry.isLive,
-            )
-        }
+        val emitted = entries
+            .sortedBy { it.index }
+            .mapNotNull { entry ->
+                val eventMs = sanitizeSampleTime(entry.eventTimeMs(now))
+                processEntry(
+                    index = entry.index,
+                    rawMmol = entry.rawMmol,
+                    rawMgdl = entry.rawMgdl,
+                    temperatureC = entry.temperatureC,
+                    impedance = entry.rawImpedance.toFloat(),
+                    eventMs = eventMs,
+                    live = entry.isLive,
+                )
+            }
+        flushLastIndexIfDirty()
         storeAndPublish(emitted)
     }
 
@@ -567,17 +595,20 @@ class SibionicsBleManager(
             setStatus(waitingForDataStatus())
             return
         }
-        val emitted = entries.mapNotNull { entry ->
-            processEntry(
-                index = entry.index,
-                rawMmol = entry.rawMmol,
-                rawMgdl = entry.rawMgdl,
-                temperatureC = entry.temperatureC,
-                impedance = entry.rawImpedance.toFloat(),
-                eventMs = sanitizeSampleTime(entry.eventTimeMs),
-                live = entry.isLive,
-            )
-        }
+        val emitted = entries
+            .sortedBy { it.index }
+            .mapNotNull { entry ->
+                processEntry(
+                    index = entry.index,
+                    rawMmol = entry.rawMmol,
+                    rawMgdl = entry.rawMgdl,
+                    temperatureC = entry.temperatureC,
+                    impedance = entry.rawImpedance.toFloat(),
+                    eventMs = sanitizeSampleTime(entry.eventTimeMs),
+                    live = entry.isLive,
+                )
+            }
+        flushLastIndexIfDirty()
         storeAndPublish(emitted)
     }
 
@@ -591,6 +622,8 @@ class SibionicsBleManager(
         live: Boolean,
     ): EmittedReading? {
         if (!rawMmol.isFinite() || rawMmol <= 0f || eventMs <= 0L) return null
+        if (!live && lastIndex > 0 && index < lastIndex) return null
+        if (live && lastLiveIndexSeen >= 0 && index <= lastLiveIndexSeen) return null
         if (startTimeMs <= 0L && index >= 0) {
             startTimeMs = eventMs - index * SibionicsConstants.READING_INTERVAL_MS
             Applic.app?.let { SibionicsRegistry.saveStartTimeMs(it, SerialNumber, startTimeMs) }
@@ -607,16 +640,26 @@ class SibionicsBleManager(
             algorithm.displayUsingCurrentLiveDelta(rawMmol)
         }
         val glucoseMgdl = displayMmol * SibionicsConstants.MGDL_PER_MMOLL
+        advanceLastIndex(index)
         if (!glucoseMgdl.isFinite() || glucoseMgdl <= 0f || glucoseMgdl >= 500f) {
             Log.w(SibionicsConstants.TAG, "skip invalid glucose idx=$index display=$glucoseMgdl raw=$rawMgdl")
             return null
         }
 
+        return EmittedReading(eventMs, glucoseMgdl, rawMgdl, temperatureC, impedance, index, live)
+    }
+
+    private fun advanceLastIndex(index: Int) {
         if (index >= lastIndex) {
             lastIndex = index + 1
-            Applic.app?.let { SibionicsRegistry.saveLastIndex(it, SerialNumber, lastIndex) }
+            lastIndexDirty = true
         }
-        return EmittedReading(eventMs, glucoseMgdl, rawMgdl, temperatureC, impedance, index, live)
+    }
+
+    private fun flushLastIndexIfDirty() {
+        if (!lastIndexDirty) return
+        lastIndexDirty = false
+        Applic.app?.let { SibionicsRegistry.saveLastIndex(it, SerialNumber, lastIndex) }
     }
 
     private fun storeAndPublish(readings: List<EmittedReading>) {

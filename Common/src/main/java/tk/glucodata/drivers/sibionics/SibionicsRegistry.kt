@@ -28,17 +28,20 @@ object SibionicsRegistry {
         val displayName: String,
         val variant: SibionicsConstants.Variant,
         val shortCode: String,
+        val bleName: String = "",
     ) {
         fun matchesId(id: String?): Boolean =
             SibionicsConstants.matchesId(sensorId, id) ||
                 SibionicsConstants.matchesId(displayName, id) ||
-                SibionicsConstants.matchesId(shortCode, id)
+                SibionicsConstants.matchesId(shortCode, id) ||
+                SibionicsConstants.matchesId(bleName, id)
     }
 
     data class SetupIdentity(
         val sensorId: String,
         val displayName: String,
         val shortCode: String,
+        val bleName: String,
     )
 
     fun prefs(context: Context): SharedPreferences =
@@ -57,17 +60,24 @@ object SibionicsRegistry {
             normalizedRaw.isNotBlank() -> normalizedRaw
             else -> variant.displayLabel
         }
-        val display = deriveDisplayName(source, variant)
+        val qrName = deriveNativeQrName(source)
+        val qrShortView = qrName?.takeLast(11)?.takeIf { it.length == 11 }
+        val bleName = deriveBleName(source).orEmpty()
+        val display = qrShortView ?: deriveDisplayName(source, variant)
         val fallback = variant.fallbackShortCode
-        val shortCode = SibionicsSensitivity.deriveShortCode(
-            source.takeIf { it.isNotBlank() } ?: rawInput,
-            fallback,
-        )
+        val shortCode = qrShortView
+            ?.take(8)
+            ?.takeIf { it.length == 8 }
+            ?: SibionicsSensitivity.deriveShortCode(
+                bleName.takeIf { it.isNotBlank() } ?: source.takeIf { it.isNotBlank() } ?: rawInput,
+                fallback,
+            )
         val idBase = if (display.isNotBlank()) display else shortCode
         return SetupIdentity(
             sensorId = SibionicsConstants.canonicalSensorId(idBase),
             displayName = display.ifBlank { "${variant.displayLabel} $shortCode" },
             shortCode = shortCode,
+            bleName = bleName,
         )
     }
 
@@ -87,16 +97,21 @@ object SibionicsRegistry {
             ?.takeIf { it.length == 8 }
             ?: identity.shortCode
         val records = persistedRecords(context).toMutableList()
-        val idx = records.indexOfFirst { it.matchesId(sensorId) }
+        val idx = records.indexOfFirst {
+            it.matchesId(sensorId) ||
+                (identity.bleName.isNotBlank() && it.matchesId(identity.bleName))
+        }
         val existing = records.getOrNull(idx)
         val normalizedAddress = SibionicsConstants.normalizeBleAddress(address)
             ?: SibionicsConstants.normalizeBleAddress(existing?.address)
             ?: ""
-        val visible = displayName
-            ?.takeIf { it.isNotBlank() }
-            ?: existing?.displayName
+        val visible = usableDisplayName(displayName)
+            ?: usableDisplayName(existing?.displayName)
             ?: identity.displayName
-        val record = SensorRecord(sensorId, normalizedAddress, visible, variant, shortCode)
+        val bleName = identity.bleName
+            .ifBlank { deriveBleName(displayName) ?: "" }
+            .ifBlank { existing?.bleName.orEmpty() }
+        val record = SensorRecord(sensorId, normalizedAddress, visible, variant, shortCode, bleName)
         if (idx >= 0) records[idx] = record else records.add(record)
         writeRecords(context, records)
         saveVariant(context, sensorId, variant)
@@ -255,6 +270,7 @@ object SibionicsRegistry {
             r.displayName.replace('|', ' '),
             r.variant.id,
             r.shortCode,
+            r.bleName,
         ).joinToString("|")
 
     private fun parseRecord(line: String): SensorRecord? {
@@ -267,6 +283,7 @@ object SibionicsRegistry {
             displayName = parts[2].ifBlank { SibionicsConstants.stripManagedPrefix(id) },
             variant = SibionicsConstants.Variant.fromId(parts[3]),
             shortCode = parts[4].ifBlank { SibionicsConstants.Variant.fromId(parts[3]).fallbackShortCode },
+            bleName = parts.getOrNull(5).orEmpty(),
         )
     }
 
@@ -277,10 +294,78 @@ object SibionicsRegistry {
         val magic = "0697283164"
         val magicPos = normalized.indexOf(magic)
         if (magicPos >= 0 && normalized.length >= 17) {
-            return normalized.takeLast(17).dropLast(1).ifBlank { normalized.takeLast(11) }
+            return normalized.takeLast(17).dropLast(1).takeLast(11).ifBlank { normalized.takeLast(11) }
         }
         return normalized.takeLast(16)
     }
+
+    private fun usableDisplayName(raw: String?): String? {
+        val normalized = SibionicsConstants.normalizeBleName(raw)
+        if (normalized.isBlank()) return null
+        if (deriveNativeQrName(raw) != null) return null
+        return normalized.takeIf { it.length <= 18 }
+    }
+
+    internal fun deriveBleName(source: String?): String? {
+        val compact = SibionicsConstants.normalizeBleName(source)
+        if (compact.length in 8..16) return compact
+        val ai10 = findBatchAi10(compact)
+        if (ai10 < 0) return null
+        val start = ai10 + 2
+        val nextAi21 = compact.indexOf("21", startIndex = start + 8)
+        val end = when {
+            nextAi21 > start -> nextAi21
+            compact.length - start in 8..16 -> compact.length
+            else -> -1
+        }
+        if (end <= start) return null
+        val candidate = compact.substring(start, end)
+        return candidate.takeIf { it.length in 8..16 }
+    }
+
+    private fun findBatchAi10(compact: String): Int {
+        val magic = "0697283164"
+        val searchStart = compact.indexOf(magic)
+            .takeIf { it >= 0 }
+            ?.let { it + magic.length }
+            ?: 0
+        var pos = compact.indexOf("10", startIndex = searchStart)
+        while (pos >= 0) {
+            val valueStart = pos + 2
+            val nextAi21 = compact.indexOf("21", startIndex = valueStart + 8)
+            if (nextAi21 > valueStart && nextAi21 - valueStart in 8..16) return pos
+            val tailLength = compact.length - valueStart
+            if (tailLength in 8..16) return pos
+            pos = compact.indexOf("10", startIndex = pos + 1)
+        }
+        return -1
+    }
+
+    private fun deriveNativeQrName(source: String?): String? {
+        val payload = cleanQrPayload(source)
+        val magic = "0697283164"
+        if (!payload.contains(magic) || payload.length < 50) return null
+        return if (payload.length < 65) {
+            val endLen = payload.length - 49
+            val startLen = 16 - endLen
+            if (endLen <= 0 || startLen < 0 || payload.length < 49 + endLen || payload.length < 22 + startLen) {
+                null
+            } else {
+                (payload.substring(22, 22 + startLen) + payload.substring(49, 49 + endLen))
+                    .takeIf { it.length == 16 }
+            }
+        } else {
+            val start = payload.length - 17
+            payload.substring(start, start + 16).takeIf { it.length == 16 }
+        }?.let { SibionicsConstants.normalizeBleName(it) }
+    }
+
+    private fun cleanQrPayload(source: String?): String =
+        source.orEmpty()
+            .trim()
+            .uppercase(java.util.Locale.US)
+            .replace("^]", "\u001D")
+            .filter { it.isLetterOrDigit() || it == '\u001D' }
 }
 
 object SibionicsManagedSensorIdentityAdapter : tk.glucodata.drivers.ManagedSensorIdentityAdapter {
