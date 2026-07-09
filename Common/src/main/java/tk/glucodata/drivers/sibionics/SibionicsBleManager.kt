@@ -92,7 +92,12 @@ class SibionicsBleManager(
 
     @Volatile private var lastIndex: Int = 0
     @Volatile private var lastIndexDirty: Boolean = false
+    @Volatile private var algorithmStateDirty: Boolean = false
+    @Volatile private var algorithmRehydrating: Boolean = false
+    @Volatile private var rehydrationExpectedIndex: Int = -1
+    @Volatile private var rehydrationTargetIndex: Int = 0
     @Volatile private var lastLiveIndexSeen: Int = -1
+    @Volatile private var lastLiveAlgorithmIndexSeen: Int = -1
     @Volatile private var startTimeMs: Long = 0L
     @Volatile private var latestReadingTimeMs: Long = 0L
     @Volatile private var latestGlucoseMgdl: Float = Float.NaN
@@ -102,7 +107,6 @@ class SibionicsBleManager(
     @Volatile private var latestImpedance: Float = Float.NaN
 
     private val algorithm = SibionicsAlgorithmContext(serial)
-    private var replayActive = false
     private val authTimeoutRunnable = Runnable { tryNextKeyGroup("auth timeout") }
 
     @Volatile private var viewModeValue: Int = ManagedSensorViewModeStore.read(Applic.app, serial, 0)
@@ -131,6 +135,13 @@ class SibionicsBleManager(
         sensitivity = SibionicsSensitivity.sensitivityFor(shortCode)
         algorithm.configure(shortCode, sensitivity)
         lastIndex = SibionicsRegistry.loadLastIndex(context, SerialNumber)
+        val algorithmState = SibionicsRegistry.loadAlgorithmState(context, SerialNumber)
+        if (algorithmState != null && algorithm.restore(algorithmState)) {
+            lastLiveAlgorithmIndexSeen = lastIndex - 1
+            Log.i(SibionicsConstants.TAG, "restored exact algorithm state idx=$lastIndex")
+        } else if (lastIndex > 1) {
+            beginAlgorithmRehydration(lastIndex, "no usable saved state")
+        }
         startTimeMs = SibionicsRegistry.loadStartTimeMs(context, SerialNumber)
         val (time, glucose, raw) = SibionicsRegistry.loadLastReading(context, SerialNumber)
         latestReadingTimeMs = time
@@ -586,7 +597,7 @@ class SibionicsBleManager(
                     live = entry.isLive,
                 )
             }
-        flushLastIndexIfDirty()
+        flushAlgorithmCheckpointIfDirty()
         storeAndPublish(emitted)
     }
 
@@ -608,7 +619,7 @@ class SibionicsBleManager(
                     live = entry.isLive,
                 )
             }
-        flushLastIndexIfDirty()
+        flushAlgorithmCheckpointIfDirty()
         storeAndPublish(emitted)
     }
 
@@ -622,25 +633,40 @@ class SibionicsBleManager(
         live: Boolean,
     ): EmittedReading? {
         if (!rawMmol.isFinite() || rawMmol <= 0f || eventMs <= 0L) return null
+        if (!algorithmRehydrating && index <= 1 && lastIndex > 1) {
+            resetForSensorRestart()
+        }
         if (!live && lastIndex > 0 && index < lastIndex) return null
-        if (live && lastLiveIndexSeen >= 0 && index <= lastLiveIndexSeen) return null
+        if (live && lastLiveAlgorithmIndexSeen >= 0 && index <= lastLiveAlgorithmIndexSeen) return null
+        if (!algorithmRehydrating && lastIndex > 0 && index > lastIndex) {
+            beginAlgorithmRehydration(lastIndex, "algorithm index gap: expected $lastIndex, received $index")
+            scheduleReconnect("exact algorithm index gap")
+            return null
+        }
+        val wasRehydrating = algorithmRehydrating
+        if (wasRehydrating && !acceptRehydrationIndex(index)) return null
         if (startTimeMs <= 0L && index >= 0) {
             startTimeMs = eventMs - index * SibionicsConstants.READING_INTERVAL_MS
             Applic.app?.let { SibionicsRegistry.saveStartTimeMs(it, SerialNumber, startTimeMs) }
         }
         if (index <= 1) algorithm.reset()
-
-        val replayBatch = !live || replayActive
-        if (!live && !replayActive) replayActive = true
-        val displayMmol = if (live) {
-            algorithm.process(rawMmol, temperatureC, index, SibionicsAlgorithmMode.LIVE)
-        } else if (replayBatch) {
-            algorithm.process(rawMmol, temperatureC, index, SibionicsAlgorithmMode.REPLAY)
-        } else {
-            algorithm.displayUsingCurrentLiveDelta(rawMmol)
-        }
-        val glucoseMgdl = displayMmol * SibionicsConstants.MGDL_PER_MMOLL
+        val displayMmol = algorithm.process(
+            rawMmol = rawMmol,
+            temperatureC = temperatureC,
+            index = index,
+            mode = if (live) SibionicsAlgorithmMode.LIVE else SibionicsAlgorithmMode.REPLAY,
+        )
+        if (live) lastLiveAlgorithmIndexSeen = index
+        algorithmStateDirty = true
         advanceLastIndex(index)
+        if (wasRehydrating && index >= rehydrationTargetIndex - 1) {
+            algorithmRehydrating = false
+            rehydrationExpectedIndex = -1
+            rehydrationTargetIndex = 0
+            Log.i(SibionicsConstants.TAG, "exact algorithm rehydrated through idx=$index")
+        }
+        if (wasRehydrating && !live) return null
+        val glucoseMgdl = displayMmol * SibionicsConstants.MGDL_PER_MMOLL
         if (!glucoseMgdl.isFinite() || glucoseMgdl <= 0f || glucoseMgdl >= 500f) {
             Log.w(SibionicsConstants.TAG, "skip invalid glucose idx=$index display=$glucoseMgdl raw=$rawMgdl")
             return null
@@ -656,10 +682,76 @@ class SibionicsBleManager(
         }
     }
 
-    private fun flushLastIndexIfDirty() {
-        if (!lastIndexDirty) return
+    private fun flushAlgorithmCheckpointIfDirty() {
+        if (!lastIndexDirty && !algorithmStateDirty) return
+        val indexDirty = lastIndexDirty
+        val stateDirty = algorithmStateDirty
         lastIndexDirty = false
-        Applic.app?.let { SibionicsRegistry.saveLastIndex(it, SerialNumber, lastIndex) }
+        algorithmStateDirty = false
+        Applic.app?.let { context ->
+            if (stateDirty) {
+                SibionicsRegistry.saveAlgorithmCheckpoint(context, SerialNumber, lastIndex, algorithm.snapshot())
+            } else if (indexDirty) {
+                SibionicsRegistry.saveLastIndex(context, SerialNumber, lastIndex)
+            }
+        }
+    }
+
+    private fun beginAlgorithmRehydration(previousIndex: Int, reason: String) {
+        algorithm.reset()
+        algorithmStateDirty = false
+        algorithmRehydrating = true
+        rehydrationExpectedIndex = -1
+        rehydrationTargetIndex = previousIndex.coerceAtLeast(1)
+        lastLiveAlgorithmIndexSeen = -1
+        lastIndex = 1
+        lastIndexDirty = true
+        Log.w(
+            SibionicsConstants.TAG,
+            "exact algorithm state unavailable ($reason); requesting contiguous replay from idx=1",
+        )
+    }
+
+    private fun resetForSensorRestart() {
+        Log.i(SibionicsConstants.TAG, "sensor index restarted; clearing exact algorithm state")
+        algorithm.reset()
+        lastIndex = 0
+        lastIndexDirty = true
+        algorithmStateDirty = true
+        lastLiveAlgorithmIndexSeen = -1
+        lastLiveIndexSeen = -1
+        startTimeMs = 0L
+        latestReadingTimeMs = 0L
+        latestGlucoseMgdl = Float.NaN
+        latestRawMgdl = Float.NaN
+        Applic.app?.let { context ->
+            SibionicsRegistry.clearStartTimeMs(context, SerialNumber)
+            HistorySyncAccess.markSensorReset(SerialNumber)
+        }
+    }
+
+    private fun acceptRehydrationIndex(index: Int): Boolean {
+        if (rehydrationExpectedIndex < 0) {
+            if (index > 1) {
+                Log.w(
+                    SibionicsConstants.TAG,
+                    "cannot rehydrate exact algorithm: expected idx 0/1, received idx=$index",
+                )
+                return false
+            }
+            rehydrationExpectedIndex = index + 1
+            return true
+        }
+        if (index < rehydrationExpectedIndex) return false
+        if (index != rehydrationExpectedIndex) {
+            Log.w(
+                SibionicsConstants.TAG,
+                "cannot rehydrate exact algorithm: expected idx=$rehydrationExpectedIndex, received idx=$index",
+            )
+            return false
+        }
+        rehydrationExpectedIndex = index + 1
+        return true
     }
 
     private fun storeAndPublish(readings: List<EmittedReading>) {
@@ -682,7 +774,6 @@ class SibionicsBleManager(
         }
 
         live?.let { publishLiveReading(it) }
-        if (live != null) replayActive = false
         UiRefreshBus.requestDataRefresh()
     }
 
@@ -777,7 +868,6 @@ class SibionicsBleManager(
         pendingResetCommand = false
         val ok = writeResetCommand("user")
         if (ok) {
-            markResetSent()
             return true
         }
         pendingResetCommand = true
@@ -795,14 +885,24 @@ class SibionicsBleManager(
     private fun markResetSent() {
         algorithm.reset()
         lastIndex = 1
+        lastIndexDirty = true
+        algorithmStateDirty = true
+        algorithmRehydrating = false
+        rehydrationExpectedIndex = -1
+        rehydrationTargetIndex = 0
+        lastLiveAlgorithmIndexSeen = -1
+        lastLiveIndexSeen = -1
         startTimeMs = 0L
         latestReadingTimeMs = 0L
         latestGlucoseMgdl = Float.NaN
         latestRawMgdl = Float.NaN
         Applic.app?.let {
-            SibionicsRegistry.saveLastIndex(it, SerialNumber, lastIndex)
+            SibionicsRegistry.saveAlgorithmCheckpoint(it, SerialNumber, lastIndex, algorithm.snapshot())
+            SibionicsRegistry.clearStartTimeMs(it, SerialNumber)
             HistorySyncAccess.markSensorReset(SerialNumber)
         }
+        lastIndexDirty = false
+        algorithmStateDirty = false
         setStatus("Reset sent")
         UiRefreshBus.requestStatusRefresh()
     }
@@ -810,8 +910,15 @@ class SibionicsBleManager(
     override fun supportsClearCalibrationAction(): Boolean = true
 
     override fun clearSensorCalibration(): Boolean {
-        algorithm.reset()
-        setStatus("Algorithm reset")
+        val previousIndex = lastIndex
+        beginAlgorithmRehydration(previousIndex, "manual algorithm reset")
+        Applic.app?.let {
+            SibionicsRegistry.clearAlgorithmState(it, SerialNumber)
+            SibionicsRegistry.saveLastIndex(it, SerialNumber, lastIndex)
+        }
+        lastIndexDirty = false
+        scheduleReconnect("manual algorithm reset")
+        setStatus("Replaying algorithm")
         UiRefreshBus.requestStatusRefresh()
         return true
     }

@@ -2,6 +2,7 @@ package tk.glucodata.drivers.sibionics
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.util.Base64
 import tk.glucodata.Applic
 import tk.glucodata.Log
 import tk.glucodata.SensorBluetooth
@@ -21,6 +22,7 @@ object SibionicsRegistry {
     private const val PREF_LAST_GLUCOSE_MGDL_PREFIX = "sibionics_managed_last_glucose_mgdl_"
     private const val PREF_LAST_RAW_MGDL_PREFIX = "sibionics_managed_last_raw_mgdl_"
     private const val PREF_LAST_READING_TIME_PREFIX = "sibionics_managed_last_reading_time_"
+    private const val PREF_ALGORITHM_STATE_PREFIX = "sibionics_managed_algorithm_state_"
 
     data class SensorRecord(
         val sensorId: String,
@@ -180,6 +182,7 @@ object SibionicsRegistry {
             remove(PREF_LAST_GLUCOSE_MGDL_PREFIX + id)
             remove(PREF_LAST_RAW_MGDL_PREFIX + id)
             remove(PREF_LAST_READING_TIME_PREFIX + id)
+            remove(PREF_ALGORITHM_STATE_PREFIX + id)
         }.apply()
         ManagedSensorUiSignals.markDeviceListDirty()
         SensorIdentity.invalidateCaches()
@@ -192,12 +195,33 @@ object SibionicsRegistry {
         prefs(context).edit().putInt(PREF_LAST_INDEX_PREFIX + sensorId, index.coerceAtLeast(0)).apply()
     }
 
+    fun loadAlgorithmState(context: Context, sensorId: String): ByteArray? {
+        val encoded = prefs(context).getString(PREF_ALGORITHM_STATE_PREFIX + sensorId, null) ?: return null
+        return runCatching { Base64.getDecoder().decode(encoded) }.getOrNull()
+    }
+
+    fun saveAlgorithmCheckpoint(context: Context, sensorId: String, nextIndex: Int, state: ByteArray) {
+        if (state.isEmpty()) return
+        prefs(context).edit().apply {
+            putInt(PREF_LAST_INDEX_PREFIX + sensorId, nextIndex.coerceAtLeast(0))
+            putString(PREF_ALGORITHM_STATE_PREFIX + sensorId, Base64.getEncoder().encodeToString(state))
+        }.apply()
+    }
+
+    fun clearAlgorithmState(context: Context, sensorId: String) {
+        prefs(context).edit().remove(PREF_ALGORITHM_STATE_PREFIX + sensorId).apply()
+    }
+
     fun loadStartTimeMs(context: Context, sensorId: String): Long =
         prefs(context).getLong(PREF_START_TIME_PREFIX + sensorId, 0L)
 
     fun saveStartTimeMs(context: Context, sensorId: String, startTimeMs: Long) {
         if (startTimeMs <= 0L) return
         prefs(context).edit().putLong(PREF_START_TIME_PREFIX + sensorId, startTimeMs).apply()
+    }
+
+    fun clearStartTimeMs(context: Context, sensorId: String) {
+        prefs(context).edit().remove(PREF_START_TIME_PREFIX + sensorId).apply()
     }
 
     fun loadProtocolMode(context: Context, sensorId: String): SibionicsConstants.ProtocolMode =
