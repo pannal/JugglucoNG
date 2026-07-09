@@ -1,10 +1,19 @@
 package tk.glucodata.drivers.sibionics
 
 import kotlin.math.abs
-import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+
+// Constants fitted against a full-sensor-life golden trace of the vendor
+// algorithm (libnative-algorithm v113B, sensor 46HU804E, 3152 comparison
+// points): steady-state MARD 4.6% vs vendor output. See sibfit golden dataset.
+private const val TEMP_POLY_REF_34_5C = 36.34948f
+private const val TEMP_GAIN = 0.0353766f
+private const val DEGRADATION_START_STAGE = 342.6381f
+private const val DEGRADATION_RATE_PER_STAGE = 0.00125212f
+private const val DEGRADATION_CAP = 2.7588152f
+private const val ESA_ADJUSTED_FRACTION = 0.0419842f
 
 enum class SibionicsAlgorithmMode {
     LIVE,
@@ -244,10 +253,16 @@ class SibionicsAlgorithmContext(
     }
 
     private data class DegradationTracker(var cumulativeBias: Float = 0f) {
+        // Vendor drift is sensor-age driven: zero until ~28.6h of wear, then a
+        // linear ramp to a late-life cap. Signature keeps adjusted/f3 so the
+        // call site and stage shape stay unchanged.
         fun update(adjusted: Float, f3: Float, stageCount: Int): Float {
-            if (stageCount < 5) return 0f
-            val gap = max(f3 - adjusted, 0f)
-            cumulativeBias = min(cumulativeBias + gap * 0.0012f, 3f)
+            val ageStage = stageCount.toFloat()
+            cumulativeBias = if (ageStage <= DEGRADATION_START_STAGE) {
+                0f
+            } else {
+                min((ageStage - DEGRADATION_START_STAGE) * DEGRADATION_RATE_PER_STAGE, DEGRADATION_CAP)
+            }
             return cumulativeBias
         }
     }
@@ -405,7 +420,7 @@ class SibionicsAlgorithmContext(
         val stageCount = max(index / 5 - 1, 0)
         clipping.update(adjusted, out, stageCount)
         val degradationComp = degradation.update(adjusted, out.f3, stageCount)
-        val signalDependentComp = max(0f, degradationComp - 0.08f * max(adjusted, 0f))
+        val signalDependentComp = max(0f, degradationComp - ESA_ADJUSTED_FRACTION * max(adjusted, 0f))
         esa.compensationSize = signalDependentComp
         val esaResult = esa.update(adjusted)
         val deconvolved = deconvolution.update(esaResult)
@@ -428,23 +443,13 @@ class SibionicsAlgorithmContext(
     private fun temperatureCompensated(rawMmol: Float, temperatureC: Float, index: Int): Float {
         val temp = temperature.update(temperatureC, index)
         val poly = temperaturePolynomial(temp)
-        val correction = (rawMmol - 0.5f) * (42f - poly) * 0.04f
+        // Reference-normalized: zero at 34.5°C, lifts cold readings, damps warm ones.
+        val correction = (rawMmol - 0.5f) * (TEMP_POLY_REF_34_5C - poly) * TEMP_GAIN
         return rawMmol + correction
     }
 
-    private fun adjustment(temperatureC: Float, index: Int): Float {
-        val s31 = temperatureC - 20f
-        val warmup = -5.9f * exp((-1.327f * (s31 - 11.1f)).toDouble()).toFloat()
-        val drift = min(0.0116f * max(index - 5, 0), 1.15f)
-        val warmupS27 = warmup + 0.88f + drift
-        val steadyS27 = 0.5f
-        val blend = when {
-            index < 200 -> 0f
-            index >= 605 -> 1f
-            else -> (index - 200).toFloat() / (605f - 200f)
-        }
-        return (1f - blend) * warmupS27 + blend * steadyS27
-    }
+    private fun adjustment(temperatureC: Float, index: Int): Float =
+        if (index <= 605) 0.2f * (temperatureC - 34.5f) + 0.3f else 0.5f
 
     private fun nativeRound(value: Float): Float {
         if (!value.isFinite()) return Float.NaN
