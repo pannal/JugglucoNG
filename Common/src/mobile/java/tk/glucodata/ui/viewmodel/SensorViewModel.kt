@@ -442,24 +442,31 @@ class SensorViewModel : ViewModel() {
                         val isPaused = SensorBluetooth.isSensorPaused(gatt)
                         val isActivelyReceiving = !isPaused && (nativeStatus.isNotEmpty() || gatt.streamingEnabled())
                         
+                        // Raw "Status=N" strings hold the GATT code of the LAST
+                        // disconnect: the Libre 3 callback only writes them when a
+                        // connection drops and a successful reconnect never clears
+                        // the field. They describe a past event, not the current
+                        // state, so they must not become the sensor's status line
+                        // (22 = "terminated by local host" shows up in routine
+                        // reconnect cycles, not just with Bluetooth off). The code
+                        // stays visible in the "Last BLE status" detail row.
                         fun mapBleStatus(status: String): String = when {
-                            status == "Status=22" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_bluetooth_off)
                             status == "Status=133" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connection_failed)
-                            status.startsWith("Status=") -> status 
+                            status.startsWith("Status=") -> tk.glucodata.Applic.app.getString(
+                                tk.glucodata.R.string.status_disconnect_code, status.removePrefix("Status="))
                             else -> status
                         }
-                        
+
                         val finalStatus = when {
                             warmupStatus != null -> warmupStatus
                             nativeStatus.isNotEmpty() -> nativeStatus
                             // Pass through custom status strings from GATT callbacks (e.g., "Connected, waiting for data...", "Connected, raw values received")
                             bleStatus.isNotEmpty() && !bleStatus.startsWith("Status=") -> bleStatus
-                            bleStatus.isNotEmpty() && (bleStatus.startsWith("Status=") || bleStatus.contains("Bluetooth off", ignoreCase = true) || bleStatus.contains("search", ignoreCase = true) || bleStatus.contains("Loss of signal", ignoreCase = true)) -> bleStatus
-                            isActivelyReceiving && (bleStatus.isEmpty() || bleStatus == "Disconnected") -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connected)
+                            isActivelyReceiving -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connected)
                             else -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_disconnected)
                         }
-                        
-                        val displayStatus = mapBleStatus(finalStatus)
+
+                        val displayStatus = finalStatus
                         val sensorSerial = SensorIdentity.resolveAppSensorId(gatt.SerialNumber)
                             ?: gatt.SerialNumber
                             ?: "Unknown"

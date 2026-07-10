@@ -894,8 +894,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="window_label">window</string>
     <string name="auto_restart_algorithm">Auto restart algorithm</string>
     
-    <string name="status_bluetooth_off">Bluetooth off</string>
     <string name="status_connection_failed">Connection failed</string>
+    <string name="status_disconnect_code">Disconnected (code %1$s)</string>
     <string name="status_connected">Connected</string>
     <string name="status_disconnected">Disconnected</string>
     <string name="status_waiting_for_data">Connected, waiting for data...</string>
