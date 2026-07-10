@@ -30,7 +30,34 @@ public final class TrendProjection {
 
     public static final int DEFAULT_HORIZON_MINUTES = 30;
 
+    // A forecast is only trustworthy while readings are current. Beyond a few
+    // missed one-minute readings (reconnect gap, app restart) the projection
+    // would extrapolate from a value and trend that no longer describe now,
+    // so it must stop claiming where glucose is heading.
+    public static final long MAX_DATA_AGE_MILLIS = 5L * 60L * 1000L;
+
     private TrendProjection() {
+    }
+
+    /**
+     * Like {@link #classify(float, float, int, float, float, float, float)}
+     * but gated on the age of the newest reading: stale data yields
+     * {@link #NONE}. Slightly negative ages (live points a few seconds ahead
+     * of the clock) count as fresh.
+     */
+    public static int classify(
+            float glucoseMgdl,
+            float rateMgdlPerMin,
+            long dataAgeMillis,
+            int horizonMinutes,
+            float targetLowMgdl,
+            float targetHighMgdl,
+            float veryLowMgdl,
+            float veryHighMgdl) {
+        if (dataAgeMillis > MAX_DATA_AGE_MILLIS)
+            return NONE;
+        return classify(glucoseMgdl, rateMgdlPerMin, horizonMinutes,
+                targetLowMgdl, targetHighMgdl, veryLowMgdl, veryHighMgdl);
     }
 
     public static int classify(

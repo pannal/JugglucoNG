@@ -443,16 +443,20 @@ fun DashboardCombinedHeader(
         glucoseContentColor
     }
     // Arrow: optionally colored by the 30-minute linear forecast (the value
-    // says where you are, the arrow where you're heading).
+    // says where you are, the arrow where you're heading). isFreshData uses
+    // the display timeout, which is too lenient for a forecast: after a
+    // reconnect gap the trend only describes the pre-gap drop, so the
+    // classifier additionally caps the data age.
     val heroArrowColor = if (arrowForecastColorsEnabled && isFreshData) {
         val forecastRisk = remember(
-            dvs?.primaryValue, trendResult, isMmol,
+            dvs?.primaryValue, trendResult, isMmol, resolvedDataState,
             targetLow, targetHigh, veryLowThreshold, veryHighThreshold
         ) {
             val toMgdl = if (isMmol) 18.016f else 1f
             TrendProjection.classify(
                 (dvs?.primaryValue ?: Float.NaN) * toMgdl,
                 trendResult.velocity,
+                resolvedDataState.ageMillis,
                 TrendProjection.DEFAULT_HORIZON_MINUTES,
                 targetLow * toMgdl,
                 targetHigh * toMgdl,

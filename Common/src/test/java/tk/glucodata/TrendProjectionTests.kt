@@ -62,6 +62,42 @@ class TrendProjectionTests {
     }
 
     @Test
+    fun staleDataNeverWarns() {
+        // Crashing hard, but the newest reading is too old to trust a
+        // forecast (reconnect gap, app restart): no tint instead of a red
+        // arrow computed from outdated data.
+        val staleAge = TrendProjection.MAX_DATA_AGE_MILLIS + 1L
+        assertEquals(
+            TrendProjection.NONE,
+            TrendProjection.classify(100f, -3f, staleAge, 30, 80f, 160f, 54f, 250f)
+        )
+    }
+
+    @Test
+    fun freshDataClassifiesNormally() {
+        assertEquals(
+            TrendProjection.OUT,
+            TrendProjection.classify(100f, -2f, 60_000L, 30, 80f, 160f, 54f, 250f)
+        )
+        // Exactly at the limit still counts as usable.
+        assertEquals(
+            TrendProjection.OUT,
+            TrendProjection.classify(
+                100f, -2f, TrendProjection.MAX_DATA_AGE_MILLIS, 30, 80f, 160f, 54f, 250f
+            )
+        )
+    }
+
+    @Test
+    fun slightlyFutureTimestampCountsAsFresh() {
+        // Live-augmented points can sit a few seconds ahead of the clock.
+        assertEquals(
+            TrendProjection.OUT,
+            TrendProjection.classify(100f, -2f, -5_000L, 30, 80f, 160f, 54f, 250f)
+        )
+    }
+
+    @Test
     fun invalidThresholdsFallBackToDefaults() {
         // Defaults 70/180 target, 54/250 very: 100 - 1.2*30 = 64 -> borderline.
         assertEquals(

@@ -3383,12 +3383,22 @@ public class Notify {
 
         // Arrow color: optionally driven by the 30-minute linear forecast
         // (value color says where you are, arrow color where you're heading).
+        // Gated on data age: during a reconnect gap the trend window only
+        // holds pre-gap points and must not paint a red forecast.
         int arrowColor = primaryDisplayColor;
         if (arrowForecastColored) {
+            long latestDataMillis = CurrentGlucoseSource.normalizeTimeMillis(glucose.time);
+            if (!nativePoints.isEmpty())
+                latestDataMillis = Math.max(latestDataMillis,
+                        nativePoints.get(nativePoints.size() - 1).timestamp);
+            final long dataAgeMillis = latestDataMillis > 0
+                    ? System.currentTimeMillis() - latestDataMillis
+                    : Long.MAX_VALUE;
             final float toMgdl = isMmol ? 18.016f : 1.0f;
             final int trendRisk = TrendProjection.classify(
                     displayGlucoseValue * toMgdl,
                     rate,
+                    dataAgeMillis,
                     TrendProjection.DEFAULT_HORIZON_MINUTES,
                     Natives.targetlow() * toMgdl, Natives.targethigh() * toMgdl,
                     Natives.alarmverylow() * toMgdl, Natives.alarmveryhigh() * toMgdl);
