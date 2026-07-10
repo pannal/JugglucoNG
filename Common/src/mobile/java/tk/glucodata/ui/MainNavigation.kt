@@ -293,6 +293,7 @@ private fun JournalRoute(
     val journalEntries by dashboardViewModel.journalEntries.collectAsStateWithLifecycle()
     val journalInsulinPresets by dashboardViewModel.journalInsulinPresets.collectAsStateWithLifecycle()
     val journalFoods by dashboardViewModel.journalFoods.collectAsStateWithLifecycle()
+    val journalEiobDisplayEnabled by dashboardViewModel.journalEiobDisplayEnabled.collectAsStateWithLifecycle()
     val predictionCarbRatioGramsPerUnit by dashboardViewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
     val predictionInsulinSensitivityMgDlPerUnit by dashboardViewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
@@ -362,7 +363,8 @@ private fun JournalRoute(
         modifier = modifier,
         showTitle = showTitle,
         useStatusBarsPadding = useStatusBarsPadding,
-        bottomContentPadding = bottomContentPadding
+        bottomContentPadding = bottomContentPadding,
+        showEiob = journalEiobDisplayEnabled
     )
 
     journalEditorRequest?.let { request ->

@@ -1569,6 +1569,12 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="journal_metric_activity_today">Aktivität heute</string>
     <string name="journal_no_active_insulin">Kein aktives Insulin</string>
     <string name="journal_active_now_percent">%1$d%% aktiv</string>
+    <string name="journal_metric_iob">IOB</string>
+    <string name="journal_metric_eiob">eIOB %1$s E</string>
+    <string name="journal_eiob_display_title">Effektives IOB (eIOB) anzeigen</string>
+    <string name="journal_eiob_display_desc">Aktivitätsbasiertes Insulin an Bord zusätzlich zum klassischen IOB anzeigen</string>
+    <string name="journal_iob_expanded">IOB %1$s E verbleibend</string>
+    <string name="journal_eiob_expanded">eIOB %1$s E wirksam</string>
     <string name="journal_visible_events">Sichtbare Ereignisse</string>
     <string name="journal_empty">Noch keine Journalereignisse in diesem Fenster</string>
     <string name="journal_type_insulin">Insulin</string>

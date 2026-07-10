@@ -111,6 +111,7 @@ class DashboardViewModel(
         const val JOURNAL_NAVIGATION_TAB_KEY = "dashboard_journal_navigation_tab_enabled"
         const val JOURNAL_FOOD_MACROS_KEY = "dashboard_journal_food_macros_enabled"
         const val JOURNAL_FOOD_LIBRARY_KEY = "dashboard_journal_food_library_enabled"
+        const val JOURNAL_EIOB_DISPLAY_KEY = "dashboard_journal_eiob_display_enabled"
         const val JOURNAL_HEALTH_CONNECT_ACTIVITY_KEY = "dashboard_journal_health_connect_activity_enabled"
         const val PREDICTION_CARB_RATIO_KEY = "dashboard_prediction_carb_ratio_g_per_u"
         const val PREDICTION_INSULIN_SENSITIVITY_KEY = "dashboard_prediction_insulin_sensitivity_mgdl_per_u"
@@ -291,6 +292,9 @@ class DashboardViewModel(
 
     private val _journalFoodLibraryEnabled = MutableStateFlow(true)
     val journalFoodLibraryEnabled = _journalFoodLibraryEnabled.asStateFlow()
+
+    private val _journalEiobDisplayEnabled = MutableStateFlow(true)
+    val journalEiobDisplayEnabled = _journalEiobDisplayEnabled.asStateFlow()
 
     private val _journalHealthConnectActivityEnabled = MutableStateFlow(false)
     val journalHealthConnectActivityEnabled = _journalHealthConnectActivityEnabled.asStateFlow()
@@ -543,6 +547,7 @@ class DashboardViewModel(
         _journalDoseCalculatorEnabled.value = prefs.getBoolean(JOURNAL_DOSE_CALCULATOR_KEY, false)
         _journalFoodMacrosEnabled.value = prefs.getBoolean(JOURNAL_FOOD_MACROS_KEY, false)
         _journalFoodLibraryEnabled.value = prefs.getBoolean(JOURNAL_FOOD_LIBRARY_KEY, true)
+        _journalEiobDisplayEnabled.value = prefs.getBoolean(JOURNAL_EIOB_DISPLAY_KEY, true)
         _journalHealthConnectActivityEnabled.value = prefs.getBoolean(JOURNAL_HEALTH_CONNECT_ACTIVITY_KEY, false)
         _aapsJournalImportEnabled.value = AapsJournalImport.isEnabled(context)
         _predictiveSimulationEnabled.value = prefs.getBoolean("dashboard_predictive_simulation_enabled", true)
@@ -1270,6 +1275,13 @@ class DashboardViewModel(
         val prefs = context.getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
         prefs.edit().putBoolean(JOURNAL_FOOD_LIBRARY_KEY, enabled).apply()
         _journalFoodLibraryEnabled.value = enabled
+    }
+
+    fun setJournalEiobDisplayEnabled(enabled: Boolean) {
+        val context = tk.glucodata.Applic.app
+        val prefs = context.getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(JOURNAL_EIOB_DISPLAY_KEY, enabled).apply()
+        _journalEiobDisplayEnabled.value = enabled
     }
 
     fun setJournalHealthConnectActivityEnabled(enabled: Boolean) {
