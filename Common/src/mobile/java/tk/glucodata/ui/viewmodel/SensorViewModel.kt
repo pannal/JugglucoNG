@@ -441,19 +441,23 @@ class SensorViewModel : ViewModel() {
                         // of what the native streamingIsEnabled flag says (it lags).
                         val isPaused = SensorBluetooth.isSensorPaused(gatt)
                         val isActivelyReceiving = !isPaused && (nativeStatus.isNotEmpty() || gatt.streamingEnabled())
-                        
-                        // Raw "Status=N" strings hold the GATT code of the LAST
-                        // disconnect: the Libre 3 callback only writes them when a
-                        // connection drops and a successful reconnect never clears
-                        // the field. They describe a past event, not the current
-                        // state, so they must not become the sensor's status line
-                        // (22 = "terminated by local host" shows up in routine
-                        // reconnect cycles, not just with Bluetooth off). The code
-                        // stays visible in the "Last BLE status" detail row.
+
+                        // constatstatusstr records the LAST connection event
+                        // ("Status=N", "Loss of signal", ...) and is never cleared
+                        // when the link recovers, so any of those strings can stick
+                        // around while readings flow. A reading newer than the event
+                        // proves recovery: the recorded status is then history and
+                        // only shown in the "Last BLE status" detail row.
+                        val bleStatusOutdated = SensorBluetooth.connectionStatusOutdated(gatt)
+
                         fun mapBleStatus(status: String): String = when {
                             status == "Status=133" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connection_failed)
                             status.startsWith("Status=") -> tk.glucodata.Applic.app.getString(
                                 tk.glucodata.R.string.status_disconnect_code, status.removePrefix("Status="))
+                            // Literals written by the GATT callbacks, localized at
+                            // display time (they double as state markers in code).
+                            status == "Loss of signal" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.lossofsignal)
+                            status == "resetdataptr" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_disconnected)
                             else -> status
                         }
 
@@ -461,7 +465,7 @@ class SensorViewModel : ViewModel() {
                             warmupStatus != null -> warmupStatus
                             nativeStatus.isNotEmpty() -> nativeStatus
                             // Pass through custom status strings from GATT callbacks (e.g., "Connected, waiting for data...", "Connected, raw values received")
-                            bleStatus.isNotEmpty() && !bleStatus.startsWith("Status=") -> bleStatus
+                            bleStatus.isNotEmpty() && !bleStatus.startsWith("Status=") && !bleStatusOutdated -> mapBleStatus(bleStatus)
                             isActivelyReceiving -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connected)
                             else -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_disconnected)
                         }
@@ -477,7 +481,11 @@ class SensorViewModel : ViewModel() {
                             serial = sensorSerial,
                             displayName = try { gatt.mygetDeviceName() } catch (_: Throwable) { sensorSerial },
                             deviceAddress = gatt.mActiveDeviceAddress ?: "Unknown",
-                            connectionStatus = if (bleStatus.startsWith("Status=")) mapBleStatus(bleStatus) else "",
+                            connectionStatus = when {
+                                bleStatus.startsWith("Status=") -> mapBleStatus(bleStatus)
+                                bleStatusOutdated && bleStatus.isNotEmpty() -> mapBleStatus(bleStatus)
+                                else -> ""
+                            },
                             starttime = if (startMs > 0) tk.glucodata.bluediag.datestr(startMs) else "",
                             streaming = warmupStatus == null && isActivelyReceiving,
                             rssi = gatt.readrssi,
