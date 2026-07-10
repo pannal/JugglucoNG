@@ -148,6 +148,8 @@ fun ExpressiveSettingsScreen(
     val graphLowValue by viewModel.graphLow.collectAsState()
     val graphHighValue by viewModel.graphHigh.collectAsState()
     val targetLowValue by viewModel.targetLow.collectAsState()
+    val veryLowThresholdValue by viewModel.veryLowThreshold.collectAsState()
+    val veryHighThresholdValue by viewModel.veryHighThreshold.collectAsState()
     val targetHighValue by viewModel.targetHigh.collectAsState()
 
     // Dialog states
@@ -258,11 +260,14 @@ fun ExpressiveSettingsScreen(
                     targetHighValue = targetHighValue,
                     chartLowValue = graphLowValue,
                     chartHighValue = graphHighValue,
+                    veryLowValue = veryLowThresholdValue,
+                    veryHighValue = veryHighThresholdValue,
                     isMmol = isMmol,
                     expanded = glucoseRangeExpanded,
                     onExpandedChange = { glucoseRangeExpanded = it },
                     onTargetRangeChange = { low, high -> viewModel.setTargetRange(low, high) },
                     onChartRangeChange = { low, high -> viewModel.setGraphRange(low, high) },
+                    onVeryRangeChange = { low, high -> viewModel.setVeryLowHighThresholds(low, high) },
                     iconTint = glucoseColor,
                     position = CardPosition.MIDDLE
                 )
@@ -814,11 +819,14 @@ private fun GlucoseRangeExpandableSettingsItem(
     targetHighValue: Float,
     chartLowValue: Float,
     chartHighValue: Float,
+    veryLowValue: Float,
+    veryHighValue: Float,
     isMmol: Boolean,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onTargetRangeChange: (Float, Float) -> Unit,
     onChartRangeChange: (Float, Float) -> Unit,
+    onVeryRangeChange: (Float, Float) -> Unit,
     iconTint: Color,
     position: CardPosition
 ) {
@@ -827,6 +835,9 @@ private fun GlucoseRangeExpandableSettingsItem(
     val targetHighBounds = if (isMmol) 6.0f..16.0f else 100f..350f
     val chartLowBounds = if (isMmol) 0.0f..12.0f else 0f..216f
     val chartHighBounds = if (isMmol) 4.0f..30.0f else 72f..540f
+    // Same bounds as the very-low/very-high alert editor.
+    val veryLowBounds = if (isMmol) 2.0f..4.0f else 36f..70f
+    val veryHighBounds = if (isMmol) 10.0f..20.0f else 180f..360f
     val normalizedTargetLow = clampLowerRangeValue(
         value = targetLowValue,
         upperValue = targetHighValue,
@@ -871,6 +882,26 @@ private fun GlucoseRangeExpandableSettingsItem(
     var chartHighSlider by remember(chartLowValue, chartHighValue, isMmol) {
         mutableFloatStateOf(normalizedChartHigh)
     }
+    val normalizedVeryLow = clampLowerRangeValue(
+        value = veryLowValue,
+        upperValue = veryHighValue,
+        bounds = veryLowBounds,
+        step = valueStep,
+        isMmol = isMmol
+    )
+    val normalizedVeryHigh = clampUpperRangeValue(
+        value = veryHighValue,
+        lowerValue = normalizedVeryLow,
+        bounds = veryHighBounds,
+        step = valueStep,
+        isMmol = isMmol
+    )
+    var veryLowSlider by remember(veryLowValue, veryHighValue, isMmol) {
+        mutableFloatStateOf(normalizedVeryLow)
+    }
+    var veryHighSlider by remember(veryLowValue, veryHighValue, isMmol) {
+        mutableFloatStateOf(normalizedVeryHigh)
+    }
 
     val targetSummary = remember(targetLowSlider, targetHighSlider, isMmol) {
         formatRangeSummary(targetLowSlider, targetHighSlider, isMmol)
@@ -880,10 +911,15 @@ private fun GlucoseRangeExpandableSettingsItem(
     }
     val targetShortTitle = stringResource(R.string.target_short_title)
     val chartShortTitle = stringResource(R.string.chart_short_title)
+    val veryShortTitle = stringResource(R.string.very_range_short_title)
     val targetTitle = stringResource(R.string.target_range_title)
     val chartTitle = stringResource(R.string.chart_limits_title)
-    val collapsedSummary = remember(targetShortTitle, chartShortTitle, targetSummary, chartSummary) {
-        "$targetShortTitle $targetSummary • $chartShortTitle $chartSummary"
+    val veryTitle = stringResource(R.string.very_range_title)
+    val verySummary = remember(veryLowSlider, veryHighSlider, isMmol) {
+        formatRangeSummary(veryLowSlider, veryHighSlider, isMmol)
+    }
+    val collapsedSummary = remember(targetShortTitle, chartShortTitle, veryShortTitle, targetSummary, chartSummary, verySummary) {
+        "$targetShortTitle $targetSummary • $chartShortTitle $chartSummary • $veryShortTitle $verySummary"
     }
 
     Surface(
@@ -1006,6 +1042,43 @@ private fun GlucoseRangeExpandableSettingsItem(
                             },
                             onHighValueChangeFinished = {
                                 onChartRangeChange(chartLowSlider, chartHighSlider)
+                            }
+                        )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                        GlucoseRangeEditorSection(
+                            title = veryTitle,
+                            lowLabel = stringResource(R.string.very_low_label),
+                            highLabel = stringResource(R.string.very_high_label),
+                            lowValue = veryLowSlider,
+                            highValue = veryHighSlider,
+                            lowBounds = veryLowBounds,
+                            highBounds = veryHighBounds,
+                            isMmol = isMmol,
+                            onLowValueChange = { candidate ->
+                                veryLowSlider = clampLowerRangeValue(
+                                    value = candidate,
+                                    upperValue = veryHighSlider,
+                                    bounds = veryLowBounds,
+                                    step = valueStep,
+                                    isMmol = isMmol
+                                )
+                            },
+                            onHighValueChange = { candidate ->
+                                veryHighSlider = clampUpperRangeValue(
+                                    value = candidate,
+                                    lowerValue = veryLowSlider,
+                                    bounds = veryHighBounds,
+                                    step = valueStep,
+                                    isMmol = isMmol
+                                )
+                            },
+                            onLowValueChangeFinished = {
+                                onVeryRangeChange(veryLowSlider, veryHighSlider)
+                            },
+                            onHighValueChangeFinished = {
+                                onVeryRangeChange(veryLowSlider, veryHighSlider)
                             }
                         )
                     }
