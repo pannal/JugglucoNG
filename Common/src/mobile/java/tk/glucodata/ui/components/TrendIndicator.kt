@@ -27,10 +27,11 @@ fun TrendIndicator(
 ) {
     // "Optically Correct Arrow" Engine
     // 1. Visual: 90-degree Head, Round Caps/Joins, Optical Centering.
-    // 2. Logic: User Tuned (25f).
+    // 2. Logic: 45 deg per mg/dL/min, vertical at +/-2 — the classic CGM
+    // arrow convention, and what GDH-style receivers show for the same rate.
     
     // Formula: Rate 2.0 -> 50 deg.
-    val sensitivity = 25f
+    val sensitivity = 45f
     val targetRotation = (-trendResult.velocity * sensitivity).coerceIn(-90f, 90f)
 
     // Animate Rotation
