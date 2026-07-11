@@ -213,6 +213,8 @@
     <string name="xdripbroadcast">Libre (patched App)</string>
     <string name="aaps_broadcast">Glucodata</string>
     <string name="glucodata_subtitle">GlucoDataHandler (GDH)</string>
+    <string name="broadcast_computed_trend_title">Broadcast computed trend</string>
+    <string name="broadcast_computed_trend_desc">Send the app\'s 20-minute trend as the rate in all outputs instead of the sensor\'s own estimate. Receiver arrows then match this app.</string>
     <string name="xdrip_compatible_title">xDrip broadcast</string>
     <string name="xdrip_compatible_desc">AAPS compatible</string>
     <string name="sensorpermission">Sensors permission</string>
