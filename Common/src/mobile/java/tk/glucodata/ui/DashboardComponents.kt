@@ -277,6 +277,7 @@ fun DashboardCombinedHeader(
     veryHighThreshold: Float = fallbackVeryHighThreshold(isMmol),
     valueRangeColorsEnabled: Boolean = false,
     arrowForecastColorsEnabled: Boolean = false,
+    showDelta: Boolean = false,
     peerReadings: List<tk.glucodata.ui.viewmodel.DashboardViewModel.PeerCurrentReading> = emptyList(),
     onPeerReadingClick: (String) -> Unit = {},
     onHeroClick: () -> Unit = {}
@@ -308,6 +309,32 @@ fun DashboardCombinedHeader(
         } else {
             tk.glucodata.logic.TrendEngine.TrendResult(tk.glucodata.logic.TrendEngine.TrendState.Unknown, 0f, 0f, 0f, 0f)
         }
+    }
+    // "Δ" readout: the measured change over the last ~5 minutes — a raw
+    // number to sanity-check the estimated arrow against. Walks back to the
+    // first point old enough for the window instead of taking blind indices.
+    val heroDeltaText = if (showDelta) {
+        remember(history, isMmol) {
+            val newest = history.lastOrNull()
+            val previous = newest?.let { n ->
+                history.asReversed().firstOrNull { p ->
+                    p.value > 0.1f && n.timestamp - p.timestamp >= tk.glucodata.GlucoseDelta.MIN_GAP_MILLIS
+                }
+            }
+            if (newest != null && previous != null) {
+                val delta = tk.glucodata.GlucoseDelta.fiveMinuteDelta(
+                    newest.timestamp, newest.value,
+                    previous.timestamp, previous.value
+                )
+                tk.glucodata.GlucoseDelta.format(delta, isMmol)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { "Δ $it" }
+            } else {
+                null
+            }
+        }
+    } else {
+        null
     }
     val isLandscape = rememberAdaptiveWindowMetrics().isLandscape
     val cornerWeights = remember(trendResult.velocity) { trendCornerWeightsFromVelocity(trendResult.velocity) }
@@ -647,10 +674,12 @@ fun DashboardCombinedHeader(
                                 )
                             }
 
-                            tk.glucodata.ui.components.TrendIndicator(
+                            HeroTrendWithDelta(
                                 trendResult = trendResult,
-                                modifier = Modifier.size(resolvedTrendIconSize),
-                                color = heroArrowColor
+                                arrowColor = heroArrowColor,
+                                deltaText = heroDeltaText,
+                                contentColor = glucoseContentColor,
+                                iconSize = resolvedTrendIconSize
                             )
                         }
 
@@ -745,10 +774,12 @@ fun DashboardCombinedHeader(
 
                             Spacer(modifier = Modifier.width(resolvedClusterGap))
 
-                            tk.glucodata.ui.components.TrendIndicator(
+                            HeroTrendWithDelta(
                                 trendResult = trendResult,
-                                modifier = Modifier.size(resolvedTrendIconSize),
-                                color = heroArrowColor
+                                arrowColor = heroArrowColor,
+                                deltaText = heroDeltaText,
+                                contentColor = glucoseContentColor,
+                                iconSize = resolvedTrendIconSize
                             )
                         }
 
@@ -959,6 +990,32 @@ fun DashboardCombinedHeader(
                 Modifier
                     .weight(0.3f)
                     .fillMaxHeight()
+            )
+        }
+    }
+}
+
+@Composable
+private fun HeroTrendWithDelta(
+    trendResult: tk.glucodata.logic.TrendEngine.TrendResult,
+    arrowColor: Color,
+    deltaText: String?,
+    contentColor: Color,
+    iconSize: androidx.compose.ui.unit.Dp
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        tk.glucodata.ui.components.TrendIndicator(
+            trendResult = trendResult,
+            modifier = Modifier.size(iconSize),
+            color = arrowColor
+        )
+        if (!deltaText.isNullOrEmpty()) {
+            Text(
+                text = deltaText,
+                style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+                color = contentColor.copy(alpha = 0.75f),
+                softWrap = false,
+                maxLines = 1
             )
         }
     }

@@ -313,6 +313,7 @@ fun DashboardScreen(
     val glucoseRangeColorsDisplayEnabled by viewModel.glucoseValueRangeColorsEnabled.collectAsState()
     val glucoseArrowForecastEnabled by viewModel.glucoseArrowForecastColorsEnabled.collectAsState()
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
+    val dashboardShowDelta by viewModel.dashboardShowDelta.collectAsState()
     val journalDoseCalculatorEnabled by viewModel.journalDoseCalculatorEnabled.collectAsState()
     val journalFoodMacrosEnabled by viewModel.journalFoodMacrosEnabled.collectAsState()
     val journalFoodLibraryEnabled by viewModel.journalFoodLibraryEnabled.collectAsState()
@@ -1183,6 +1184,7 @@ fun DashboardScreen(
                             veryLowThreshold = veryLowThreshold,
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
+                            showDelta = dashboardShowDelta,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             onHeroClick = {
                                 val autoVal = latestPoint?.value ?: tk.glucodata.GlucoseValueParser.parseFirstOrZero(currentGlucose)
@@ -1424,6 +1426,7 @@ fun DashboardScreen(
                             veryLowThreshold = veryLowThreshold,
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
+                            showDelta = dashboardShowDelta,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             onHeroClick = {
                                 val autoVal = latestPoint?.value ?: tk.glucodata.GlucoseValueParser.parseFirstOrZero(currentGlucose)
