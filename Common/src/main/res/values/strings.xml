@@ -1836,6 +1836,10 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_show_iob_desc">IOB/eIOB from the journal in the status line</string>
     <string name="notification_show_cob_title">Show carbs on board</string>
     <string name="notification_show_cob_desc">COB from the journal in the status line</string>
+    <string name="notification_show_delta_title">Show delta (Δ)</string>
+    <string name="notification_show_delta_desc">Measured change of the last 5 minutes next to the arrow</string>
+    <string name="dashboard_show_delta_title">Delta (Δ) on the dashboard</string>
+    <string name="dashboard_show_delta_desc">Measured change of the last 5 minutes below the trend arrow</string>
     <string name="glucose_range_colors_title">Color glucose by range</string>
     <string name="glucose_range_colors_desc">Green in target, yellow borderline, red beyond very low/high — notification and dashboard</string>
     <string name="very_range_title">Very low / very high</string>

@@ -1578,6 +1578,10 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="notification_show_iob_desc">IOB/eIOB aus dem Journal in der Statuszeile</string>
     <string name="notification_show_cob_title">Kohlenhydrate an Bord anzeigen</string>
     <string name="notification_show_cob_desc">COB aus dem Journal in der Statuszeile</string>
+    <string name="notification_show_delta_title">Delta (Δ) anzeigen</string>
+    <string name="notification_show_delta_desc">Gemessene Änderung der letzten 5 Minuten neben dem Pfeil</string>
+    <string name="dashboard_show_delta_title">Delta (Δ) auf dem Dashboard</string>
+    <string name="dashboard_show_delta_desc">Gemessene Änderung der letzten 5 Minuten unter dem Trendpfeil</string>
     <string name="glucose_range_colors_title">Glukose nach Bereich einfärben</string>
     <string name="glucose_range_colors_desc">Grün im Zielbereich, Gelb grenzwertig, Rot jenseits von sehr niedrig/hoch — Benachrichtigung und Dashboard</string>
     <string name="very_range_title">Sehr niedrig / sehr hoch</string>

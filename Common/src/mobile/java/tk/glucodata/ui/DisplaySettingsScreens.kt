@@ -96,6 +96,7 @@ fun NotificationSettingsScreen(
     val arrowForecastEnabled by viewModel.glucoseArrowForecastColorsEnabled.collectAsState()
     val chartRangeColorsEnabled by viewModel.glucoseChartRangeColorsEnabled.collectAsState()
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
+    val dashboardDeltaEnabled by viewModel.dashboardShowDelta.collectAsState()
 
     var fontSize by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_font_size", 1.0f)) }
     var fontType by rememberSaveable { mutableIntStateOf(prefs.getInt("notification_font_family", 0)) }
@@ -106,6 +107,7 @@ fun NotificationSettingsScreen(
     var showTargetRange by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_chart_target_range", true)) }
     var showIob by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_show_iob", false)) }
     var showCob by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_show_cob", false)) }
+    var showDelta by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_show_delta", false)) }
     var iobCobRiskColored by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_iob_cob_risk_colored", false)) }
     var iobRiskWithoutCob by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_iob_risk_without_cob", false)) }
     var statusIconScale by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_status_icon_scale", 1.0f)) }
@@ -121,6 +123,7 @@ fun NotificationSettingsScreen(
             .putBoolean("notification_chart_target_range", showTargetRange)
             .putBoolean("notification_show_iob", showIob)
             .putBoolean("notification_show_cob", showCob)
+            .putBoolean("notification_show_delta", showDelta)
             .putBoolean("notification_iob_cob_risk_colored", iobCobRiskColored)
             .putBoolean("notification_iob_risk_without_cob", iobRiskWithoutCob)
             .putFloat("notification_status_icon_scale", statusIconScale)
@@ -265,6 +268,22 @@ fun NotificationSettingsScreen(
                 subtitle = stringResource(R.string.glucose_app_chart_range_colors_desc),
                 checked = appChartRangeColorsEnabled,
                 onCheckedChange = { viewModel.setGlucoseAppChartRangeColorsEnabled(it) },
+                icon = null,
+                position = CardPosition.MIDDLE
+            )
+            SettingsSwitchItem(
+                title = stringResource(R.string.dashboard_show_delta_title),
+                subtitle = stringResource(R.string.dashboard_show_delta_desc),
+                checked = dashboardDeltaEnabled,
+                onCheckedChange = { viewModel.setDashboardShowDelta(it) },
+                icon = null,
+                position = CardPosition.MIDDLE
+            )
+            SettingsSwitchItem(
+                title = stringResource(R.string.notification_show_delta_title),
+                subtitle = stringResource(R.string.notification_show_delta_desc),
+                checked = showDelta,
+                onCheckedChange = { showDelta = it; save() },
                 icon = null,
                 position = CardPosition.MIDDLE
             )

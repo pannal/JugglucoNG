@@ -3357,6 +3357,7 @@ public class Notify {
         boolean showStatus = prefs.getBoolean("notification_show_status", true);
         boolean showIob = prefs.getBoolean("notification_show_iob", false);
         boolean showCob = prefs.getBoolean("notification_show_cob", false);
+        boolean showDelta = prefs.getBoolean("notification_show_delta", false);
         boolean iobCobRiskColored = prefs.getBoolean("notification_iob_cob_risk_colored", false);
         boolean arrowForecastColored = prefs.getBoolean("glucose_arrow_forecast_colors_enabled", false);
         boolean showChart = prefs.getBoolean("notification_chart_enabled", true);
@@ -3464,6 +3465,39 @@ public class Notify {
                 newStatusText = (sensorStatusText == null || sensorStatusText.isEmpty())
                         ? iobLine
                         : new android.text.SpannableStringBuilder(iobLine).append(" · ").append(sensorStatusText);
+        }
+        // The "Δ" readout: measured change over the last ~5 minutes — a raw
+        // number to sanity-check the estimated arrow against. Leftmost, right
+        // next to the arrow. Walks back to the first point old enough for the
+        // window; the tail can hold near-duplicates (persisted vs live
+        // timestamp of the same reading), so never take blind indices.
+        if (showDelta && nativePoints.size() >= 2) {
+            final GlucosePoint newest = nativePoints.get(nativePoints.size() - 1);
+            final float newestValue = (isRawMode && newest.rawValue > 0f) ? newest.rawValue : newest.value;
+            GlucosePoint previous = null;
+            for (int i = nativePoints.size() - 2; i >= 0; i--) {
+                final GlucosePoint p = nativePoints.get(i);
+                final float value = (isRawMode && p.rawValue > 0f) ? p.rawValue : p.value;
+                if (value > 0.1f && newest.timestamp - p.timestamp >= GlucoseDelta.MIN_GAP_MILLIS) {
+                    previous = p;
+                    break;
+                }
+            }
+            final float previousValue = previous == null ? Float.NaN
+                    : (isRawMode && previous.rawValue > 0f) ? previous.rawValue : previous.value;
+            final String deltaText = previous == null ? "" : GlucoseDelta.format(
+                    GlucoseDelta.fiveMinuteDelta(newest.timestamp, newestValue, previous.timestamp, previousValue),
+                    isMmol);
+            if (doLog)
+                Log.i(LOG_ID, "notification delta=" + deltaText
+                        + " points=" + nativePoints.size()
+                        + " gap=" + (previous == null ? -1L : (newest.timestamp - previous.timestamp)));
+            if (!deltaText.isEmpty()) {
+                newStatusText = (newStatusText == null || newStatusText.length() == 0)
+                        ? "Δ " + deltaText
+                        : new android.text.SpannableStringBuilder("Δ ").append(deltaText)
+                                .append(" · ").append(newStatusText);
+            }
         }
 
         // Apply Style to Status Text too

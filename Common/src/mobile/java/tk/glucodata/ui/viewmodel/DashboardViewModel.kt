@@ -117,6 +117,7 @@ class DashboardViewModel(
         const val ARROW_FORECAST_COLORS_KEY = "glucose_arrow_forecast_colors_enabled"
         const val CHART_RANGE_COLORS_KEY = "glucose_chart_range_colors_enabled"
         const val APP_CHART_RANGE_COLORS_KEY = "glucose_app_chart_range_colors_enabled"
+        const val DASHBOARD_SHOW_DELTA_KEY = "dashboard_show_delta"
         const val JOURNAL_HEALTH_CONNECT_ACTIVITY_KEY = "dashboard_journal_health_connect_activity_enabled"
         const val PREDICTION_CARB_RATIO_KEY = "dashboard_prediction_carb_ratio_g_per_u"
         const val PREDICTION_INSULIN_SENSITIVITY_KEY = "dashboard_prediction_insulin_sensitivity_mgdl_per_u"
@@ -312,6 +313,9 @@ class DashboardViewModel(
 
     private val _glucoseAppChartRangeColorsEnabled = MutableStateFlow(false)
     val glucoseAppChartRangeColorsEnabled = _glucoseAppChartRangeColorsEnabled.asStateFlow()
+
+    private val _dashboardShowDelta = MutableStateFlow(false)
+    val dashboardShowDelta = _dashboardShowDelta.asStateFlow()
 
     private val _journalHealthConnectActivityEnabled = MutableStateFlow(false)
     val journalHealthConnectActivityEnabled = _journalHealthConnectActivityEnabled.asStateFlow()
@@ -595,6 +599,7 @@ class DashboardViewModel(
         _glucoseArrowForecastColorsEnabled.value = prefs.getBoolean(ARROW_FORECAST_COLORS_KEY, false)
         _glucoseChartRangeColorsEnabled.value = prefs.getBoolean(CHART_RANGE_COLORS_KEY, false)
         _glucoseAppChartRangeColorsEnabled.value = prefs.getBoolean(APP_CHART_RANGE_COLORS_KEY, false)
+        _dashboardShowDelta.value = prefs.getBoolean(DASHBOARD_SHOW_DELTA_KEY, false)
         _journalHealthConnectActivityEnabled.value = prefs.getBoolean(JOURNAL_HEALTH_CONNECT_ACTIVITY_KEY, false)
         _aapsJournalImportEnabled.value = AapsJournalImport.isEnabled(context)
         _predictiveSimulationEnabled.value = prefs.getBoolean("dashboard_predictive_simulation_enabled", true)
@@ -1351,6 +1356,13 @@ class DashboardViewModel(
         prefs.edit().putBoolean(GLUCOSE_RANGE_COLORS_KEY, enabled).apply()
         _glucoseValueRangeColorsEnabled.value = enabled
         refreshNotificationPredictionSurfaces(context)
+    }
+
+    fun setDashboardShowDelta(enabled: Boolean) {
+        val context = tk.glucodata.Applic.app
+        val prefs = context.getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(DASHBOARD_SHOW_DELTA_KEY, enabled).apply()
+        _dashboardShowDelta.value = enabled
     }
 
     fun setGlucoseArrowForecastColorsEnabled(enabled: Boolean) {
