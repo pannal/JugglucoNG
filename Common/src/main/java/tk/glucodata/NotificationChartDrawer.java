@@ -932,15 +932,9 @@ public class NotificationChartDrawer {
             outlinePaint.setStrokeWidth(strokeWidth * 2.2f);
         }
 
-        // Rotation Formula: Rate -> Degrees
-        // 45 deg per mg/dL/min, vertical at +/-2, matching TrendIndicator and
-        // the classic CGM arrow convention.
-        float sensitivity = 45f;
-        float rotation = (-rate * sensitivity);
-        if (rotation < -90f)
-            rotation = -90f;
-        if (rotation > 90f)
-            rotation = 90f;
+        // Shared rotation math (45 deg per mg/dL/min, vertical at +/-2, flat
+        // below the Flat trend state) — must match TrendIndicator.
+        float rotation = TrendArrowAngle.rotationDegrees(rate);
 
         // Base Dimensions from TrendIndicator.kt
         float headSpan = drawSize * 0.5f;
