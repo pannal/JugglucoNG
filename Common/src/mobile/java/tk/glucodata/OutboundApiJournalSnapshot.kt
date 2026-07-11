@@ -58,16 +58,21 @@ object OutboundApiJournalSnapshot {
      */
     @JvmStatic
     fun journalChanged() {
+        if (Log.doLog) Log.i("JournalChanged", "hook fired")
         broadcastIobCache = null
         journalChangedJob?.cancel()
         journalChangedJob = journalChangedScope.launch {
             delay(JOURNAL_CHANGED_DEBOUNCE_MS)
             val now = System.currentTimeMillis()
-            val values = runCatching { buildBroadcastIob(now) }.getOrNull()
+            val values = runCatching { buildBroadcastIob(now) }
+                .onFailure { if (Log.doLog) Log.i("JournalChanged", "buildBroadcastIob failed: $it") }
+                .getOrNull()
             broadcastIobCache = BroadcastIobCache(now, values)
+            if (Log.doLog) Log.i("JournalChanged", "fan-out values=" + values?.joinToString())
             JournalIobAccess.pushWatchserver(now)
             if (values != null) JugglucoSend.rebroadcastIob()
             Notify.showoldglucose()
+            if (Log.doLog) Log.i("JournalChanged", "fan-out done")
         }
     }
 
