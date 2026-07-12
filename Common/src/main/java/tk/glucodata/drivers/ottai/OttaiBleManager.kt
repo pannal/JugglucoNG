@@ -186,6 +186,22 @@ class OttaiBleManager(
         requestPendingHistoryChunk()
     }
 
+    private val endedHistoryBackfillRunnable = Runnable { runEndedHistoryBackfill() }
+
+    private fun runEndedHistoryBackfill() {
+        if (stop || commandStatus < 4 || phase != Phase.STREAMING || sessionKeyHex.isBlank()) {
+            return
+        }
+        if (actStep != ActStep.NONE && actStep != ActStep.DONE) {
+            handler.postDelayed(endedHistoryBackfillRunnable, 1_000L)
+            return
+        }
+        val endExclusive = lastDataNo + 1
+        if (endExclusive <= 0) return
+        val issued = requestRoomBackfillAfterLive(endExclusive, -1)
+        Log.i(TAG, "ended history backfill endExclusive=$endExclusive issued=$issued")
+    }
+
     private val connectionWatchdogRunnable = Runnable {
         checkConnectionWatchdog()
     }
@@ -282,6 +298,7 @@ class OttaiBleManager(
         handler.removeCallbacks(livePollRunnable)
         handler.removeCallbacks(postHistoryLiveRunnable)
         handler.removeCallbacks(pendingHistoryChunkRunnable)
+        handler.removeCallbacks(endedHistoryBackfillRunnable)
         handler.removeCallbacks(connectionWatchdogRunnable)
         clearPendingHistoryRange()
         svcDeviceInfo = null
@@ -440,6 +457,7 @@ class OttaiBleManager(
                 handler.removeCallbacks(livePollRunnable)
                 handler.removeCallbacks(postHistoryLiveRunnable)
                 handler.removeCallbacks(pendingHistoryChunkRunnable)
+                handler.removeCallbacks(endedHistoryBackfillRunnable)
                 handler.removeCallbacks(connectionWatchdogRunnable)
                 clearPendingHistoryRange()
                 svcDeviceInfo = null; svcCgm = null; svcAuth = null
@@ -593,6 +611,7 @@ class OttaiBleManager(
         val previous = commandStatus
         commandStatus = status
         if (status < 4) {
+            handler.removeCallbacks(endedHistoryBackfillRunnable)
             if (status == 3 && previous >= 4) {
                 Log.i(TAG, "ended-sensor recovery accepted; normal streaming restored")
                 handler.postDelayed({ runCatching { readCgmInfo(gatt) } }, 250L)
@@ -854,7 +873,7 @@ class OttaiBleManager(
     private fun handleGlucosePayload(cipher: ByteArray, live: Boolean, source: String) {
         if (sessionKeyHex.isBlank()) { Log.w(TAG, "payload before session key"); return }
         if (live && commandStatus >= 4) {
-            Log.w(TAG, "ignore ended-sensor live buffer cmd=$commandStatus source=$source")
+            handleEndedLiveBuffer(cipher, source)
             return
         }
         val activeMs = effectiveActiveTimeMs()
@@ -921,6 +940,33 @@ class OttaiBleManager(
         } else if (!live) {
             continueHistoryAfterPayload(readings)
         }
+    }
+
+    private fun handleEndedLiveBuffer(cipher: ByteArray, source: String) {
+        val payload = OttaiCrypto.decryptPayload(cipher, sessionKeyHex)
+        if (payload == null) {
+            Log.w(TAG, "ended live $source decrypt failed len=${cipher.size}")
+            return
+        }
+        val latest = OttaiParser.frameRecords(payload, materials.deviceVersion)
+            .map(OttaiParser::parseRecord)
+            .maxByOrNull { it.dataNo }
+        if (latest == null) {
+            Log.w(TAG, "ended live $source has no records")
+            return
+        }
+        noteSeenDataNo(latest.dataNo)
+        val activeMs = effectiveActiveTimeMs()
+        if (streamStartTimeMs <= 0L && activeMs > 0L) {
+            seedStreamTimeAnchor(
+                latest.dataNo,
+                activeMs + latest.runtimeSec.toLong() * 1_000L,
+                "ended-live",
+            )
+        }
+        Log.i(TAG, "ended live buffer indexed dataNo=${latest.dataNo}; glucose suppressed")
+        handler.removeCallbacks(endedHistoryBackfillRunnable)
+        handler.postDelayed(endedHistoryBackfillRunnable, 4_500L)
     }
 
     private fun emitReading(
