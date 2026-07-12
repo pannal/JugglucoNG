@@ -24,6 +24,7 @@ import tk.glucodata.DataSmoothing
 import tk.glucodata.MultiSensorSelection
 import tk.glucodata.Notify
 import tk.glucodata.SensorBluetooth
+import tk.glucodata.ManagedCurrentSensor
 import tk.glucodata.SensorIdentity
 import tk.glucodata.data.GlucoseRepository
 import tk.glucodata.data.HistorySync
@@ -513,6 +514,32 @@ class DashboardViewModel(
             refreshDashboardSettings()
             refreshSensorSnapshot()
             refreshCurrentDisplaySnapshot()
+        }
+    }
+
+    /**
+     * Call after a glucose history import so the dashboard chart shows the
+     * imported readings. Only pins the imported serial as the display sensor
+     * when there is no current/live sensor to show — never hijacks a live
+     * sensor. [displaySerial] may be a synthetic "imported" id for files
+     * without a sensor serial.
+     */
+    fun onHistoryImported(displaySerial: String?) {
+        val currentSerial = SensorIdentity.resolveMainSensor()?.takeIf { it.isNotBlank() }
+        if (currentSerial == null) {
+            // No live sensor: pin the imported serial so the dashboard shows it.
+            if (!displaySerial.isNullOrBlank()) {
+                ManagedCurrentSensor.set(displaySerial)
+                glucoseRepository.refreshSensorSerial(displaySerial)
+            }
+            refreshData()
+        } else {
+            // Sensor already present: fold overlapping imported data into it now,
+            // then refresh. Never hijacks the live sensor.
+            viewModelScope.launch {
+                glucoseRepository.reconcileImportedIntoCurrentSensor()
+                refreshData()
+            }
         }
     }
 

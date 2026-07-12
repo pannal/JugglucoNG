@@ -513,26 +513,48 @@ fun DashboardScreen(
         }
     }
 
-    // Import launcher for CSV files
+    // Import launcher for glucose history. Accepts a JugglucoNG export package
+    // (JSON) — from which ONLY the glucose section is imported — and history CSV
+    // files. Settings/calibrations in a package are intentionally ignored here.
+    fun toast(message: String) {
+        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
+    }
     val importLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
             coroutineScope.launch {
-                val result = tk.glucodata.data.HistoryExporter.importFromCsv(context, uri)
-                if (result.success) {
-                    android.widget.Toast.makeText(
-                        context,
-                        context.getString(R.string.imported_readings_count, result.successCount),
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
-                    viewModel.refreshData()
-                } else {
-                    android.widget.Toast.makeText(
-                        context,
-                        context.getString(R.string.import_failed_with_error, result.errorMessage ?: ""),
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
+                when {
+                    tk.glucodata.data.ExportPackageExporter.isExportPackage(context, uri) -> {
+                        tk.glucodata.data.ExportPackageExporter.importHistoryFromPackage(context, uri)
+                            .onSuccess { outcome ->
+                                if (outcome == null || outcome.readings == 0) {
+                                    // Valid package, but it has no glucose (e.g. settings-only export)
+                                    toast(context.getString(R.string.import_no_glucose))
+                                } else {
+                                    toast(context.getString(R.string.imported_readings_count, outcome.readings))
+                                    viewModel.onHistoryImported(outcome.displaySerial)
+                                }
+                            }
+                            .onFailure { throwable ->
+                                toast(context.getString(R.string.import_failed_with_error, throwable.localizedMessage ?: ""))
+                            }
+                    }
+                    tk.glucodata.data.SettingsExporter.isSettingsExport(context, uri) -> {
+                        // A valid JugglucoNG settings export contains no glucose data
+                        toast(context.getString(R.string.import_no_glucose))
+                    }
+                    else -> {
+                        val result = tk.glucodata.data.HistoryExporter.importFromCsv(context, uri)
+                        when {
+                            result.success && result.successCount > 0 -> {
+                                toast(context.getString(R.string.imported_readings_count, result.successCount))
+                                viewModel.onHistoryImported(tk.glucodata.data.HistoryRepository.IMPORTED_SENSOR_SERIAL)
+                            }
+                            result.success -> toast(context.getString(R.string.import_no_glucose))
+                            else -> toast(context.getString(R.string.import_unsupported_file))
+                        }
+                    }
                 }
             }
         }
@@ -1129,7 +1151,7 @@ fun DashboardScreen(
                 }
             },
                 onImportHistory = {
-                    importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "*/*"))
+                    importLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "*/*"))
                 },
                 modifier = Modifier
                     .padding(padding),

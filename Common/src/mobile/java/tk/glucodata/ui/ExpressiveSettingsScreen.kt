@@ -760,10 +760,16 @@ fun ExpressiveSettingsScreen(
                                 },
                                 Toast.LENGTH_LONG
                             ).show()
-                            if (summary.restartRequired) {
-                                context.findActivity()?.fullRestart()
+                            if (summary.historyReadings > 0) {
+                                // Pin the imported serial for display (when idle) so the
+                                // dashboard chart shows the imported glucose. Persisted, so
+                                // it survives the restart below.
+                                viewModel.onHistoryImported(summary.historyDisplaySerial)
                             } else {
                                 viewModel.refreshData()
+                            }
+                            if (summary.restartRequired) {
+                                context.findActivity()?.fullRestart()
                             }
                         } else {
                             Toast.makeText(
