@@ -147,6 +147,7 @@ private fun HistoryRoute(
     val journalEntries by dashboardViewModel.journalEntries.collectAsStateWithLifecycle()
     val journalInsulinPresets by dashboardViewModel.journalInsulinPresets.collectAsStateWithLifecycle()
     val journalFoods by dashboardViewModel.journalFoods.collectAsStateWithLifecycle()
+    val appChartRangeColorsEnabled by dashboardViewModel.glucoseAppChartRangeColorsEnabled.collectAsStateWithLifecycle()
     val predictionCarbRatioGramsPerUnit by dashboardViewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
     val predictionInsulinSensitivityMgDlPerUnit by dashboardViewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
@@ -174,6 +175,7 @@ private fun HistoryRoute(
         calibrations = calibrations,
         title = title,
         browseMode = browseMode,
+        chartRangeColors = appChartRangeColorsEnabled,
 //        initialShowReadingRows = initialShowReadingRows,
         journalEnabled = journalEnabled,
         journalEntries = scopedJournalEntries,
@@ -294,6 +296,7 @@ private fun JournalRoute(
     val journalInsulinPresets by dashboardViewModel.journalInsulinPresets.collectAsStateWithLifecycle()
     val journalFoods by dashboardViewModel.journalFoods.collectAsStateWithLifecycle()
     val journalEiobDisplayEnabled by dashboardViewModel.journalEiobDisplayEnabled.collectAsStateWithLifecycle()
+    val appChartRangeColorsEnabled by dashboardViewModel.glucoseAppChartRangeColorsEnabled.collectAsStateWithLifecycle()
     val predictionCarbRatioGramsPerUnit by dashboardViewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
     val predictionInsulinSensitivityMgDlPerUnit by dashboardViewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
@@ -364,7 +367,8 @@ private fun JournalRoute(
         showTitle = showTitle,
         useStatusBarsPadding = useStatusBarsPadding,
         bottomContentPadding = bottomContentPadding,
-        showEiob = journalEiobDisplayEnabled
+        showEiob = journalEiobDisplayEnabled,
+        chartRangeColors = appChartRangeColorsEnabled
     )
 
     journalEditorRequest?.let { request ->

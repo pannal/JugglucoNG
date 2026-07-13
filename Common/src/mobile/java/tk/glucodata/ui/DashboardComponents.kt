@@ -111,7 +111,9 @@ import tk.glucodata.SensorIdentity
 import tk.glucodata.Applic
 import tk.glucodata.CurrentDisplaySource
 import tk.glucodata.DisplayDataState
+import androidx.compose.ui.graphics.toArgb
 import tk.glucodata.GlucoseRangeColors
+import tk.glucodata.TrendProjection
 import tk.glucodata.Notify
 import tk.glucodata.UiRefreshBus
 import tk.glucodata.logic.TrendEngine
@@ -273,6 +275,8 @@ fun DashboardCombinedHeader(
     targetHigh: Float = fallbackHighThreshold(isMmol),
     veryLowThreshold: Float = fallbackVeryLowThreshold(isMmol),
     veryHighThreshold: Float = fallbackVeryHighThreshold(isMmol),
+    valueRangeColorsEnabled: Boolean = false,
+    arrowForecastColorsEnabled: Boolean = false,
     peerReadings: List<tk.glucodata.ui.viewmodel.DashboardViewModel.PeerCurrentReading> = emptyList(),
     onPeerReadingClick: (String) -> Unit = {},
     onHeroClick: () -> Unit = {}
@@ -416,6 +420,57 @@ fun DashboardCombinedHeader(
             veryLowThreshold = veryLowThreshold,
             veryHighThreshold = veryHighThreshold
         )
+    }
+    // Optional GDH-style traffic coloring of the value itself: green in
+    // target range, yellow up to the alarm bounds, red beyond.
+    val heroValueColor = if (valueRangeColorsEnabled && isFreshData) {
+        val fallbackArgb = glucoseContentColor.toArgb()
+        remember(dvs?.primaryValue, isDark, isMmol, targetLow, targetHigh, veryLowThreshold, veryHighThreshold, fallbackArgb) {
+            Color(
+                GlucoseRangeColors.trafficColorForValue(
+                    dvs?.primaryValue ?: Float.NaN,
+                    targetLow,
+                    targetHigh,
+                    veryLowThreshold,
+                    veryHighThreshold,
+                    isDark,
+                    isMmol,
+                    fallbackArgb
+                )
+            )
+        }
+    } else {
+        glucoseContentColor
+    }
+    // Arrow: optionally colored by the 30-minute linear forecast (the value
+    // says where you are, the arrow where you're heading). isFreshData uses
+    // the display timeout, which is too lenient for a forecast: after a
+    // reconnect gap the trend only describes the pre-gap drop, so the
+    // classifier additionally caps the data age.
+    val heroArrowColor = if (arrowForecastColorsEnabled && isFreshData) {
+        val forecastRisk = remember(
+            dvs?.primaryValue, trendResult, isMmol, resolvedDataState,
+            targetLow, targetHigh, veryLowThreshold, veryHighThreshold
+        ) {
+            val toMgdl = if (isMmol) 18.016f else 1f
+            TrendProjection.classify(
+                (dvs?.primaryValue ?: Float.NaN) * toMgdl,
+                trendResult.velocity,
+                resolvedDataState.ageMillis,
+                TrendProjection.DEFAULT_HORIZON_MINUTES,
+                targetLow * toMgdl,
+                targetHigh * toMgdl,
+                veryLowThreshold * toMgdl,
+                veryHighThreshold * toMgdl
+            )
+        }
+        when (forecastRisk) {
+            TrendProjection.OUT -> Color(GlucoseRangeColors.valueOut(isDark))
+            TrendProjection.BORDERLINE -> Color(GlucoseRangeColors.valueBorderline(isDark))
+            else -> heroValueColor
+        }
+    } else {
+        heroValueColor
     }
     val targetGlucoseContainerColor = glucoseTone?.let { tone ->
         lerpColor(glucoseBaseContainerColor, tone.tint, tone.blendFraction)
@@ -588,14 +643,14 @@ fun DashboardCombinedHeader(
                                 DashboardHeroPrimaryText(
                                     value = primaryText,
                                     style = primaryValueStyle,
-                                    color = glucoseContentColor
+                                    color = heroValueColor
                                 )
                             }
 
                             tk.glucodata.ui.components.TrendIndicator(
                                 trendResult = trendResult,
                                 modifier = Modifier.size(resolvedTrendIconSize),
-                                color = glucoseContentColor
+                                color = heroArrowColor
                             )
                         }
 
@@ -684,7 +739,8 @@ fun DashboardCombinedHeader(
                                 separatorStyle = slashStyle,
                                 secondaryStackStyle = secondaryThreeValueStyle,
                                 tertiaryStackStyle = tertiaryThreeValueStyle,
-                                contentColor = glucoseContentColor
+                                contentColor = glucoseContentColor,
+                                primaryColor = heroValueColor
                             )
 
                             Spacer(modifier = Modifier.width(resolvedClusterGap))
@@ -692,7 +748,7 @@ fun DashboardCombinedHeader(
                             tk.glucodata.ui.components.TrendIndicator(
                                 trendResult = trendResult,
                                 modifier = Modifier.size(resolvedTrendIconSize),
-                                color = glucoseContentColor
+                                color = heroArrowColor
                             )
                         }
 
@@ -1051,7 +1107,8 @@ private fun DashboardHeroValueCluster(
     secondaryStackStyle: TextStyle,
     tertiaryStackStyle: TextStyle,
     contentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    primaryColor: Color = contentColor
 ) {
     val hasSecondary = secondaryText != null
     val hasTertiary = tertiaryText != null
@@ -1128,7 +1185,7 @@ private fun DashboardHeroValueCluster(
                 DashboardHeroPrimaryText(
                     value = primaryText,
                     style = primaryStyle,
-                    color = contentColor
+                    color = primaryColor
                 )
             }
 
@@ -1143,7 +1200,7 @@ private fun DashboardHeroValueCluster(
                     DashboardHeroPrimaryText(
                         value = primaryText,
                         style = scaledPrimaryStyle,
-                        color = contentColor
+                        color = primaryColor
                     )
                     Spacer(modifier = Modifier.width(6.dp * pairScale))
                     Text(
@@ -1178,7 +1235,7 @@ private fun DashboardHeroValueCluster(
                     DashboardHeroPrimaryText(
                         value = primaryText,
                         style = scaledPrimaryStyle,
-                        color = contentColor
+                        color = primaryColor
                     )
 
                     Spacer(modifier = Modifier.width(8.dp * stackScale))
