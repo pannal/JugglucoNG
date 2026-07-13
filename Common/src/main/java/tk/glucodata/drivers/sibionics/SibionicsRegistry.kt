@@ -278,7 +278,7 @@ object SibionicsRegistry {
         val legacyKey = PREF_CUSTOM_ALGORITHM_PREFIX + sensorId
         return if (preferences.contains(legacyKey)) {
             if (preferences.getBoolean(legacyKey, false)) {
-                SibionicsAlgorithmSelection.ADAPTIVE_CALIBRATED
+                SibionicsAlgorithmSelection.STATE_MODEL_CALIBRATED
             } else {
                 SibionicsAlgorithmSelection.STOCK_CALIBRATED
             }

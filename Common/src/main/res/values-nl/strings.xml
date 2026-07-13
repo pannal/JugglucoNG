@@ -1982,4 +1982,12 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="ottai_import_export_ready">Opgeslagen materialen voor %1$s zijn klaar.</string>
     <string name="ottai_credentials_import">Importeren</string>
     <string name="ottai_credentials_replace">Vervangen</string>
+    <string name="sibionics_glucose_model">Glucosemodel</string>
+    <string name="sibionics_stock_model_detail">Exact Sibionics-sensoralgoritme</string>
+    <string name="sibionics_responsive_algorithm">Responsieve schatter</string>
+    <string name="sibionics_responsive_algorithm_desc">Oorspronkelijke trendgestuurde schatter van glucose en snelheid</string>
+    <string name="sibionics_balanced_algorithm">Gebalanceerde tracker</string>
+    <string name="sibionics_balanced_algorithm_desc">Begrensde ruisonderdrukking dicht bij het standaardmodel</string>
+    <string name="sibionics_state_algorithm">Chemisch toestandsmodel</string>
+    <string name="sibionics_state_algorithm_desc">Compensatie van sensordrift, fysiologische vertraging en artefacten</string>
 </resources>

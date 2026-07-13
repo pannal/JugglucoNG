@@ -81,7 +81,7 @@ class SibionicsBleManager(
         private const val MAX_FUTURE_DRIFT_MS = 10L * 60L * 1000L
         private const val MIN_REASONABLE_TIME_MS = 946_684_800_000L
         private const val ALGORITHM_REBUILD_DEBOUNCE_MS = 600L
-        private const val LOCAL_REBUILD_FORMAT_VERSION = 5
+        private const val LOCAL_REBUILD_FORMAT_VERSION = 6
 
         private fun sampleJournalFile(context: Context, sensorId: String): File {
             val digest = MessageDigest.getInstance("SHA-256")
@@ -1402,12 +1402,14 @@ class SibionicsBleManager(
     override fun supportsCustomAlgorithm(): Boolean = true
 
     override fun isCustomAlgorithmEnabled(): Boolean =
-        algorithmSelection.adaptiveEnabled
+        algorithmSelection.customModelEnabled
 
     override fun setCustomAlgorithmEnabled(enabled: Boolean): Boolean {
         return setCustomAlgorithmMode(
-            if (enabled) algorithmSelection.storageId or 2
-            else algorithmSelection.storageId and 2.inv(),
+            algorithmSelection.withModel(
+                if (enabled) SibionicsCustomAlgorithmModel.STATE_MODEL
+                else SibionicsCustomAlgorithmModel.STOCK,
+            ).storageId,
         )
     }
 
@@ -1487,7 +1489,7 @@ class SibionicsBleManager(
             dataptr = 0L,
             viewMode = viewMode,
             autoResetDays = autoResetDays,
-            customAlgorithmEnabled = algorithmSelection.adaptiveEnabled,
+            customAlgorithmEnabled = algorithmSelection.customModelEnabled,
             customAlgorithmMode = algorithmSelection.storageId,
             supportsDisplayModes = supportsDisplayModes(),
             supportsManualCalibration = supportsManualCalibration(),

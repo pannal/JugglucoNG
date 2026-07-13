@@ -1929,4 +1929,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Materiali salvati per %1$s pronti.</string>
     <string name="ottai_credentials_import">Importa</string>
     <string name="ottai_credentials_replace">Sostituisci</string>
+    <string name="sibionics_glucose_model">Modello glicemico</string>
+    <string name="sibionics_stock_model_detail">Algoritmo esatto del sensore Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Stimatore reattivo</string>
+    <string name="sibionics_responsive_algorithm_desc">Stimatore originale di glicemia e velocità basato sulla tendenza</string>
+    <string name="sibionics_balanced_algorithm">Tracciamento bilanciato</string>
+    <string name="sibionics_balanced_algorithm_desc">Riduzione limitata del rumore vicina al modello standard</string>
+    <string name="sibionics_state_algorithm">Modello di stato chimico</string>
+    <string name="sibionics_state_algorithm_desc">Compensazione della deriva del sensore, del ritardo fisiologico e degli artefatti</string>
 </resources>

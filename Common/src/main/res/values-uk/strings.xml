@@ -2011,4 +2011,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Збережені матеріали для %1$s готові.</string>
     <string name="ottai_credentials_import">Імпорт</string>
     <string name="ottai_credentials_replace">Замінити</string>
+    <string name="sibionics_glucose_model">Модель глюкози</string>
+    <string name="sibionics_stock_model_detail">Точний штатний алгоритм Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Швидка модель</string>
+    <string name="sibionics_responsive_algorithm_desc">Початкова модель рівня та швидкості зміни глюкози</string>
+    <string name="sibionics_balanced_algorithm">Збалансована модель</string>
+    <string name="sibionics_balanced_algorithm_desc">Обмежене приглушення шуму з близьким слідуванням штатній моделі</string>
+    <string name="sibionics_state_algorithm">Хімічна модель стану</string>
+    <string name="sibionics_state_algorithm_desc">Компенсація дрейфу датчика, фізіологічної затримки й артефактів</string>
 </resources>

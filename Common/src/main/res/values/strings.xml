@@ -2162,4 +2162,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_display_select">Select display sensor</string>
     <string name="sensor_display_selected">Display sensor selected</string>
     <string name="wrongcode">Wrong QR code</string>
+    <string name="sibionics_glucose_model">Glucose model</string>
+    <string name="sibionics_stock_model_detail">Exact Sibionics sensor algorithm</string>
+    <string name="sibionics_responsive_algorithm">Responsive estimator</string>
+    <string name="sibionics_responsive_algorithm_desc">Original trend-aware glucose and velocity estimator</string>
+    <string name="sibionics_balanced_algorithm">Balanced tracker</string>
+    <string name="sibionics_balanced_algorithm_desc">Bounded noise reduction that follows the stock model closely</string>
+    <string name="sibionics_state_algorithm">Chemical state model</string>
+    <string name="sibionics_state_algorithm_desc">Sensor drift, physiological lag and artifact compensation</string>
 </resources>

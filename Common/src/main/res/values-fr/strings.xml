@@ -1945,4 +1945,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Les matériaux enregistrés pour %1$s sont prêts.</string>
     <string name="ottai_credentials_import">Importer</string>
     <string name="ottai_credentials_replace">Remplacer</string>
+    <string name="sibionics_glucose_model">Modèle de glucose</string>
+    <string name="sibionics_stock_model_detail">Algorithme exact du capteur Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Estimateur réactif</string>
+    <string name="sibionics_responsive_algorithm_desc">Estimateur original de la glycémie et de sa vitesse</string>
+    <string name="sibionics_balanced_algorithm">Suivi équilibré</string>
+    <string name="sibionics_balanced_algorithm_desc">Réduction du bruit limitée, proche du modèle standard</string>
+    <string name="sibionics_state_algorithm">Modèle d’état chimique</string>
+    <string name="sibionics_state_algorithm_desc">Compensation de la dérive du capteur, du retard physiologique et des artefacts</string>
 </resources>

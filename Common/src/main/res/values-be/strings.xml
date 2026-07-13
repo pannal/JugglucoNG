@@ -2006,4 +2006,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Захаваныя матэрыялы для %1$s гатовыя.</string>
     <string name="ottai_credentials_import">Імпарт</string>
     <string name="ottai_credentials_replace">Замяніць</string>
+    <string name="sibionics_glucose_model">Мадэль глюкозы</string>
+    <string name="sibionics_stock_model_detail">Дакладны штатны алгарытм Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Хуткая мадэль</string>
+    <string name="sibionics_responsive_algorithm_desc">Пачатковая мадэль узроўню і хуткасці змены глюкозы</string>
+    <string name="sibionics_balanced_algorithm">Збалансаваная мадэль</string>
+    <string name="sibionics_balanced_algorithm_desc">Абмежаванае прыглушэнне шуму з блізкім следаваннем штатнай мадэлі</string>
+    <string name="sibionics_state_algorithm">Хімічная мадэль стану</string>
+    <string name="sibionics_state_algorithm_desc">Кампенсацыя дрэйфу датчыка, фізіялагічнай затрымкі і артэфактаў</string>
 </resources>

@@ -1977,4 +1977,12 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_import_export_ready">Gespeicherte Materialien für %1$s sind bereit.</string>
     <string name="ottai_credentials_import">Importieren</string>
     <string name="ottai_credentials_replace">Ersetzen</string>
+    <string name="sibionics_glucose_model">Glukosemodell</string>
+    <string name="sibionics_stock_model_detail">Exakter Sibionics-Sensoralgorithmus</string>
+    <string name="sibionics_responsive_algorithm">Reaktionsschneller Schätzer</string>
+    <string name="sibionics_responsive_algorithm_desc">Ursprünglicher trendbasierter Glukose- und Geschwindigkeitsschätzer</string>
+    <string name="sibionics_balanced_algorithm">Ausgewogener Tracker</string>
+    <string name="sibionics_balanced_algorithm_desc">Begrenzte Rauschminderung nahe am Standardmodell</string>
+    <string name="sibionics_state_algorithm">Chemisches Zustandsmodell</string>
+    <string name="sibionics_state_algorithm_desc">Kompensation von Sensordrift, physiologischer Verzögerung und Artefakten</string>
 </resources>

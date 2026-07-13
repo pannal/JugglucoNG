@@ -1974,4 +1974,12 @@
     <string name="ottai_import_export_ready">Zapisane materiały dla %1$s są gotowe.</string>
     <string name="ottai_credentials_import">Importuj</string>
     <string name="ottai_credentials_replace">Zastąp</string>
+    <string name="sibionics_glucose_model">Model glukozy</string>
+    <string name="sibionics_stock_model_detail">Dokładny algorytm sensora Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Szybki estymator</string>
+    <string name="sibionics_responsive_algorithm_desc">Pierwotny estymator glukozy i szybkości oparty na trendzie</string>
+    <string name="sibionics_balanced_algorithm">Zrównoważone śledzenie</string>
+    <string name="sibionics_balanced_algorithm_desc">Ograniczona redukcja szumu blisko modelu standardowego</string>
+    <string name="sibionics_state_algorithm">Chemiczny model stanu</string>
+    <string name="sibionics_state_algorithm_desc">Kompensacja dryfu sensora, opóźnienia fizjologicznego i artefaktów</string>
 </resources>

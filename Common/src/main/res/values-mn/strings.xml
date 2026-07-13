@@ -2051,4 +2051,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_sign_out">Гарах</string>
     <string name="ottai_verify_code_hint">Баталгаажуулах код</string>
     <string name="wrongcode">Wrong QR code</string>
+    <string name="sibionics_glucose_model">Глюкозын загвар</string>
+    <string name="sibionics_stock_model_detail">Sibionics мэдрэгчийн нарийн алгоритм</string>
+    <string name="sibionics_responsive_algorithm">Хурдан үнэлэгч</string>
+    <string name="sibionics_responsive_algorithm_desc">Глюкоз ба өөрчлөлтийн хурдыг чиг хандлагаар үнэлэх анхны загвар</string>
+    <string name="sibionics_balanced_algorithm">Тэнцвэртэй хянагч</string>
+    <string name="sibionics_balanced_algorithm_desc">Үндсэн загварыг ойроос дагасан хязгаарлагдмал шуугиан бууруулалт</string>
+    <string name="sibionics_state_algorithm">Химийн төлөвийн загвар</string>
+    <string name="sibionics_state_algorithm_desc">Мэдрэгчийн хазайлт, физиологийн хоцролт ба артефактын нөхөн олговор</string>
 </resources>

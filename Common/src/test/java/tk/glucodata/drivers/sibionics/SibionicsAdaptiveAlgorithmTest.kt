@@ -62,19 +62,31 @@ class SibionicsAdaptiveAlgorithmTest {
     }
 
     @Test
-    fun algorithmFeatureStorageRepresentsBothIndependentToggles() {
+    fun algorithmStoragePreservesLegacyModesAndRepresentsEveryModel() {
         assertEquals(SibionicsAlgorithmSelection.STOCK, SibionicsAlgorithmSelection.fromStorage(0))
         assertEquals(SibionicsAlgorithmSelection.STOCK_CALIBRATED, SibionicsAlgorithmSelection.fromStorage(1))
-        assertEquals(SibionicsAlgorithmSelection.ADAPTIVE, SibionicsAlgorithmSelection.fromStorage(2))
-        assertEquals(SibionicsAlgorithmSelection.ADAPTIVE_CALIBRATED, SibionicsAlgorithmSelection.fromStorage(3))
+        assertEquals(SibionicsAlgorithmSelection.STATE_MODEL, SibionicsAlgorithmSelection.fromStorage(2))
+        assertEquals(SibionicsAlgorithmSelection.STATE_MODEL_CALIBRATED, SibionicsAlgorithmSelection.fromStorage(3))
+        assertEquals(SibionicsAlgorithmSelection.BALANCED_TRACKER, SibionicsAlgorithmSelection.fromStorage(4))
+        assertEquals(SibionicsAlgorithmSelection.BALANCED_TRACKER_CALIBRATED, SibionicsAlgorithmSelection.fromStorage(5))
+        assertEquals(SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR, SibionicsAlgorithmSelection.fromStorage(6))
+        assertEquals(SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR_CALIBRATED, SibionicsAlgorithmSelection.fromStorage(7))
         assertTrue(!SibionicsAlgorithmSelection.STOCK.calibrationEnabled)
-        assertTrue(!SibionicsAlgorithmSelection.STOCK.adaptiveEnabled)
+        assertTrue(!SibionicsAlgorithmSelection.STOCK.customModelEnabled)
         assertTrue(SibionicsAlgorithmSelection.STOCK_CALIBRATED.calibrationEnabled)
-        assertTrue(!SibionicsAlgorithmSelection.STOCK_CALIBRATED.adaptiveEnabled)
-        assertTrue(!SibionicsAlgorithmSelection.ADAPTIVE.calibrationEnabled)
-        assertTrue(SibionicsAlgorithmSelection.ADAPTIVE.adaptiveEnabled)
-        assertTrue(SibionicsAlgorithmSelection.ADAPTIVE_CALIBRATED.calibrationEnabled)
-        assertTrue(SibionicsAlgorithmSelection.ADAPTIVE_CALIBRATED.adaptiveEnabled)
+        assertTrue(!SibionicsAlgorithmSelection.STOCK_CALIBRATED.customModelEnabled)
+        assertTrue(!SibionicsAlgorithmSelection.STATE_MODEL.calibrationEnabled)
+        assertTrue(SibionicsAlgorithmSelection.STATE_MODEL.customModelEnabled)
+        assertTrue(SibionicsAlgorithmSelection.STATE_MODEL_CALIBRATED.calibrationEnabled)
+        assertTrue(SibionicsAlgorithmSelection.STATE_MODEL_CALIBRATED.customModelEnabled)
+        assertEquals(
+            SibionicsAlgorithmSelection.BALANCED_TRACKER_CALIBRATED,
+            SibionicsAlgorithmSelection.STOCK_CALIBRATED.withModel(SibionicsCustomAlgorithmModel.BALANCED_TRACKER),
+        )
+        assertEquals(
+            SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR,
+            SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR_CALIBRATED.withCalibration(false),
+        )
     }
 
     @Test
@@ -93,8 +105,8 @@ class SibionicsAdaptiveAlgorithmTest {
             )
         }
 
-        assertEquals(8f, firstOutput(SibionicsAlgorithmSelection.ADAPTIVE), 0.001f)
-        assertEquals(6.4f, firstOutput(SibionicsAlgorithmSelection.ADAPTIVE_CALIBRATED), 0.001f)
+        assertEquals(8f, firstOutput(SibionicsAlgorithmSelection.STATE_MODEL), 0.001f)
+        assertEquals(6.4f, firstOutput(SibionicsAlgorithmSelection.STATE_MODEL_CALIBRATED), 0.001f)
     }
 
     @Test
@@ -104,7 +116,7 @@ class SibionicsAdaptiveAlgorithmTest {
             SibionicsConstants.Variant.SIBIONICS2,
         ).forEach { variant ->
             val algorithm = SibionicsAlgorithmContext("chemical-${variant.name}")
-            algorithm.configure("46HU804EBJ4", 1.4f, variant, SibionicsAlgorithmSelection.ADAPTIVE)
+            algorithm.configure("46HU804EBJ4", 1.4f, variant, SibionicsAlgorithmSelection.STATE_MODEL)
             var output = Float.NaN
             repeat(130) { offset ->
                 val index = offset + 1
@@ -120,6 +132,92 @@ class SibionicsAdaptiveAlgorithmTest {
                 assertTrue("variant=$variant index=$index signal=$signal", signal?.mmol?.isFinite() == true)
             }
             assertTrue("variant=$variant output=$output", output.isFinite() && output > 0f)
+        }
+    }
+
+    @Test
+    fun everyModelSnapshotContinuesDeterministically() {
+        val selections = listOf(
+            SibionicsAlgorithmSelection.STOCK,
+            SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR,
+            SibionicsAlgorithmSelection.BALANCED_TRACKER,
+            SibionicsAlgorithmSelection.STATE_MODEL,
+        )
+        selections.forEach { selection ->
+            val original = SibionicsAlgorithmContext("snapshot-${selection.name}").apply {
+                configure("46HU804EBJ4", 1.4f, SibionicsConstants.Variant.CHINESE, selection)
+            }
+            repeat(40) { offset ->
+                val index = offset + 1
+                original.process(
+                    rawMmol = 5.5f + (offset % 11) * 0.17f,
+                    temperatureC = 33.5f + (offset % 3) * 0.2f,
+                    index = index,
+                    mode = SibionicsAlgorithmMode.REPLAY,
+                    impedance = 2_900f + offset,
+                    eventTimeMs = index * 60_000L,
+                )
+            }
+
+            val restored = SibionicsAlgorithmContext("restored-${selection.name}").apply {
+                configure("46HU804EBJ4", 1.4f, SibionicsConstants.Variant.CHINESE, selection)
+            }
+            assertTrue("selection=$selection", restored.restore(original.snapshot()))
+
+            val nextIndex = 41
+            val expected = original.process(
+                6.7f, 34f, nextIndex, SibionicsAlgorithmMode.REPLAY,
+                impedance = 2_950f, eventTimeMs = nextIndex * 60_000L,
+            )
+            val actual = restored.process(
+                6.7f, 34f, nextIndex, SibionicsAlgorithmMode.REPLAY,
+                impedance = 2_950f, eventTimeMs = nextIndex * 60_000L,
+            )
+            assertEquals("selection=$selection", expected, actual, 0.001f)
+        }
+    }
+
+    @Test
+    fun stockSnapshotTransfersExactCoreIntoEveryCustomModel() {
+        val stock = SibionicsAlgorithmContext("stock-transfer").apply {
+            configure(
+                "46HU804EBJ4",
+                1.4f,
+                SibionicsConstants.Variant.CHINESE,
+                SibionicsAlgorithmSelection.STOCK,
+            )
+        }
+        repeat(130) { offset ->
+            val index = offset + 1
+            stock.processStock(
+                rawMmol = 5.8f + (offset % 9) * 0.12f,
+                temperatureC = 34f,
+                index = index,
+                mode = SibionicsAlgorithmMode.REPLAY,
+            )
+        }
+        val stockSnapshot = stock.snapshot()
+
+        listOf(
+            SibionicsAlgorithmSelection.RESPONSIVE_ESTIMATOR,
+            SibionicsAlgorithmSelection.BALANCED_TRACKER,
+            SibionicsAlgorithmSelection.STATE_MODEL,
+        ).forEach { selection ->
+            val target = SibionicsAlgorithmContext("target-${selection.name}").apply {
+                configure("46HU804EBJ4", 1.4f, SibionicsConstants.Variant.CHINESE, selection)
+            }
+            assertTrue("selection=$selection", target.restore(stockSnapshot))
+            val output = target.processPreparedMeasurement(
+                stockMmol = 6.4f,
+                measurementMmol = 6.4f,
+                rawMmol = 6.4f,
+                temperatureC = 34f,
+                index = 1,
+                impedance = 2_900f,
+                eventTimeMs = 60_000L,
+                chemicalSignal = SibionicsChemicalSignal(6.4f, 0),
+            )
+            assertTrue("selection=$selection output=$output", output.isFinite() && output > 0f)
         }
     }
 

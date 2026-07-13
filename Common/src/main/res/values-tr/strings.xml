@@ -1967,4 +1967,12 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="ottai_import_export_ready">%1$s için kayıtlı materyaller hazır.</string>
     <string name="ottai_credentials_import">İçe aktar</string>
     <string name="ottai_credentials_replace">Değiştir</string>
+    <string name="sibionics_glucose_model">Glikoz modeli</string>
+    <string name="sibionics_stock_model_detail">Tam Sibionics sensör algoritması</string>
+    <string name="sibionics_responsive_algorithm">Hızlı tahminleyici</string>
+    <string name="sibionics_responsive_algorithm_desc">Özgün eğilim duyarlı glikoz ve hız tahminleyicisi</string>
+    <string name="sibionics_balanced_algorithm">Dengeli izleyici</string>
+    <string name="sibionics_balanced_algorithm_desc">Standart modele yakın, sınırlı gürültü azaltma</string>
+    <string name="sibionics_state_algorithm">Kimyasal durum modeli</string>
+    <string name="sibionics_state_algorithm_desc">Sensör kayması, fizyolojik gecikme ve artefakt telafisi</string>
 </resources>

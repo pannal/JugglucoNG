@@ -1985,4 +1985,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Материалы для %1$s загружены.</string>
     <string name="ottai_credentials_import">Импорт</string>
     <string name="ottai_credentials_replace">Заменить</string>
+    <string name="sibionics_glucose_model">Модель глюкозы</string>
+    <string name="sibionics_stock_model_detail">Точный штатный алгоритм Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Быстрая модель</string>
+    <string name="sibionics_responsive_algorithm_desc">Исходная модель уровня и скорости изменения глюкозы</string>
+    <string name="sibionics_balanced_algorithm">Сбалансированная модель</string>
+    <string name="sibionics_balanced_algorithm_desc">Ограниченное подавление шума с близким следованием штатной модели</string>
+    <string name="sibionics_state_algorithm">Химическая модель состояния</string>
+    <string name="sibionics_state_algorithm_desc">Компенсация дрейфа датчика, физиологической задержки и артефактов</string>
 </resources>

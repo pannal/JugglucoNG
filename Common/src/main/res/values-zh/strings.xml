@@ -1955,4 +1955,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">%1$s 的已保存材料已就绪。</string>
     <string name="ottai_credentials_import">导入</string>
     <string name="ottai_credentials_replace">替换</string>
+    <string name="sibionics_glucose_model">葡萄糖模型</string>
+    <string name="sibionics_stock_model_detail">精确的 Sibionics 原厂算法</string>
+    <string name="sibionics_responsive_algorithm">快速估算模型</string>
+    <string name="sibionics_responsive_algorithm_desc">原始的趋势感知葡萄糖与变化速度估算模型</string>
+    <string name="sibionics_balanced_algorithm">均衡跟踪模型</string>
+    <string name="sibionics_balanced_algorithm_desc">紧随原厂模型的有限降噪</string>
+    <string name="sibionics_state_algorithm">化学状态模型</string>
+    <string name="sibionics_state_algorithm_desc">补偿传感器漂移、生理延迟和信号伪影</string>
 </resources>

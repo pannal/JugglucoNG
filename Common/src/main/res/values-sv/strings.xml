@@ -1939,4 +1939,12 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_export_ready">Sparat material för %1$s är redo.</string>
     <string name="ottai_credentials_import">Importera</string>
     <string name="ottai_credentials_replace">Ersätt</string>
+    <string name="sibionics_glucose_model">Glukosmodell</string>
+    <string name="sibionics_stock_model_detail">Exakt Sibionics-sensoralgoritm</string>
+    <string name="sibionics_responsive_algorithm">Responsiv skattare</string>
+    <string name="sibionics_responsive_algorithm_desc">Ursprunglig trendstyrd skattare för glukos och hastighet</string>
+    <string name="sibionics_balanced_algorithm">Balanserad spårning</string>
+    <string name="sibionics_balanced_algorithm_desc">Begränsad brusreducering nära standardmodellen</string>
+    <string name="sibionics_state_algorithm">Kemisk tillståndsmodell</string>
+    <string name="sibionics_state_algorithm_desc">Kompensation för sensordrift, fysiologisk fördröjning och artefakter</string>
 </resources>
