@@ -13,6 +13,11 @@ enum class SibionicsAlgorithmMode {
     REPLAY,
 }
 
+internal data class SibionicsChemicalSignal(
+    val mmol: Float,
+    val qualityFlags: Int,
+)
+
 enum class SibionicsAlgorithmSelection(val storageId: Int) {
     STOCK(0),
     STOCK_CALIBRATED(1),
@@ -141,7 +146,7 @@ class SibionicsAlgorithmContext(
      * The exact core is not advanced here, which makes a two-pass historical
      * calibration rebuild deterministic.
      */
-    fun processPreparedMeasurement(
+    internal fun processPreparedMeasurement(
         stockMmol: Float,
         measurementMmol: Float,
         rawMmol: Float,
@@ -149,13 +154,17 @@ class SibionicsAlgorithmContext(
         index: Int,
         impedance: Float = Float.NaN,
         eventTimeMs: Long = 0L,
+        chemicalSignal: SibionicsChemicalSignal? = latestChemicalSignal(),
     ): Float {
         if (!stockMmol.isFinite() || stockMmol <= 0f) return Float.NaN
         val measurement = measurementMmol.takeIf { it.isFinite() && it > 0f } ?: stockMmol
         return if (selection.adaptiveEnabled) {
             adaptiveCore.process(
                 stockMmol = measurement,
+                vendorStockMmol = stockMmol,
                 rawMmol = rawMmol,
+                chemicalMmol = chemicalSignal?.mmol ?: Float.NaN,
+                chemicalQualityFlags = chemicalSignal?.qualityFlags ?: 0,
                 temperatureC = temperatureC,
                 impedance = impedance,
                 index = index,
@@ -165,6 +174,11 @@ class SibionicsAlgorithmContext(
         } else {
             nativeRound(measurement)
         }
+    }
+
+    internal fun latestChemicalSignal(): SibionicsChemicalSignal? = when (family) {
+        AlgorithmFamily.V115G -> v115Core.latestChemicalSignal
+        AlgorithmFamily.V116A -> v116Core.latestChemicalSignal
     }
 
     fun snapshot(): ByteArray = ByteArrayOutputStream().use { bytes ->

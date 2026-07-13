@@ -81,7 +81,7 @@ class SibionicsBleManager(
         private const val MAX_FUTURE_DRIFT_MS = 10L * 60L * 1000L
         private const val MIN_REASONABLE_TIME_MS = 946_684_800_000L
         private const val ALGORITHM_REBUILD_DEBOUNCE_MS = 600L
-        private const val LOCAL_REBUILD_FORMAT_VERSION = 4
+        private const val LOCAL_REBUILD_FORMAT_VERSION = 5
 
         private fun sampleJournalFile(context: Context, sensorId: String): File {
             val digest = MessageDigest.getInstance("SHA-256")

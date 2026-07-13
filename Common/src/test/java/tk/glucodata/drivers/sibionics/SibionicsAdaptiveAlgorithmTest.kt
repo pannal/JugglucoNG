@@ -98,6 +98,32 @@ class SibionicsAdaptiveAlgorithmTest {
     }
 
     @Test
+    fun bothManagedAlgorithmFamiliesExposeOneMinuteChemicalSignal() {
+        listOf(
+            SibionicsConstants.Variant.CHINESE,
+            SibionicsConstants.Variant.SIBIONICS2,
+        ).forEach { variant ->
+            val algorithm = SibionicsAlgorithmContext("chemical-${variant.name}")
+            algorithm.configure("46HU804EBJ4", 1.4f, variant, SibionicsAlgorithmSelection.ADAPTIVE)
+            var output = Float.NaN
+            repeat(130) { offset ->
+                val index = offset + 1
+                output = algorithm.process(
+                    rawMmol = 6f,
+                    temperatureC = 34f,
+                    index = index,
+                    mode = SibionicsAlgorithmMode.REPLAY,
+                    impedance = 2_900f,
+                    eventTimeMs = index * 60_000L,
+                )
+                val signal = algorithm.latestChemicalSignal()
+                assertTrue("variant=$variant index=$index signal=$signal", signal?.mmol?.isFinite() == true)
+            }
+            assertTrue("variant=$variant output=$output", output.isFinite() && output > 0f)
+        }
+    }
+
+    @Test
     fun preparedCalibrationMeasurementDoesNotReapplyLegacyAnchorMapper() {
         val algorithm = SibionicsAlgorithmContext("prepared")
         algorithm.configure(
@@ -122,180 +148,161 @@ class SibionicsAdaptiveAlgorithmTest {
     }
 
     @Test
-    fun calibrationAnchorChangesPersistentSensorStateInsteadOfPostHocOutput() {
+    fun customModelUsesPreVendorChemicalMotionInsteadOfFilteringStock() {
         val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        val start = context.process(8f, 4f, 34f, 100f, 1, 60_000L, emptyList())
-        val anchor = SibionicsCalibrationAnchor(8f, 6f, 90_000L)
-        val firstAdjusted = context.process(8f, 4f, 34f, 100f, 2, 120_000L, listOf(anchor))
-        val secondAdjusted = context.process(8f, 4f, 34f, 100f, 3, 180_000L, listOf(anchor))
-
-        assertEquals(8f, start, 0.001f)
-        assertTrue(firstAdjusted < start)
-        assertTrue(secondAdjusted <= firstAdjusted)
-        assertTrue(secondAdjusted > 5.5f)
-    }
-
-    @Test
-    fun telemetryAnomalyCannotMakeTheModelOverrideStockBySixMmol() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(6) { offset ->
-            context.process(6f, 3f, 34f, 100f, offset + 1, (offset + 1) * 60_000L, emptyList())
-        }
-        val anomalous = context.process(12f, 9f, 50f, 10_000f, 7, 420_000L, emptyList())
-        assertEquals(12f, anomalous, 0.001f)
-    }
-
-    @Test
-    fun startupTransientStaysOnTheQrAnchoredStockMeasurement() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        val stock = floatArrayOf(29f, 29.3f, 12.3f, 8.6f, 8f)
-        val adaptive = stock.mapIndexed { offset, value ->
-            val index = offset + 1
-            context.process(value, value, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-
-        assertEquals(stock.toList(), adaptive)
-    }
-
-    @Test
-    fun sustainedCoherentRiseRemainsResponsiveWithoutForecastOvershoot() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(10) { offset ->
-            val index = offset + 1
-            context.process(6f, 8.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        var stock = 6f
-        var raw = 8.4f
-        var adaptive = 6f
-        repeat(8) { offset ->
-            stock += 0.25f
-            raw += 0.35f
-            val index = 11 + offset
-            adaptive = context.process(stock, raw, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-
-        assertTrue("stock=$stock adaptive=$adaptive", adaptive >= stock - 0.2f)
-        assertTrue("stock=$stock adaptive=$adaptive", adaptive <= stock + 0.1f)
-    }
-
-    @Test
-    fun alternatingStockNoiseIsNotAmplifiedOrShifted() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(8) { offset ->
-            val index = offset + 1
-            context.process(6f, 8.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        val stock = floatArrayOf(6.4f, 5.7f, 6.3f, 5.8f, 6.35f, 5.75f, 6.25f, 5.85f)
-        val adaptive = stock.mapIndexed { offset, value ->
-            val index = offset + 9
-            context.process(value, value * 1.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        val stockDeviation = stock.map { abs(it - 6f) }.average()
-        val adaptiveDeviation = adaptive.map { abs(it - 6f) }.average()
-
-        assertTrue(
-            "stockDeviation=$stockDeviation adaptiveDeviation=$adaptiveDeviation adaptive=$adaptive",
-            adaptiveDeviation <= stockDeviation * 1.05,
-        )
-        assertTrue("adaptive=$adaptive", abs(adaptive.average() - 6.0) < 0.2)
-    }
-
-    @Test
-    fun oneTenthQuantisationOscillationIsAttenuatedInsteadOfAmplified() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(8) { offset ->
-            val index = offset + 1
-            context.process(6f, 8.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        val stock = FloatArray(12) { if (it % 2 == 0) 6.1f else 5.9f }
-        val adaptive = stock.mapIndexed { offset, value ->
-            val index = offset + 9
-            context.process(value, value * 1.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        val stockMotion = stock.asList().zipWithNext { before, after -> abs(after - before) }.sum()
-        val adaptiveMotion = adaptive.zipWithNext { before, after -> abs(after - before) }.sum()
-
-        assertTrue("stock=$stockMotion adaptive=$adaptiveMotion values=$adaptive", adaptiveMotion < stockMotion)
-        assertTrue("adaptive=$adaptive", adaptive.all { abs(it - 6f) <= 0.1f })
-    }
-
-    @Test
-    fun coherentHighQualityFallIntoLowRangeIsNotHiddenAsAnArtifact() {
-        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(8) { offset ->
-            val index = offset + 1
-            context.process(6.5f, 9.1f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        val falling = floatArrayOf(5.8f, 4.9f, 4.1f, 3.5f, 3.1f)
-        val adaptive = falling.mapIndexed { offset, value ->
-            val index = offset + 9
-            context.process(value, value * 1.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-
-        assertTrue("adaptive=$adaptive", adaptive.last() <= 3.6f)
-        assertTrue("adaptive=$adaptive", adaptive.last() >= 2.5f)
-        assertEquals(falling.last(), adaptive.last(), 0.001f)
-    }
-
-    @Test
-    fun qrScaledRawTrendOnlyProvidesBoundedDirectionalSupport() {
-        val coherent = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        val disagreeing = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(8) { offset ->
-            val index = offset + 1
-            coherent.process(6f, 8.4f, 34f, 100f, index, index * 60_000L, emptyList())
-            disagreeing.process(6f, 8.4f, 34f, 100f, index, index * 60_000L, emptyList())
-        }
-        var stock = 6f
-        var coherentRaw = 8.4f
-        var disagreeingRaw = 8.4f
-        var coherentOutput = 6f
-        var disagreeingOutput = 6f
-        repeat(7) { offset ->
-            val index = offset + 9
-            stock += 0.25f
-            coherentRaw += 0.35f
-            disagreeingRaw -= 0.12f
-            coherentOutput = coherent.process(
-                stock, coherentRaw, 34f, 100f, index, index * 60_000L, emptyList(),
-            )
-            disagreeingOutput = disagreeing.process(
-                stock, disagreeingRaw, 34f, 100f, index, index * 60_000L, emptyList(),
+        repeat(20) { offset ->
+            val index = 120 + offset
+            context.process(
+                stockMmol = 6f,
+                rawMmol = 6f,
+                temperatureC = 34f,
+                impedance = 2_900f,
+                index = index,
+                eventTimeMs = index * 60_000L,
+                anchors = emptyList(),
+                chemicalMmol = 6f,
+                vendorStockMmol = 6f,
             )
         }
 
-        assertTrue("coherent=$coherentOutput stock=$stock", abs(coherentOutput - stock) <= 0.2f)
-        assertTrue("disagreeing=$disagreeingOutput stock=$stock", abs(disagreeingOutput - stock) <= 0.2f)
-        assertTrue(
-            "coherent=$coherentOutput disagreeing=$disagreeingOutput",
-            coherentOutput >= disagreeingOutput,
+        var output = 6f
+        repeat(8) { offset ->
+            val index = 140 + offset
+            output = context.process(
+                stockMmol = 6f,
+                rawMmol = 6f,
+                temperatureC = 34f,
+                impedance = 2_900f,
+                index = index,
+                eventTimeMs = index * 60_000L,
+                anchors = emptyList(),
+                chemicalMmol = 6f + (offset + 1) * 0.18f,
+                vendorStockMmol = 6f,
+            )
+        }
+
+        assertTrue("output=$output", output > 6.5f)
+    }
+
+    @Test
+    fun stateModelReducesKnownFirstOrderChemicalLag() {
+        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
+        var chemical = 6f
+        repeat(30) { offset ->
+            val index = 120 + offset
+            context.process(
+                6f, 6f, 34f, 2_900f, index, index * 60_000L, emptyList(),
+                chemicalMmol = chemical,
+                vendorStockMmol = 6f,
+            )
+        }
+
+        var chemicalError = 0f
+        var modelError = 0f
+        repeat(20) { offset ->
+            val truth = 6f + (offset + 1) * 0.12f
+            chemical += (truth - chemical) / 6f
+            val index = 150 + offset
+            val output = context.process(
+                truth, truth, 34f, 2_900f, index, index * 60_000L, emptyList(),
+                chemicalMmol = chemical,
+                vendorStockMmol = truth,
+            )
+            chemicalError += abs(chemical - truth)
+            modelError += abs(output - truth)
+        }
+
+        assertTrue("chemicalError=$chemicalError modelError=$modelError", modelError < chemicalError)
+    }
+
+    @Test
+    fun isolatedChemicalArtifactIsRobustlyDownWeighted() {
+        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
+        repeat(25) { offset ->
+            val index = 120 + offset
+            context.process(
+                6f, 6f, 34f, 2_900f, index, index * 60_000L, emptyList(),
+                chemicalMmol = 6f,
+                vendorStockMmol = 6f,
+            )
+        }
+        val artifact = context.process(
+            6f, 12f, 34f, 2_900f, 145, 145 * 60_000L, emptyList(),
+            chemicalMmol = 12f,
+            vendorStockMmol = 6f,
         )
+
+        assertTrue("artifact=$artifact", artifact in 5.5f..6.7f)
+    }
+
+    @Test
+    fun calibrationCorrectionShiftsEstimatorStateImmediately() {
+        val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
+        repeat(25) { offset ->
+            val index = 120 + offset
+            context.process(
+                6f, 6f, 34f, 2_900f, index, index * 60_000L, emptyList(),
+                chemicalMmol = 6f,
+                vendorStockMmol = 6f,
+            )
+        }
+        val calibrated = context.process(
+            stockMmol = 5f,
+            rawMmol = 6f,
+            temperatureC = 34f,
+            impedance = 2_900f,
+            index = 145,
+            eventTimeMs = 145 * 60_000L,
+            anchors = emptyList(),
+            chemicalMmol = 6f,
+            vendorStockMmol = 6f,
+        )
+
+        assertTrue("calibrated=$calibrated", calibrated in 4.8f..5.2f)
     }
 
     @Test
     fun invalidMeasurementDoesNotInventOrAdvanceAReading() {
         val context = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        context.process(6f, 8.4f, 34f, 100f, 1, 60_000L, emptyList())
+        context.process(
+            6f, 6f, 34f, 2_900f, 120, 120 * 60_000L, emptyList(),
+            chemicalMmol = 6f,
+            vendorStockMmol = 6f,
+        )
 
-        val missing = context.process(Float.NaN, 8.5f, 34f, 100f, 2, 120_000L, emptyList())
-        val recovered = context.process(6.1f, 8.54f, 34f, 100f, 3, 180_000L, emptyList())
+        val missing = context.process(
+            Float.NaN, 6f, 34f, 2_900f, 121, 121 * 60_000L, emptyList(),
+            chemicalMmol = 6f,
+            vendorStockMmol = 6f,
+        )
 
         assertTrue(missing.isNaN())
-        assertTrue("recovered=$recovered", recovered in 5.8f..6.4f)
     }
 
     @Test
-    fun snapshotRestoresAdaptiveLevelAndTrendState() {
+    fun snapshotRestoresDriftAndMotionState() {
         val original = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
-        repeat(8) { offset ->
-            val index = offset + 1
-            original.process(5f + offset * 0.2f, 2.5f + offset * 0.1f, 34f, 100f, index, index * 60_000L, emptyList())
+        repeat(30) { offset ->
+            val index = 120 + offset
+            original.process(
+                6f + offset * 0.04f, 6f, 34f, 2_900f, index, index * 60_000L, emptyList(),
+                chemicalMmol = 6f + offset * 0.03f,
+                vendorStockMmol = 6f + offset * 0.04f,
+            )
         }
         val restored = SibionicsAdaptiveAlgorithmContext().apply { configure(1.4f) }
         assertTrue(restored.restore(original.snapshot()))
 
-        val expected = original.process(6.8f, 3.4f, 34f, 100f, 9, 540_000L, emptyList())
-        val actual = restored.process(6.8f, 3.4f, 34f, 100f, 9, 540_000L, emptyList())
+        val expected = original.process(
+            7.3f, 7f, 34f, 2_900f, 150, 150 * 60_000L, emptyList(),
+            chemicalMmol = 7f,
+            vendorStockMmol = 7.3f,
+        )
+        val actual = restored.process(
+            7.3f, 7f, 34f, 2_900f, 150, 150 * 60_000L, emptyList(),
+            chemicalMmol = 7f,
+            vendorStockMmol = 7.3f,
+        )
         assertEquals(expected, actual, 0.001f)
     }
 

@@ -36,6 +36,7 @@ internal object SibionicsAlgorithmRebuilder {
         }
         val validSources = ArrayList<SibionicsSourceSample>(sourceSamples.size)
         val stockMmol = ArrayList<Float>(sourceSamples.size)
+        val chemicalSignals = ArrayList<SibionicsChemicalSignal?>(sourceSamples.size)
         sourceSamples.forEach { sample ->
             val stock = stockContext.processStock(
                 rawMmol = sample.rawMmol,
@@ -47,6 +48,7 @@ internal object SibionicsAlgorithmRebuilder {
             if (stock.isFinite() && stock > 0f && SibionicsConstants.isValidAlgorithmGlucoseMgdl(stockMgdl)) {
                 validSources += sample
                 stockMmol += stock
+                chemicalSignals += stockContext.latestChemicalSignal()
             }
         }
         if (validSources.isEmpty()) {
@@ -85,6 +87,7 @@ internal object SibionicsAlgorithmRebuilder {
                 index = sample.index,
                 impedance = sample.impedance,
                 eventTimeMs = sample.timestampMs,
+                chemicalSignal = chemicalSignals[index],
             )
             val displayMgdl = displayMmol * SibionicsConstants.MGDL_PER_MMOLL
             if (SibionicsConstants.isValidAlgorithmGlucoseMgdl(displayMgdl)) {

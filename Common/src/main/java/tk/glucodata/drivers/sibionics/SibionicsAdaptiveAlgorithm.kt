@@ -6,8 +6,10 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.math.abs
 import kotlin.math.exp
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 data class SibionicsCalibrationAnchor(
     val sensorMmol: Float,
@@ -16,27 +18,133 @@ data class SibionicsCalibrationAnchor(
 )
 
 /**
- * Experimental one-minute sensor model layered around, rather than after, the
- * exact Sibionics core. The exact core remains the per-sensor chemical model;
- * this context treats its result as a measurement and combines it with raw
- * current direction, temperature/impedance quality and robust calibration
- * anchors in a persistent, bounded one-minute tracker. It deliberately does
- * not forecast beyond the exact model: the adaptive layer only attenuates
- * small quantisation noise and yields immediately on clinically important
- * motion.
+ * Alternative one-minute Sibionics signal model.
+ *
+ * The vendor front end still owns sensor-specific current correction, QR
+ * sensitivity and temperature compensation. This model starts from that
+ * compensated chemical signal, before the vendor's five-stage filters,
+ * clipping, ESA compensation and deconvolution. It then combines:
+ *
+ *  - a slowly time-varying affine sensor-drift model;
+ *  - steady and dynamic constant-velocity Kalman models;
+ *  - innovation-based model probabilities and robust outlier weighting;
+ *  - temperature, impedance and vendor front-end quality signals; and
+ *  - calibration corrections injected into the state observations.
+ *
+ * The exact stock result is an absolute/drift reference and safety fallback,
+ * not the signal being smoothed. Every emitted value still requires a real
+ * one-minute source sample.
  */
 internal class SibionicsAdaptiveAlgorithmContext {
+    private class MotionModel(private val processNoise: Float) {
+        var level = Float.NaN
+        var rate = 0f
+        var p00 = 1f
+        var p01 = 0f
+        var p10 = 0f
+        var p11 = 0.1f
+
+        data class Update(val logLikelihood: Float)
+
+        fun initialize(value: Float) {
+            level = value
+            rate = 0f
+            p00 = 1f
+            p01 = 0f
+            p10 = 0f
+            p11 = 0.1f
+        }
+
+        fun shiftLevel(delta: Float) {
+            if (level.isFinite() && delta.isFinite()) level += delta
+        }
+
+        fun update(measurement: Float, measurementVariance: Float, dt: Float): Update {
+            val predictedLevel = level + rate * dt
+            val predictedRate = rate
+            val dt2 = dt * dt
+            val predictedP00 = p00 + dt * (p10 + p01) + dt2 * p11 + processNoise * dt * dt2 / 3f
+            val predictedP01 = p01 + dt * p11 + processNoise * dt2 / 2f
+            val predictedP10 = p10 + dt * p11 + processNoise * dt2 / 2f
+            val predictedP11 = p11 + processNoise * dt
+
+            val innovation = measurement - predictedLevel
+            val initialVariance = max(predictedP00 + measurementVariance, MIN_VARIANCE)
+            val robustScale = max(sqrt(initialVariance), MIN_ROBUST_SCALE)
+            val robustWeight = min(1f, HUBER_SIGMA * robustScale / max(abs(innovation), 0.0001f))
+            val effectiveMeasurementVariance = measurementVariance / (robustWeight * robustWeight)
+            val innovationVariance = max(predictedP00 + effectiveMeasurementVariance, MIN_VARIANCE)
+            val levelGain = predictedP00 / innovationVariance
+            val rateGain = predictedP10 / innovationVariance
+
+            level = predictedLevel + levelGain * innovation
+            rate = (predictedRate + rateGain * innovation).coerceIn(-MAX_RATE, MAX_RATE)
+            p00 = max((1f - levelGain) * predictedP00, MIN_VARIANCE)
+            p01 = (1f - levelGain) * predictedP01
+            p10 = predictedP10 - rateGain * predictedP00
+            p11 = max(predictedP11 - rateGain * predictedP01, MIN_VARIANCE)
+
+            val logLikelihood = -0.5f * (ln(innovationVariance) + innovation * innovation / innovationVariance)
+            return Update(logLikelihood)
+        }
+
+        fun writeTo(output: DataOutputStream) {
+            output.writeFloat(level)
+            output.writeFloat(rate)
+            output.writeFloat(p00)
+            output.writeFloat(p01)
+            output.writeFloat(p10)
+            output.writeFloat(p11)
+        }
+
+        fun readFrom(input: DataInputStream) {
+            level = input.readFloat()
+            rate = input.readFloat()
+            p00 = input.readFloat()
+            p01 = input.readFloat()
+            p10 = input.readFloat()
+            p11 = input.readFloat()
+        }
+
+        fun isValid(): Boolean = level.isFinite() && level in 0f..50f && rate.isFinite() &&
+            abs(rate) <= MAX_RATE && p00.isFinite() && p00 > 0f && p01.isFinite() &&
+            p10.isFinite() && p11.isFinite() && p11 > 0f
+
+        private companion object {
+            private const val MIN_VARIANCE = 0.000001f
+            private const val MIN_ROBUST_SCALE = 0.12f
+            private const val HUBER_SIGMA = 2.5f
+            private const val MAX_RATE = 0.65f
+        }
+    }
+
+    private data class SignalQuality(
+        val overall: Float,
+        val severe: Boolean,
+    )
+
     private var decodedSensitivity = DEFAULT_SENSITIVITY
     private var initialized = false
-    private var level = Float.NaN
-    private var trend = 0f
-    private var lastMeasurement = Float.NaN
-    private var lastRaw = Float.NaN
+    private val steadyModel = MotionModel(STEADY_PROCESS_NOISE)
+    private val dynamicModel = MotionModel(DYNAMIC_PROCESS_NOISE)
+    private var dynamicProbability = INITIAL_DYNAMIC_PROBABILITY
+
+    private var chemicalGain = 1f
+    private var chemicalBias = 0f
+    private var meanChemical = 0f
+    private var meanStock = 0f
+    private var chemicalVariance = INITIAL_MAPPING_VARIANCE
+    private var chemicalStockCovariance = INITIAL_MAPPING_VARIANCE
+
+    private var lastChemical = Float.NaN
+    private var lastStock = Float.NaN
+    private var lastReference = Float.NaN
+    private var lastCalibrationDelta = Float.NaN
     private var lastTemperature = Float.NaN
     private var impedanceBaseline = Float.NaN
     private var lastTimestampMs = 0L
     private var lastIndex = -1
-    private var samplesSinceReset = 0
+    private var samplesSinceInitialization = 0
 
     fun configure(sensitivity: Float) {
         decodedSensitivity = sensitivity.takeIf { it.isFinite() && it in 0.5f..3.5f }
@@ -45,15 +153,22 @@ internal class SibionicsAdaptiveAlgorithmContext {
 
     fun reset() {
         initialized = false
-        level = Float.NaN
-        trend = 0f
-        lastMeasurement = Float.NaN
-        lastRaw = Float.NaN
+        dynamicProbability = INITIAL_DYNAMIC_PROBABILITY
+        chemicalGain = 1f
+        chemicalBias = 0f
+        meanChemical = 0f
+        meanStock = 0f
+        chemicalVariance = INITIAL_MAPPING_VARIANCE
+        chemicalStockCovariance = INITIAL_MAPPING_VARIANCE
+        lastChemical = Float.NaN
+        lastStock = Float.NaN
+        lastReference = Float.NaN
+        lastCalibrationDelta = Float.NaN
         lastTemperature = Float.NaN
         impedanceBaseline = Float.NaN
         lastTimestampMs = 0L
         lastIndex = -1
-        samplesSinceReset = 0
+        samplesSinceInitialization = 0
     }
 
     fun process(
@@ -64,17 +179,23 @@ internal class SibionicsAdaptiveAlgorithmContext {
         index: Int,
         eventTimeMs: Long,
         anchors: List<SibionicsCalibrationAnchor>,
+        chemicalMmol: Float = Float.NaN,
+        chemicalQualityFlags: Int = 0,
+        vendorStockMmol: Float = stockMmol,
     ): Float {
         if (!stockMmol.isFinite() || stockMmol <= 0f) return Float.NaN
+        val reference = applyIntegratedCalibration(stockMmol, eventTimeMs, anchors)
+        val vendorStock = vendorStockMmol.takeIf { it.isFinite() && it > 0f } ?: stockMmol
 
-        val measurement = applyIntegratedCalibration(stockMmol, eventTimeMs, anchors)
-        if (!initialized || index <= 1 || index <= lastIndex) {
+        if (index < CUSTOM_MODEL_WARMUP_INDEX || !chemicalMmol.isFinite() || chemicalMmol <= 0f) {
+            updateTelemetry(temperatureC, impedance, index, eventTimeMs)
+            return roundTenth(reference)
+        }
+
+        if (!initialized || index <= lastIndex) {
             reset()
-            initialized = true
-            level = measurement
-            samplesSinceReset = 1
-            updateTelemetry(rawMmol, temperatureC, impedance, index, eventTimeMs, measurement)
-            return roundTenth(measurement)
+            initialize(chemicalMmol, vendorStock, reference, temperatureC, impedance, index, eventTimeMs)
+            return roundTenth(reference)
         }
 
         val elapsedMinutes = when {
@@ -83,53 +204,212 @@ internal class SibionicsAdaptiveAlgorithmContext {
             index > lastIndex -> (index - lastIndex).toFloat().coerceIn(1f, 3f)
             else -> 1f
         }
-        val signal = signalQuality(temperatureC, impedance)
-        val latestStep = if (lastMeasurement.isFinite()) measurement - lastMeasurement else 0f
-        val predicted = level + trend * elapsedMinutes
-        val innovation = measurement - predicted
-        val rapidChange = (abs(innovation) / RAPID_INNOVATION_MMOL).coerceIn(0f, 1f)
-        val alpha = BASE_LEVEL_GAIN + (MAX_LEVEL_GAIN - BASE_LEVEL_GAIN) * rapidChange
-        level = predicted + alpha * innovation
+        val quality = signalQuality(temperatureC, impedance, chemicalQualityFlags)
+        if (quality.severe) {
+            alignToReference(reference)
+            updateLastValues(chemicalMmol, vendorStock, reference, temperatureC, impedance, index, eventTimeMs)
+            return roundTenth(reference)
+        }
 
-        val rawTrend = if (rawMmol.isFinite() && lastRaw.isFinite()) {
-            ((rawMmol - lastRaw) / decodedSensitivity / elapsedMinutes)
-                .coerceIn(-MAX_TREND_RATE, MAX_TREND_RATE)
+        updateChemicalMapping(
+            chemical = chemicalMmol,
+            vendorStock = vendorStock,
+            elapsedMinutes = elapsedMinutes,
+            quality = quality.overall,
+        )
+        val calibrationDelta = reference - vendorStock
+        if (lastCalibrationDelta.isFinite()) {
+            val calibrationShift = calibrationDelta - lastCalibrationDelta
+            if (abs(calibrationShift) >= CALIBRATION_STATE_SHIFT_THRESHOLD) {
+                steadyModel.shiftLevel(calibrationShift)
+                dynamicModel.shiftLevel(calibrationShift)
+            }
+        }
+        val chemicalObservation = chemicalGain * chemicalMmol + chemicalBias + calibrationDelta
+        val measurementVariance = BASE_MEASUREMENT_VARIANCE /
+            max(quality.overall * quality.overall, MIN_QUALITY * MIN_QUALITY)
+        val steadyUpdate = steadyModel.update(chemicalObservation, measurementVariance, elapsedMinutes)
+        val dynamicUpdate = dynamicModel.update(chemicalObservation, measurementVariance, elapsedMinutes)
+        updateDynamicProbability(
+            steadyLogLikelihood = steadyUpdate.logLikelihood,
+            dynamicLogLikelihood = dynamicUpdate.logLikelihood,
+            chemicalRate = (chemicalMmol - lastChemical) / elapsedMinutes,
+        )
+
+        val level = steadyModel.level * (1f - dynamicProbability) +
+            dynamicModel.level * dynamicProbability
+        val rate = steadyModel.rate * (1f - dynamicProbability) +
+            dynamicModel.rate * dynamicProbability
+        val leadMinutes = MIN_LEAD_MINUTES +
+            (MAX_LEAD_MINUTES - MIN_LEAD_MINUTES) * dynamicProbability
+        var output = level + rate * leadMinutes
+
+        val divergence = output - reference
+        if (abs(divergence) > MAX_REFERENCE_DIVERGENCE) {
+            output = reference + divergence.coerceIn(-MAX_REFERENCE_DIVERGENCE, MAX_REFERENCE_DIVERGENCE)
+        }
+        if (reference < LOW_GLUCOSE_GUARD) {
+            output = min(output, reference + LOW_FALL_ALLOWANCE)
+        }
+        output = output.coerceIn(MIN_OUTPUT_MMOL, MAX_OUTPUT_MMOL)
+
+        samplesSinceInitialization++
+        updateLastValues(chemicalMmol, vendorStock, reference, temperatureC, impedance, index, eventTimeMs)
+        return roundTenth(output)
+    }
+
+    private fun initialize(
+        chemical: Float,
+        vendorStock: Float,
+        reference: Float,
+        temperatureC: Float,
+        impedance: Float,
+        index: Int,
+        eventTimeMs: Long,
+    ) {
+        initialized = true
+        chemicalGain = 1f
+        chemicalBias = vendorStock - chemical
+        meanChemical = chemical
+        meanStock = vendorStock
+        chemicalVariance = INITIAL_MAPPING_VARIANCE
+        chemicalStockCovariance = INITIAL_MAPPING_VARIANCE
+        val calibrationDelta = reference - vendorStock
+        val initial = chemicalGain * chemical + chemicalBias + calibrationDelta
+        steadyModel.initialize(initial)
+        dynamicModel.initialize(initial)
+        dynamicProbability = INITIAL_DYNAMIC_PROBABILITY
+        samplesSinceInitialization = 1
+        updateLastValues(chemical, vendorStock, reference, temperatureC, impedance, index, eventTimeMs)
+    }
+
+    private fun updateChemicalMapping(
+        chemical: Float,
+        vendorStock: Float,
+        elapsedMinutes: Float,
+        quality: Float,
+    ) {
+        val chemicalRate = (chemical - lastChemical) / elapsedMinutes
+        val stockRate = (vendorStock - lastStock) / elapsedMinutes
+        val motionWeight = if (abs(chemicalRate) < MAPPING_MAX_CHEMICAL_RATE &&
+            abs(stockRate) < MAPPING_MAX_STOCK_RATE
+        ) 1f else MAPPING_DYNAMIC_WEIGHT
+        val updateWeight = quality * motionWeight
+        val decay = 1f - (1f - MAPPING_FORGETTING_FACTOR) * updateWeight
+        val oldMeanChemical = meanChemical
+        val oldMeanStock = meanStock
+        meanChemical = decay * meanChemical + (1f - decay) * chemical
+        meanStock = decay * meanStock + (1f - decay) * vendorStock
+        chemicalVariance = decay * chemicalVariance +
+            (1f - decay) * (chemical - oldMeanChemical) * (chemical - meanChemical)
+        chemicalStockCovariance = decay * chemicalStockCovariance +
+            (1f - decay) * (chemical - oldMeanChemical) * (vendorStock - meanStock)
+
+        val targetGain = (chemicalStockCovariance / max(chemicalVariance, MIN_MAPPING_VARIANCE))
+            .coerceIn(MIN_CHEMICAL_GAIN, MAX_CHEMICAL_GAIN)
+        chemicalGain += MAPPING_GAIN_RATE * updateWeight * (targetGain - chemicalGain)
+
+        val residual = vendorStock - (chemicalGain * chemical + chemicalBias)
+        chemicalBias += MAPPING_BIAS_RATE * updateWeight *
+            residual.coerceIn(-MAX_MAPPING_BIAS_STEP, MAX_MAPPING_BIAS_STEP)
+        val targetBias = meanStock - chemicalGain * meanChemical
+        chemicalBias += MAPPING_MEAN_BIAS_RATE * updateWeight *
+            (targetBias - chemicalBias).coerceIn(-MAX_MAPPING_MEAN_STEP, MAX_MAPPING_MEAN_STEP)
+        chemicalBias = chemicalBias.coerceIn(MIN_CHEMICAL_BIAS, MAX_CHEMICAL_BIAS)
+    }
+
+    private fun updateDynamicProbability(
+        steadyLogLikelihood: Float,
+        dynamicLogLikelihood: Float,
+        chemicalRate: Float,
+    ) {
+        val priorDynamic = MODEL_PERSISTENCE * dynamicProbability +
+            (1f - MODEL_PERSISTENCE) * INITIAL_DYNAMIC_PROBABILITY
+        val maximum = max(steadyLogLikelihood, dynamicLogLikelihood)
+        val steadyEvidence = (1f - priorDynamic) * exp(steadyLogLikelihood - maximum)
+        val dynamicEvidence = priorDynamic * exp(dynamicLogLikelihood - maximum)
+        val posterior = dynamicEvidence / max(steadyEvidence + dynamicEvidence, 0.000001f)
+        val motionPrior = (abs(chemicalRate) / DYNAMIC_RATE_SCALE).coerceIn(0f, 1f)
+        dynamicProbability = (LIKELIHOOD_WEIGHT * posterior + MOTION_WEIGHT * motionPrior)
+            .coerceIn(MIN_DYNAMIC_PROBABILITY, MAX_DYNAMIC_PROBABILITY)
+    }
+
+    private fun signalQuality(
+        temperatureC: Float,
+        impedance: Float,
+        chemicalQualityFlags: Int,
+    ): SignalQuality {
+        val frontEndSevere = chemicalQualityFlags and 0x30 != 0
+        val temperatureJump = lastTemperature.isFinite() && temperatureC.isFinite() &&
+            abs(temperatureC - lastTemperature) > TEMPERATURE_JUMP_C
+        val temperatureQuality = when {
+            !temperatureC.isFinite() -> 0.25f
+            temperatureC in 28f..40f -> 1f
+            temperatureC in 10f..42f -> 0.60f
+            else -> 0.20f
+        } * if (temperatureJump) 0.55f else 1f
+
+        val impedanceDelta = if (impedance.isFinite() && impedance > 0f && impedanceBaseline.isFinite()) {
+            abs(impedance - impedanceBaseline) / max(abs(impedanceBaseline), 1f)
         } else {
-            Float.NaN
+            0f
         }
-        val rawCoherent = rawTrend.isFinite() && (
-            abs(latestStep) < MIN_DIRECTION_STEP || abs(rawTrend) < MIN_RAW_TREND_RATE ||
-                latestStep * rawTrend > 0f
-            )
-        val rawWeight = if (rawCoherent) RAW_TREND_WEIGHT * signal.overall else 0f
-        val innovationTrend = TREND_GAIN * innovation.coerceIn(-MAX_TREND_INNOVATION, MAX_TREND_INNOVATION) /
-            elapsedMinutes
-        val rawContribution = if (rawTrend.isFinite()) rawTrend * rawWeight else 0f
-        trend = ((trend + innovationTrend) * (1f - rawWeight) +
-            rawContribution)
-            .coerceIn(-MAX_TREND_RATE, MAX_TREND_RATE)
-        samplesSinceReset++
+        val impedanceQuality = (1f / (1f + impedanceDelta * IMPEDANCE_QUALITY_SLOPE))
+            .coerceIn(MIN_QUALITY, 1f)
+        val severe = frontEndSevere || temperatureC.isFinite() && temperatureC !in 10f..42f ||
+            impedanceDelta > IMPEDANCE_SEVERE_FRACTION
+        return SignalQuality(
+            overall = (temperatureQuality * 0.68f + impedanceQuality * 0.32f)
+                .coerceIn(MIN_QUALITY, 1f),
+            severe = severe,
+        )
+    }
 
-        val turning = abs(latestStep) >= TURN_STEP_MMOL && latestStep * trend < 0f
-        val exactPassThrough = samplesSinceReset <= STARTUP_PASSTHROUGH_SAMPLES ||
-            abs(latestStep) >= LARGE_STEP_MMOL || measurement <= LOW_EXACT_MMOL ||
-            turning || signal.telemetryAnomaly
-        var output = if (exactPassThrough) {
-            level = measurement
-            if (abs(latestStep) >= LARGE_STEP_MMOL || signal.telemetryAnomaly) trend = 0f
-            measurement
-        } else {
-            level.coerceIn(
-                measurement - MAX_TRACKING_DISTANCE_MMOL,
-                measurement + MAX_TRACKING_DISTANCE_MMOL,
-            )
-        }
-        if (measurement < LOW_FALL_GUARD_MMOL && latestStep < 0f) {
-            output = min(output, measurement)
-        }
+    private fun alignToReference(reference: Float) {
+        if (!initialized) return
+        steadyModel.initialize(reference)
+        dynamicModel.initialize(reference)
+        dynamicProbability = INITIAL_DYNAMIC_PROBABILITY
+    }
 
-        updateTelemetry(rawMmol, temperatureC, impedance, index, eventTimeMs, measurement)
-        return roundTenth(max(output, 0f))
+    private fun updateLastValues(
+        chemical: Float,
+        vendorStock: Float,
+        reference: Float,
+        temperatureC: Float,
+        impedance: Float,
+        index: Int,
+        eventTimeMs: Long,
+    ) {
+        lastChemical = chemical
+        lastStock = vendorStock
+        lastReference = reference
+        lastCalibrationDelta = reference - vendorStock
+        updateTelemetry(temperatureC, impedance, index, eventTimeMs)
+    }
+
+    private fun updateTelemetry(
+        temperatureC: Float,
+        impedance: Float,
+        index: Int,
+        eventTimeMs: Long,
+    ) {
+        if (impedance.isFinite() && impedance > 0f) {
+            impedanceBaseline = if (impedanceBaseline.isFinite()) {
+                val relativeDelta = abs(impedance - impedanceBaseline) / max(abs(impedanceBaseline), 1f)
+                val rate = if (relativeDelta > IMPEDANCE_SEVERE_FRACTION) {
+                    ANOMALOUS_IMPEDANCE_LEARNING_RATE
+                } else {
+                    IMPEDANCE_LEARNING_RATE
+                }
+                impedanceBaseline * (1f - rate) + impedance * rate
+            } else {
+                impedance
+            }
+        }
+        if (temperatureC.isFinite()) lastTemperature = temperatureC
+        lastTimestampMs = eventTimeMs
+        lastIndex = index
     }
 
     fun snapshot(): ByteArray = ByteArrayOutputStream().use { bytes ->
@@ -138,15 +418,24 @@ internal class SibionicsAdaptiveAlgorithmContext {
             output.writeInt(SNAPSHOT_VERSION)
             output.writeFloat(decodedSensitivity)
             output.writeBoolean(initialized)
-            output.writeFloat(level)
-            output.writeFloat(trend)
-            output.writeFloat(lastMeasurement)
-            output.writeFloat(lastRaw)
+            output.writeFloat(dynamicProbability)
+            output.writeFloat(chemicalGain)
+            output.writeFloat(chemicalBias)
+            output.writeFloat(meanChemical)
+            output.writeFloat(meanStock)
+            output.writeFloat(chemicalVariance)
+            output.writeFloat(chemicalStockCovariance)
+            output.writeFloat(lastChemical)
+            output.writeFloat(lastStock)
+            output.writeFloat(lastReference)
+            output.writeFloat(lastCalibrationDelta)
             output.writeFloat(lastTemperature)
             output.writeFloat(impedanceBaseline)
             output.writeLong(lastTimestampMs)
             output.writeInt(lastIndex)
-            output.writeInt(samplesSinceReset)
+            output.writeInt(samplesSinceInitialization)
+            steadyModel.writeTo(output)
+            dynamicModel.writeTo(output)
         }
         bytes.toByteArray()
     }
@@ -157,30 +446,50 @@ internal class SibionicsAdaptiveAlgorithmContext {
             DataInputStream(ByteArrayInputStream(snapshot)).use { input ->
                 if (input.readInt() != SNAPSHOT_MAGIC) return@use false
                 val version = input.readInt()
-                if (version !in LEGACY_SNAPSHOT_VERSION..SNAPSHOT_VERSION) return@use false
-                val savedSensitivity = input.readFloat()
-                if (!savedSensitivity.isFinite() || abs(savedSensitivity - decodedSensitivity) > 0.0001f) {
-                    return@use false
-                }
                 if (version < SNAPSHOT_VERSION) {
                     reset()
                     return@use true
                 }
+                if (version != SNAPSHOT_VERSION) return@use false
+                val savedSensitivity = input.readFloat()
+                if (!savedSensitivity.isFinite() || abs(savedSensitivity - decodedSensitivity) > 0.0001f) {
+                    return@use false
+                }
                 initialized = input.readBoolean()
-                level = input.readFloat()
-                trend = input.readFloat()
-                lastMeasurement = input.readFloat()
-                lastRaw = input.readFloat()
+                dynamicProbability = input.readFloat()
+                chemicalGain = input.readFloat()
+                chemicalBias = input.readFloat()
+                meanChemical = input.readFloat()
+                meanStock = input.readFloat()
+                chemicalVariance = input.readFloat()
+                chemicalStockCovariance = input.readFloat()
+                lastChemical = input.readFloat()
+                lastStock = input.readFloat()
+                lastReference = input.readFloat()
+                lastCalibrationDelta = input.readFloat()
                 lastTemperature = input.readFloat()
                 impedanceBaseline = input.readFloat()
                 lastTimestampMs = input.readLong()
                 lastIndex = input.readInt()
-                samplesSinceReset = input.readInt()
+                samplesSinceInitialization = input.readInt()
+                steadyModel.readFrom(input)
+                dynamicModel.readFrom(input)
                 input.available() == 0 && isStateValid()
             }
         }.getOrDefault(false)
         if (!restored) reset()
         return restored
+    }
+
+    private fun isStateValid(): Boolean {
+        if (!initialized) return true
+        return dynamicProbability.isFinite() && dynamicProbability in 0f..1f &&
+            chemicalGain.isFinite() && chemicalGain in MIN_CHEMICAL_GAIN..MAX_CHEMICAL_GAIN &&
+            chemicalBias.isFinite() && chemicalBias in MIN_CHEMICAL_BIAS..MAX_CHEMICAL_BIAS &&
+            meanChemical.isFinite() && meanStock.isFinite() && chemicalVariance.isFinite() &&
+            chemicalVariance > 0f && chemicalStockCovariance.isFinite() && lastChemical.isFinite() &&
+            lastStock.isFinite() && lastReference.isFinite() && lastIndex >= CUSTOM_MODEL_WARMUP_INDEX &&
+            samplesSinceInitialization > 0 && steadyModel.isValid() && dynamicModel.isValid()
     }
 
     fun applyIntegratedCalibration(
@@ -264,72 +573,6 @@ internal class SibionicsAdaptiveAlgorithmContext {
         } / sumWeight).toFloat().coerceIn(-MAX_CALIBRATION_OFFSET, MAX_CALIBRATION_OFFSET)
     }
 
-    private data class SignalQuality(
-        val overall: Float,
-        val telemetryAnomaly: Boolean,
-    )
-
-    private fun signalQuality(temperatureC: Float, impedance: Float): SignalQuality {
-        val temperatureJump = lastTemperature.isFinite() && temperatureC.isFinite() &&
-            abs(temperatureC - lastTemperature) > TEMPERATURE_JUMP_C
-        val temperatureQuality = when {
-            !temperatureC.isFinite() -> 0.45f
-            temperatureC in 28f..40f -> 1f
-            temperatureC in 10f..42f -> 0.65f
-            else -> 0.25f
-        } * if (temperatureJump) 0.55f else 1f
-
-        val impedanceDelta = if (impedance.isFinite() && impedance > 0f && impedanceBaseline.isFinite()) {
-            abs(impedance - impedanceBaseline) / max(abs(impedanceBaseline), 1f)
-        } else {
-            0f
-        }
-        val impedanceQuality = (1f / (1f + impedanceDelta * IMPEDANCE_QUALITY_SLOPE))
-            .coerceIn(MIN_SIGNAL_QUALITY, 1f)
-        val anomaly = temperatureJump || temperatureC.isFinite() && temperatureC !in 10f..42f ||
-            impedanceDelta > IMPEDANCE_ANOMALY_FRACTION
-        return SignalQuality(
-            overall = (temperatureQuality * 0.68f + impedanceQuality * 0.32f)
-                .coerceIn(MIN_SIGNAL_QUALITY, 1f),
-            telemetryAnomaly = anomaly,
-        )
-    }
-
-    private fun updateTelemetry(
-        rawMmol: Float,
-        temperatureC: Float,
-        impedance: Float,
-        index: Int,
-        eventTimeMs: Long,
-        measurement: Float,
-    ) {
-        if (impedance.isFinite() && impedance > 0f) {
-            impedanceBaseline = if (impedanceBaseline.isFinite()) {
-                val relativeDelta = abs(impedance - impedanceBaseline) / max(abs(impedanceBaseline), 1f)
-                val learningRate = if (relativeDelta > IMPEDANCE_ANOMALY_FRACTION) {
-                    ANOMALOUS_IMPEDANCE_LEARNING_RATE
-                } else {
-                    IMPEDANCE_LEARNING_RATE
-                }
-                impedanceBaseline * (1f - learningRate) + impedance * learningRate
-            } else {
-                impedance
-            }
-        }
-        if (rawMmol.isFinite()) lastRaw = rawMmol
-        if (temperatureC.isFinite()) lastTemperature = temperatureC
-        lastMeasurement = measurement
-        lastTimestampMs = eventTimeMs
-        lastIndex = index
-    }
-
-    private fun isStateValid(): Boolean {
-        if (!initialized) return true
-        return level.isFinite() && level in 0f..50f && trend.isFinite() &&
-            abs(trend) <= MAX_TREND_RATE && lastMeasurement.isFinite() &&
-            lastMeasurement in 0f..50f && lastIndex >= 0 && samplesSinceReset > 0
-    }
-
     private fun median(values: FloatArray): Float {
         if (values.isEmpty()) return 0f
         val sorted = values.sortedArray()
@@ -341,30 +584,53 @@ internal class SibionicsAdaptiveAlgorithmContext {
 
     private companion object {
         private const val SNAPSHOT_MAGIC = 0x5349_4241
-        private const val LEGACY_SNAPSHOT_VERSION = 1
-        private const val SNAPSHOT_VERSION = 4
+        private const val SNAPSHOT_VERSION = 5
         private const val DEFAULT_SENSITIVITY = 1.27f
-        private const val BASE_LEVEL_GAIN = 0.35f
-        private const val MAX_LEVEL_GAIN = 0.92f
-        private const val RAPID_INNOVATION_MMOL = 0.8f
-        private const val TREND_GAIN = 0.02f
-        private const val RAW_TREND_WEIGHT = 0.05f
-        private const val MAX_TREND_RATE = 0.35f
-        private const val MAX_TREND_INNOVATION = 1f
-        private const val MIN_DIRECTION_STEP = 0.05f
-        private const val MIN_RAW_TREND_RATE = 0.02f
-        private const val STARTUP_PASSTHROUGH_SAMPLES = 5
-        private const val MAX_TRACKING_DISTANCE_MMOL = 0.2f
-        private const val LARGE_STEP_MMOL = 1f
-        private const val TURN_STEP_MMOL = 0.15f
-        private const val LOW_EXACT_MMOL = 3.9f
-        private const val LOW_FALL_GUARD_MMOL = 4.5f
+        private const val CUSTOM_MODEL_WARMUP_INDEX = 120
+
+        private const val STEADY_PROCESS_NOISE = 0.00025f
+        private const val DYNAMIC_PROCESS_NOISE = 0.008f
+        private const val BASE_MEASUREMENT_VARIANCE = 0.035f
+        private const val INITIAL_DYNAMIC_PROBABILITY = 0.18f
+        private const val MIN_DYNAMIC_PROBABILITY = 0.05f
+        private const val MAX_DYNAMIC_PROBABILITY = 0.95f
+        private const val MODEL_PERSISTENCE = 0.94f
+        private const val LIKELIHOOD_WEIGHT = 0.75f
+        private const val MOTION_WEIGHT = 0.25f
+        private const val DYNAMIC_RATE_SCALE = 0.12f
+        private const val MIN_LEAD_MINUTES = 2f
+        private const val MAX_LEAD_MINUTES = 4f
+
+        private const val INITIAL_MAPPING_VARIANCE = 0.001f
+        private const val MIN_MAPPING_VARIANCE = 0.02f
+        private const val MAPPING_FORGETTING_FACTOR = 0.9993f
+        private const val MAPPING_MAX_CHEMICAL_RATE = 0.45f
+        private const val MAPPING_MAX_STOCK_RATE = 0.60f
+        private const val MAPPING_DYNAMIC_WEIGHT = 0.15f
+        private const val MAPPING_GAIN_RATE = 0.002f
+        private const val MAPPING_BIAS_RATE = 0.0015f
+        private const val MAPPING_MEAN_BIAS_RATE = 0.001f
+        private const val MAX_MAPPING_BIAS_STEP = 0.25f
+        private const val MAX_MAPPING_MEAN_STEP = 0.10f
+        private const val MIN_CHEMICAL_GAIN = 0.75f
+        private const val MAX_CHEMICAL_GAIN = 1.35f
+        private const val MIN_CHEMICAL_BIAS = -8f
+        private const val MAX_CHEMICAL_BIAS = 12f
+
+        private const val CALIBRATION_STATE_SHIFT_THRESHOLD = 0.08f
+        private const val MAX_REFERENCE_DIVERGENCE = 2.5f
+        private const val LOW_GLUCOSE_GUARD = 4.2f
+        private const val LOW_FALL_ALLOWANCE = 0.2f
+        private const val MIN_OUTPUT_MMOL = 1.1f
+        private const val MAX_OUTPUT_MMOL = 35f
+
         private const val TEMPERATURE_JUMP_C = 1.2f
         private const val IMPEDANCE_QUALITY_SLOPE = 5f
-        private const val IMPEDANCE_ANOMALY_FRACTION = 0.75f
-        private const val MIN_SIGNAL_QUALITY = 0.20f
+        private const val IMPEDANCE_SEVERE_FRACTION = 0.75f
+        private const val MIN_QUALITY = 0.20f
         private const val IMPEDANCE_LEARNING_RATE = 0.04f
         private const val ANOMALOUS_IMPEDANCE_LEARNING_RATE = 0.004f
+
         private const val SINGLE_ANCHOR_CONFIDENCE = 0.82f
         private const val MIN_CALIBRATION_GAIN = 0.78f
         private const val MAX_CALIBRATION_GAIN = 1.22f
