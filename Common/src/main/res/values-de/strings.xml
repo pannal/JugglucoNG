@@ -166,8 +166,8 @@
   <string name="wronglibrary">Bibliothek funktioniert nicht richtig, versuche es mit einer anderen</string>
   <string name="installedlibrary">Installierte Bibliothek</string>
   <string name="cantextract">Kann %s nicht extrahieren, versuche es mit einer anderen apk</string>
-  <string name="connectwithsensor">Aktiv für Sensorverbindung</string>
-  <string name="exchangedata">Aktiv für Datenverbindung</string>
+  <string name="connectwithsensor">Sensor wird verbunden…</string>
+  <string name="exchangedata">Datenaustausch aktiv</string>
   <string name="nonewvalue">"Kein neuer Wert seit "</string>
   <string name="status_no_new_value_for_duration">Seit %1$s kein neuer Wert</string>
   <string name="status_no_new_value_since_time">Kein neuer Wert seit %1$s</string>
@@ -1575,6 +1575,10 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="journal_eiob_display_desc">Aktivitätsbasiertes Insulin an Bord zusätzlich zum klassischen IOB anzeigen</string>
     <string name="journal_iob_expanded">IOB %1$s E verbleibend</string>
     <string name="journal_eiob_expanded">eIOB %1$s E wirksam</string>
+    <string name="notification_show_iob_title">Insulin an Bord anzeigen</string>
+    <string name="notification_show_iob_desc">IOB/eIOB aus dem Journal in der Statuszeile</string>
+    <string name="notification_show_cob_title">Kohlenhydrate an Bord anzeigen</string>
+    <string name="notification_show_cob_desc">COB aus dem Journal in der Statuszeile</string>
     <string name="journal_visible_events">Sichtbare Ereignisse</string>
     <string name="journal_empty">Noch keine Journalereignisse in diesem Fenster</string>
     <string name="journal_type_insulin">Insulin</string>

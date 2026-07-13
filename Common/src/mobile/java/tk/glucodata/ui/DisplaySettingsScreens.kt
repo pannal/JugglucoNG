@@ -100,6 +100,8 @@ fun NotificationSettingsScreen(
     var arrowSize by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_arrow_size", 1.0f)) }
     var collapsedChart by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_chart_collapsed", false)) }
     var showTargetRange by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_chart_target_range", true)) }
+    var showIob by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_show_iob", false)) }
+    var showCob by rememberSaveable { mutableStateOf(prefs.getBoolean("notification_show_cob", false)) }
     var statusIconScale by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_status_icon_scale", 1.0f)) }
 
     fun save() {
@@ -111,8 +113,11 @@ fun NotificationSettingsScreen(
             .putFloat("notification_arrow_size", arrowSize)
             .putBoolean("notification_chart_collapsed", collapsedChart)
             .putBoolean("notification_chart_target_range", showTargetRange)
+            .putBoolean("notification_show_iob", showIob)
+            .putBoolean("notification_show_cob", showCob)
             .putFloat("notification_status_icon_scale", statusIconScale)
             .apply()
+        viewModel.refreshNotificationSurfaces()
     }
 
     LegacySettingsScaffold(
@@ -220,6 +225,22 @@ fun NotificationSettingsScreen(
                 subtitle = stringResource(R.string.show_target_range_desc),
                 checked = showTargetRange,
                 onCheckedChange = { showTargetRange = it; save() },
+                icon = null,
+                position = CardPosition.MIDDLE
+            )
+            SettingsSwitchItem(
+                title = stringResource(R.string.notification_show_iob_title),
+                subtitle = stringResource(R.string.notification_show_iob_desc),
+                checked = showIob,
+                onCheckedChange = { showIob = it; save() },
+                icon = null,
+                position = CardPosition.MIDDLE
+            )
+            SettingsSwitchItem(
+                title = stringResource(R.string.notification_show_cob_title),
+                subtitle = stringResource(R.string.notification_show_cob_desc),
+                checked = showCob,
+                onCheckedChange = { showCob = it; save() },
                 icon = null,
                 position = CardPosition.BOTTOM
             )

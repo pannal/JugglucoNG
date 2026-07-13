@@ -1834,6 +1834,10 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_eiob_display_desc">Also display activity-based insulin on board next to classic IOB</string>
     <string name="journal_iob_expanded">IOB %1$sU remaining</string>
     <string name="journal_eiob_expanded">eIOB %1$sU acting</string>
+    <string name="notification_show_iob_title">Show insulin on board</string>
+    <string name="notification_show_iob_desc">IOB/eIOB from the journal in the status line</string>
+    <string name="notification_show_cob_title">Show carbs on board</string>
+    <string name="notification_show_cob_desc">COB from the journal in the status line</string>
     <string name="journal_visible_events">Visible events</string>
     <string name="journal_empty">No journal events in this window yet</string>
     <string name="journal_type_insulin">Insulin</string>

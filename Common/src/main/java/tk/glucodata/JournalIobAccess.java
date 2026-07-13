@@ -24,8 +24,8 @@ public class JournalIobAccess {
     private static java.lang.reflect.Method snapshotMethod;
     private static boolean snapshotResolved;
 
-    // [classicIob, eiob, cob] in units/grams, NaN marking "no data of that
-    // kind"; null when unavailable.
+    // [classicIob, eiob, cob, iobNext30min, cobNext30min] in units/grams,
+    // NaN marking "no data of that kind"; null when unavailable.
     static float[] snapshot(long atMillis) {
         try {
             if (!snapshotResolved) {
@@ -40,5 +40,32 @@ public class JournalIobAccess {
             snapshotMethod = null;
             return null;
         }
+    }
+
+    // "IOB 4.2U · eIOB 3.1U · COB 24g" for the persistent notification, or
+    // null when nothing requested is available. eIOB follows the journal
+    // display toggle.
+    static CharSequence notificationLine(android.content.SharedPreferences prefs, boolean showIob, boolean showCob) {
+        float[] values = snapshot(System.currentTimeMillis());
+        if (values == null || values.length < 3)
+            return null;
+        StringBuilder line = new StringBuilder();
+        if (showIob && !Float.isNaN(values[0])) {
+            line.append("IOB ").append(formatUnits(values[0])).append("U");
+            if (!Float.isNaN(values[1]) && prefs.getBoolean("dashboard_journal_eiob_display_enabled", true))
+                line.append(" · eIOB ").append(formatUnits(values[1])).append("U");
+        }
+        if (showCob && !Float.isNaN(values[2])) {
+            if (line.length() > 0)
+                line.append(" · ");
+            line.append("COB ").append(formatUnits(values[2])).append("g");
+        }
+        return line.length() > 0 ? line.toString() : null;
+    }
+
+    private static String formatUnits(float units) {
+        if (units % 1f < 0.05f)
+            return String.valueOf(Math.round(units));
+        return String.format(java.util.Locale.getDefault(), "%.1f", units);
     }
 }

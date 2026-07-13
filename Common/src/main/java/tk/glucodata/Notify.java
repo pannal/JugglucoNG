@@ -1002,7 +1002,11 @@ public class Notify {
         } catch (Throwable th) {
             Log.stack(LOG_ID, "resolveNotificationStatusText", th);
         }
-        return fallbackStatus != null ? fallbackStatus : "";
+        // Raw GATT codes ("Status=147") are diagnostics for the bluediag
+        // screen, not something to surface in the notification.
+        if (fallbackStatus == null || fallbackStatus.startsWith("Status="))
+            return "";
+        return fallbackStatus;
     }
 
     private static CurrentDisplaySource.Snapshot resolveNotificationCurrentSnapshot() {
@@ -2992,6 +2996,12 @@ public class Notify {
 
                 remoteViews.setViewVisibility(R.id.notification_status, View.VISIBLE);
                 remoteViews.setTextViewText(R.id.notification_status, badgeText);
+                remoteViews.setTextColor(R.id.notification_status,
+                        ((Applic.app.getResources().getConfiguration().uiMode
+                                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                                == android.content.res.Configuration.UI_MODE_NIGHT_YES)
+                                        ? 0xB3FFFFFF
+                                        : 0x8A000000);
                 remoteViews.setViewVisibility(R.id.notification_alert_badge, View.GONE);
                 remoteViews.setViewVisibility(R.id.notification_meta, View.GONE);
 
@@ -3345,7 +3355,12 @@ public class Notify {
         boolean showArrow = prefs.getBoolean("notification_show_arrow", true);
         float arrowSize = prefs.getFloat("notification_arrow_size", 1.0f);
         boolean showStatus = prefs.getBoolean("notification_show_status", true);
+        boolean showIob = prefs.getBoolean("notification_show_iob", false);
+        boolean showCob = prefs.getBoolean("notification_show_cob", false);
         boolean showChart = prefs.getBoolean("notification_chart_enabled", true);
+        final boolean shadeNight = (Applic.app.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
         boolean showChartCollapsed = prefs.getBoolean("notification_chart_collapsed", false);
         boolean showTargetRange = prefs.getBoolean("notification_chart_target_range", true);
 
@@ -3393,11 +3408,31 @@ public class Notify {
 
         CharSequence finalText = ssb;
 
-        String newStatusText = resolveNotificationStatusText(activeSensorSerial, statusText);
+        String sensorStatusText = resolveNotificationStatusText(activeSensorSerial, statusText);
+
+        // The status line carries the journal IOB/eIOB/COB (when enabled) and
+        // the sensor status (gated by its own pref). IOB goes first — the
+        // status view ellipsizes and must not swallow it.
+        if (!showStatus)
+            sensorStatusText = "";
+        CharSequence newStatusText = sensorStatusText;
+        if (showIob || showCob) {
+            CharSequence iobLine = JournalIobAccess.notificationLine(prefs, showIob, showCob);
+            if (doLog)
+                Log.i(LOG_ID, "notification iobLine=" + iobLine);
+            if (iobLine != null)
+                newStatusText = (sensorStatusText == null || sensorStatusText.isEmpty())
+                        ? iobLine
+                        : new android.text.SpannableStringBuilder(iobLine).append(" · ").append(sensorStatusText);
+        }
 
         // Apply Style to Status Text too
+        // The layout's ?android:attr/textColorSecondary resolves against the app
+        // theme, not the notification's, and can render near-invisible on dark
+        // shades — pick an explicit night-aware color instead.
+        final int statusTextColor = shadeNight ? 0xB3FFFFFF : 0x8A000000;
         CharSequence styledStatus = newStatusText;
-        if (newStatusText != null && !newStatusText.isEmpty()) {
+        if (newStatusText != null && newStatusText.length() > 0) {
             android.text.SpannableStringBuilder ssbStatus = new android.text.SpannableStringBuilder(newStatusText);
             ssbStatus.setSpan(new android.text.style.TypefaceSpan(family), 0, ssbStatus.length(),
                     android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE);
@@ -3427,9 +3462,10 @@ public class Notify {
         }
 
         // Status - native TextView
-        if (showStatus && newStatusText != null && !newStatusText.isEmpty()) {
+        if (newStatusText != null && newStatusText.length() > 0) {
             remoteViews.setViewVisibility(R.id.notification_status, View.VISIBLE);
             remoteViews.setTextViewText(R.id.notification_status, styledStatus);
+            remoteViews.setTextColor(R.id.notification_status, statusTextColor);
         } else {
             remoteViews.setViewVisibility(R.id.notification_status, View.GONE);
         }
@@ -3455,9 +3491,10 @@ public class Notify {
         }
 
         // Status for Expanded - native TextView
-        if (showStatus && newStatusText != null && !newStatusText.isEmpty()) {
+        if (newStatusText != null && newStatusText.length() > 0) {
             remoteViewsExpanded.setViewVisibility(R.id.notification_status, View.VISIBLE);
             remoteViewsExpanded.setTextViewText(R.id.notification_status, styledStatus);
+            remoteViewsExpanded.setTextColor(R.id.notification_status, statusTextColor);
         } else {
             remoteViewsExpanded.setViewVisibility(R.id.notification_status, View.GONE);
         }
@@ -3814,8 +3851,15 @@ public class Notify {
             styledMessage = ssbMsg;
         }
 
+        // Same explicit night-aware color as the live notification — the
+        // layout's theme attribute renders near-invisible on dark shades.
+        final boolean startupShadeNight = (Applic.app.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        final int startupStatusColor = startupShadeNight ? 0xB3FFFFFF : 0x8A000000;
         remoteViews.setViewVisibility(R.id.notification_status, View.VISIBLE);
         remoteViews.setTextViewText(R.id.notification_status, styledMessage);
+        remoteViews.setTextColor(R.id.notification_status, startupStatusColor);
 
         RemoteViews remoteViewsExpanded = new RemoteViews(Applic.app.getPackageName(),
                 R.layout.notification_material_regular_expanded);
@@ -3836,6 +3880,7 @@ public class Notify {
         }
         remoteViewsExpanded.setViewVisibility(R.id.notification_status, View.VISIBLE);
         remoteViewsExpanded.setTextViewText(R.id.notification_status, styledMessage);
+        remoteViewsExpanded.setTextColor(R.id.notification_status, startupStatusColor);
 
         var GluNotBuilder = mkbuilder(GLUCOSENOTIFICATION);
         if (Build.VERSION.SDK_INT >= 24) {
