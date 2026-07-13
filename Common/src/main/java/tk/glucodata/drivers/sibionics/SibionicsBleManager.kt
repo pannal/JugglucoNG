@@ -1575,7 +1575,7 @@ class SibionicsBleManager(
             sensorRemainingHours = remainingHours(),
             sensorAgeHours = ageHours(),
             vendorModel = variant.displayLabel,
-            vendorFirmware = SibionicsConstants.initialProtocolMode(variant, protocolMode).name,
+//            vendorFirmware = SibionicsConstants.initialProtocolMode(variant, protocolMode).name,
         )
 
     override fun getDetailedBleStatus(): String {
@@ -1606,21 +1606,27 @@ class SibionicsBleManager(
 
     private fun detailTelemetry(): String =
         buildString {
-            append(protocolMode.name)
-            append(" • ")
-            append(variant.id)
-            append(" • idx=")
-            append(lastIndex)
+//            append(" • ")
+//            append(variant.id)
+//            append(" • idx=")
+//            append(lastIndex)
+
             if (shortCode.isNotBlank()) {
-                append(" • ")
-                append(shortCode)
-                append(if (SibionicsSensitivity.tryDecode(shortCode) != null) " qrSens=" else " fallbackSens=")
+                append(if (SibionicsSensitivity.tryDecode(shortCode) != null) "qrSens=" else "fallbackSens=")
                 append("%.2f".format(sensitivity))
             }
             if (latestTemperatureC.isFinite()) {
-                append(" • temp=")
+                append(" • ")
+                append("temp=")
                 append("%.1f".format(latestTemperatureC))
             }
+            if (shortCode.isNotBlank()) {
+                append(" ")
+                append(shortCode)
+            }
+            append(" • ")
+            append(protocolMode.name)
+
         }
 
     private fun officialEndMs(): Long =
