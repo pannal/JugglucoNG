@@ -60,6 +60,16 @@ class OttaiLifetimeTests {
         )
     }
 
+    @Test
+    fun commandStatusBelowThreeRequiresActivation() {
+        assertFalse(OttaiConstants.commandNeedsActivation(-1))
+        assertTrue(OttaiConstants.commandNeedsActivation(0))
+        assertTrue(OttaiConstants.commandNeedsActivation(1))
+        assertTrue(OttaiConstants.commandNeedsActivation(2))
+        assertFalse(OttaiConstants.commandNeedsActivation(3))
+        assertFalse(OttaiConstants.commandNeedsActivation(4))
+    }
+
     private companion object {
         const val DAY_MS = 24L * 60L * 60L * 1000L
     }

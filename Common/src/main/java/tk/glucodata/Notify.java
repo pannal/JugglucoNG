@@ -2773,6 +2773,11 @@ public class Notify {
     }
 
     private void setIcon(Notification.Builder GluNotBuilder, float glvalue, int sensorgen2) {
+        setIcon(GluNotBuilder, glvalue, sensorgen2, java.util.Collections.emptyList());
+    }
+
+    private void setIcon(Notification.Builder GluNotBuilder, float glvalue, int sensorgen2,
+            java.util.List<NotificationChartDrawer.ValueItem> peerValues) {
         boolean hideIcon = Applic.app.getSharedPreferences("tk.glucodata_preferences", Context.MODE_PRIVATE)
                 .getBoolean("notification_hide_status_icon", false);
 
@@ -2782,7 +2787,18 @@ public class Notify {
         }
 
         if (makeicon) {
-            final var icon = icons.getIcon(getglstring(glvalue, sensorgen2));
+            final java.util.ArrayList<String> peerTexts = new java.util.ArrayList<>();
+            if (peerValues != null) {
+                for (NotificationChartDrawer.ValueItem peer : peerValues) {
+                    if (peer != null && peer.text != null && !peer.text.isEmpty()) {
+                        // The status icon identifies sensors, not each sensor's Auto/Raw
+                        // sub-values. Keep only the leading displayed value here.
+                        int separator = peer.text.indexOf(" · ");
+                        peerTexts.add(separator >= 0 ? peer.text.substring(0, separator) : peer.text);
+                    }
+                }
+            }
+            final var icon = icons.getIcon(getglstring(glvalue, sensorgen2), peerTexts);
             GluNotBuilder.setSmallIcon(icon);
         } else {
             var draw = GlucoseDraw.getgludraw(glvalue, sensorgen2);
@@ -3525,7 +3541,7 @@ public class Notify {
         var GluNotBuilder = mkbuilder(type);
         GluNotBuilder.setOnlyAlertOnce(once);
 
-        setIcon(GluNotBuilder, displayGlucoseValue, glucose.sensorgen2);
+        setIcon(GluNotBuilder, displayGlucoseValue, glucose.sensorgen2, peerValueItems);
 
         GluNotBuilder.setVisibility(VISIBILITY_PUBLIC);
 
