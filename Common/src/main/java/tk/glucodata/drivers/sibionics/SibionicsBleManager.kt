@@ -242,20 +242,25 @@ class SibionicsBleManager(
     override fun connectDevice(delayMillis: Long): Boolean {
         if (stop) return false
         uiPaused = false
-        // Startup can request the same persisted sensor several times while the
-        // first GATT is already connecting or discovering services. The shared
-        // connector treats any existing GATT as stale, so coalesce every active
-        // handshake/streaming phase. Explicit retry preparation returns to IDLE.
-        if (phase != Phase.IDLE && phase != Phase.ERROR) {
+        // Coalesce only a connection which owns a real GATT. During first setup the
+        // scanner calls us before it has found a BluetoothDevice; that attempt must
+        // not suppress the real connection after the scan result is bound.
+        if (phase != Phase.IDLE && phase != Phase.ERROR && mBluetoothGatt != null) {
             Log.d(SibionicsConstants.TAG, "connect coalesced phase=$phase serial=$SerialNumber")
             return true
         }
         if (mActiveBluetoothDevice == null) {
             hydrateBluetoothDeviceFromAddress()
         }
+        if (mActiveBluetoothDevice == null) {
+            phase = Phase.IDLE
+            return false
+        }
         phase = Phase.CONNECTING
         setStatus(connectingStatus())
-        return super.connectDevice(delayMillis)
+        val scheduled = super.connectDevice(delayMillis)
+        if (!scheduled && phase == Phase.CONNECTING) phase = Phase.IDLE
+        return scheduled
     }
 
     @Synchronized
@@ -584,8 +589,6 @@ class SibionicsBleManager(
     }
 
     private fun handleV120Handshake(response: SibionicsProtocol.ResponseType) {
-        handler.removeCallbacks(handshakeTimeoutRunnable)
-        handler.removeCallbacks(authTimeoutRunnable)
         protocolMode = SibionicsConstants.ProtocolMode.V120
         Applic.app?.let {
             SibionicsRegistry.saveProtocolMode(it, SerialNumber, protocolMode)
@@ -593,6 +596,11 @@ class SibionicsBleManager(
         }
         when (response) {
             SibionicsProtocol.ResponseType.AUTH_ACCEPTED -> {
+                if (phase != Phase.AUTHENTICATING) {
+                    logIgnoredV120Handshake(response)
+                    return
+                }
+                clearV120StepTimeouts()
                 synchronized(algorithmLock) {
                     algorithm.configure(shortCode, sensitivity, variant, algorithmSelection)
                 }
@@ -602,21 +610,41 @@ class SibionicsBleManager(
                 scheduleHandshakeTimeout()
             }
             SibionicsProtocol.ResponseType.TIME_SYNC_NEEDED -> {
+                if (phase == Phase.SYNCING_TIME || phase == Phase.REQUESTING_DATA || phase == Phase.STREAMING) {
+                    logIgnoredV120Handshake(response)
+                    return
+                }
+                clearV120StepTimeouts()
                 phase = Phase.SYNCING_TIME
                 writeCommand(SibionicsProtocol.buildTimeSyncPacket(), "time-sync")
                 scheduleHandshakeTimeout()
             }
             SibionicsProtocol.ResponseType.DATA_REQUESTED -> {
+                if (phase == Phase.REQUESTING_DATA || phase == Phase.STREAMING) {
+                    logIgnoredV120Handshake(response)
+                    return
+                }
+                clearV120StepTimeouts()
                 phase = Phase.REQUESTING_DATA
                 writeCommand(SibionicsProtocol.buildDataRequestPacket(lastIndex), "data-request")
                 scheduleHandshakeTimeout()
             }
             SibionicsProtocol.ResponseType.STREAMING_READY -> {
+                clearV120StepTimeouts()
                 phase = Phase.STREAMING
                 setStatus(waitingForDataStatus())
                 scheduleStreamingTimeout()
             }
         }
+    }
+
+    private fun logIgnoredV120Handshake(response: SibionicsProtocol.ResponseType) {
+        Log.d(SibionicsConstants.TAG, "ignoring duplicate V120 $response in phase=$phase serial=$SerialNumber")
+    }
+
+    private fun clearV120StepTimeouts() {
+        handler.removeCallbacks(handshakeTimeoutRunnable)
+        handler.removeCallbacks(authTimeoutRunnable)
     }
 
     private fun switchToV120(reason: String) {
@@ -709,8 +737,10 @@ class SibionicsBleManager(
         val ordered = entries.sortedBy { it.index }.map { entry ->
             entry to sanitizeSampleTime(entry.eventTimeMs(now))
         }
-        prepareSourceBatchForJournal(ordered.first().first.index)
-        sampleJournal?.appendAll(ordered.map { (entry, eventMs) ->
+        val journalEntries = if (algorithmRehydrating) ordered else ordered.filter { (entry, _) ->
+            entry.index >= lastIndex || (entry.index <= 1 && entry.isLive)
+        }
+        sampleJournal?.appendAll(journalEntries.map { (entry, eventMs) ->
             SibionicsSourceSample(
                 index = entry.index,
                 timestampMs = eventMs,
@@ -746,8 +776,10 @@ class SibionicsBleManager(
         observeCalibrationRevision()
         val now = System.currentTimeMillis()
         val ordered = entries.sortedBy { it.index }
-        prepareSourceBatchForJournal(ordered.first().index)
-        sampleJournal?.appendAll(ordered.map { entry ->
+        val journalEntries = if (algorithmRehydrating) ordered else ordered.filter { entry ->
+            entry.index >= lastIndex || (entry.index <= 1 && isV120Current(entry, now))
+        }
+        sampleJournal?.appendAll(journalEntries.map { entry ->
             SibionicsSourceSample(
                 index = entry.index,
                 timestampMs = sanitizeSampleTime(entry.eventTimeMs),
@@ -773,12 +805,6 @@ class SibionicsBleManager(
         storeAndPublish(emitted)
         maybeScheduleInitialLocalRebuild()
         updateHistoryStatus(resultHasLive = entries.any { isV120Current(it, now) })
-    }
-
-    private fun prepareSourceBatchForJournal(firstIndex: Int) {
-        if (!algorithmRehydrating && firstIndex <= 1 && lastIndex > 1) {
-            resetForSensorRestart()
-        }
     }
 
     private fun updateChineseHistoryProgress(entries: List<SibionicsProtocol.ChineseEntry>) {
@@ -813,10 +839,15 @@ class SibionicsBleManager(
         entry.eventTimeMs in (now - 90_000L)..(now + MAX_FUTURE_DRIFT_MS)
 
     private fun updateHistoryStatus(resultHasLive: Boolean) {
-        if (historyTotalCount > historyReceivedCount && historyReceivedCount > 0) {
-            setStatus(historyProgressStatus())
-        } else if (resultHasLive) {
+        if (resultHasLive) {
             setStatus(connectedStatus())
+        } else if (SibionicsSessionPolicy.shouldShowHistoryProgress(
+                historyReceivedCount,
+                historyTotalCount,
+                hasReceivedLiveReading = lastLiveIndexSeen >= 0,
+            )
+        ) {
+            setStatus(historyProgressStatus())
         }
     }
 
@@ -830,7 +861,11 @@ class SibionicsBleManager(
         live: Boolean,
     ): EmittedReading? {
         if (index < 0 || eventMs <= 0L) return null
-        if (!algorithmRehydrating && index <= 1 && lastIndex > 1) resetForSensorRestart()
+        // Repeated history pages may begin at index 1. A current index-1 sample is
+        // the evidence that the physical sensor actually restarted.
+        if (SibionicsSessionPolicy.isConfirmedIndexRestart(index, lastIndex, live, algorithmRehydrating)) {
+            resetForSensorRestart()
+        }
         if (!rawMmol.isFinite() || rawMmol <= 0f) return null
         if (!live && lastIndex > 0 && index < lastIndex) return null
         if (live && lastLiveAlgorithmIndexSeen >= 0 && index <= lastLiveAlgorithmIndexSeen) return null
@@ -1362,10 +1397,12 @@ class SibionicsBleManager(
     }
 
     private fun writeResetCommand(reason: String): Boolean {
-        val packet = if (variant.legacySubtype <= SibionicsConstants.Variant.CHINESE.legacySubtype) {
-            SibionicsProtocol.buildGs1ResetPacket()
-        } else {
-            SibionicsProtocol.buildResetPacket(0)
+        val packet = when {
+            protocolMode == SibionicsConstants.ProtocolMode.CHINESE ->
+                SibionicsProtocol.buildChineseResetPacket()
+            variant.legacySubtype <= SibionicsConstants.Variant.CHINESE.legacySubtype ->
+                SibionicsProtocol.buildGs1ResetPacket()
+            else -> SibionicsProtocol.buildResetPacket(0)
         }
         val ok = writeCommand(packet, "reset-$reason")
         if (ok) markResetSent()
@@ -1554,7 +1591,12 @@ class SibionicsBleManager(
             Phase.SYNCING_TIME -> "Syncing time"
             Phase.REQUESTING_DATA -> "Requesting data"
             Phase.STREAMING -> when {
-                historyTotalCount > historyReceivedCount && historyReceivedCount > 0 -> historyProgressStatus()
+                lastLiveIndexSeen >= 0 -> connectedStatus()
+                SibionicsSessionPolicy.shouldShowHistoryProgress(
+                    historyReceivedCount,
+                    historyTotalCount,
+                    hasReceivedLiveReading = false,
+                ) -> historyProgressStatus()
                 latestReadingTimeMs > 0L -> connectedStatus()
                 else -> waitingForDataStatus()
             }

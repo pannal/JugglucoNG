@@ -425,6 +425,14 @@ class SibionicsAdaptiveAlgorithmTest {
     }
 
     @Test
+    fun chineseResetUsesObservedAa55Payload() {
+        assertArrayEquals(
+            byteArrayOf(0xAA.toByte(), 0x55, 0x10, 0xF1.toByte()),
+            SibionicsProtocol.buildChineseResetPacket(),
+        )
+    }
+
+    @Test
     fun chineseHistoryProgressCountsRecordsRatherThanPacketIndex() {
         val first = chineseEntry(index = 700, unreceived = 12_340)
         assertEquals(12_341, SibionicsProtocol.estimateChineseHistoryTotal(0, 1, listOf(first)))
