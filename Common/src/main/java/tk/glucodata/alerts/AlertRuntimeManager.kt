@@ -19,7 +19,6 @@ data class AlertRuntimeEvaluation(
 object AlertRuntimeManager {
     private const val LOG_ID = "AlertRuntimeManager"
     private const val CHECK_INTERVAL_MS = 15_000L
-    private const val SENSOR_EXPIRY_WARNING_MS = 24L * 60L * 60L * 1000L
 
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
     private val lock = Any()
@@ -373,18 +372,21 @@ object AlertRuntimeManager {
             0L
         }
 
+        val thresholds = config.expiryWarningMinutes
         val activeNow = config.isActiveNow()
         val snoozed = SnoozeManager.isSnoozed(type)
-        val shouldTrigger = sensorExpiryState.shouldTrigger(
+        val triggered = sensorExpiryState.triggeredThresholds(
             enabled = true,
             activeNow = activeNow,
             snoozed = snoozed,
             endTimeMs = endTimeMs,
             nowMs = nowMs,
-            warningMs = SENSOR_EXPIRY_WARNING_MS
+            thresholdsMinutes = thresholds
         )
 
-        if (endTimeMs <= 0L || endTimeMs - nowMs > SENSOR_EXPIRY_WARNING_MS) {
+        // Not yet within even the longest configured lead time -> nothing pending.
+        val largestThresholdMs = (thresholds.maxOrNull() ?: 0).toLong() * 60_000L
+        if (endTimeMs <= 0L || thresholds.isEmpty() || endTimeMs - nowMs > largestThresholdMs) {
             clearRuntimeAlert(type, "sensor-expiry-not-due")
             return
         }
@@ -393,16 +395,29 @@ object AlertRuntimeManager {
             clearRuntimeAlert(type, "sensor-expiry-time-inactive")
             return
         }
-        if (snoozed || !shouldTrigger) {
+        if (snoozed || triggered.isEmpty()) {
             return
         }
 
         val glucoseValue = currentGlucoseValueLocked() ?: return
-        val remainingHours = ((endTimeMs - nowMs).coerceAtLeast(0L) / 3_600_000L).toInt().coerceAtLeast(1)
-        val message = Applic.app.getString(R.string.alert_sensor_expiry) + " - " +
-            Applic.app.getString(R.string.hours_short, remainingHours)
+        val message = sensorExpiryMessage(triggered.first())
 
         triggerAlert(type, glucoseValue, currentRateLocked(), message)
+    }
+
+    /** Notification text naming the threshold that fired ("... in 3 days" / "... in 6 hours"). */
+    private fun sensorExpiryMessage(thresholdMinutes: Int): String {
+        val res = Applic.app.resources
+        return when {
+            thresholdMinutes >= 1440 && thresholdMinutes % 1440 == 0 -> {
+                val days = thresholdMinutes / 1440
+                res.getQuantityString(R.plurals.sensor_expires_in_days, days, days)
+            }
+            else -> {
+                val hours = (thresholdMinutes / 60).coerceAtLeast(1)
+                res.getQuantityString(R.plurals.sensor_expires_in_hours, hours, hours)
+            }
+        }
     }
 
     private fun triggerAlert(type: AlertType, glucoseValue: Float, rate: Float, message: String): Boolean {
