@@ -1196,6 +1196,10 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="default_snooze">Default snooze</string>
     <string name="delete_custom_alert">Delete custom alert</string>
     <string name="duration_label">Duration</string>
+    <string name="sound_delay_title">Delay alarm sound</string>
+    <string name="sound_delay_desc">Vibrate first; add the audible alarm only after a delay</string>
+    <string name="sound_delay_label">Sound delay</string>
+    <string name="sound_delay_hypo_warning">Caution: this delays the audible alarm for a low-glucose alert.</string>
     <string name="end">End</string>
     <string name="high_alert">High Alert</string>
     <string name="high_alerts">High Alerts</string>
