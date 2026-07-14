@@ -47,6 +47,7 @@ object GlucosePaletteState {
     fun setPalette(context: Context, palette: Palette) {
         prefs(context).edit { putString(GlucoseRangeColors.PREF_PALETTE, palette.name) }
         GlucoseRangeColors.setPalette(palette)
+        refreshNotification()
     }
 
     /** Set (argb) or clear (null) a single band override; persists and applies. */
@@ -56,6 +57,7 @@ object GlucosePaletteState {
             if (argb == null) remove(key) else putInt(key, argb)
         }
         GlucoseRangeColors.setOverride(band, argb)
+        refreshNotification()
     }
 
     fun clearOverrides(context: Context) {
@@ -63,5 +65,16 @@ object GlucosePaletteState {
             GlucoseRangeColors.PREF_OVERRIDE_KEYS.forEach { remove(it) }
         }
         GlucoseRangeColors.clearOverrides()
+        refreshNotification()
+    }
+
+    // Compose recomposes on its own via [revision], but the ongoing notification
+    // is a rendered bitmap that only refreshes on a new reading. Repaint it now
+    // so a palette change is visible there immediately, not minutes later.
+    private fun refreshNotification() {
+        try {
+            tk.glucodata.Notify.showoldglucose()
+        } catch (_: Throwable) {
+        }
     }
 }
