@@ -46,7 +46,7 @@
     <string name="visible">Muuqda</string>
     <string name="password">Furaha</string>
     <string name="delete">Tirtir</string>
-    <string name="specifyreceiveordata">Cadee \\'Ka hel\\' ama xogta loo dirayo qalab kale</string>
+    <string name="specifyreceiveordata">Cadee \'Ka hel\' ama xogta loo dirayo qalab kale</string>
     <string name="specifyip">Waa inaad sheegtaa IP-ga</string>
     <string name="portrange">Dekadaha shabakadu waa inay ahaadaan inta u dhaxaysa 1024 iyo 65535</string>
     <string name="mirror_portrange">Dekadaha muraayadaha waa inay ahaadaan inta u dhaxaysa 1 iyo 65535</string>
@@ -85,7 +85,7 @@
  <string name="time">Waqtiga</string>
  <string name="glucose">Gulukoos</string>
  <string name="sensorviabluetooth">Dareeme ku xiran Bluetooth</string>
- <string name="sensorviabluetoothon">Qalabka aan muraayadda ahayn, \\'Sensor via Bluetooth\\' waa inuu shidan yahay</string>
+ <string name="sensorviabluetoothon">Qalabka aan muraayadda ahayn, \'Sensor via Bluetooth\' waa inuu shidan yahay</string>
  <string name="setunitfirst">Marka hore deji cutubka</string>
  <string name="numberlabels">Summadaha tirooyinka</string>
  <string name="colors">Midabada</string>
@@ -166,7 +166,7 @@
  <string name="addsensorenddate">Ku dar taariikhda dhamaadka dareemaha abka kalandararka</string>
  <string name="enddatesensor">"Dareenka taariikhda dhamaadka"</string>
  <string name="open">Furan</string>
- <string name="withoutsensor">Dareem la\\'aan</string>
+ <string name="withoutsensor">Dareem la\'aan</string>
  <string name="wronglibrary">Maktabadu si fiican uma shaqaynayso, isku day mid kale</string>
  <string name="installedlibrary">Maktabada la rakibay</string>
  <string name="cantextract">Lama soo saari karo %s, isku day apk ka duwan</string>
@@ -386,7 +386,7 @@
     <string name="lispro">Insulin Lispro/Humalog</string>
     <string name="urli">URLi/Lyumjev/insulin lispro-aabc</string>
     <string name="glulisine">Insulin Glulisin/Apidra</string>
-    <string name="humaninsulin">Insulin bini\\'aadamka/Humulin R/Novolin R</string>
+    <string name="humaninsulin">Insulin bini\'aadamka/Humulin R/Novolin R</string>
     <string name="afrezza">Afrezza</string>
     <string name="not">Maya</string>
     <string name="eusibionics">Sibionics EU</string>
@@ -450,7 +450,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
  <string name="nonewdata">"Ma jirto xog cusub"</string>
  <string name="newdata">"xog cusub"</string>
 <string name="isconnected">Ku xidhan</string> 
-<string name="isdisconnected">Go\\'ay</string> 
+<string name="isdisconnected">Go\'ay</string>
 <string name="phone">telefoonka</string>
  <string name="watch">daawo</string>
 <string name="directsensor">Dareemaha tooska ah-</string>
@@ -845,7 +845,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sensor_lost_restart">Khalad: Dareemuhu waa lumay Fadlan dib u bilow habaynta</string>
     <string name="invalid_device_name">"Magaca aaladda aan sax ahayn:"</string>
     <string name="failed_to_connect">"waa ku guuldareystay in lagu xiro"</string>
-    <string name="sensor_not_init">Dareemaha lama bilaabin Isticmaal \\'Scan Sensor\\' marka hore.</string>
+    <string name="sensor_not_init">Dareemaha lama bilaabin Isticmaal \'Scan Sensor\' marka hore.</string>
     <string name="invalid_code_format">Qaab kood aan sax ahayn Fadlan isku day mar kale</string>
     <string name="no_qr_found">Ma jiro summada QR ee sawirka laga helay</string>
     
@@ -897,7 +897,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="status_bluetooth_off">Bluetooth dansan</string>
     <string name="status_connection_failed">Xidhiidhku wuu fashilmay</string>
     <string name="status_connected">Ku xidhan</string>
-    <string name="status_disconnected">Go\\'ay</string>
+    <string name="status_disconnected">Go\'ay</string>
     <string name="status_waiting_for_data">Ku xidhan, sugitaanka xogta...</string>
     <string name="status_raw_values_received">Ku xidhan, qiyam cayriin ayaa la helay</string>
     <string name="status_invalid_glucose_from_sensor">Gulukoos aan sax ahayn oo ka timaadda dareemayaasha</string>
@@ -1321,7 +1321,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="calibration_model_legend_active_desc">Loo isticmaalo ku habboon</string>
     <string name="calibration_model_legend_disabled_desc">Laga saaray</string>
     <string name="calibration_model_legend_fit_desc">Khadka la qiyaasay</string>
-    <string name="calibration_model_legend_age">Da\\'da</string>
+    <string name="calibration_model_legend_age">Da\'da</string>
     <string name="calibration_model_legend_age_desc">Ka yar ayaa ka weyn</string>
     <string name="calibration_weight_title">Miisaanka cabbirka</string>
     <string name="calibration_weight_fresh">Cusub</string>
@@ -1521,7 +1521,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="send_receive">Dir/soo dir</string>
     <string name="send_to_colon">U dir:</string>
     <string name="sending_now">Diraya...</string>
-    <string name="sensor_age">Da\\'da dareeme</string>
+    <string name="sensor_age">Da\'da dareeme</string>
     <string name="sensor_expired_text">Dareemuhu wuu dhacay</string>
     <string name="sensor_life">Nolosha dareenka</string>
     <string name="sensorhelp">Caawinta Dareemaha</string>
@@ -2012,7 +2012,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="mirror_relay">Gudbinta</string>
     <string name="mirror_turn_server_desc">U rog gudbinta isku xirka fog</string>
     <string name="mirror_connections">Xiriirinta</string>
-    <string name="mirror_no_connections">Xiriir la\\'aan Isticmaal Lamaane Degdeg ah ama taabo + si aad ugu darto.</string>
+    <string name="mirror_no_connections">Xiriir la\'aan Isticmaal Lamaane Degdeg ah ama taabo + si aad ugu darto.</string>
     <string name="mirror_delete_connection_title">Tirtir xidhiidhka?</string>
     <string name="mirror_delete_connection_message">%1$s waa laga saari doonaa si joogto ah.</string>
     <string name="mirror_connection_type">Nooca isku xirka</string>
@@ -2141,7 +2141,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="api_source_format_gluco_watch">VK qoraalka kooban</string>
     <string name="api_source_poll_seconds">Muddada cod bixinta (ilbiriqsi)</string>
     <string name="api_source_poll_seconds_desc">Ugu yaraan 30 ilbiriqsi</string>
-    <string name="api_source_status_idle">isha API shaqo la\\'aan</string>
+    <string name="api_source_status_idle">isha API shaqo la\'aan</string>
     <string name="api_source_status_following">Isha API ee soo socota</string>
     <string name="api_source_status_syncing">Isha API ee dib-u-cusboonaysiinta</string>
     <string name="api_source_status_paused">Isha API waa la hakiyay</string>
@@ -2160,7 +2160,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="api_source_preset">Isha hore loo dejiyay</string>
     <string name="api_source_preset_sheet_title">Dooro horudhaca isha</string>
     <string name="api_source_preset_custom_json">Meesha ugu dambeysa ee JSON</string>
-    <string name="api_source_preset_custom_json_desc">Ra\\'yi ururin URL soo celiya qorshaha gulukoosta JSON ee caadiga ah.</string>
+    <string name="api_source_preset_custom_json_desc">Ra\'yi ururin URL soo celiya qorshaha gulukoosta JSON ee caadiga ah.</string>
     <string name="api_source_preset_telegram">Wixii ku soo kordha Telegram bot</string>
     <string name="api_source_preset_telegram_desc">Poll Telegram bot bot cusboonaysiinta oo soo deji JSON ama akhrinta GV kooban.</string>
     <string name="api_source_preset_vk_direct">Taariikhda fariinta tooska ah ee VK</string>

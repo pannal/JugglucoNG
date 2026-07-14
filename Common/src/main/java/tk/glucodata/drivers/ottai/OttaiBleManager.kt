@@ -673,6 +673,14 @@ class OttaiBleManager(
         } else {
             Log.w(TAG, "sensor ended cmd=$status; live buffer will not be published " +
                 "(recoveryEligible=$canRecover attempted=$endedRecoveryAttempted)")
+            // The ended-history path needs the final dataNo from the live buffer before it can
+            // request the missing range. Reading this characteristic is safe after expiry;
+            // handleEndedLiveBuffer indexes it without publishing a new glucose value.
+            handler.postDelayed({
+                if (commandStatus >= 4) {
+                    runCatching { readLiveGlucose(gatt, "ended-history-index") }
+                }
+            }, 500L)
         }
         UiRefreshBus.requestStatusRefresh()
     }
