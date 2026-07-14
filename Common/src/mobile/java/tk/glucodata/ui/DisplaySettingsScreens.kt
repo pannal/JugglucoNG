@@ -271,6 +271,7 @@ fun NotificationSettingsScreen(
                 icon = null,
                 position = CardPosition.MIDDLE
             )
+            GlucosePaletteCard(position = CardPosition.MIDDLE)
             SettingsSwitchItem(
                 title = stringResource(R.string.dashboard_show_delta_title),
                 subtitle = stringResource(R.string.dashboard_show_delta_desc),

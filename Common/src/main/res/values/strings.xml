@@ -1851,6 +1851,24 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucose_chart_range_colors_desc">Traffic colors for the glucose line in the notification and AOD charts</string>
     <string name="glucose_app_chart_range_colors_title">Color in-app chart lines</string>
     <string name="glucose_app_chart_range_colors_desc">Traffic colors for the glucose line in dashboard, history, journal and statistics charts</string>
+    <!-- Glucose colour palette -->
+    <string name="glucose_palette_title">Glucose color palette</string>
+    <string name="glucose_palette_edit_title">Glucose colors</string>
+    <string name="glucose_palette_preset_label">Preset</string>
+    <string name="glucose_palette_bands_label">Per-band colors</string>
+    <string name="glucose_palette_preset_muted">Muted</string>
+    <string name="glucose_palette_preset_vibrant">Vibrant</string>
+    <string name="glucose_palette_preset_gdh">GDH-like</string>
+    <string name="glucose_palette_preset_custom">Custom</string>
+    <string name="glucose_palette_custom_suffix">+ adjustments</string>
+    <string name="glucose_palette_band_very_low">Very low</string>
+    <string name="glucose_palette_band_low">Low</string>
+    <string name="glucose_palette_band_in_range">In range</string>
+    <string name="glucose_palette_band_high">High</string>
+    <string name="glucose_palette_band_very_high">Very high</string>
+    <string name="glucose_palette_edit">Edit</string>
+    <string name="glucose_palette_reset">Reset</string>
+    <string name="glucose_palette_reset_all">Reset all colors</string>
     <string name="notification_iob_cob_risk_title">Warn when insulin outweighs carbs</string>
     <string name="notification_iob_cob_risk_desc">Color IOB/COB when insulin acting in the next 30 minutes is projected to drop glucose below target</string>
     <string name="notification_iob_risk_without_cob_title">Warn without carbs on board</string>

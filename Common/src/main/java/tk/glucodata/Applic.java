@@ -831,6 +831,11 @@ public class Applic extends Application implements androidx.work.Configuration.P
             SuperGattCallback.initAlarmTalk();
             initialize();
 
+            // Load the glucose colour palette + per-band overrides before any
+            // drawing happens, so the notification chart (which runs outside
+            // Compose) renders with the user's choice too.
+            GlucoseRangeColors.initFromPrefs(this);
+
             // Preserve an explicit non-active selection across startup. Historical sensors
             // are still valid dashboard targets even if they are not in activeSensors().
             // Virtual/cloud-only sensors must not stay in native lastsensorname: native
