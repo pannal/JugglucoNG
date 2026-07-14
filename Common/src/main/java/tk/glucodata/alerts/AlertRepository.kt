@@ -52,6 +52,17 @@ object AlertRepository {
     private fun keyRetryEnabled(type: AlertType) = "alert_${type.id}_retryOn"
     private fun keyRetryInterval(type: AlertType) = "alert_${type.id}_retryInt"
     private fun keyRetryCount(type: AlertType) = "alert_${type.id}_retryCnt"
+    // Sensor-expiry pre-warning thresholds (minutes), stored as a StringSet.
+    private fun keyExpiryWarnings(type: AlertType) = "alert_${type.id}_expiryWarnings"
+
+    /** Missing key -> default (24h migration); present-but-empty -> no pre-warning. */
+    private fun readExpiryWarnings(type: AlertType, default: Set<Int>): Set<Int> {
+        if (!prefs.contains(keyExpiryWarnings(type))) {
+            return default
+        }
+        val raw = prefs.getStringSet(keyExpiryWarnings(type), null) ?: return default
+        return sanitizeExpiryWarningMinutes(raw.mapNotNull { it.toIntOrNull() }.toSet())
+    }
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -241,10 +252,11 @@ object AlertRepository {
             activeEndMinute = prefs.getInt(keyActiveEndMinute(type), -1).takeIf { it >= 0 },
             retryEnabled = prefs.getBoolean(keyRetryEnabled(type), false),
             retryIntervalMinutes = prefs.getInt(keyRetryInterval(type), 5),
-            retryCount = prefs.getInt(keyRetryCount(type), 3)
+            retryCount = prefs.getInt(keyRetryCount(type), 3),
+            expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes)
         )
     }
-    
+
     /**
      * Save configuration for an alert type.
      * For legacy types, writes to both SharedPreferences and Natives.
@@ -289,6 +301,13 @@ object AlertRepository {
             putBoolean(keyRetryEnabled(config.type), config.retryEnabled)
             putInt(keyRetryInterval(config.type), config.retryIntervalMinutes)
             putInt(keyRetryCount(config.type), config.retryCount)
+            // Type-specific: only the sensor-expiry alert carries pre-warnings.
+            if (config.type == AlertType.SENSOR_EXPIRY) {
+                putStringSet(
+                    keyExpiryWarnings(config.type),
+                    sanitizeExpiryWarningMinutes(config.expiryWarningMinutes).map { it.toString() }.toSet()
+                )
+            }
         }
     }
     

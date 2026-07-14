@@ -58,6 +58,15 @@ fun sanitizeAlertDurationSeconds(value: Int): Int {
         ?: DEFAULT_ALERT_DURATION_SECONDS
 }
 
+// Sensor-expiry pre-warning thresholds (minutes before end), single source of
+// truth for the UI chips and validation. Descending = longest lead time first.
+val EXPIRY_WARNING_PRESETS: List<Int> = listOf(4320, 2880, 1440, 720, 360, 120, 60)
+const val DEFAULT_EXPIRY_WARNING_MINUTES = 1440   // 24h — preserves today's behaviour
+
+/** Keep only recognised presets, so stray persisted values can't leak through. */
+fun sanitizeExpiryWarningMinutes(values: Set<Int>): Set<Int> =
+    values.filter { it in EXPIRY_WARNING_PRESETS }.toSet()
+
 /**
  * Delivery mode for alerts.
  */
@@ -112,7 +121,11 @@ data class AlertConfig(
     // === NEW: Retry settings ("try again if no reaction") ===
     val retryEnabled: Boolean = false,
     val retryIntervalMinutes: Int = 5,      // Re-alert every X minutes
-    val retryCount: Int = 3                 // Max number of retries (0 = unlimited until dismissed)
+    val retryCount: Int = 3,                // Max number of retries (0 = unlimited until dismissed)
+
+    // Sensor-expiry only: warn this many minutes before the sensor ends. Each
+    // selected threshold fires once per sensor. Empty = no pre-warning.
+    val expiryWarningMinutes: Set<Int> = emptySet()
 ) {
     /**
      * Whether this alert should use the old system alarm path (AlarmActivity).
@@ -290,7 +303,8 @@ object AlertDefaults {
                 deliveryMode = AlertDeliveryMode.NOTIFICATION_ONLY,
                 hapticProfile = HapticProfile.SOFT,
                 soundEnabled = true,
-                defaultSnoozeMinutes = 120
+                defaultSnoozeMinutes = 120,
+                expiryWarningMinutes = setOf(DEFAULT_EXPIRY_WARNING_MINUTES)
             )
             AlertType.LOSS -> AlertConfig(
                 type = type,

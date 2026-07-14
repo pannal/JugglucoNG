@@ -1083,10 +1083,81 @@ private fun AlertSettingsExpanded(
                         }
                     }
                 }
+
+                // === Sensor-expiry pre-warnings (multi-select, this type only) ===
+                if (config.type == AlertType.SENSOR_EXPIRY) {
+                    SensorExpiryThresholdSelector(
+                        selected = config.expiryWarningMinutes,
+                        onToggle = { minutes ->
+                            val next = if (minutes in config.expiryWarningMinutes) {
+                                config.expiryWarningMinutes - minutes
+                            } else {
+                                config.expiryWarningMinutes + minutes
+                            }
+                            onConfigChange(config.copy(expiryWarningMinutes = next))
+                        }
+                    )
+                }
             }
         )
     }
-}    
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SensorExpiryThresholdSelector(
+    selected: Set<Int>,
+    onToggle: (Int) -> Unit
+) {
+    val days = EXPIRY_WARNING_PRESETS.filter { it >= 1440 }
+    val hours = EXPIRY_WARNING_PRESETS.filter { it < 1440 }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.sensor_expiry_warnings_title),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            stringResource(R.string.sensor_expiry_warnings_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            stringResource(R.string.sensor_expiry_group_days),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            days.forEach { minutes ->
+                val on = minutes in selected
+                FilterChip(
+                    selected = on,
+                    onClick = { onToggle(minutes) },
+                    label = { Text(stringResource(R.string.days_short, minutes / 1440)) },
+                    leadingIcon = { if (on) Icon(Icons.Filled.Check, contentDescription = null) }
+                )
+            }
+        }
+
+        Text(
+            stringResource(R.string.sensor_expiry_group_hours),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            hours.forEach { minutes ->
+                val on = minutes in selected
+                FilterChip(
+                    selected = on,
+                    onClick = { onToggle(minutes) },
+                    label = { Text(stringResource(R.string.hours_short, minutes / 60)) },
+                    leadingIcon = { if (on) Icon(Icons.Filled.Check, contentDescription = null) }
+                )
+            }
+        }
+    }
+}
         
 //        HorizontalDivider()
         
