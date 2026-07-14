@@ -1285,7 +1285,10 @@ fun SensorCard(
                         }
                     }
 
-                    if (sensor.connectionStatus.isNotEmpty()) {
+                    val connectedStatus = stringResource(R.string.status_connected)
+                    if (sensor.connectionStatus.isNotEmpty() &&
+                        !sensor.connectionStatus.equals(connectedStatus, ignoreCase = true)
+                    ) {
                         DataRow(stringResource(R.string.last_ble_status), sensor.connectionStatus)
                     }
                     DataRow(stringResource(R.string.sensor_address), sensor.deviceAddress)
