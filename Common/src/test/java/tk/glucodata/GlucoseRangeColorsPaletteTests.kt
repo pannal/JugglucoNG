@@ -88,6 +88,33 @@ class GlucoseRangeColorsPaletteTests {
     }
 
     @Test
+    fun valueTrafficColorsFollowThePreset() {
+        // MUTED keeps the historical traffic tones (regression guarantee).
+        GlucoseRangeColors.setPalette(Palette.MUTED)
+        assertEquals(0xFF2E7D32.toInt(), GlucoseRangeColors.valueInRange(false))
+        assertEquals(0xFFC62828.toInt(), GlucoseRangeColors.valueOut(false))
+
+        // GDH_LIKE drives the value/arrow colouring to GDH's pure primaries.
+        GlucoseRangeColors.setPalette(Palette.GDH_LIKE)
+        assertEquals(0xFF00FF00.toInt(), GlucoseRangeColors.valueInRange(false))
+        assertEquals(0xFFFFDC00.toInt(), GlucoseRangeColors.valueBorderline(false))
+        assertEquals(0xFFFF0000.toInt(), GlucoseRangeColors.valueOut(false))
+
+        // Vibrant differs from muted for the value colouring too.
+        GlucoseRangeColors.setPalette(Palette.VIBRANT)
+        assertNotEquals(0xFF2E7D32.toInt(), GlucoseRangeColors.valueInRange(false))
+        assertNotEquals(0xFFC62828.toInt(), GlucoseRangeColors.valueOut(false))
+    }
+
+    @Test
+    fun inRangeOverrideFlowsToValueInRange() {
+        GlucoseRangeColors.setPalette(Palette.MUTED)
+        GlucoseRangeColors.setOverride(Band.IN_RANGE, 0xFF0000FF.toInt())
+        assertEquals(0xFF0000FF.toInt(), GlucoseRangeColors.valueInRange(false))
+        assertEquals(0xFF0000FF.toInt(), GlucoseRangeColors.valueInRange(true))
+    }
+
+    @Test
     fun changeListenerFiresOnEveryEffectiveChange() {
         var count = 0
         GlucoseRangeColors.setChangeListener { count++ }

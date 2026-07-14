@@ -260,9 +260,12 @@ public final class GlucoseRangeColors {
         return isMmol ? DEFAULT_VERY_HIGH_MMOL : DEFAULT_VERY_HIGH_MGDL;
     }
 
-    // Traffic-light palette for coloring the current value itself (GDH-style):
-    // green inside the target range, yellow between target and alarm bounds,
-    // red beyond the alarms. Dark variants are lighter for dark backgrounds.
+    // Traffic-light palette for colouring the current value (and trend arrow,
+    // and the notification value): green inside the target range, yellow between
+    // target and alarm bounds, red beyond the alarms. This is a 3-tier system,
+    // distinct from the 5 AGP bands above, but it follows the active preset too
+    // so switching to Vibrant / GDH-like visibly recolours the value and arrow.
+    // The MUTED constants are the historical tones, kept bit-identical.
     public static final int VALUE_IN_RANGE = 0xFF2E7D32;
     public static final int VALUE_IN_RANGE_DARK = 0xFF81C784;
     public static final int VALUE_BORDERLINE = 0xFFF9A825;
@@ -270,16 +273,40 @@ public final class GlucoseRangeColors {
     public static final int VALUE_OUT = 0xFFC62828;
     public static final int VALUE_OUT_DARK = 0xFFE57373;
 
+    // Per-preset traffic tiers: [in-range, borderline, out].
+    private static final int[] MUTED_TRAFFIC_LIGHT = { VALUE_IN_RANGE, VALUE_BORDERLINE, VALUE_OUT };
+    private static final int[] MUTED_TRAFFIC_DARK = { VALUE_IN_RANGE_DARK, VALUE_BORDERLINE_DARK, VALUE_OUT_DARK };
+    private static final int[] VIBRANT_TRAFFIC_LIGHT = { 0xFF00A651, 0xFFFFB300, 0xFFD50000 };
+    private static final int[] VIBRANT_TRAFFIC_DARK = { 0xFF69F0AE, 0xFFFFD24D, 0xFFFF5252 };
+    private static final int[] GDH_TRAFFIC_LIGHT = { 0xFF00FF00, 0xFFFFDC00, 0xFFFF0000 };
+    private static final int[] GDH_TRAFFIC_DARK = GDH_TRAFFIC_LIGHT;
+
+    private static int[] trafficFor(Palette palette, boolean darkTheme) {
+        switch (palette) {
+            case VIBRANT:
+                return darkTheme ? VIBRANT_TRAFFIC_DARK : VIBRANT_TRAFFIC_LIGHT;
+            case GDH_LIKE:
+                return darkTheme ? GDH_TRAFFIC_DARK : GDH_TRAFFIC_LIGHT;
+            case MUTED:
+            case CUSTOM:
+            default:
+                return darkTheme ? MUTED_TRAFFIC_DARK : MUTED_TRAFFIC_LIGHT;
+        }
+    }
+
     public static int valueInRange(boolean darkTheme) {
-        return darkTheme ? VALUE_IN_RANGE_DARK : VALUE_IN_RANGE;
+        // The in-range tier honours an explicit IN_RANGE override so the user's
+        // chosen in-range colour applies to the value too, not just the bands.
+        final Integer override = overrides[Band.IN_RANGE.ordinal()];
+        return override != null ? override : trafficFor(activePalette, darkTheme)[0];
     }
 
     public static int valueBorderline(boolean darkTheme) {
-        return darkTheme ? VALUE_BORDERLINE_DARK : VALUE_BORDERLINE;
+        return trafficFor(activePalette, darkTheme)[1];
     }
 
     public static int valueOut(boolean darkTheme) {
-        return darkTheme ? VALUE_OUT_DARK : VALUE_OUT;
+        return trafficFor(activePalette, darkTheme)[2];
     }
 
     public static int trafficColorForValue(
