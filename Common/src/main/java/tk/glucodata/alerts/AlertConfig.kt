@@ -58,6 +58,23 @@ fun sanitizeAlertDurationSeconds(value: Int): Int {
         ?: DEFAULT_ALERT_DURATION_SECONDS
 }
 
+// --- Sound-delay caps (single source of truth for the hypo-safety policy) ---
+// A delayed audible alarm on a hypo is a double-edged sword, so LOW and
+// VERY_LOW are capped tighter than the rest. Change the policy here only.
+const val MAX_SOUND_DELAY_SECONDS = 300
+const val MAX_SOUND_DELAY_SECONDS_LOW = 60
+const val MAX_SOUND_DELAY_SECONDS_VERY_LOW = 30
+
+fun maxSoundDelaySecondsFor(type: AlertType): Int = when (type) {
+    AlertType.LOW -> MAX_SOUND_DELAY_SECONDS_LOW
+    AlertType.VERY_LOW -> MAX_SOUND_DELAY_SECONDS_VERY_LOW
+    else -> MAX_SOUND_DELAY_SECONDS
+}
+
+/** Clamp a requested delay to [0, cap-for-type]. Holds on every write path. */
+fun sanitizeSoundDelaySeconds(type: AlertType, value: Int): Int =
+    value.coerceIn(0, maxSoundDelaySecondsFor(type))
+
 /**
  * Delivery mode for alerts.
  */
@@ -94,6 +111,12 @@ data class AlertConfig(
     val vibrationEnabled: Boolean = true,
     val hapticProfile: HapticProfile = HapticProfile.STRONG,
     val flashEnabled: Boolean = false,
+
+    // Sound delay: vibrate first, add the audible alarm only after this delay.
+    // Only meaningful when soundEnabled && vibrationEnabled. 0 = immediate
+    // (today's behaviour). Capped per type for hypo safety (see caps below).
+    val soundDelayEnabled: Boolean = false,
+    val soundDelaySeconds: Int = 0,
     
     // Snooze settings
     val defaultSnoozeMinutes: Int = 15,

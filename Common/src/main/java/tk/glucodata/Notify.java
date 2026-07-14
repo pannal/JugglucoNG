@@ -918,6 +918,10 @@ public class Notify {
     private static AlertSoundHandle delayedAlertSoundHandle = null;
     private static long nextAlertEffectStartAllowedMs = 0L;
     private static long manualEffectBypassUntilMs = 0L;
+    // "Vibrate first, audio after N seconds": the scheduled audible-alarm start.
+    // Distinct from the anti-overlap debounce above; cancelled on any stop.
+    private static ScheduledFuture<?> delayedSoundSchedule = null;
+    private static long delayedSoundGeneration = 0L;
 
     private static final class AlertRetrySession {
         int kind;
@@ -1579,7 +1583,9 @@ public class Notify {
     }
 
     private static void cancelDelayedAlertEffectsLocked(String reason) {
-        final boolean hadDelayed = delayedAlertEffectSchedule != null || delayedAlertSoundHandle != null;
+        final boolean hadDelayed = delayedAlertEffectSchedule != null
+                || delayedAlertSoundHandle != null
+                || delayedSoundSchedule != null;
         if (delayedAlertEffectSchedule != null) {
             delayedAlertEffectSchedule.cancel(false);
             delayedAlertEffectSchedule = null;
@@ -1588,6 +1594,13 @@ public class Notify {
             stopSoundHandleQuietly(delayedAlertSoundHandle);
             delayedAlertSoundHandle = null;
         }
+        // Cancel a pending "vibrate first, audio later" sound so it never fires
+        // after a dismiss / snooze / resolution / retry.
+        if (delayedSoundSchedule != null) {
+            delayedSoundSchedule.cancel(false);
+            delayedSoundSchedule = null;
+        }
+        delayedSoundGeneration++;
         delayedAlertEffectPriority = Integer.MIN_VALUE;
         delayedAlertEffectGeneration++;
         if (hadDelayed && doLog) {
@@ -1989,16 +2002,14 @@ public class Notify {
         // MOVED EFFECTS START HERE - SAFER
         final String resolvedHapticProfile = (hapticProfile != null) ? hapticProfile : getHapticProfile(kind);
 
-        if (sound) {
-            if (doplaysound[0] && hasSoundHandle) {
-                if (soundHandle != null) {
-                    soundHandle.setMaxVolume(soundVolumeForProfile(resolvedHapticProfile));
-                    soundHandle.play();
-                } else if (doLog) {
-                    Log.w(LOG_ID, "playringhier: sound handle is null");
-                }
-            }
-        }
+        // Sound delay ("vibrate first, audio after N seconds"): start vibration
+        // and flash immediately; add the audible alarm only after the configured
+        // delay. Only when both sound and vibration are on for this alert (else
+        // there is either nothing to delay, or a silent gap with no signal).
+        final int soundDelaySeconds = (sound && vibrate) ? getSoundDelaySeconds(kind) : 0;
+        final long soundDelayMs = TimeUnit.SECONDS.toMillis(soundDelaySeconds);
+        final boolean canPlaySound = sound && doplaysound[0] && hasSoundHandle && soundHandle != null;
+
         if (!isWearable) {
             if (flash) {
                 Flash.start(app, 200L);
@@ -2008,7 +2019,43 @@ public class Notify {
             vibratealarm(kind, resolvedHapticProfile, duration);
         }
 
-        stopschedule = Applic.scheduler.schedule(runstopalarm, stopDelayMs, TimeUnit.MILLISECONDS);
+        if (canPlaySound) {
+            soundHandle.setMaxVolume(soundVolumeForProfile(resolvedHapticProfile));
+            if (soundDelayMs > 0L) {
+                // Delay only the play() call; the gradual fade-in lives inside
+                // play() and carries over unchanged, just starting later.
+                final AlertSoundHandle delayedHandle = soundHandle;
+                final long soundGeneration;
+                synchronized (alertEffectLock) {
+                    soundGeneration = ++delayedSoundGeneration;
+                    delayedSoundSchedule = Applic.scheduler.schedule(() -> {
+                        synchronized (alertEffectLock) {
+                            if (soundGeneration != delayedSoundGeneration) {
+                                return;
+                            }
+                            delayedSoundSchedule = null;
+                        }
+                        // Only sound if still alarming (not dismissed / snoozed /
+                        // resolved during the delay); play() is also a no-op once
+                        // the handle has been released.
+                        if (getisalarm()) {
+                            delayedHandle.play();
+                        }
+                    }, soundDelayMs, TimeUnit.MILLISECONDS);
+                }
+                if (doLog) {
+                    Log.i(LOG_ID, "Sound delayed by " + soundDelaySeconds + "s for kind=" + kind);
+                }
+            } else {
+                soundHandle.play();
+            }
+        } else if (sound && soundHandle == null && doLog) {
+            Log.w(LOG_ID, "playringhier: sound handle is null");
+        }
+
+        // Auto-stop counts the sound's play time from when it actually begins, so
+        // a delayed sound still plays for its full duration.
+        stopschedule = Applic.scheduler.schedule(runstopalarm, stopDelayMs + soundDelayMs, TimeUnit.MILLISECONDS);
 
     }
     private String getDeliveryMode(int kind) {
@@ -2071,6 +2118,27 @@ public class Notify {
             case "SOFT":      case "LOW":      return 0.4f;
             case "STEADY":    case "MEDIUM":   return 0.7f;
             default:                           return 1.0f;
+        }
+    }
+
+    // Resolved audible-alarm delay for this alert type, in seconds (0 = none).
+    // Re-applies the per-type hypo cap via the single source of truth in
+    // AlertConfig, independent of how the value was written.
+    private int getSoundDelaySeconds(int kind) {
+        final AlertType type = AlertType.Companion.fromId(kind);
+        if (type == null) {
+            return 0;
+        }
+        try {
+            final android.content.SharedPreferences prefs = Applic.app.getSharedPreferences(
+                    "tk.glucodata.alerts", android.content.Context.MODE_PRIVATE);
+            if (!prefs.getBoolean("alert_" + kind + "_soundDelayEnabled", false)) {
+                return 0;
+            }
+            final int requested = prefs.getInt("alert_" + kind + "_soundDelay", 0);
+            return tk.glucodata.alerts.AlertConfigKt.sanitizeSoundDelaySeconds(type, requested);
+        } catch (Exception e) {
+            return 0;
         }
     }
 

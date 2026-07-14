@@ -664,6 +664,10 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="default_snooze">Standard-Schlummern</string>
     <string name="delete_custom_alert">Benutzerdefinierten Alarm loschen</string>
     <string name="duration_label">Dauer</string>
+    <string name="sound_delay_title">Alarmton verzögern</string>
+    <string name="sound_delay_desc">Zuerst nur vibrieren; der Alarmton setzt erst nach einer Verzögerung ein</string>
+    <string name="sound_delay_label">Ton-Verzögerung</string>
+    <string name="sound_delay_hypo_warning">Achtung: Dies verzögert den Alarmton bei einem Unterzucker-Alarm.</string>
     <string name="end">Ende</string>
     <string name="high_alert">Hoher Alarm</string>
     <string name="high_alerts">Hohe Alarme</string>
