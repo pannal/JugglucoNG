@@ -52,6 +52,14 @@ object AlertRepository {
     private fun keyRetryEnabled(type: AlertType) = "alert_${type.id}_retryOn"
     private fun keyRetryInterval(type: AlertType) = "alert_${type.id}_retryInt"
     private fun keyRetryCount(type: AlertType) = "alert_${type.id}_retryCnt"
+    // Sound delay ("vibrate first, audio after N seconds")
+    private fun keySoundDelayEnabled(type: AlertType) = "alert_${type.id}_soundDelayEnabled"
+    private fun keySoundDelaySeconds(type: AlertType) = "alert_${type.id}_soundDelay"
+
+    // Cap enforced on every read so a value written by any path (incl. the
+    // apply-to-all bulk edit onto LOW/VERY_LOW) can never exceed the hypo cap.
+    private fun readSoundDelaySeconds(type: AlertType): Int =
+        sanitizeSoundDelaySeconds(type, prefs.getInt(keySoundDelaySeconds(type), 0))
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -191,7 +199,9 @@ object AlertRepository {
             activeEndMinute = prefs.getInt(keyActiveEndMinute(type), -1).takeIf { it >= 0 },
             retryEnabled = prefs.getBoolean(keyRetryEnabled(type), false),
             retryIntervalMinutes = prefs.getInt(keyRetryInterval(type), 5),
-            retryCount = prefs.getInt(keyRetryCount(type), 3)
+            retryCount = prefs.getInt(keyRetryCount(type), 3),
+            soundDelayEnabled = prefs.getBoolean(keySoundDelayEnabled(type), false),
+            soundDelaySeconds = readSoundDelaySeconds(type)
         )
     }
 
@@ -241,10 +251,12 @@ object AlertRepository {
             activeEndMinute = prefs.getInt(keyActiveEndMinute(type), -1).takeIf { it >= 0 },
             retryEnabled = prefs.getBoolean(keyRetryEnabled(type), false),
             retryIntervalMinutes = prefs.getInt(keyRetryInterval(type), 5),
-            retryCount = prefs.getInt(keyRetryCount(type), 3)
+            retryCount = prefs.getInt(keyRetryCount(type), 3),
+            soundDelayEnabled = prefs.getBoolean(keySoundDelayEnabled(type), false),
+            soundDelaySeconds = readSoundDelaySeconds(type)
         )
     }
-    
+
     /**
      * Save configuration for an alert type.
      * For legacy types, writes to both SharedPreferences and Natives.
@@ -289,6 +301,8 @@ object AlertRepository {
             putBoolean(keyRetryEnabled(config.type), config.retryEnabled)
             putInt(keyRetryInterval(config.type), config.retryIntervalMinutes)
             putInt(keyRetryCount(config.type), config.retryCount)
+            putBoolean(keySoundDelayEnabled(config.type), config.soundDelayEnabled)
+            putInt(keySoundDelaySeconds(config.type), sanitizeSoundDelaySeconds(config.type, config.soundDelaySeconds))
         }
     }
     

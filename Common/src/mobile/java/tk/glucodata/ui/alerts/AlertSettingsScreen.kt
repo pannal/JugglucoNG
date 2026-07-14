@@ -239,6 +239,8 @@ fun AlertSettingsScreen(
                                 retryEnabled = draft.retryEnabled,
                                 retryIntervalMinutes = draft.retryIntervalMinutes,
                                 retryCount = draft.retryCount,
+                                soundDelayEnabled = draft.soundDelayEnabled,
+                                soundDelaySeconds = draft.soundDelaySeconds,
                                 defaultSnoozeMinutes = draft.defaultSnoozeMinutes
                             )
                             persistConfigIfChanged(updated)
