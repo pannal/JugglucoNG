@@ -1596,6 +1596,24 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="glucose_chart_range_colors_desc">Ampelfarben für die Glukoselinie im Benachrichtigungs- und AOD-Diagramm</string>
     <string name="glucose_app_chart_range_colors_title">App-Diagrammlinien einfärben</string>
     <string name="glucose_app_chart_range_colors_desc">Ampelfarben für die Glukoselinie in Dashboard-, Verlaufs-, Journal- und Statistik-Diagrammen</string>
+    <!-- Glukose-Farbpalette -->
+    <string name="glucose_palette_title">Glukose-Farbpalette</string>
+    <string name="glucose_palette_edit_title">Glukose-Farben</string>
+    <string name="glucose_palette_preset_label">Voreinstellung</string>
+    <string name="glucose_palette_bands_label">Farben je Bereich</string>
+    <string name="glucose_palette_preset_muted">Gedämpft</string>
+    <string name="glucose_palette_preset_vibrant">Kräftig</string>
+    <string name="glucose_palette_preset_gdh">GDH-ähnlich</string>
+    <string name="glucose_palette_preset_custom">Benutzerdefiniert</string>
+    <string name="glucose_palette_custom_suffix">+ Anpassungen</string>
+    <string name="glucose_palette_band_very_low">Sehr niedrig</string>
+    <string name="glucose_palette_band_low">Niedrig</string>
+    <string name="glucose_palette_band_in_range">Im Zielbereich</string>
+    <string name="glucose_palette_band_high">Hoch</string>
+    <string name="glucose_palette_band_very_high">Sehr hoch</string>
+    <string name="glucose_palette_edit">Ändern</string>
+    <string name="glucose_palette_reset">Zurücksetzen</string>
+    <string name="glucose_palette_reset_all">Alle Farben zurücksetzen</string>
     <string name="notification_iob_cob_risk_title">Warnen, wenn Insulin die Kohlenhydrate übersteigt</string>
     <string name="notification_iob_cob_risk_desc">IOB/COB einfärben, wenn in den nächsten 30 Minuten wirkendes Insulin die Glukose voraussichtlich unter den Zielbereich senkt</string>
     <string name="notification_iob_risk_without_cob_title">Auch ohne Kohlenhydrate warnen</string>

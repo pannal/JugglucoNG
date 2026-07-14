@@ -435,7 +435,9 @@ fun DashboardCombinedHeader(
         targetLow,
         targetHigh,
         veryLowThreshold,
-        veryHighThreshold
+        veryHighThreshold,
+        // Recompose the band tint when the user switches palette / edits a band.
+        GlucosePaletteState.revision
     ) {
         glucoseHeroTone(
             value = dvs?.primaryValue,
