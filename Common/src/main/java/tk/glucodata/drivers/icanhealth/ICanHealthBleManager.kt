@@ -1075,7 +1075,10 @@ class ICanHealthBleManager(
         super.close()
     }
 
-    override fun getService(): UUID = ICanHealthConstants.CGM_SERVICE
+    // Unpaired regional i3/i6 discovery cannot rely on 0x181F being present in
+    // every delivered advertisement, so use the existing unfiltered scan path.
+    override fun getService(): UUID? =
+        if (mActiveDeviceAddress.isNullOrBlank()) null else ICanHealthConstants.CGM_SERVICE
 
     override fun matchDeviceName(deviceName: String?, address: String?): Boolean {
         val trimmedName = deviceName?.trim()?.takeIf { it.isNotEmpty() } ?: return false
