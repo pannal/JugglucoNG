@@ -17,7 +17,9 @@ enum class AlertType(val id: Int, val nameResId: Int) {
     PRE_HIGH(8, R.string.alert_forecast_high),         
     MISSED_READING(9, R.string.alert_missed_reading),
     PERSISTENT_HIGH(10, R.string.alert_persistent_high),
-    SENSOR_EXPIRY(11, R.string.alert_sensor_expiry);
+    SENSOR_EXPIRY(11, R.string.alert_sensor_expiry),
+    FALLING_FAST(12, R.string.alert_falling_fast),
+    RISING_FAST(13, R.string.alert_rising_fast);
 
     companion object {
         fun fromId(id: Int): AlertType? = entries.find { it.id == id }
@@ -37,7 +39,9 @@ enum class AlertType(val id: Int, val nameResId: Int) {
             MISSED_READING,
             PERSISTENT_HIGH,
             LOSS,
-            SENSOR_EXPIRY
+            SENSOR_EXPIRY,
+            FALLING_FAST,
+            RISING_FAST
         )
     }
 }
@@ -83,7 +87,12 @@ data class AlertConfig(
     val threshold: Float? = null,           // Glucose value (null for non-threshold alerts)
     val durationMinutes: Int? = null,       // For persistent high / missed reading alerts
     val forecastMinutes: Int? = null,       // For forecast alerts (how far ahead to predict)
-    
+
+    // Delta-counter settings (FALLING_FAST / RISING_FAST): GDH-style robust rate-of-change alarm.
+    val deltaThreshold: Float? = null,      // Min per-reading change (display units) to count as steep
+    val deltaCount: Int? = null,            // How many consecutive steep readings must accumulate
+    val deltaBorder: Float? = null,         // Only alarm once the value is past this bound (below/above)
+
     // Delivery settings
     val deliveryMode: AlertDeliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
     val overrideDND: Boolean = false,       // Override Do Not Disturb
@@ -203,6 +212,18 @@ object AlertDefaults {
     const val MISSED_READING_MINUTES = 30
     const val PERSISTENT_HIGH_MINUTES = 60
     const val FORECAST_LOOK_AHEAD_MINUTES = 20
+
+    // Delta-counter defaults (FALLING_FAST / RISING_FAST). Tunable; disabled by default.
+    // Change over the delta interval that counts as steep (~10 mg/dL / 0.6 mmol per 5 min).
+    const val DELTA_THRESHOLD_MGDL = 10f
+    const val DELTA_THRESHOLD_MMOL = 0.6f
+    // Consecutive steep readings required.
+    const val DELTA_COUNT_DEFAULT = 3
+    // Only warn once the value is already heading toward trouble.
+    const val FALLING_BORDER_MGDL = 120f     // alarm only at/below this
+    const val FALLING_BORDER_MMOL = 6.7f
+    const val RISING_BORDER_MGDL = 180f      // alarm only at/above this
+    const val RISING_BORDER_MMOL = 10.0f
     
     // Snooze presets (minutes)
     val SNOOZE_PRESETS = listOf(5, 10, 15, 30, 60, 90, 120)
@@ -298,6 +319,26 @@ object AlertDefaults {
                 durationMinutes = 30,
                 deliveryMode = AlertDeliveryMode.NOTIFICATION_ONLY,
                 hapticProfile = HapticProfile.STEADY,
+                defaultSnoozeMinutes = 30
+            )
+            AlertType.FALLING_FAST -> AlertConfig(
+                type = type,
+                enabled = false,
+                deltaThreshold = if (isMmol) DELTA_THRESHOLD_MMOL else DELTA_THRESHOLD_MGDL,
+                deltaCount = DELTA_COUNT_DEFAULT,
+                deltaBorder = if (isMmol) FALLING_BORDER_MMOL else FALLING_BORDER_MGDL,
+                deliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
+                hapticProfile = HapticProfile.SOFT,
+                defaultSnoozeMinutes = 20
+            )
+            AlertType.RISING_FAST -> AlertConfig(
+                type = type,
+                enabled = false,
+                deltaThreshold = if (isMmol) DELTA_THRESHOLD_MMOL else DELTA_THRESHOLD_MGDL,
+                deltaCount = DELTA_COUNT_DEFAULT,
+                deltaBorder = if (isMmol) RISING_BORDER_MMOL else RISING_BORDER_MGDL,
+                deliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
+                hapticProfile = HapticProfile.SOFT,
                 defaultSnoozeMinutes = 30
             )
             else -> AlertConfig(type = type)

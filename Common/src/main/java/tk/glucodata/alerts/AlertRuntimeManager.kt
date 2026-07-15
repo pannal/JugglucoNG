@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import tk.glucodata.Applic
 import tk.glucodata.CurrentDisplaySource
+import tk.glucodata.GlucoseDelta
 import tk.glucodata.Log
 import tk.glucodata.Natives
 import tk.glucodata.Notify
@@ -33,6 +34,8 @@ object AlertRuntimeManager {
     private var persistentHighStartedAtMs: Long = 0L
     private val standardEpisodes = AlertEpisodeState<AlertType>()
     private val sensorExpiryState = SensorExpiryAlertState()
+    private val fallingDeltaState = DeltaAlarmState(falling = true)
+    private val risingDeltaState = DeltaAlarmState(falling = false)
     private val calibrationReadingBarrier = ReadingTimestampBarrier()
 
     private val standardGlucoseAlertTypes = listOf(
@@ -67,6 +70,10 @@ object AlertRuntimeManager {
         synchronized(lock) {
             val suppressThroughMs = maxOf(lastReadingTimeMs, currentReadingTimeMs)
             calibrationReadingBarrier.suppressThrough(suppressThroughMs)
+            // A recalibration shifts the displayed value without a real new sample; drop the delta
+            // baseline so the jump can't be mistaken for a steep fall/rise.
+            fallingDeltaState.resetBaseline()
+            risingDeltaState.resetBaseline()
             if (suppressThroughMs > 0L) {
                 Log.i(LOG_ID, "Calibration changed; glucose alerts wait for reading after $suppressThroughMs")
             }
@@ -153,6 +160,7 @@ object AlertRuntimeManager {
         evaluateMissedReadingLocked(nowMs)
         if (!glucoseAlertsBlocked) {
             evaluatePersistentHighLocked(nowMs)
+            evaluateDeltaAlarmsLocked()
         }
         evaluateSensorExpiryLocked(nowMs)
         return standardAlertEvaluation
@@ -402,6 +410,71 @@ object AlertRuntimeManager {
         val message = Applic.app.getString(R.string.alert_sensor_expiry) + " - " +
             Applic.app.getString(R.string.hours_short, remainingHours)
 
+        triggerAlert(type, glucoseValue, currentRateLocked(), message)
+    }
+
+    private fun evaluateDeltaAlarmsLocked() {
+        evaluateDeltaAlarmLocked(AlertType.FALLING_FAST, fallingDeltaState)
+        evaluateDeltaAlarmLocked(AlertType.RISING_FAST, risingDeltaState)
+    }
+
+    private fun deltaIntervalMinutesLocked(): Int {
+        return try {
+            GlucoseDelta.sanitizeIntervalMinutes(
+                Applic.app
+                    .getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
+                    .getInt("delta_interval_minutes", GlucoseDelta.DEFAULT_INTERVAL_MINUTES)
+            )
+        } catch (t: Throwable) {
+            GlucoseDelta.DEFAULT_INTERVAL_MINUTES
+        }
+    }
+
+    private fun evaluateDeltaAlarmLocked(type: AlertType, state: DeltaAlarmState) {
+        val config = AlertRepository.loadConfig(type)
+        val deltaThreshold = config.deltaThreshold
+        val deltaCount = config.deltaCount
+        val deltaBorder = config.deltaBorder
+
+        if (!config.enabled || deltaThreshold == null || deltaCount == null || deltaBorder == null) {
+            state.reset()
+            clearRuntimeAlert(type, "delta-alarm-disabled")
+            return
+        }
+
+        val glucoseValue = currentGlucoseValueLocked()
+        if (glucoseValue == null) {
+            // Keep the run intact; a missing sample is not a movement.
+            return
+        }
+
+        val activeNow = config.isActiveNow()
+        val snoozed = SnoozeManager.isSnoozed(type)
+        // The state advances its run counter here (once per genuinely newer reading) and only
+        // returns true while active and not snoozed. The delta is measured over the global
+        // interval, the same one that drives the Δ readout.
+        val shouldTrigger = state.shouldTrigger(
+            enabled = true,
+            activeNow = activeNow,
+            snoozed = snoozed,
+            value = glucoseValue,
+            readingTimeMs = lastReadingTimeMs,
+            deltaThreshold = deltaThreshold,
+            deltaCount = deltaCount,
+            deltaBorder = deltaBorder,
+            intervalMinutes = deltaIntervalMinutesLocked()
+        )
+
+        if (!activeNow) {
+            clearRuntimeAlert(type, "delta-alarm-time-inactive")
+            return
+        }
+        if (snoozed || !shouldTrigger) {
+            return
+        }
+
+        val label = Applic.app.getString(type.nameResId)
+        val message = "$label ${Notify.glucosestr(glucoseValue)}"
         triggerAlert(type, glucoseValue, currentRateLocked(), message)
     }
 

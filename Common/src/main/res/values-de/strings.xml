@@ -724,6 +724,14 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="alert_sensor_expiry">Sensorablauf</string>
     <string name="missed_reading_channel_description">Alerts when no glucose reading arrives for the configured duration</string>
     <string name="sensor_expiry_channel_description">Alerts when the current sensor is nearing expiry</string>
+    <string name="alert_falling_fast">Schnell fallend</string>
+    <string name="alert_rising_fast">Schnell steigend</string>
+    <string name="delta_change_label">Änderung pro %1$d Min</string>
+    <string name="delta_count_label">Messwerte in Folge</string>
+    <string name="delta_border_below_label">Nur unterhalb alarmieren</string>
+    <string name="delta_border_above_label">Nur oberhalb alarmieren</string>
+    <string name="falling_fast_explanation">Warnt, wenn %1$d Messwerte in Folge um mehr als %2$s fallen und der Wert bei oder unter %3$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
+    <string name="rising_fast_explanation">Warnt, wenn %1$d Messwerte in Folge um mehr als %2$s steigen und der Wert bei oder über %3$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
     <string name="alert_value_available">Wert verfügbar</string>
     <string name="alert_very_high">Sehr hoch</string>
     <string name="alert_very_low">Sehr niedrig</string>

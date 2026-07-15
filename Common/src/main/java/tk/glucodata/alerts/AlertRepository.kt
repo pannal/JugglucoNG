@@ -52,6 +52,10 @@ object AlertRepository {
     private fun keyRetryEnabled(type: AlertType) = "alert_${type.id}_retryOn"
     private fun keyRetryInterval(type: AlertType) = "alert_${type.id}_retryInt"
     private fun keyRetryCount(type: AlertType) = "alert_${type.id}_retryCnt"
+    // Delta-counter keys (FALLING_FAST / RISING_FAST)
+    private fun keyDeltaThreshold(type: AlertType) = "alert_${type.id}_deltaThreshold"
+    private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
+    private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -241,10 +245,13 @@ object AlertRepository {
             activeEndMinute = prefs.getInt(keyActiveEndMinute(type), -1).takeIf { it >= 0 },
             retryEnabled = prefs.getBoolean(keyRetryEnabled(type), false),
             retryIntervalMinutes = prefs.getInt(keyRetryInterval(type), 5),
-            retryCount = prefs.getInt(keyRetryCount(type), 3)
+            retryCount = prefs.getInt(keyRetryCount(type), 3),
+            deltaThreshold = prefs.getFloat(keyDeltaThreshold(type), default.deltaThreshold ?: 0f).takeIf { it > 0 },
+            deltaCount = prefs.getInt(keyDeltaCount(type), default.deltaCount ?: 0).takeIf { it > 0 },
+            deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 }
         )
     }
-    
+
     /**
      * Save configuration for an alert type.
      * For legacy types, writes to both SharedPreferences and Natives.
@@ -289,6 +296,9 @@ object AlertRepository {
             putBoolean(keyRetryEnabled(config.type), config.retryEnabled)
             putInt(keyRetryInterval(config.type), config.retryIntervalMinutes)
             putInt(keyRetryCount(config.type), config.retryCount)
+            if (config.deltaThreshold != null) putFloat(keyDeltaThreshold(config.type), config.deltaThreshold) else remove(keyDeltaThreshold(config.type))
+            if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
+            if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
         }
     }
     
