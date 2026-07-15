@@ -73,6 +73,11 @@ object AlertRepository {
         return sanitizeExpiryWarningMinutes(raw.mapNotNull { it.toIntOrNull() }.toSet())
     }
 
+    // Delta-counter keys (FALLING_FAST / RISING_FAST)
+    private fun keyDeltaThreshold(type: AlertType) = "alert_${type.id}_deltaThreshold"
+    private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
+    private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
+
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
             runCatching { enumValueOf<T>(raw.uppercase()) }.getOrNull()
@@ -266,7 +271,10 @@ object AlertRepository {
             retryCount = prefs.getInt(keyRetryCount(type), 3),
             soundDelayEnabled = prefs.getBoolean(keySoundDelayEnabled(type), false),
             soundDelaySeconds = readSoundDelaySeconds(type),
-            expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes)
+            expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes),
+            deltaThreshold = prefs.getFloat(keyDeltaThreshold(type), default.deltaThreshold ?: 0f).takeIf { it > 0 },
+            deltaCount = prefs.getInt(keyDeltaCount(type), default.deltaCount ?: 0).takeIf { it > 0 },
+            deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 }
         )
     }
 
@@ -323,6 +331,9 @@ object AlertRepository {
                     sanitizeExpiryWarningMinutes(config.expiryWarningMinutes).map { it.toString() }.toSet()
                 )
             }
+            if (config.deltaThreshold != null) putFloat(keyDeltaThreshold(config.type), config.deltaThreshold) else remove(keyDeltaThreshold(config.type))
+            if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
+            if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
         }
     }
     
