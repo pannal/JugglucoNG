@@ -39,6 +39,43 @@ class GlucoseDeltaTests {
     }
 
     @Test
+    fun oneMinuteIntervalGivesRawChangeForAdjacentReadings() {
+        // 1-minute interval, 1-minute gap -> raw change, no scaling.
+        val d = GlucoseDelta.delta(t0, 219f, t0 - 60_000L, 215f, 1)
+        assertEquals(4f, d, 0.001f)
+    }
+
+    @Test
+    fun oneMinuteIntervalNormalizesWiderGaps() {
+        // 1-minute interval over a 5-minute gap: +10 -> +2 per minute.
+        val d = GlucoseDelta.delta(t0, 130f, t0 - 5 * 60_000L, 120f, 1)
+        assertEquals(2f, d, 0.001f)
+    }
+
+    @Test
+    fun oneMinuteIntervalRejectsSubHalfWindowPairs() {
+        // Closer than half of a 1-minute window (< 30 s) says nothing.
+        assertTrue(GlucoseDelta.delta(t0, 119f, t0 - 20_000L, 120f, 1).isNaN())
+    }
+
+    @Test
+    fun minGapScalesWithInterval() {
+        // 5-minute interval keeps the historical walk-back constant.
+        assertEquals(GlucoseDelta.MIN_GAP_MILLIS, GlucoseDelta.minGapMillis(5))
+        // 1-minute interval walks back only ~54 s.
+        assertEquals(54_000L, GlucoseDelta.minGapMillis(1))
+    }
+
+    @Test
+    fun fiveMinuteDeltaStillMatchesGeneralInterval() {
+        assertEquals(
+            GlucoseDelta.delta(t0, 130f, t0 - 10 * 60_000L, 120f, 5),
+            GlucoseDelta.fiveMinuteDelta(t0, 130f, t0 - 10 * 60_000L, 120f),
+            0.001f
+        )
+    }
+
+    @Test
     fun formatsMgdlCompactlyWithSign() {
         assertEquals("+2", GlucoseDelta.format(2f, false))
         assertEquals("-1", GlucoseDelta.format(-1f, false))
