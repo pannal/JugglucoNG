@@ -49,11 +49,29 @@ public final class BroadcastTrendRate {
     public static float computed(String sensorId, float nativeRate) {
         try {
             final boolean isMmol = Applic.unit == 1;
-            final java.util.List<GlucosePoint> points = NotificationHistorySource.getDisplayHistory(
-                    System.currentTimeMillis() - DisplayTrendSource.TREND_WINDOW_MS,
+            final long startT = System.currentTimeMillis() - DisplayTrendSource.TREND_WINDOW_MS;
+            java.util.List<GlucosePoint> points = NotificationHistorySource.getDisplayHistory(
+                    startT,
                     isMmol,
                     sensorId);
+            // Append the live reading before regressing, exactly like the notification and the
+            // dashboard do. Room persistence lags the current value, so without this the outgoing
+            // rate is computed over a point list one reading shorter than the one the app's own
+            // arrow uses -- the two then disagree on precisely the fast moves this option exists
+            // for. resolveCurrent (not ...ForExchange) on purpose: the promise here is to carry
+            // the trend the app's arrows show, which is the locally smoothed series.
+            CurrentDisplaySource.Snapshot current = null;
+            try {
+                current = CurrentDisplaySource.resolveCurrent(Notify.glucosetimeout, sensorId);
+            } catch (Throwable th) {
+                if (Log.doLog)
+                    Log.i("BroadcastTrendRate", "resolveCurrent failed: " + th);
+            }
+            points = DisplayTrendSource.augmentHistory(points, current, sensorId, startT);
             final int viewMode = Notify.resolveSensorViewMode(sensorId);
+            // current is deliberately not handed to resolveArrowRate: when the history is too thin
+            // to say anything this must fall back to the caller's native rate, as documented above,
+            // rather than to the display snapshot's own rate.
             final float computed = DisplayTrendSource.resolveArrowRate(points, null, viewMode, isMmol, Float.NaN);
             return Float.isFinite(computed) ? computed : nativeRate;
         } catch (Throwable th) {
