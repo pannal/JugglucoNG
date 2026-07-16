@@ -26,6 +26,10 @@ import android.content.IntentFilter;
 
 public class Specific {
 	static void start(Application context) {
+		// Hand the shared code this variant's trend estimator before anything can draw an
+		// arrow or broadcast a rate. Explicit registration, not a runtime name lookup: R8
+		// renames the estimator's members in release builds (see TrendAccess).
+		TrendAccess.register(tk.glucodata.logic.TrendEngineVelocityProvider.INSTANCE);
 		watchdrip.set(Natives.getwatchdrip());
 		SuperGattCallback.doGadgetbridge = Natives.getgadgetbridge();
 	}
