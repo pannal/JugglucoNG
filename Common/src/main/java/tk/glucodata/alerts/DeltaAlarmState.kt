@@ -42,6 +42,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
     private val history = ArrayDeque<Sample>()
     private var lastReadingTimeMs = NO_READING
     private var lastCheckpointMs = NO_READING
+    private var lastIntervalMinutes = 0   // 0 = no reading judged yet
     private var count = 0
     private var armed = true
 
@@ -49,6 +50,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         history.clear()
         lastReadingTimeMs = NO_READING
         lastCheckpointMs = NO_READING
+        lastIntervalMinutes = 0
         count = 0
         armed = true
     }
@@ -80,12 +82,20 @@ internal class DeltaAlarmState(private val falling: Boolean) {
             return false
         }
 
+        // The window scales both the walk-back and the checkpoint spacing, so a run measured
+        // over mixed windows is meaningless: when the effective interval changes, start over.
+        val interval = GlucoseDelta.sanitizeIntervalMinutes(intervalMinutes)
+        if (lastIntervalMinutes != 0 && interval != lastIntervalMinutes) {
+            resetBaseline()
+        }
+        lastIntervalMinutes = interval
+
         // Advance the run counter only on a genuinely newer, finite reading.
         if (value.isFinite() && readingTimeMs > lastReadingTimeMs) {
-            advanceRun(value, readingTimeMs, deltaThreshold, intervalMinutes)
+            advanceRun(value, readingTimeMs, deltaThreshold, interval)
             history.addLast(Sample(readingTimeMs, value))
             lastReadingTimeMs = readingTimeMs
-            pruneOld(readingTimeMs, intervalMinutes)
+            pruneOld(readingTimeMs, interval)
         }
 
         if (!activeNow || snoozed) {

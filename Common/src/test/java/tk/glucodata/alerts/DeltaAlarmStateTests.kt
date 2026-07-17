@@ -385,6 +385,22 @@ class DeltaAlarmStateTests {
         assertTrue(state.feed(116f, 17))   // checkpoint -> count 3 -> fire (116 <= 120)
     }
 
+    // ---- 16. Effective window change resets the run ----
+
+    @Test
+    fun changingTheIntervalMidRunDiscardsRunAndHistory() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0))
+        assertFalse(state.feed(140f, 5))   // drop 1
+        assertFalse(state.feed(130f, 10))  // drop 2
+        // The effective window flips to 1 minute: run and history no longer match it.
+        // The next reading is only a fresh baseline, however steep it looks.
+        assertFalse(state.feed(120f, 11, interval = 1, threshold = 3f))
+        assertFalse(state.feed(116f, 12, interval = 1, threshold = 3f)) // -4/min -> drop 1
+        assertFalse(state.feed(112f, 13, interval = 1, threshold = 3f)) // drop 2
+        assertTrue(state.feed(108f, 14, interval = 1, threshold = 3f))  // drop 3 -> fire
+    }
+
     @Test
     fun aShallowSameSignDeltaBetweenCheckpointsDoesNotBreakTheRun() {
         val state = DeltaAlarmState(falling = true)

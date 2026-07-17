@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import tk.glucodata.Applic
+import tk.glucodata.GlucoseDelta
 import tk.glucodata.Natives
 import tk.glucodata.SuperGattCallback
 
@@ -77,6 +78,7 @@ object AlertRepository {
     private fun keyDeltaThreshold(type: AlertType) = "alert_${type.id}_deltaThreshold"
     private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
     private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
+    private fun keyDeltaInterval(type: AlertType) = "alert_${type.id}_deltaInterval"
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -274,7 +276,10 @@ object AlertRepository {
             expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes),
             deltaThreshold = prefs.getFloat(keyDeltaThreshold(type), default.deltaThreshold ?: 0f).takeIf { it > 0 },
             deltaCount = prefs.getInt(keyDeltaCount(type), default.deltaCount ?: 0).takeIf { it > 0 },
-            deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 }
+            deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 },
+            // Missing/0 = follow the Δ readout's global interval.
+            deltaIntervalMinutes = prefs.getInt(keyDeltaInterval(type), 0).takeIf { it > 0 }
+                ?.let { GlucoseDelta.sanitizeIntervalMinutes(it) }
         )
     }
 
@@ -334,6 +339,7 @@ object AlertRepository {
             if (config.deltaThreshold != null) putFloat(keyDeltaThreshold(config.type), config.deltaThreshold) else remove(keyDeltaThreshold(config.type))
             if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
             if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
+            if (config.deltaIntervalMinutes != null) putInt(keyDeltaInterval(config.type), config.deltaIntervalMinutes) else remove(keyDeltaInterval(config.type))
         }
     }
     

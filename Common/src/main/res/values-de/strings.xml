@@ -747,8 +747,10 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="delta_count_label">Messwerte in Folge</string>
     <string name="delta_border_below_label">Nur unterhalb alarmieren</string>
     <string name="delta_border_above_label">Nur oberhalb alarmieren</string>
-    <string name="falling_fast_explanation">Warnt, wenn %1$d Messwerte in Folge um mehr als %2$s fallen und der Wert bei oder unter %3$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
-    <string name="rising_fast_explanation">Warnt, wenn %1$d Messwerte in Folge um mehr als %2$s steigen und der Wert bei oder über %3$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
+    <string name="falling_fast_explanation">Warnt nach %1$d aufeinanderfolgenden %2$d-Minuten-Intervallen mit Abfall ≥ %3$s (≈ %4$d Min anhaltender Fall), wenn der Wert bei oder unter %5$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
+    <string name="rising_fast_explanation">Warnt nach %1$d aufeinanderfolgenden %2$d-Minuten-Intervallen mit Anstieg ≥ %3$s (≈ %4$d Min anhaltender Anstieg), wenn der Wert bei oder über %5$s liegt. Keine Vorhersage, nur der rohe Trend.</string>
+    <string name="delta_alarm_interval_label">Delta-Fenster</string>
+    <string name="delta_alarm_interval_follow">Wie Δ-Anzeige (aktuell %1$d Min)</string>
     <string name="alert_value_available">Wert verfügbar</string>
     <string name="alert_very_high">Sehr hoch</string>
     <string name="alert_very_low">Sehr niedrig</string>
@@ -1610,7 +1612,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="dashboard_show_delta_title">Delta (Δ) auf dem Dashboard</string>
     <string name="dashboard_show_delta_desc">Gemessene Änderung über das Delta-Intervall, unter dem Trendpfeil</string>
     <string name="delta_interval_title">Delta-Intervall (Δ)</string>
-    <string name="delta_interval_desc">Zeitfenster für die Δ-Anzeige und die Schnell-fallend/steigend-Alarme</string>
+    <string name="delta_interval_desc">Zeitfenster für die Δ-Anzeige; die Schnell-fallend/steigend-Alarme folgen ihm, solange kein eigenes Fenster gesetzt ist</string>
     <string name="delta_interval_1min">1 Min</string>
     <string name="delta_interval_5min">5 Min</string>
     <string name="glucose_range_colors_title">Glukose nach Bereich einfärben</string>

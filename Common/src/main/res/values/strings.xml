@@ -829,8 +829,10 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="delta_count_label">Readings in a row</string>
     <string name="delta_border_below_label">Alarm only below</string>
     <string name="delta_border_above_label">Alarm only above</string>
-    <string name="falling_fast_explanation">Warns when %1$d readings in a row each drop by more than %2$s and the value is at or below %3$s. No prediction, just the raw trend.</string>
-    <string name="rising_fast_explanation">Warns when %1$d readings in a row each rise by more than %2$s and the value is at or above %3$s. No prediction, just the raw trend.</string>
+    <string name="falling_fast_explanation">Warns after %1$d consecutive %2$d-minute intervals each falling by at least %3$s (≈ %4$d min of sustained fall) while the value is at or below %5$s. No prediction, just the raw trend.</string>
+    <string name="rising_fast_explanation">Warns after %1$d consecutive %2$d-minute intervals each rising by at least %3$s (≈ %4$d min of sustained rise) while the value is at or above %5$s. No prediction, just the raw trend.</string>
+    <string name="delta_alarm_interval_label">Delta window</string>
+    <string name="delta_alarm_interval_follow">Like Δ readout (currently %1$d min)</string>
     <string name="alert_value_available">Value Available</string>
     <string name="alert_amount">Amount Alert</string>
 
@@ -1868,7 +1870,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="dashboard_show_delta_title">Delta (Δ) on the dashboard</string>
     <string name="dashboard_show_delta_desc">Measured change over the delta interval, below the trend arrow</string>
     <string name="delta_interval_title">Delta (Δ) interval</string>
-    <string name="delta_interval_desc">Time window used for the Δ readout and the falling/rising alarms</string>
+    <string name="delta_interval_desc">Time window for the Δ readout; the falling/rising alarms follow it unless given their own window</string>
     <string name="delta_interval_1min">1 min</string>
     <string name="delta_interval_5min">5 min</string>
     <string name="glucose_range_colors_title">Color glucose by range</string>
