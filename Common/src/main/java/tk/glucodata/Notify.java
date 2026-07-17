@@ -1266,15 +1266,7 @@ public class Notify {
         if (customAlertId == null || customAlertId.isEmpty()) {
             return false;
         }
-        try {
-            final Class<?> managerClass = Class.forName("tk.glucodata.logic.CustomAlertManager");
-            final Object manager = managerClass.getField("INSTANCE").get(null);
-            managerClass.getMethod("dismissAlert", String.class).invoke(manager, customAlertId);
-            return true;
-        } catch (Throwable th) {
-            Log.stack(LOG_ID, "dismissCustomAlertById", th);
-            return false;
-        }
+        return CustomAlertAccess.dismissAlert(customAlertId);
     }
 
     public static void acknowledgeCurrentAlert() {
