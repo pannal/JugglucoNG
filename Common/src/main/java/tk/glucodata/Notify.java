@@ -2992,8 +2992,17 @@ public class Notify {
 
                 float displayRate = glucose.rate;
                 try {
-                    boolean useRaw = (viewMode == 1 || viewMode == 3);
-                    displayRate = TrendAccess.calculateVelocity(nativePoints, useRaw, isMmol);
+                    // The alarm arrow must not disagree with the main notification and the
+                    // dashboard hero: regress over the same canonical trend list they use,
+                    // not a bare 10-minute wall-clock slice.
+                    final CurrentDisplaySource.Snapshot alarmSnapshot = resolveNotificationCurrentSnapshot(
+                            activeSensorSerial);
+                    java.util.List<GlucosePoint> trendPoints = NotificationHistorySource.getDisplayHistory(
+                            endT - 2 * DisplayTrendSource.TREND_WINDOW_MS, isMmol, activeSensorSerial);
+                    trendPoints = DisplayTrendSource.resolveTrendPoints(trendPoints, alarmSnapshot,
+                            activeSensorSerial);
+                    displayRate = DisplayTrendSource.resolveArrowRate(trendPoints, alarmSnapshot, viewMode, isMmol,
+                            glucose.rate);
                 } catch (Throwable t) {
                     // keep original rate if fails
                 }
@@ -3328,22 +3337,19 @@ public class Notify {
         } catch (Exception e) {
             chartPoints = new java.util.ArrayList<>();
         }
+
+        // The canonical trend list: derived from the same rows before the chart's own
+        // augmentation, so the arrow regresses over byte-identical points with the
+        // dashboard hero and the computed-trend broadcast.
+        java.util.List<GlucosePoint> nativePoints = DisplayTrendSource.resolveTrendPoints(chartPoints, resolvedDisplay,
+                activeSensorSerial);
+
         chartPoints = DisplayTrendSource.augmentHistory(chartPoints, resolvedDisplay, activeSensorSerial, startT);
 
         BatteryTrace.bump(
                 "notify.glucose.render",
                 20L,
                 "interactive=" + isScreenInteractive());
-
-        long recentStartT = endT - DisplayTrendSource.TREND_WINDOW_MS;
-        java.util.List<GlucosePoint> nativePoints = new java.util.ArrayList<>();
-        try {
-            nativePoints = NotificationHistorySource.getDisplayHistory(recentStartT, isMmol, activeSensorSerial);
-        } catch (Exception e) {
-            // Fall back to chart points if native fails
-            nativePoints = chartPoints;
-        }
-        nativePoints = DisplayTrendSource.augmentHistory(nativePoints, resolvedDisplay, activeSensorSerial, recentStartT);
 
         // Status Logic & ViewMode extraction
         String statusText = "";
@@ -3757,16 +3763,12 @@ public class Notify {
         } catch (Exception e) {
             chartPoints = new java.util.ArrayList<>();
         }
-        chartPoints = DisplayTrendSource.augmentHistory(chartPoints, current, activeSensorSerial, startT);
 
-        long recentStartT = endT - DisplayTrendSource.TREND_WINDOW_MS;
-        java.util.List<GlucosePoint> nativePoints = new java.util.ArrayList<>();
-        try {
-            nativePoints = NotificationHistorySource.getDisplayHistory(recentStartT, isMmol, activeSensorSerial);
-        } catch (Exception e) {
-            nativePoints = chartPoints;
-        }
-        nativePoints = DisplayTrendSource.augmentHistory(nativePoints, current, activeSensorSerial, recentStartT);
+        // Same canonical trend list as the update path, the dashboard hero and the broadcast.
+        java.util.List<GlucosePoint> nativePoints = DisplayTrendSource.resolveTrendPoints(chartPoints, current,
+                activeSensorSerial);
+
+        chartPoints = DisplayTrendSource.augmentHistory(chartPoints, current, activeSensorSerial, startT);
 
         // Identify ViewMode for Startup
         int viewMode = 0;

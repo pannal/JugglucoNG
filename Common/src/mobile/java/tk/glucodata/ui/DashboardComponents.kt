@@ -298,11 +298,14 @@ fun DashboardCombinedHeader(
     val sensorContentColor = if (isExpiring) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
 
     // Advanced Trend
-    val trendResult = remember(history, latestPoint) {
+    val trendResult = remember(history, latestPoint, currentSnapshot) {
         if (history.isNotEmpty()) {
              // Map Kotlin UI points to Native Java points for shared TrendEngine
              val nativeList = history.map { tk.glucodata.GlucosePoint(it.timestamp, it.value, it.rawValue) }
-             tk.glucodata.logic.TrendEngine.calculateTrend(nativeList, useRaw = (viewMode == 1 || viewMode == 3), isMmol = isMmol)
+             // The canonical trend list (live-augmented, newest-anchored window) —
+             // the same points the notification and broadcast arrows regress over.
+             val trendPoints = tk.glucodata.DisplayTrendSource.resolveTrendPoints(nativeList, currentSnapshot, null)
+             tk.glucodata.logic.TrendEngine.calculateTrend(trendPoints, useRaw = (viewMode == 1 || viewMode == 3), isMmol = isMmol)
         } else if (latestPoint != null) {
             // Fallback
              val nativeList = listOf(tk.glucodata.GlucosePoint(latestPoint.timestamp, latestPoint.value, latestPoint.rawValue))
