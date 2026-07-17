@@ -625,6 +625,9 @@ public abstract class SuperGattCallback extends BluetoothGattCallback {
         if (!isWearable) {
             app.numdata.sendglucose(SerialNumber, tim, gl, thresholdchange(rate), alarm | 0x10);
             GlucoseWidget.update();
+            // Keep the webserver's /pebble IOB in step with the journal,
+            // independent of whether any broadcast target is configured.
+            JournalIobAccess.pushWatchserver(System.currentTimeMillis());
         }
         if (shouldBroadcastMinuteUpdate) {
             nexttime = tim + mininterval;
