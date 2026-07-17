@@ -833,6 +833,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="rising_fast_explanation">Warns after %1$d consecutive %2$d-minute intervals each rising by at least %3$s (≈ %4$d min of sustained rise) while the value is at or above %5$s. No prediction, just the raw trend.</string>
     <string name="delta_alarm_interval_label">Delta window</string>
     <string name="delta_alarm_interval_follow">Like Δ readout (currently %1$d min)</string>
+    <string name="delta_early_trigger_label">Early trigger</string>
+    <string name="delta_early_trigger_desc">Also fire as soon as the total distance (%1$s %2$s) is covered, no matter how many intervals have passed</string>
     <string name="alert_value_available">Value Available</string>
     <string name="alert_amount">Amount Alert</string>
 

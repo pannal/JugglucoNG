@@ -30,7 +30,8 @@ class DeltaAlarmStateTests {
         border: Float = 120f,
         enabled: Boolean = true,
         activeNow: Boolean = true,
-        snoozed: Boolean = false
+        snoozed: Boolean = false,
+        earlyTrigger: Boolean = false
     ): Boolean = shouldTrigger(
         enabled = enabled,
         activeNow = activeNow,
@@ -40,7 +41,8 @@ class DeltaAlarmStateTests {
         deltaThreshold = threshold,
         deltaCount = count,
         deltaBorder = border,
-        intervalMinutes = interval
+        intervalMinutes = interval,
+        earlyTriggerEnabled = earlyTrigger
     )
 
     // ---- 1. Run length over 5-minute readings ----
@@ -413,5 +415,59 @@ class DeltaAlarmStateTests {
         assertFalse(state.feed(139f, 6))   // -9 vs minute 1: same sign, not steep -> run stands
         assertFalse(state.feed(130f, 10))  // checkpoint: -10 vs minute 5 -> count 2
         assertTrue(state.feed(120f, 15))   // checkpoint: -10 -> count 3 -> fire
+    }
+
+    // ---- 17. Early trigger on the implied total distance (count x threshold) ----
+
+    @Test
+    fun withoutEarlyTriggerAFastFullDistanceDropStillWaitsForTheCheckpoints() {
+        val state = DeltaAlarmState(falling = true)
+        // -5/min: the full implied distance (3 x 10 = 30) is covered within ~6 minutes,
+        // but with the escalation off the alarm still waits for the third checkpoint.
+        var v = 150f
+        for (m in 0..14L) {
+            assertFalse("minute $m", state.feed(v, m))
+            v -= 5f
+        }
+        assertTrue(state.feed(v, 15))  // third checkpoint -> count 3
+    }
+
+    @Test
+    fun earlyTriggerFiresWhenTheFirstDeltaCoversTheFullDistance() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0, earlyTrigger = true))
+        // One rolling delta of -30: the run starts and the full distance is already covered.
+        assertTrue(state.feed(120f, 5, earlyTrigger = true))
+        // Shared arming: the continuing drop must not fire a second alarm this run.
+        assertFalse(state.feed(90f, 10, earlyTrigger = true))
+        assertFalse(state.feed(60f, 15, earlyTrigger = true))
+    }
+
+    @Test
+    fun earlyTriggerFiresBetweenCheckpointsOnceTheDistanceIsCovered() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0, earlyTrigger = true))
+        assertFalse(state.feed(132f, 5, earlyTrigger = true))  // -18 -> run starts, 18 of 30 covered
+        // 33 covered from the anchor: fires between checkpoints, not at the third one.
+        assertTrue(state.feed(117f, 8, earlyTrigger = true))
+    }
+
+    @Test
+    fun earlyTriggerStillRespectsTheBorder() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(190f, 0, earlyTrigger = true))
+        assertFalse(state.feed(155f, 5, earlyTrigger = true))  // 35 covered, but 155 > 120 border
+        assertTrue(state.feed(120f, 10, earlyTrigger = true))  // at the border -> fire
+    }
+
+    @Test
+    fun aRunBreakDiscardsTheEarlyTriggerAnchor() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0, earlyTrigger = true))
+        assertFalse(state.feed(132f, 5, earlyTrigger = true))  // -18 -> run starts, anchored at 150
+        assertFalse(state.feed(140f, 10, earlyTrigger = true)) // reversal -> run breaks, anchor discarded
+        assertFalse(state.feed(120f, 15, earlyTrigger = true)) // new run anchored at 140: 20 of 30
+        // 28 from the NEW anchor -> no alarm; the stale 150 anchor would have given 38.
+        assertFalse(state.feed(112f, 18, earlyTrigger = true))
     }
 }

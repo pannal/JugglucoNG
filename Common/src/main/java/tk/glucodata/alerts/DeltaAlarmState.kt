@@ -26,6 +26,12 @@ import tk.glucodata.GlucoseDelta
  * next checkpoint decides. A NaN delta (no usable history, or the pair straddles a data gap)
  * breaks the run at once.
  *
+ * The configuration implies a total distance (`deltaCount × deltaThreshold`). With the optional
+ * early trigger, the alarm also fires as soon as the value has moved that far from the run's
+ * anchor (the older sample of the run-starting delta, so distance is measured consistently with
+ * the delta metric) — checked on every reading, not just at checkpoints, and sharing the
+ * once-per-run arming with the checkpoint path.
+ *
  * One instance per direction, fed the current display value on every evaluation. It advances only
  * on a genuinely newer reading timestamp, so scheduler ticks (which re-pass the same reading) and
  * calibration-only display changes cannot inflate the counter. It fires once per steep run and
@@ -44,6 +50,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
     private var lastCheckpointMs = NO_READING
     private var lastIntervalMinutes = 0   // 0 = no reading judged yet
     private var count = 0
+    private var runReferenceValue = Float.NaN   // anchor of the current run, for the early trigger
     private var armed = true
 
     fun reset() {
@@ -52,6 +59,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         lastCheckpointMs = NO_READING
         lastIntervalMinutes = 0
         count = 0
+        runReferenceValue = Float.NaN
         armed = true
     }
 
@@ -63,6 +71,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         history.clear()
         lastCheckpointMs = NO_READING
         count = 0
+        runReferenceValue = Float.NaN
         armed = true
     }
 
@@ -75,7 +84,8 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         deltaThreshold: Float,
         deltaCount: Int,
         deltaBorder: Float,
-        intervalMinutes: Int
+        intervalMinutes: Int,
+        earlyTriggerEnabled: Boolean = false
     ): Boolean {
         if (!enabled || deltaThreshold <= 0f || deltaCount <= 0) {
             reset()
@@ -103,7 +113,14 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         }
 
         val pastBorder = if (falling) value <= deltaBorder else value >= deltaBorder
-        val triggering = armed && count >= deltaCount && value.isFinite() && pastBorder
+        val runComplete = count >= deltaCount
+        // Optional escalation: once the value has covered the configured total distance
+        // (count x threshold) from the run's anchor, the remaining checkpoints add nothing.
+        // Checked on every reading; NaN anchor or value makes the comparison false.
+        val distanceCovered = if (falling) runReferenceValue - value else value - runReferenceValue
+        val earlyTrigger = earlyTriggerEnabled && count > 0 &&
+            distanceCovered >= deltaCount * deltaThreshold
+        val triggering = armed && value.isFinite() && pastBorder && (runComplete || earlyTrigger)
         if (triggering) {
             armed = false
             return true
@@ -139,9 +156,11 @@ internal class DeltaAlarmState(private val falling: Boolean) {
         val steep = if (falling) delta <= -deltaThreshold else delta >= deltaThreshold
         if (count == 0) {
             if (steep) {
-                // Run start: this rolling delta already spans one interval of movement.
+                // Run start: this rolling delta already spans one interval of movement. Its
+                // older sample anchors the early trigger's distance measurement.
                 count = 1
                 lastCheckpointMs = readingTimeMs
+                runReferenceValue = prev?.value ?: Float.NaN
             }
             return
         }
@@ -169,6 +188,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
     private fun breakRun() {
         count = 0
         lastCheckpointMs = NO_READING
+        runReferenceValue = Float.NaN
         armed = true  // run broken -> eligible to fire again on the next run
     }
 
