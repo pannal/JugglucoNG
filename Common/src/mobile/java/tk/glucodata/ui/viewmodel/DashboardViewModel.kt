@@ -192,6 +192,9 @@ class DashboardViewModel(
     private val _glucodataBroadcastEnabled = MutableStateFlow(false)
     val glucodataBroadcastEnabled = _glucodataBroadcastEnabled.asStateFlow()
 
+    private val _broadcastComputedTrend = MutableStateFlow(false)
+    val broadcastComputedTrend = _broadcastComputedTrend.asStateFlow()
+
     private val _glucoseHistory = MutableStateFlow<List<tk.glucodata.ui.GlucosePoint>>(emptyList())
     val glucoseHistory = _glucoseHistory.asStateFlow()
 
@@ -639,6 +642,7 @@ class DashboardViewModel(
         _xDripBroadcastEnabled.value = Natives.getxbroadcast()
         _patchedLibreBroadcastEnabled.value = Natives.getlibrelinkused()
         _glucodataBroadcastEnabled.value = Natives.getJugglucobroadcast()
+        _broadcastComputedTrend.value = prefs.getBoolean(tk.glucodata.BroadcastTrendRate.PREF_KEY, false)
 
         _hasLowAlarm.value = Natives.hasalarmlow()
         _lowAlarmThreshold.value = Natives.alarmlow()
@@ -1229,6 +1233,13 @@ class DashboardViewModel(
              tk.glucodata.XInfuus.setlibrenames()
         }
         _patchedLibreBroadcastEnabled.value = Natives.getlibrelinkused()
+    }
+
+    fun setBroadcastComputedTrend(enabled: Boolean) {
+        val context = tk.glucodata.Applic.app
+        val prefs = context.getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(tk.glucodata.BroadcastTrendRate.PREF_KEY, enabled).apply()
+        _broadcastComputedTrend.value = enabled
     }
 
     fun toggleGlucodataBroadcast(enabled: Boolean) {

@@ -1450,7 +1450,9 @@ public class Notify {
         return null;
     }
 
-    private static int resolveSensorViewMode(String sensorName) {
+    // Package-visible: BroadcastTrendRate resolves the same view mode when
+    // computing the outgoing trend.
+    static int resolveSensorViewMode(String sensorName) {
         if (sensorName == null || sensorName.isEmpty()) {
             return 0;
         }
