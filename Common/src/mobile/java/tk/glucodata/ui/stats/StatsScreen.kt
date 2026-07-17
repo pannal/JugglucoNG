@@ -3,6 +3,8 @@
 package tk.glucodata.ui.stats
 
 import android.content.Intent
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.toArgb
 import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -2118,6 +2120,12 @@ private fun AgpChart(
     val minY = minOf(values.minOrNull() ?: lowAnchor, lowAnchor - yPadding)
     val maxY = maxOf(values.maxOrNull() ?: highAnchor, highAnchor + yPadding).coerceAtLeast(minY + 10f)
 
+    val chartContext = LocalContext.current
+    val trafficLineColors = remember(chartContext) {
+        chartContext.getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
+            .getBoolean("glucose_app_chart_range_colors_enabled", false)
+    }
+    val isDarkTheme = isSystemInDarkTheme()
     val targetBandColor = TirInRangeColor.copy(alpha = 0.16f)
     val iqrBandColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
     val p10P90Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
@@ -2222,6 +2230,9 @@ private fun AgpChart(
             var p90Started = false
             val medianPath = Path()
             var medianStarted = false
+            var prevMedianPoint: Offset? = null
+            var prevMedianValue = 0f
+            val medianSegments = mutableListOf<Triple<Offset, Offset, Float>>()
 
             val upperIqr = mutableListOf<Offset>()
             val lowerIqr = mutableListOf<Offset>()
@@ -2264,8 +2275,15 @@ private fun AgpChart(
                     } else {
                         medianPath.lineTo(x, y)
                     }
+                    val point = Offset(x, y)
+                    prevMedianPoint?.let { previous ->
+                        medianSegments += Triple(previous, point, (median + prevMedianValue) / 2f)
+                    }
+                    prevMedianPoint = point
+                    prevMedianValue = median
                 } else {
                     medianStarted = false
+                    prevMedianPoint = null
                 }
 
                 bin.p75MgDl?.let { upperIqr += Offset(x, yFor(it)) }
@@ -2291,11 +2309,35 @@ private fun AgpChart(
                 color = p10P90Color,
                 style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
             )
-            drawPath(
-                path = medianPath,
-                color = medianColor,
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-            )
+            if (trafficLineColors) {
+                val medianFallbackArgb = medianColor.toArgb()
+                medianSegments.forEach { (segmentStart, segmentEnd, valueMg) ->
+                    drawLine(
+                        color = Color(
+                            tk.glucodata.GlucoseRangeColors.trafficColorForValue(
+                                valueMg,
+                                targets.lowMgDl,
+                                targets.highMgDl,
+                                targets.veryLowMgDl,
+                                targets.veryHighMgDl,
+                                isDarkTheme,
+                                false,
+                                medianFallbackArgb
+                            )
+                        ),
+                        start = segmentStart,
+                        end = segmentEnd,
+                        strokeWidth = 3.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+                }
+            } else {
+                drawPath(
+                    path = medianPath,
+                    color = medianColor,
+                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                )
+            }
 
             tickHours.forEach { hour ->
                 val x = xForHour(hour)

@@ -107,7 +107,8 @@ fun JournalScreen(
     showTitle: Boolean = true,
     useStatusBarsPadding: Boolean = true,
     bottomContentPadding: Dp = 104.dp,
-    showEiob: Boolean = true
+    showEiob: Boolean = true,
+    chartRangeColors: Boolean = false
 ) {
     val view = LocalView.current
     val sortedHistory = remember(glucoseHistory) { glucoseHistory.sortedBy { it.timestamp } }
@@ -190,6 +191,7 @@ fun JournalScreen(
                     ) {
                         DashboardChartSection(
                             modifier = Modifier.matchParentSize(),
+                            appChartRangeColors = chartRangeColors,
                             glucoseHistory = sortedHistory,
                             journalMarkers = markers,
                             graphSmoothingMinutes = graphSmoothingMinutes,

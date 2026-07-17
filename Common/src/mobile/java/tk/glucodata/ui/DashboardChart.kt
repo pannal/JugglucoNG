@@ -645,6 +645,7 @@ fun DashboardChartSection(
     journalMarkers: List<JournalChartMarker> = emptyList(),
     activeInsulinSummary: JournalActiveInsulinSummary? = null,
     showEiob: Boolean = true,
+    appChartRangeColors: Boolean = false,
     predictionPoints: List<GlucosePredictionPoint> = emptyList(),
     predictionSeries: List<GlucosePredictionSeries> = emptyList(),
     graphSmoothingMinutes: Int = 0,
@@ -686,6 +687,7 @@ fun DashboardChartSection(
                         journalMarkers = journalMarkers,
                         activeInsulinSummary = activeInsulinSummary,
                         showEiob = showEiob,
+                        appChartRangeColors = appChartRangeColors,
                         predictionPoints = predictionPoints,
                         predictionSeries = predictionSeries,
                         graphSmoothingMinutes = graphSmoothingMinutes,
@@ -750,6 +752,7 @@ fun InteractiveGlucoseChart(
     journalMarkers: List<JournalChartMarker> = emptyList(),
     activeInsulinSummary: JournalActiveInsulinSummary? = null,
     showEiob: Boolean = true,
+    appChartRangeColors: Boolean = false,
     predictionPoints: List<GlucosePredictionPoint> = emptyList(),
     predictionSeries: List<GlucosePredictionSeries> = emptyList(),
     graphSmoothingMinutes: Int = 0,
@@ -2025,6 +2028,7 @@ fun InteractiveGlucoseChart(
             // Multi-sensor: the primary trace carries a subtle identity tint so
             // it pairs with its (tinted) values, like the peer traces do.
             val primaryLineTintFraction = if (peerChartSeries.isNotEmpty()) 0.22f else 0f
+            val appTrafficDark = isSystemInDarkTheme()
             val gradientBrush = remember(
                 limitYVeryHigh,
                 limitYHigh,
@@ -2035,7 +2039,9 @@ fun InteractiveGlucoseChart(
                 highOutOfRangeTintBase,
                 lowOutOfRangeTintBase,
                 primaryLineTintFraction,
-                primaryIdentityColor
+                primaryIdentityColor,
+                appChartRangeColors,
+                appTrafficDark
             ) {
                 if (chartHeightPx <= 0f) {
                     Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
@@ -2047,11 +2053,28 @@ fun InteractiveGlucoseChart(
                             color
                         }
 
-                    val veryHighTint = identityTinted(Color(GlucoseRangeColors.VERY_HIGH))
-                    val highTint = identityTinted(highOutOfRangeTintBase)
-                    val lowTint = identityTinted(lowOutOfRangeTintBase)
-                    val veryLowTint = identityTinted(Color(GlucoseRangeColors.VERY_LOW))
-                    val inRangeTint = identityTinted(primaryColor)
+                    // Traffic mode swaps the muted tints for the same palette
+                    // the value/notification coloring uses, incl. green in range.
+                    val veryHighTint = identityTinted(
+                        if (appChartRangeColors) Color(GlucoseRangeColors.valueOut(appTrafficDark))
+                        else Color(GlucoseRangeColors.VERY_HIGH)
+                    )
+                    val highTint = identityTinted(
+                        if (appChartRangeColors) Color(GlucoseRangeColors.valueBorderline(appTrafficDark))
+                        else highOutOfRangeTintBase
+                    )
+                    val lowTint = identityTinted(
+                        if (appChartRangeColors) Color(GlucoseRangeColors.valueBorderline(appTrafficDark))
+                        else lowOutOfRangeTintBase
+                    )
+                    val veryLowTint = identityTinted(
+                        if (appChartRangeColors) Color(GlucoseRangeColors.valueOut(appTrafficDark))
+                        else Color(GlucoseRangeColors.VERY_LOW)
+                    )
+                    val inRangeTint = identityTinted(
+                        if (appChartRangeColors) Color(GlucoseRangeColors.valueInRange(appTrafficDark))
+                        else primaryColor
+                    )
                     val fadePx = 18f
                     val stops = mutableListOf<Pair<Float, Color>>()
 
