@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -97,6 +98,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -372,8 +374,9 @@ fun SensorCard(
 ) {
     val context = LocalContext.current
     var showTerminateDialog by remember { mutableStateOf(false) }
-    // AiDex disconnect: break the sensor's pairing by default (frees it for another device).
-    var breakPairingChecked by remember { mutableStateOf(true) }
+    var unbindAiDexChecked by remember(sensor.serial, sensor.isVendorPaired) {
+        mutableStateOf(sensor.isVendorPaired)
+    }
     var showForgetDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
     // Edit 79: showClearDialog removed — restart algorithm now in Sibionics Calibration bottom sheet
@@ -413,47 +416,66 @@ fun SensorCard(
     // forgetVendor() + removeAiDexFromPrefs() + finishSensor() + sensorEnded() = full cleanup.
     if (showTerminateDialog) {
         if (sensor.isAidex) {
-            // AiDex: teardown + optional protocol unpair. The "Break pairing" toggle
-            // defaults ON so disconnect also frees the sensor for another device;
-            // turning it off keeps the pairing/keys for a later reconnect.
             AlertDialog(
-                onDismissRequest = { showTerminateDialog = false; breakPairingChecked = true },
+                onDismissRequest = {
+                    showTerminateDialog = false
+                    unbindAiDexChecked = sensor.isVendorPaired
+                },
                 title = { Text(stringResource(R.string.disconnect_sensor_title)) },
                 text = {
                     Column {
-                        Text(stringResource(R.string.disconnect_sensor_aidex_desc))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        // Only offer to break pairing when a bond was actually
-                        // established on this device (session key exchanged). In
-                        // broadcast-only mode (e.g. the sensor is still bonded to
-                        // another device) there is nothing here to unpair.
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Switch(
-                                checked = breakPairingChecked && sensor.isVendorPaired,
-                                onCheckedChange = { breakPairingChecked = it },
-                                enabled = sensor.isVendorPaired
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.break_pairing),
-                                color = if (sensor.isVendorPaired) {
-                                    MaterialTheme.colorScheme.onSurface
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        Text(
+                            text = stringResource(R.string.disconnect_sensor_aidex_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (sensor.isVendorPaired) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(MaterialTheme.shapes.large)
+                                    .toggleable(
+                                        value = unbindAiDexChecked,
+                                        role = Role.Switch,
+                                        onValueChange = { unbindAiDexChecked = it }
+                                    )
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.unbind_sensor),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.unbind_sensor_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
-                            )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                StyledSwitch(
+                                    checked = unbindAiDexChecked,
+                                    onCheckedChange = null
+                                )
+                            }
                         }
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        viewModel.disconnectAiDexSensor(sensor.serial, breakPairingChecked && sensor.isVendorPaired)
+                        viewModel.disconnectAiDexSensor(sensor.serial, unbindAiDexChecked && sensor.isVendorPaired)
                         showTerminateDialog = false
-                        breakPairingChecked = true
+                        unbindAiDexChecked = sensor.isVendorPaired
                     }) { Text(stringResource(R.string.disconnect)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showTerminateDialog = false; breakPairingChecked = true }) {
+                    TextButton(onClick = {
+                        showTerminateDialog = false
+                        unbindAiDexChecked = sensor.isVendorPaired
+                    }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
