@@ -134,6 +134,8 @@ class OttaiBleManager(
     @Volatile private var discoveryStarted = false
     @Volatile private var activationCommandSentAtMs = 0L
     @Volatile private var provisionalActiveTimeMs = 0L
+    @Volatile private var commandStatus = -1
+    @Volatile private var endedRecoveryAttempted = false
     @Volatile private var livePollIntervalMs = 60_000L
     @Volatile private var lastHistoryRequestAtMs = 0L
     @Volatile private var roomBackfillChecked = false
@@ -167,14 +169,14 @@ class OttaiBleManager(
     override var viewMode: Int = 0
 
     private val livePollRunnable = Runnable {
-        if (stop || phase != Phase.STREAMING || sessionKeyHex.isBlank()) return@Runnable
+        if (stop || phase != Phase.STREAMING || sessionKeyHex.isBlank() || commandStatus >= 4) return@Runnable
         val gatt = mBluetoothGatt ?: return@Runnable
         readLiveGlucose(gatt, "poll")
         scheduleLivePoll()
     }
 
     private val postHistoryLiveRunnable = Runnable {
-        if (stop || phase != Phase.STREAMING || sessionKeyHex.isBlank()) return@Runnable
+        if (stop || phase != Phase.STREAMING || sessionKeyHex.isBlank() || commandStatus >= 4) return@Runnable
         val gatt = mBluetoothGatt ?: return@Runnable
         readLiveGlucose(gatt, "post-history")
         scheduleLivePoll()
@@ -582,8 +584,44 @@ class OttaiBleManager(
             OttaiConstants.CHAR_COMMAND -> {
                 val status = if (value.isNotEmpty()) value[0].toInt() and 0xFF else -1
                 Log.i(TAG, "cmd/activation status=$status (official: 3=activated, <3=needs activation) raw=${OttaiCrypto.bytesToHex(value)}")
+                handleCommandStatus(gatt, status)
             }
         }
+    }
+
+    private fun handleCommandStatus(gatt: BluetoothGatt, status: Int) {
+        val previous = commandStatus
+        commandStatus = status
+        if (status < 4) {
+            if (status == 3 && previous >= 4) {
+                Log.i(TAG, "ended-sensor recovery accepted; normal streaming restored")
+                handler.postDelayed({ runCatching { readCgmInfo(gatt) } }, 250L)
+                handler.postDelayed({
+                    runCatching {
+                        readLiveGlucose(gatt, "post-ended-recovery")
+                        scheduleLivePoll()
+                    }
+                }, 700L)
+            }
+            UiRefreshBus.requestStatusRefresh()
+            return
+        }
+
+        handler.removeCallbacks(livePollRunnable)
+        handler.removeCallbacks(postHistoryLiveRunnable)
+        val start = effectiveActiveTimeMs()
+        val now = System.currentTimeMillis()
+        val canRecover = OttaiConstants.shouldAttemptEndedSensorRecovery(status, start, now)
+        if (canRecover && !endedRecoveryAttempted) {
+            endedRecoveryAttempted = true
+            Log.w(TAG, "sensor reported cmd=$status at age=${(now - start) / 86_400_000L}d; " +
+                "attempting one maxActive recovery to ${OttaiConstants.EXTENDED_LIFETIME_DAYS}d")
+            handler.postDelayed({ runCatching { requestForceActivation() } }, 250L)
+        } else {
+            Log.w(TAG, "sensor ended cmd=$status; live buffer will not be published " +
+                "(recoveryEligible=$canRecover attempted=$endedRecoveryAttempted)")
+        }
+        UiRefreshBus.requestStatusRefresh()
     }
 
     private fun parseDeviceAuthParam(v: ByteArray) {
@@ -815,6 +853,10 @@ class OttaiBleManager(
 
     private fun handleGlucosePayload(cipher: ByteArray, live: Boolean, source: String) {
         if (sessionKeyHex.isBlank()) { Log.w(TAG, "payload before session key"); return }
+        if (live && commandStatus >= 4) {
+            Log.w(TAG, "ignore ended-sensor live buffer cmd=$commandStatus source=$source")
+            return
+        }
         val activeMs = effectiveActiveTimeMs()
         val receivedAtMs = System.currentTimeMillis()
         val kind = if (live) "live" else "history"
@@ -1264,8 +1306,11 @@ class OttaiBleManager(
         // activeExpireTime (ms) from the cloud validate-by-mac response. p.U zero-pads
         // to one AES block and encrypts with AES/ECB/ZeroBytePadding; this is a 16-byte
         // write, not plaintext duration + session key.
-        val expireMs = materials.activeExpireTimeMs.takeIf { it > 0L } ?: OttaiConstants.DEFAULT_ACTIVE_EXPIRE_MS
+        val cloudExpireMs = materials.activeExpireTimeMs.takeIf { it > 0L }
+            ?: OttaiConstants.DEFAULT_ACTIVE_EXPIRE_MS
+        val expireMs = OttaiConstants.activationMaxActiveMs(cloudExpireMs)
         val secs = expireMs / 1000L
+        Log.i(TAG, "maxActive target=${secs}s cloud=${cloudExpireMs / 1000L}s")
         val payload = OttaiCrypto.encryptPayload(longToBytesLE(secs), sessionKeyHex)
             ?: run {
                 Log.e(TAG, "maxActive encryption failed — aborting activation")
@@ -1570,6 +1615,7 @@ class OttaiBleManager(
     // and past it we keep reading as long as samples still arrive — only once the stream has
     // been silent past the stale-grace do we call it expired, so a healthy sensor runs past 25d.
     override fun isSensorExpired(): Boolean {
+        if (commandStatus >= 4) return true
         val end = getExpectedEndMs()
         if (end <= 0L) return false
         val now = System.currentTimeMillis()
@@ -1592,7 +1638,7 @@ class OttaiBleManager(
     override val vendorModelName: String get() = OttaiConstants.DEFAULT_DISPLAY_NAME
     override fun isUiEnabled(): Boolean = !stop
     override fun isVendorConnectedForUi(): Boolean =
-        !stop && phase == Phase.STREAMING && sessionKeyHex.isNotBlank() && !isConnectionStale()
+        !stop && phase == Phase.STREAMING && sessionKeyHex.isNotBlank() && commandStatus < 4 && !isConnectionStale()
 
     override fun matchesManagedSensorId(sensorId: String?): Boolean =
         OttaiRegistry.resolveCanonicalSensorId(Applic.app, sensorId)
@@ -1605,6 +1651,10 @@ class OttaiBleManager(
         val loss = lossOfSignalText()
         val hasLossStatus = constatstatusstr == "Loss of signal" || constatstatusstr == loss
         if (isConnectionStale()) return loss
+        if (commandStatus >= 4) return appString(
+            R.string.ottai_state_expired,
+            "Expired or ended",
+        )
         return when (phase) {
             Phase.IDLE -> if (hasLossStatus) loss
                 else if (authKeys == null) "Needs cloud bind"

@@ -75,7 +75,8 @@ object OutboundApiJournalSnapshot {
      * Compact insulin/carb snapshot for the glucodata.Minute broadcast and the
      * persistent notification, resolved from src/main (JugglucoSend, Notify)
      * via reflection because the journal only exists in the mobile source set.
-     * Returns [classicIob, eiob, cob] with NaN marking "no data of that kind",
+     * Returns [classicIob, eiob, cob, iobNext30min, cobNext30min] with NaN
+     * marking "no data of that kind",
      * or null when the journal feature is disabled or has never seen
      * insulin/carb entries — users of the legacy native amounts must not have
      * their /pebble-polled IOB clobbered with journal zeros.
@@ -113,14 +114,25 @@ object OutboundApiJournalSnapshot {
         val startMillis = (atMillis - maxOf(DEFAULT_ACTIVE_WINDOW_MS, maxPresetDurationMs) - 60_000L)
             .coerceAtLeast(0L)
         val entries = dao.getEntriesBetween(startMillis, atMillis)
-        val insulin = JournalIobCalculator.compute(
-            JournalIobCalculator.dosesFromEntities(entries, presetsById),
-            atMillis
-        )
+        val doses = JournalIobCalculator.dosesFromEntities(entries, presetsById)
+        val insulin = JournalIobCalculator.compute(doses, atMillis)
+        // Insulin delivering / carbs absorbing within the next 30 minutes —
+        // the "soon" quantities the notification risk warning projects with.
+        val windowMillis = 30L * 60L * 1000L
+        val insulinAfterWindow = JournalIobCalculator.compute(doses, atMillis + windowMillis)
+        val iobNextWindow = (insulin.iobUnits - insulinAfterWindow.iobUnits).coerceAtLeast(0f)
+        val cobNow = if (hasCarbs) activeCarbsGrams(entries, atMillis) else Float.NaN
+        val cobNextWindow = if (hasCarbs) {
+            (cobNow - activeCarbsGrams(entries, atMillis + windowMillis)).coerceAtLeast(0f)
+        } else {
+            Float.NaN
+        }
         return floatArrayOf(
             if (hasInsulin) insulin.iobUnits else Float.NaN,
             if (hasInsulin) insulin.eiobUnits else Float.NaN,
-            if (hasCarbs) activeCarbsGrams(entries, atMillis) else Float.NaN
+            cobNow,
+            if (hasInsulin) iobNextWindow else Float.NaN,
+            cobNextWindow
         )
     }
 
