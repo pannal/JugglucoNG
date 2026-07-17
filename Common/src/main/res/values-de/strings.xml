@@ -619,8 +619,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="juggluco_native">Juggluco nativ</string>
     <string name="window_label">Fenster</string>
     <string name="auto_restart_algorithm">Algorithmus neu starten</string>
+    <string name="status_bluetooth_off">Bluetooth aus</string>
     <string name="status_connection_failed">Verbindung fehlgeschlagen</string>
-    <string name="status_disconnect_code">Getrennt (Code %1$s)</string>
     <string name="scan_sensor_qr">Sensor-QR-Code scannen</string>
     <string name="status_connected">Verbunden</string>
     <string name="status_disconnected">Getrennt</string>
