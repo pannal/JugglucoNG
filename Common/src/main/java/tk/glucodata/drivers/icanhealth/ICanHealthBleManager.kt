@@ -19,6 +19,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -1106,6 +1107,24 @@ class ICanHealthBleManager(
             return true
         }
         return ICanHealthConstants.isICanHealthDevice(trimmedName)
+    }
+
+    override fun matchScanResult(result: ScanResult): Boolean {
+        val address = result.device?.address?.trim()?.uppercase(Locale.US)
+        if (address != null && address in rejectedOnboardingAddresses) {
+            return false
+        }
+        val knownAddress = mActiveDeviceAddress?.takeIf { it.isNotBlank() }
+        if (knownAddress != null) {
+            return address != null && address.equals(knownAddress, ignoreCase = true)
+        }
+        val record = result.scanRecord ?: return false
+        val advertisesCgmService = record.serviceUuids
+            ?.any { it.uuid == ICanHealthConstants.CGM_SERVICE } == true
+        val carriesCgmServiceData = record.serviceData
+            ?.keys
+            ?.any { it.uuid == ICanHealthConstants.CGM_SERVICE } == true
+        return advertisesCgmService || carriesCgmServiceData
     }
 
     override fun reconnect(now: Long): Boolean {
