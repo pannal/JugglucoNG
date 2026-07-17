@@ -5,15 +5,26 @@ import tk.glucodata.GlucoseDelta
 /**
  * GDH-style delta run-length counter behind the FALLING_FAST / RISING_FAST alarms.
  *
- * Robust, model-free "you're dropping/rising fast" detection: it counts consecutive readings whose
- * change over the configured interval (via [GlucoseDelta]) exceeds [deltaThreshold] in the alarming
- * direction, and fires once a run of [deltaCount] such readings has accumulated while the value is
- * past [deltaBorder]. No extrapolation, no insulin, no smoothing.
+ * Robust, model-free "you're dropping/rising fast" detection: it counts consecutive
+ * non-overlapping intervals whose change (via [GlucoseDelta]) exceeds [deltaThreshold] in the
+ * alarming direction, and fires once a run of [deltaCount] such intervals has accumulated while
+ * the value is past [deltaBorder]. No extrapolation, no insulin, no smoothing.
  *
- * The delta is measured over the same 1-or-5-minute window as NG's Δ readout, so the threshold is
- * cadence-independent: "10 mg/dl per 5 min" means the same on a 1-minute sensor and a 5-minute one.
- * The state keeps a short reading history to walk back to the sample one interval old, exactly like
- * the readout does.
+ * The delta itself stays rolling: it is recomputed for every reading over the configured
+ * 1-or-5-minute window, exactly like NG's Δ readout, so the threshold is cadence-independent:
+ * "10 mg/dl per 5 min" means the same on a 1-minute sensor and a 5-minute one. The *counter*,
+ * however, advances only at interval checkpoints: the first steep delta starts the run (that
+ * delta already covers one interval of movement), and it is re-judged at the first reading a
+ * full interval later, whose rolling delta covers the adjacent, non-overlapping interval. On a
+ * fast stream, consecutive rolling windows overlap almost entirely, so counting every reading
+ * would satisfy [deltaCount] within a few readings instead of `deltaCount × interval` minutes.
+ * On a sensor that reports exactly once per interval, every reading is a checkpoint and the
+ * behaviour is the same as counting readings.
+ *
+ * Between checkpoints, a delta reversed against the alarming direction breaks the run
+ * immediately; a delta that is merely no longer steep enough leaves the run standing until the
+ * next checkpoint decides. A NaN delta (no usable history, or the pair straddles a data gap)
+ * breaks the run at once.
  *
  * One instance per direction, fed the current display value on every evaluation. It advances only
  * on a genuinely newer reading timestamp, so scheduler ticks (which re-pass the same reading) and
@@ -30,12 +41,14 @@ internal class DeltaAlarmState(private val falling: Boolean) {
 
     private val history = ArrayDeque<Sample>()
     private var lastReadingTimeMs = NO_READING
+    private var lastCheckpointMs = NO_READING
     private var count = 0
     private var armed = true
 
     fun reset() {
         history.clear()
         lastReadingTimeMs = NO_READING
+        lastCheckpointMs = NO_READING
         count = 0
         armed = true
     }
@@ -46,6 +59,7 @@ internal class DeltaAlarmState(private val falling: Boolean) {
      */
     fun resetBaseline() {
         history.clear()
+        lastCheckpointMs = NO_READING
         count = 0
         armed = true
     }
@@ -108,16 +122,44 @@ internal class DeltaAlarmState(private val falling: Boolean) {
 
         if (delta.isNaN()) {
             // Not enough history yet, or the pair straddles a data gap: break the run.
-            count = 0
-            armed = true
+            breakRun()
             return
         }
 
         val steep = if (falling) delta <= -deltaThreshold else delta >= deltaThreshold
-        count = if (steep) count + 1 else 0
         if (count == 0) {
-            armed = true  // run broken -> eligible to fire again on the next run
+            if (steep) {
+                // Run start: this rolling delta already spans one interval of movement.
+                count = 1
+                lastCheckpointMs = readingTimeMs
+            }
+            return
         }
+
+        // A reversal against the alarming direction breaks the run immediately, even between
+        // checkpoints; a merely-not-steep-enough delta is left for the next checkpoint to judge.
+        val reversed = if (falling) delta > 0f else delta < 0f
+        if (reversed) {
+            breakRun()
+            return
+        }
+
+        // Checkpoint: the first reading a full interval past the last one. Its rolling delta
+        // covers the adjacent, non-overlapping interval; between checkpoints the counter holds.
+        if (readingTimeMs - lastCheckpointMs >= GlucoseDelta.windowMillis(intervalMinutes)) {
+            if (steep) {
+                count += 1
+                lastCheckpointMs = readingTimeMs
+            } else {
+                breakRun()
+            }
+        }
+    }
+
+    private fun breakRun() {
+        count = 0
+        lastCheckpointMs = NO_READING
+        armed = true  // run broken -> eligible to fire again on the next run
     }
 
     private fun pruneOld(readingTimeMs: Long, intervalMinutes: Int) {
