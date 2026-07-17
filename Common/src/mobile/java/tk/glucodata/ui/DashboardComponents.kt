@@ -278,6 +278,7 @@ fun DashboardCombinedHeader(
     valueRangeColorsEnabled: Boolean = false,
     arrowForecastColorsEnabled: Boolean = false,
     showDelta: Boolean = false,
+    deltaIntervalMinutes: Int = tk.glucodata.GlucoseDelta.DEFAULT_INTERVAL_MINUTES,
     peerReadings: List<tk.glucodata.ui.viewmodel.DashboardViewModel.PeerCurrentReading> = emptyList(),
     onPeerReadingClick: (String) -> Unit = {},
     onHeroClick: () -> Unit = {}
@@ -317,17 +318,18 @@ fun DashboardCombinedHeader(
     // number to sanity-check the estimated arrow against. Walks back to the
     // first point old enough for the window instead of taking blind indices.
     val heroDeltaText = if (showDelta) {
-        remember(history, isMmol) {
+        remember(history, isMmol, deltaIntervalMinutes) {
             val newest = history.lastOrNull()
             val previous = newest?.let { n ->
                 history.asReversed().firstOrNull { p ->
-                    p.value > 0.1f && n.timestamp - p.timestamp >= tk.glucodata.GlucoseDelta.MIN_GAP_MILLIS
+                    p.value > 0.1f && n.timestamp - p.timestamp >= tk.glucodata.GlucoseDelta.minGapMillis(deltaIntervalMinutes)
                 }
             }
             if (newest != null && previous != null) {
-                val delta = tk.glucodata.GlucoseDelta.fiveMinuteDelta(
+                val delta = tk.glucodata.GlucoseDelta.delta(
                     newest.timestamp, newest.value,
-                    previous.timestamp, previous.value
+                    previous.timestamp, previous.value,
+                    deltaIntervalMinutes
                 )
                 tk.glucodata.GlucoseDelta.format(delta, isMmol)
                     .takeIf { it.isNotEmpty() }

@@ -97,6 +97,7 @@ fun NotificationSettingsScreen(
     val chartRangeColorsEnabled by viewModel.glucoseChartRangeColorsEnabled.collectAsState()
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
     val dashboardDeltaEnabled by viewModel.dashboardShowDelta.collectAsState()
+    val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsState()
 
     var fontSize by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_font_size", 1.0f)) }
     var fontType by rememberSaveable { mutableIntStateOf(prefs.getInt("notification_font_family", 0)) }
@@ -287,6 +288,32 @@ fun NotificationSettingsScreen(
                 icon = null,
                 position = CardPosition.MIDDLE
             )
+            Column(
+                modifier = Modifier.padding(horizontal = legacySettingsHorizontalPadding, vertical = 8.dp)
+            ) {
+                Text(
+                    stringResource(R.string.delta_interval_title),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    stringResource(R.string.delta_interval_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = deltaIntervalMinutes == 1,
+                        onClick = { viewModel.setDeltaIntervalMinutes(1) },
+                        label = { Text(stringResource(R.string.delta_interval_1min)) }
+                    )
+                    FilterChip(
+                        selected = deltaIntervalMinutes == 5,
+                        onClick = { viewModel.setDeltaIntervalMinutes(5) },
+                        label = { Text(stringResource(R.string.delta_interval_5min)) }
+                    )
+                }
+            }
             SettingsSwitchItem(
                 title = stringResource(R.string.notification_show_iob_title),
                 subtitle = stringResource(R.string.notification_show_iob_desc),

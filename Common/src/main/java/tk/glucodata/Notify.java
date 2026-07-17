@@ -3356,6 +3356,7 @@ public class Notify {
         boolean showIob = prefs.getBoolean("notification_show_iob", false);
         boolean showCob = prefs.getBoolean("notification_show_cob", false);
         boolean showDelta = prefs.getBoolean("notification_show_delta", false);
+        int deltaIntervalMinutes = prefs.getInt("delta_interval_minutes", GlucoseDelta.DEFAULT_INTERVAL_MINUTES);
         boolean iobCobRiskColored = prefs.getBoolean("notification_iob_cob_risk_colored", false);
         boolean arrowForecastColored = prefs.getBoolean("glucose_arrow_forecast_colors_enabled", false);
         boolean showChart = prefs.getBoolean("notification_chart_enabled", true);
@@ -3476,7 +3477,7 @@ public class Notify {
             for (int i = nativePoints.size() - 2; i >= 0; i--) {
                 final GlucosePoint p = nativePoints.get(i);
                 final float value = (isRawMode && p.rawValue > 0f) ? p.rawValue : p.value;
-                if (value > 0.1f && newest.timestamp - p.timestamp >= GlucoseDelta.MIN_GAP_MILLIS) {
+                if (value > 0.1f && newest.timestamp - p.timestamp >= GlucoseDelta.minGapMillis(deltaIntervalMinutes)) {
                     previous = p;
                     break;
                 }
@@ -3484,7 +3485,7 @@ public class Notify {
             final float previousValue = previous == null ? Float.NaN
                     : (isRawMode && previous.rawValue > 0f) ? previous.rawValue : previous.value;
             final String deltaText = previous == null ? "" : GlucoseDelta.format(
-                    GlucoseDelta.fiveMinuteDelta(newest.timestamp, newestValue, previous.timestamp, previousValue),
+                    GlucoseDelta.delta(newest.timestamp, newestValue, previous.timestamp, previousValue, deltaIntervalMinutes),
                     isMmol);
             if (doLog)
                 Log.i(LOG_ID, "notification delta=" + deltaText
