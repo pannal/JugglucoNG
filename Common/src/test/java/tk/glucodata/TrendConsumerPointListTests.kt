@@ -2,6 +2,7 @@ package tk.glucodata
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import tk.glucodata.logic.TrendEngine
 import tk.glucodata.ui.DisplayValues
@@ -21,6 +22,16 @@ import tk.glucodata.ui.DisplayValues
  * acceptance criteria) and identical glyph decisions at the dead-zone edge.
  */
 class TrendConsumerPointListTests {
+
+    @Before
+    fun registerProductionTrendProvider() {
+        // Specific.start() performs this registration in the app. Local JVM
+        // tests do not run application startup, so reproduce that wiring here
+        // instead of exercising TrendAccess's deliberately degraded fallback.
+        TrendAccess.register(TrendVelocityProvider { points, useRaw, isMmol ->
+            TrendEngine.calculateTrend(points, useRaw, isMmol).velocity
+        })
+    }
 
     private val minute = 60_000L
     private val now = 1_700_000_000_000L
