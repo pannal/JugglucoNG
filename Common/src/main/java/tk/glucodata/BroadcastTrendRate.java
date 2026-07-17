@@ -49,7 +49,9 @@ public final class BroadcastTrendRate {
     public static float computed(String sensorId, float nativeRate) {
         try {
             final boolean isMmol = Applic.unit == 1;
-            final long startT = System.currentTimeMillis() - DisplayTrendSource.TREND_WINDOW_MS;
+            // Load twice the trend window: the canonical cut below anchors at the newest
+            // point, which lags the wall clock, so a window-sized load could miss the tail.
+            final long startT = System.currentTimeMillis() - 2 * DisplayTrendSource.TREND_WINDOW_MS;
             java.util.List<GlucosePoint> points = NotificationHistorySource.getDisplayHistory(
                     startT,
                     isMmol,
@@ -67,7 +69,7 @@ public final class BroadcastTrendRate {
                 if (Log.doLog)
                     Log.i("BroadcastTrendRate", "resolveCurrent failed: " + th);
             }
-            points = DisplayTrendSource.augmentHistory(points, current, sensorId, startT);
+            points = DisplayTrendSource.resolveTrendPoints(points, current, sensorId);
             final int viewMode = Notify.resolveSensorViewMode(sensorId);
             // current is deliberately not handed to resolveArrowRate: when the history is too thin
             // to say anything this must fall back to the caller's native rate, as documented above,
