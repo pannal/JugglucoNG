@@ -46,6 +46,7 @@ object SibionicsRegistry {
         val variant: SibionicsConstants.Variant,
         val shortCode: String,
         val bleName: String = "",
+        val legacyNativeName: String = "",
     ) {
         fun matchesId(id: String?): Boolean =
             SibionicsConstants.matchesId(sensorId, id) ||
@@ -135,7 +136,15 @@ object SibionicsRegistry {
             .ifBlank { identity.bleName }
             .ifBlank { deriveBleName(displayName) ?: "" }
             .ifBlank { existing?.bleName.orEmpty() }
-        val record = SensorRecord(sensorId, normalizedAddress, visible, variant, shortCode, bleName)
+        val record = SensorRecord(
+            sensorId = sensorId,
+            address = normalizedAddress,
+            displayName = visible,
+            variant = variant,
+            shortCode = shortCode,
+            bleName = bleName,
+            legacyNativeName = existing?.legacyNativeName.orEmpty(),
+        )
         if (idx >= 0) records[idx] = record else records.add(record)
         writeRecords(context, records)
         saveVariant(context, sensorId, variant)
@@ -240,6 +249,17 @@ object SibionicsRegistry {
             remove(PREF_INTEGRATED_CALIBRATION_BASELINE_PREFIX + id)
         }.apply()
         ManagedSensorUiSignals.markDeviceListDirty()
+        SensorIdentity.invalidateCaches()
+    }
+
+    internal fun bindLegacyNativeName(context: Context, sensorId: String, legacyNativeName: String) {
+        val normalized = legacyNativeName.trim().takeIf(SensorIdentity::isUsableSensorId) ?: return
+        val records = persistedRecords(context).toMutableList()
+        val index = records.indexOfFirst { it.matchesId(sensorId) }
+        val existing = records.getOrNull(index) ?: return
+        if (existing.legacyNativeName.equals(normalized, ignoreCase = true)) return
+        records[index] = existing.copy(legacyNativeName = normalized)
+        writeRecords(context, records)
         SensorIdentity.invalidateCaches()
     }
 
@@ -486,6 +506,7 @@ object SibionicsRegistry {
             r.variant.id,
             r.shortCode,
             r.bleName,
+            r.legacyNativeName.replace('|', ' '),
         ).joinToString("|")
 
     private fun parseRecord(line: String): SensorRecord? {
@@ -499,6 +520,7 @@ object SibionicsRegistry {
             variant = SibionicsConstants.Variant.fromId(parts[3]),
             shortCode = parts[4].ifBlank { SibionicsConstants.Variant.fromId(parts[3]).fallbackShortCode },
             bleName = parts.getOrNull(5).orEmpty(),
+            legacyNativeName = parts.getOrNull(6).orEmpty(),
         )
     }
 
@@ -627,6 +649,13 @@ object SibionicsManagedSensorIdentityAdapter : tk.glucodata.drivers.ManagedSenso
     override fun removePersistedSensor(context: Context, sensorId: String?) {
         SibionicsRegistry.removeSensor(context, sensorId)
     }
+
+    override fun resolveNativeHistorySensorNames(sensorId: String?): List<String> =
+        SibionicsRegistry.findRecord(Applic.app, sensorId)
+            ?.legacyNativeName
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::listOf)
+            .orEmpty()
 
     override fun isExternallyManagedBleSensor(sensorId: String?): Boolean =
         SibionicsRegistry.findRecord(Applic.app, sensorId) != null

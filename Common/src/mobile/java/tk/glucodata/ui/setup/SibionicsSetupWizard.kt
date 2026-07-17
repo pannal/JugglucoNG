@@ -56,12 +56,12 @@ import kotlinx.coroutines.withContext
 import tk.glucodata.drivers.sibionics.SibionicsConstants
 import tk.glucodata.drivers.sibionics.SibionicsRegistry
 
-enum class SibionicsType(val displayNameRes: Int, val subtype: Int) {
+enum class SibionicsType(val displayNameRes: Int, val subtype: Int, val setupVisible: Boolean = true) {
     EU(R.string.eusibionics, 0),
     HEMATONIX(R.string.hematonix, 1),
     CHINESE(R.string.chsibionics, 2),
     SIBIONICS2(R.string.sibionics2, 3),
-    GS3(R.string.gs3, 4),
+    GS3(R.string.gs3, 4, setupVisible = false),
 }
 
 private fun SibionicsType.toManagedVariant(): SibionicsConstants.Variant =
@@ -376,7 +376,7 @@ fun SibionicsSetupWizard(
     val context = LocalContext.current
     var currentStep by remember { mutableStateOf(SibionicsSetupStep.SELECT_TYPE) }
     var selectedType by remember { mutableStateOf(SibionicsType.EU) }
-    var useManagedDriver by remember { mutableStateOf(false) }
+    var useManagedDriver by remember { mutableStateOf(true) }
     var sensorPtr by remember { mutableStateOf(0L) }
     var sensorName by remember { mutableStateOf("") }
     var resetTransmitter by remember { mutableStateOf(false) } // Default false as requested
@@ -999,7 +999,7 @@ fun SelectTypeStep(
                 .selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(listGap) // Generous spacing instead of dividers
         ) {
-            SibionicsType.values().forEach { type ->
+            SibionicsType.entries.filter { it.setupVisible }.forEach { type ->
                 val isSelected = (type == selectedType)
 
                 val containerColor by animateColorAsState(
