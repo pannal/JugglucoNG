@@ -450,9 +450,10 @@ object AlertRuntimeManager {
 
         val activeNow = config.isActiveNow()
         val snoozed = SnoozeManager.isSnoozed(type)
-        // The state advances its run counter here (once per genuinely newer reading) and only
-        // returns true while active and not snoozed. The delta is measured over the global
-        // interval, the same one that drives the Δ readout.
+        // The state advances its run counter at interval checkpoints and only returns true while
+        // active and not snoozed. The delta is measured over the alert's own window when one is
+        // set, else over the global interval that drives the Δ readout; the state resets itself
+        // when the effective window changes, so a run never mixes windows.
         val shouldTrigger = state.shouldTrigger(
             enabled = true,
             activeNow = activeNow,
@@ -462,7 +463,7 @@ object AlertRuntimeManager {
             deltaThreshold = deltaThreshold,
             deltaCount = deltaCount,
             deltaBorder = deltaBorder,
-            intervalMinutes = deltaIntervalMinutesLocked()
+            intervalMinutes = config.deltaIntervalMinutes ?: deltaIntervalMinutesLocked()
         )
 
         if (!activeNow) {

@@ -1110,9 +1110,11 @@ private fun AlertSettingsExpanded(
 
 
 /**
- * Type-specific inputs for the GDH-style delta alarms: how big a per-reading change counts as
- * steep, how many such readings in a row are needed, and the value past which it may alarm.
+ * Type-specific inputs for the GDH-style delta alarms: how big a change per interval counts as
+ * steep, how many consecutive intervals are needed, the value past which it may alarm, and the
+ * interval itself (own window, or follow the Δ readout's global one).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DeltaAlarmSettings(
     config: AlertConfig,
@@ -1128,17 +1130,18 @@ private fun DeltaAlarmSettings(
     } else {
         if (isMmol) AlertDefaults.RISING_BORDER_MMOL else AlertDefaults.RISING_BORDER_MGDL
     }
-    // The delta is measured over the global interval (1 or 5 min); label the threshold with it.
-    val intervalMinutes = remember {
+    // The alarm follows the Δ readout's global interval unless this alert sets its own window.
+    val displayIntervalMinutes = remember {
         tk.glucodata.GlucoseDelta.sanitizeIntervalMinutes(
             Applic.app
                 .getSharedPreferences("tk.glucodata_preferences", android.content.Context.MODE_PRIVATE)
                 .getInt("delta_interval_minutes", tk.glucodata.GlucoseDelta.DEFAULT_INTERVAL_MINUTES)
         )
     }
+    val effectiveIntervalMinutes = config.deltaIntervalMinutes ?: displayIntervalMinutes
 
     ThresholdSlider(
-        label = stringResource(R.string.delta_change_label, intervalMinutes),
+        label = stringResource(R.string.delta_change_label, effectiveIntervalMinutes),
         value = deltaThreshold,
         isMmol = isMmol,
         range = if (isMmol) 0.1f..2.5f else 1f..40f,
@@ -1166,11 +1169,37 @@ private fun DeltaAlarmSettings(
         onValueChange = { onConfigChange(config.copy(deltaBorder = it)) }
     )
 
+    // With checkpoint counting the window directly scales the confirmation time
+    // (count x window), so it must not silently change with a display preference.
+    Text(
+        text = stringResource(R.string.delta_alarm_interval_label),
+        style = MaterialTheme.typography.bodyLarge
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(
+            selected = config.deltaIntervalMinutes == null,
+            onClick = { onConfigChange(config.copy(deltaIntervalMinutes = null)) },
+            label = { Text(stringResource(R.string.delta_alarm_interval_follow, displayIntervalMinutes)) }
+        )
+        FilterChip(
+            selected = config.deltaIntervalMinutes == 1,
+            onClick = { onConfigChange(config.copy(deltaIntervalMinutes = 1)) },
+            label = { Text(stringResource(R.string.delta_interval_1min)) }
+        )
+        FilterChip(
+            selected = config.deltaIntervalMinutes == 5,
+            onClick = { onConfigChange(config.copy(deltaIntervalMinutes = 5)) },
+            label = { Text(stringResource(R.string.delta_interval_5min)) }
+        )
+    }
+
     Text(
         text = stringResource(
             if (falling) R.string.falling_fast_explanation else R.string.rising_fast_explanation,
             deltaCount,
+            effectiveIntervalMinutes,
             formatThreshold(deltaThreshold, isMmol),
+            deltaCount * effectiveIntervalMinutes,
             formatThreshold(deltaBorder, isMmol)
         ),
         style = MaterialTheme.typography.bodySmall,

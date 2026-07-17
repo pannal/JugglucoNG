@@ -89,9 +89,10 @@ data class AlertConfig(
     val forecastMinutes: Int? = null,       // For forecast alerts (how far ahead to predict)
 
     // Delta-counter settings (FALLING_FAST / RISING_FAST): GDH-style robust rate-of-change alarm.
-    val deltaThreshold: Float? = null,      // Min per-reading change (display units) to count as steep
-    val deltaCount: Int? = null,            // How many consecutive steep readings must accumulate
+    val deltaThreshold: Float? = null,      // Min change per interval (display units) to count as steep
+    val deltaCount: Int? = null,            // How many consecutive steep intervals must accumulate
     val deltaBorder: Float? = null,         // Only alarm once the value is past this bound (below/above)
+    val deltaIntervalMinutes: Int? = null,  // Own delta window (1 or 5); null = follow the Δ readout's global interval
 
     // Delivery settings
     val deliveryMode: AlertDeliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
