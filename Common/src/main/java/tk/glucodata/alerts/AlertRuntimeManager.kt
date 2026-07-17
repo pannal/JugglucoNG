@@ -463,7 +463,8 @@ object AlertRuntimeManager {
             deltaThreshold = deltaThreshold,
             deltaCount = deltaCount,
             deltaBorder = deltaBorder,
-            intervalMinutes = config.deltaIntervalMinutes ?: deltaIntervalMinutesLocked()
+            intervalMinutes = config.deltaIntervalMinutes ?: deltaIntervalMinutesLocked(),
+            earlyTriggerEnabled = config.earlyTriggerEnabled
         )
 
         if (!activeNow) {

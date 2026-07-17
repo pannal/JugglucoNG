@@ -1205,6 +1205,19 @@ private fun DeltaAlarmSettings(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
+
+    // Optional escalation on the implied total distance (count x threshold).
+    ClickableToggleRow(
+        icon = Icons.Default.Bolt,
+        title = stringResource(R.string.delta_early_trigger_label),
+        subtitle = stringResource(
+            R.string.delta_early_trigger_desc,
+            formatThreshold(deltaCount * deltaThreshold, isMmol),
+            stringResource(if (isMmol) R.string.unit_mmol else R.string.unit_mg)
+        ),
+        checked = config.earlyTriggerEnabled,
+        onCheckedChange = { onConfigChange(config.copy(earlyTriggerEnabled = it)) }
+    )
 }
 
 @Composable

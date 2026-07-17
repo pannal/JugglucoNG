@@ -93,6 +93,7 @@ data class AlertConfig(
     val deltaCount: Int? = null,            // How many consecutive steep intervals must accumulate
     val deltaBorder: Float? = null,         // Only alarm once the value is past this bound (below/above)
     val deltaIntervalMinutes: Int? = null,  // Own delta window (1 or 5); null = follow the Δ readout's global interval
+    val earlyTriggerEnabled: Boolean = false, // Also fire once the total distance (count x threshold) is covered
 
     // Delivery settings
     val deliveryMode: AlertDeliveryMode = AlertDeliveryMode.SYSTEM_ALARM,

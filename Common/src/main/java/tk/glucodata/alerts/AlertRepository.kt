@@ -58,6 +58,7 @@ object AlertRepository {
     private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
     private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
     private fun keyDeltaInterval(type: AlertType) = "alert_${type.id}_deltaInterval"
+    private fun keyEarlyTrigger(type: AlertType) = "alert_${type.id}_earlyTrigger"
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -253,7 +254,8 @@ object AlertRepository {
             deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 },
             // Missing/0 = follow the Δ readout's global interval.
             deltaIntervalMinutes = prefs.getInt(keyDeltaInterval(type), 0).takeIf { it > 0 }
-                ?.let { GlucoseDelta.sanitizeIntervalMinutes(it) }
+                ?.let { GlucoseDelta.sanitizeIntervalMinutes(it) },
+            earlyTriggerEnabled = prefs.getBoolean(keyEarlyTrigger(type), false)
         )
     }
 
@@ -305,6 +307,7 @@ object AlertRepository {
             if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
             if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
             if (config.deltaIntervalMinutes != null) putInt(keyDeltaInterval(config.type), config.deltaIntervalMinutes) else remove(keyDeltaInterval(config.type))
+            putBoolean(keyEarlyTrigger(config.type), config.earlyTriggerEnabled)
         }
     }
     
