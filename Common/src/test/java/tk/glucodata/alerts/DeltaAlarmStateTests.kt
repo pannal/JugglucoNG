@@ -1,5 +1,6 @@
 package tk.glucodata.alerts
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -309,5 +310,92 @@ class DeltaAlarmStateTests {
         assertFalse(state.feed(111f, 1, interval = 1, threshold = 3f)) // -4/min -> drop 1
         assertFalse(state.feed(107f, 2, interval = 1, threshold = 3f)) // drop 2
         assertTrue(state.feed(103f, 3, interval = 1, threshold = 3f))  // drop 3 -> fire (103 <= 120)
+    }
+
+    // ---- 15. Non-overlapping checkpoints on fast streams ----
+
+    @Test
+    fun overlappingRollingDeltasOnAOneMinuteStreamDoNotSatisfyTheCount() {
+        // Live regression (2026-07-16): threshold 10/5min, count 3, border 145. A ~7-minute
+        // drop from 157 to 141 produced three overlapping rolling deltas (-13, -14, -13) on
+        // consecutive minutes; they cover the SAME fall and must count as one interval, not three.
+        val state = DeltaAlarmState(falling = true)
+        val values = listOf(157f, 156f, 154f, 151f, 148f, 144f, 142f, 141f)
+        values.forEachIndexed { m, v ->
+            assertFalse("minute $m", state.feed(v, m.toLong(), border = 145f))
+        }
+    }
+
+    @Test
+    fun countOneStillFiresOnTheFirstSteepDelta() {
+        val state = DeltaAlarmState(falling = true)
+        val values = listOf(157f, 156f, 154f, 151f, 148f)
+        values.forEachIndexed { m, v ->
+            assertFalse(state.feed(v, m.toLong(), count = 1, border = 145f))
+        }
+        // First steep rolling delta (-13 vs minute 0) -> immediate alarm, 144 <= 145.
+        assertTrue(state.feed(144f, 5, count = 1, border = 145f))
+    }
+
+    @Test
+    fun fifteenMinutesOfSustainedFallFireAtTheSecondCheckpointAfterRunStart() {
+        // 1-minute stream falling 2.5 mg/dl per minute: every rolling 5-min delta is -12.5.
+        // Run starts at minute 5, checkpoints at 10 and 15 -> count 3 after ~15 min of fall.
+        val state = DeltaAlarmState(falling = true)
+        var v = 150f
+        for (m in 0..14L) {
+            assertFalse("minute $m", state.feed(v, m))
+            v -= 2.5f
+        }
+        assertTrue(state.feed(v, 15))  // 112.5 <= 120 border
+    }
+
+    @Test
+    fun sameTrajectoryFiresAtTheSameTimeOnOneAndFiveMinuteCadence() {
+        // Identical fall (-2 mg/dl per minute from 150) sampled at both cadences: the 5-minute
+        // series behaves exactly like the per-reading counter used to, and the 1-minute series
+        // matches it instead of firing three times earlier.
+        fun valueAt(m: Long) = 150f - 2f * m
+
+        val fiveMinute = DeltaAlarmState(falling = true)
+        var firedAtFive = -1L
+        for (m in 0..15L step 5) if (fiveMinute.feed(valueAt(m), m)) firedAtFive = m
+
+        val oneMinute = DeltaAlarmState(falling = true)
+        var firedAtOne = -1L
+        for (m in 0..15L) if (oneMinute.feed(valueAt(m), m)) firedAtOne = m
+
+        assertEquals(15L, firedAtFive)
+        assertEquals(15L, firedAtOne)
+    }
+
+    @Test
+    fun reversedSignBetweenCheckpointsBreaksTheRunImmediately() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0))
+        assertFalse(state.feed(148f, 1))
+        assertFalse(state.feed(146f, 2))
+        assertFalse(state.feed(144f, 3))
+        assertFalse(state.feed(142f, 4))
+        assertFalse(state.feed(140f, 5))   // -10 vs minute 0 -> run starts
+        assertFalse(state.feed(152f, 6))   // +4 vs minute 1 -> reversed sign -> run breaks NOW
+        // A fresh steep run must accumulate from scratch: start at 7, checkpoints at 12 and 17.
+        assertFalse(state.feed(136f, 7))   // -10 vs minute 2 -> run restarts (count 1)
+        assertFalse(state.feed(126f, 12))  // checkpoint -> count 2
+        assertTrue(state.feed(116f, 17))   // checkpoint -> count 3 -> fire (116 <= 120)
+    }
+
+    @Test
+    fun aShallowSameSignDeltaBetweenCheckpointsDoesNotBreakTheRun() {
+        val state = DeltaAlarmState(falling = true)
+        assertFalse(state.feed(150f, 0))
+        assertFalse(state.feed(148f, 1))
+        assertFalse(state.feed(146f, 2))
+        assertFalse(state.feed(144f, 3))
+        assertFalse(state.feed(142f, 4))
+        assertFalse(state.feed(140f, 5))   // -10 vs minute 0 -> run starts
+        assertFalse(state.feed(139f, 6))   // -9 vs minute 1: same sign, not steep -> run stands
+        assertFalse(state.feed(130f, 10))  // checkpoint: -10 vs minute 5 -> count 2
+        assertTrue(state.feed(120f, 15))   // checkpoint: -10 -> count 3 -> fire
     }
 }
