@@ -502,7 +502,7 @@
     <string name="import_history_desc">Импорт данных сахара из файла экспорта JugglucoNG</string>
     <string name="get_started_desc">Начните с добавления вашего сенсора</string>
     <string name="select_sensor">Выберите тип сенсора</string>
-    <string name="select_sibionics_type">Выберите тип сенсора</string>
+    <string name="select_sibionics_type">Выберите сенсор Sibionics</string>
     <string name="or_divider">"  или  "</string>
     <string name="no_sensors_connected">Нет подключенных сенсоров</string>
     <string name="enter_sensor_codes">Введите коды сенсора</string>
@@ -522,7 +522,7 @@
     <string name="select_gallery_button">Выбрать из Галереи</string>
     <string name="skip_fake_sensor">Пропустить (Исп. фиктивный сенсор)</string>
     <string name="enter_code_manually">Ввести код вручную</string>
-    <string name="choose_sibionics_variant">Выберите вариант сенсора Sibionics</string>
+    <string name="choose_sibionics_variant">Укажите модель с упаковки.</string>
     <string name="continue_action">Продолжить</string>
     <string name="sensor_init_failed">Инициализация сенсора не удалась</string>
     <string name="sensor_lost_restart">Ошибка: Сенсор потерян. Перезапустите настройку.</string>
@@ -784,7 +784,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="calibrate_a">Визуальный режим</string>
     <string name="calibrated">Calibrated</string>
     <string name="calibratepast">Apply to past</string>
-    <string name="calibration">Calibration</string>
+    <string name="calibration">Калибровка</string>
     <string name="calibrations">Calibrations</string>
     <string name="caresens_air_scan_instruction">Отсканируйте код датчика на упаковке CareSens Air.</string>
     <string name="caresens_air_sensor">CareSens Air</string>
@@ -1375,7 +1375,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_use_fake_qr_from_ble">Использовать фейковый QR из этого BLE-имени</string>
     <string name="sibionics_use_ble_device">Использовать это Bluetooth-устройство</string>
     <string name="sibionics_legacy_driver_title">Старый драйвер</string>
-    <string name="sibionics_legacy_driver_desc">Использовать проприетарную нативную библиотеку Sibionics вместо Kotlin-драйвера. Включайте только для совместимости.</string>
+    <string name="sibionics_legacy_driver_desc">Старый проприетарный драйвер — только для совместимости с существующей установкой.</string>
     <string name="sibionics_managed_sensor_added">Управляемый датчик Sibionics добавлен: %1$s</string>
     <string name="wear_transport">Транспорт Wear</string>
     <string name="wear_transport_desc">Настройка обмена данных с Wear OS и состояния синхронизации.</string>

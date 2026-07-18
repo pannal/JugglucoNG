@@ -656,7 +656,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_setup_title">Sibionics Setup</string>
     <string name="scan_sensor_qr">Scan Sensor QR Code</string>
     <string name="scan_sensor_qr_desc">Scan the data matrix on the sensor packaging</string>
-    <string name="select_sibionics_type">Select Sensor Type</string>
+    <string name="select_sibionics_type">Choose a Sibionics sensor</string>
     <string name="scan_transmitter">Scan Transmitter</string>
 
     <string name="connecting">Connecting...</string>
@@ -840,7 +840,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="skip_fake_sensor">Skip (Use Fake Sensor)</string>
     <string name="enter_code_manually">Enter Code Manually</string>
     
-    <string name="choose_sibionics_variant">Choose your Sibionics sensor variant</string>
+    <string name="choose_sibionics_variant">Select the model shown on its packaging.</string>
     <string name="continue_action">Continue</string>
     
     <string name="sensor_init_failed">Sensor initialization failed</string>
@@ -1642,7 +1642,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_use_fake_qr_from_ble">Use fake QR info from this BLE name</string>
     <string name="sibionics_use_ble_device">Use this Bluetooth device</string>
     <string name="sibionics_legacy_driver_title">Legacy driver</string>
-    <string name="sibionics_legacy_driver_desc">Use the proprietary native Sibionics library instead of the Kotlin driver. Enable only as a compatibility fallback.</string>
+    <string name="sibionics_legacy_driver_desc">Use the old proprietary driver only for compatibility with an existing setup.</string>
     <string name="sibionics_managed_sensor_added">Managed Sibionics sensor added: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>

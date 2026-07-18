@@ -118,6 +118,7 @@ class SibionicsBleManager(
     @Volatile private var pendingResetCommand: Boolean = false
     @Volatile private var discardNotificationsUntilResetDisconnect: Boolean = false
     @Volatile private var loggedDiscardedPostResetNotification: Boolean = false
+    @Volatile private var connectionPrioritySettled: Boolean = false
     @Volatile private var uiPaused: Boolean = false
     @Volatile private var pendingMatchedBleName: String = ""
     @Volatile private var autoResetDays: Int = 300
@@ -430,6 +431,7 @@ class SibionicsBleManager(
                 mActiveBluetoothDevice = gatt.device
                 keyGroupIndex = 0
                 authCandidateVariant = null
+                connectionPrioritySettled = false
                 gatt.device?.address?.let { setDeviceAddress(it) }
                 connectTime = System.currentTimeMillis()
                 phase = Phase.DISCOVERING
@@ -579,6 +581,7 @@ class SibionicsBleManager(
                     protocolMode = SibionicsConstants.ProtocolMode.CHINESE
                     Applic.app?.let { SibionicsRegistry.saveProtocolMode(it, SerialNumber, protocolMode) }
                 }
+                confirmChineseVariant()
                 handler.removeCallbacks(chineseProbeTimeoutRunnable)
                 handler.removeCallbacks(chineseDataTimeoutRunnable)
                 if (phase != Phase.STREAMING) {
@@ -593,6 +596,7 @@ class SibionicsBleManager(
                     protocolMode = SibionicsConstants.ProtocolMode.CHINESE
                     Applic.app?.let { SibionicsRegistry.saveProtocolMode(it, SerialNumber, protocolMode) }
                 }
+                confirmChineseVariant()
                 handler.removeCallbacks(chineseProbeTimeoutRunnable)
                 handler.removeCallbacks(chineseDataTimeoutRunnable)
                 phase = Phase.STREAMING
@@ -611,6 +615,22 @@ class SibionicsBleManager(
             }
             else -> Unit
         }
+    }
+
+    private fun confirmChineseVariant() {
+        if (variant == SibionicsConstants.Variant.CHINESE) return
+        variant = SibionicsConstants.Variant.CHINESE
+        Applic.app?.let { context ->
+            record = SibionicsRegistry.confirmAuthenticatedVariant(
+                context,
+                SerialNumber,
+                SibionicsConstants.Variant.CHINESE,
+            ) ?: record
+        }
+        synchronized(algorithmLock) {
+            algorithm.configure(shortCode, sensitivity, variant, algorithmSelection)
+        }
+        Log.i(SibionicsConstants.TAG, "confirmed Chinese protocol variant serial=$SerialNumber")
     }
 
     private fun handleV120(result: SibionicsProtocol.ParseResult) {
@@ -901,6 +921,10 @@ class SibionicsBleManager(
 
     private fun updateHistoryStatus(resultHasLive: Boolean) {
         if (resultHasLive) {
+            // Keep high priority through authentication and history recovery. Relax only once
+            // the sensor has delivered a current sample, otherwise large V120 history transfers
+            // become unnecessarily slow on conservative Android Bluetooth stacks.
+            settleConnectionPriority()
             setStatus(connectedStatus())
         } else if (SibionicsSessionPolicy.shouldShowHistoryProgress(
                 historyReceivedCount,
@@ -1848,6 +1872,20 @@ class SibionicsBleManager(
         Log.i(SibionicsConstants.TAG, "schedule reconnect: $reason")
         handler.removeCallbacks(reconnectRunnable)
         handler.postDelayed(reconnectRunnable, RECONNECT_DELAY_MS)
+    }
+
+    private fun settleConnectionPriority() {
+        if (connectionPrioritySettled) return
+        connectionPrioritySettled = true
+        val connectedGatt = mBluetoothGatt ?: return
+        handler.postDelayed({
+            if (!stop && phase == Phase.STREAMING && mBluetoothGatt === connectedGatt) {
+                runCatching {
+                    connectedGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED)
+                }
+                Log.d(SibionicsConstants.TAG, "settled BLE priority after streaming serial=$SerialNumber")
+            }
+        }, 2_000L)
     }
 
     private val reconnectRunnable = Runnable {

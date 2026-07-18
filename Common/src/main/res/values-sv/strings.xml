@@ -410,7 +410,7 @@
     <string name="import_history_desc">Importera glukosdata från CSV-fil</string>
     <string name="get_started_desc">Börja med att lägga till din sensor</string>
     <string name="select_sensor">Välj sensortyp</string>
-    <string name="select_sibionics_type">Välj sensortyp</string>
+    <string name="select_sibionics_type">Välj en Sibionics-sensor</string>
     <string name="or_divider">"  eller  "</string>
     <string name="no_sensors_connected">Inga sensorer anslutna</string>
     <string name="enter_sensor_codes">Ange sensorkoder</string>
@@ -430,7 +430,7 @@
     <string name="select_gallery_button">Välj från Galleri</string>
     <string name="skip_fake_sensor">Hoppa över (Använd falsk sensor)</string>
     <string name="enter_code_manually">Ange kod manuellt</string>
-    <string name="choose_sibionics_variant">Välj din Sibionics-sensorvariant</string>
+    <string name="choose_sibionics_variant">Välj modellen som står på förpackningen.</string>
     <string name="continue_action">Fortsätt</string>
     <string name="sensor_init_failed">Sensorinitiering misslyckades</string>
     <string name="sensor_lost_restart">Fel: Sensor förlorad. Starta om installationen.</string>
@@ -672,7 +672,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="calibrate_a">Visuellt läge</string>
     <string name="calibrated">Calibrated</string>
     <string name="calibratepast">Apply to past</string>
-    <string name="calibration">Calibration</string>
+    <string name="calibration">Kalibrering</string>
     <string name="calibration_algorithm">Calibration Algorithm</string>
     <string name="calibrations">Calibrations</string>
     <string name="caresens_air_scan_instruction">Skanna sensorkoden på ditt CareSens Air-paket</string>
@@ -1330,7 +1330,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_use_fake_qr_from_ble">Använd falsk QR-info från detta BLE-namn</string>
     <string name="sibionics_use_ble_device">Använd denna Bluetooth-enhet</string>
     <string name="sibionics_legacy_driver_title">Äldre drivrutin</string>
-    <string name="sibionics_legacy_driver_desc">Använder Sibionics proprietära inbyggda bibliotek i stället för Kotlin-drivrutinen. Aktivera endast som kompatibilitetsalternativ.</string>
+    <string name="sibionics_legacy_driver_desc">Använd den gamla proprietära drivrutinen endast för en befintlig konfiguration.</string>
     <string name="sibionics_managed_sensor_added">Hanterad Sibionics-sensor tillagd: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>

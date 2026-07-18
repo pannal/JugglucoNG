@@ -8,7 +8,7 @@ internal object SibionicsResetPolicy {
 
     const val REMINDER_LEAD_MS = 4L * 60L * 60L * 1000L
     const val POSTPONE_MS = 2L * 60L * 60L * 1000L
-    const val HARD_DEADLINE_GUARD_MS = 30L * 60L * 1000L
+    const val EXPECTED_END_GUARD_MS = 4L * 60L * 60L * 1000L
 
     private const val COMFORTABLE_GLUCOSE_MIN_MGDL = 80f
     private const val COMFORTABLE_GLUCOSE_MAX_MGDL = 180f
@@ -34,7 +34,7 @@ internal object SibionicsResetPolicy {
         startTimeMs + ENABLED_DAYS * SibionicsConstants.DAY_MS
 
     fun hardDeadlineMs(startTimeMs: Long): Long =
-        startTimeMs + SibionicsConstants.SIBIONICS2_OFFICIAL_LIFETIME_MS - HARD_DEADLINE_GUARD_MS
+        startTimeMs + SibionicsConstants.SIBIONICS2_EXPECTED_LIFETIME_MS - EXPECTED_END_GUARD_MS
 
     fun evaluate(
         nowMs: Long,

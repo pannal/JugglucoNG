@@ -82,10 +82,10 @@ class SibionicsResetPolicyTest {
     }
 
     @Test
-    fun `hard reset runs thirty minutes before official expiry`() {
+    fun `hard reset runs four hours before the 23 day expected end`() {
         assertEquals(
-            start + SibionicsConstants.SIBIONICS2_OFFICIAL_LIFETIME_MS -
-                SibionicsResetPolicy.HARD_DEADLINE_GUARD_MS,
+            start + SibionicsConstants.SIBIONICS2_EXPECTED_LIFETIME_MS -
+                SibionicsResetPolicy.EXPECTED_END_GUARD_MS,
             hardDeadline,
         )
         val before = decision(nowMs = hardDeadline - 1L, glucose = 210f, rate = 3f)

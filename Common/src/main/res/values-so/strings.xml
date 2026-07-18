@@ -429,7 +429,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
  <string name="resettitle">Dib u dajin</string>
  <string name="resetmessage">Waxay nadiifisaa xusuusta gudbiyaha. Waa in la cadaadiyo ka hor inta aan la isticmaalin dareemaha cusub gudbiye hore loo isticmaalay.</string>
  <string name="nolibrelink">Bedelkeeda isticmaal EverSense Broadcast. Caawimo eeg</string>
- <string name="calibration">Calibration</string>
+ <string name="calibration">Qalabayn</string>
  <string name="exclude">Ka saar</string>
  <string name="calibratepast">Codso wixii hore</string>
  <string name="bloodvar">Gulukoosta dhiigga:</string>
@@ -655,7 +655,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sibionics_setup_title">Dejinta Sibionics</string>
     <string name="scan_sensor_qr">Sawirka Sensor code QR</string>
     <string name="scan_sensor_qr_desc">Sawir shaxanka xogta ee baakadaha dareemayaasha</string>
-    <string name="select_sibionics_type">Dooro Nooca Sensor</string>
+    <string name="select_sibionics_type">Dooro dareeme Sibionics</string>
     <string name="scan_transmitter">Iskaan Wariyaha</string>
 
     <string name="connecting">Isku xidhka...</string>
@@ -839,7 +839,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="skip_fake_sensor">Ka bood (Isticmaal sensor been abuur ah)</string>
     <string name="enter_code_manually">Gacanta u geli Koodhka</string>
     
-    <string name="choose_sibionics_variant">Dooro kala duwanaanshaha dareemayaashaaga Sibionics</string>
+    <string name="choose_sibionics_variant">Dooro nooca ku qoran baakadka.</string>
     <string name="continue_action">Sii wad</string>
     
     <string name="sensor_init_failed">Dareemida bilawga waa fashilantay</string>
@@ -1634,7 +1634,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sibionics_ble_probe_empty">Wali lama helin FF30 aaladaha Sibionics</string>
     <string name="sibionics_ble_selected">La xushay: %1$s</string>
     <string name="sibionics_legacy_driver_title">Darawalka hore</string>
-    <string name="sibionics_legacy_driver_desc">Isticmaal maktabadda asalka ah ee gaarka loo leeyahay ee Sibionics halkii darawalka Kotlin. Daar oo keliya marka loo baahdo waafaqid.</string>
+    <string name="sibionics_legacy_driver_desc">Isticmaal darawalka gaarka ah ee hore keliya si uu ula jaanqaado habayn jirta.</string>
     <string name="sibionics_use_fake_qr_from_ble">Isticmaal macluumaadka QR ee been abuurka ah ee magacan BLE</string>
     <string name="wear_transport">Gudbinta Wear OS</string>
     <string name="wear_transport_desc">Habee gudbinta xogta Wear OS iyo isku xidhka xaaladda</string>

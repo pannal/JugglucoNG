@@ -63,6 +63,7 @@ object SibionicsRegistry {
         val displayName: String,
         val shortCode: String,
         val bleName: String,
+        val qrDerived: Boolean,
     )
 
     fun prefs(context: Context): SharedPreferences =
@@ -103,6 +104,7 @@ object SibionicsRegistry {
             displayName = display.ifBlank { "${variant.displayLabel} $shortCode" },
             shortCode = shortCode,
             bleName = resolvedBleName,
+            qrDerived = framedQrName != null,
         )
     }
 
@@ -132,6 +134,7 @@ object SibionicsRegistry {
             ?: SibionicsConstants.normalizeBleAddress(existing?.address)
             ?: ""
         val visible = usableDisplayName(displayName)
+            ?: identity.displayName.takeIf { identity.qrDerived }
             ?: usableDisplayName(existing?.displayName)
             ?: identity.displayName
         val bleName = deriveBleName(bleNameOverride)

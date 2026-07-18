@@ -478,7 +478,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="import_history_desc">Importeer glucosegegevens uit een CSV-bestand</string>
     <string name="get_started_desc">Ga aan de slag door je sensor toe te voegen</string>
     <string name="select_sensor">Selecteer sensortype</string>
-    <string name="select_sibionics_type">Selecteer sensortype</string>
+    <string name="select_sibionics_type">Kies een Sibionics-sensor</string>
     <string name="or_divider">"  of  "</string>
     <string name="no_sensors_connected">Geen sensoren verbonden</string>
     
@@ -501,7 +501,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="select_gallery_button">Selecteer uit galerij</string>
     <string name="skip_fake_sensor">Overslaan (Gebruik nepsensor)</string>
     <string name="enter_code_manually">Code handmatig invoeren</string>
-    <string name="choose_sibionics_variant">Kies je Sibionics-sensorvariant</string>
+    <string name="choose_sibionics_variant">Kies het model dat op de verpakking staat.</string>
     <string name="continue_action">Doorgaan</string>
     
     <string name="sensor_init_failed">Sensorinitialisatie mislukt</string>
@@ -1373,7 +1373,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="sibionics_use_fake_qr_from_ble">Gebruik nep-QR-info van deze BLE-naam</string>
     <string name="sibionics_use_ble_device">Gebruik dit Bluetooth-apparaat</string>
     <string name="sibionics_legacy_driver_title">Legacy-stuurprogramma</string>
-    <string name="sibionics_legacy_driver_desc">Gebruik de propriëtaire native Sibionics-bibliotheek in plaats van het Kotlin-stuurprogramma. Alleen inschakelen als compatibiliteitsoptie.</string>
+    <string name="sibionics_legacy_driver_desc">Gebruik het oude propriëtaire stuurprogramma alleen voor een bestaande installatie.</string>
     <string name="sibionics_managed_sensor_added">Beheerde Sibionics-sensor toegevoegd: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>

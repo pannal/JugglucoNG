@@ -408,7 +408,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="resettitle">Дахин тохируулах</string>
     <string name="resetmessage">Clears transmitter memory. Should be pressed before using a new sensor in an already used transmitter.</string>
     <string name="nolibrelink">Use the EverSense Broadcast instead. See help.</string>
-    <string name="calibration">Calibration</string>
+    <string name="calibration">Тохируулга</string>
     <string name="exclude">Exclude</string>
     <string name="calibratepast">Apply to past</string>
     <string name="bloodvar">Blood glucose:</string>
@@ -609,7 +609,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_setup_title">Sibionics Setup</string>
     <string name="scan_sensor_qr">Scan Sensor QR Code</string>
     <string name="scan_sensor_qr_desc">Scan the data matrix on the sensor packaging</string>
-    <string name="select_sibionics_type">Select Sensor Type</string>
+    <string name="select_sibionics_type">Sibionics мэдрэгч сонгох</string>
     <string name="scan_transmitter">Scan Transmitter</string>
     <string name="connecting">Connecting...</string>
     <string name="setup_complete">Setup Complete</string>
@@ -762,7 +762,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="select_gallery_button">Select from Gallery</string>
     <string name="skip_fake_sensor">Skip (Use Fake Sensor)</string>
     <string name="enter_code_manually">Enter Code Manually</string>
-    <string name="choose_sibionics_variant">Choose your Sibionics sensor variant</string>
+    <string name="choose_sibionics_variant">Савлагаан дээрх загварыг сонгоно уу.</string>
     <string name="continue_action">Continue</string>
     <string name="sensor_init_failed">Sensor initialization failed</string>
     <string name="sensor_lost_restart">Error: Sensor lost. Please restart setup.</string>
@@ -1474,7 +1474,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_use_fake_qr_from_ble">Use fake QR info from this BLE name</string>
     <string name="sibionics_use_ble_device">Use this Bluetooth device</string>
     <string name="sibionics_legacy_driver_title">Хуучин драйвер</string>
-    <string name="sibionics_legacy_driver_desc">Kotlin драйверын оронд Sibionics-ийн өмчийн натив санг ашиглана. Зөвхөн нийцтэй байдлын нөөц хувилбар болгон идэвхжүүлнэ үү.</string>
+    <string name="sibionics_legacy_driver_desc">Хуучин өмчийн драйверийг зөвхөн одоогийн тохиргоотой нийцүүлэхэд ашиглана.</string>
     <string name="sibionics_managed_sensor_added">Managed Sibionics sensor added: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>

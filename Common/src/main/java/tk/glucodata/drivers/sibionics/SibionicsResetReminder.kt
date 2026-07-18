@@ -58,7 +58,8 @@ internal object SibionicsResetReminder {
             action = ACTION_POSTPONE,
             requestCode = requestCode + 2,
         )
-        val hours = ceil(((dueAtMs - nowMs).coerceAtLeast(0L)) / 3_600_000.0).toInt()
+        val nextDeadline = if (dueAtMs > nowMs) dueAtMs else hardDeadlineMs
+        val hours = ceil(((nextDeadline - nowMs).coerceAtLeast(0L)) / 3_600_000.0).toInt()
         val text = context.getString(R.string.sibionics_reset_reminder_text, hours)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.novalue)

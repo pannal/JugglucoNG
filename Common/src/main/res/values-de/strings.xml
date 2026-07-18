@@ -485,7 +485,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="import_history_desc">Glukosedaten aus einer CSV-Datei importieren</string>
     <string name="get_started_desc">Beginnen Sie, indem Sie Ihren Sensor hinzufügen</string>
     <string name="select_sensor">Sensortyp auswählen</string>
-    <string name="select_sibionics_type">Sensortyp auswählen</string>
+    <string name="select_sibionics_type">Sibionics-Sensor auswählen</string>
     <string name="or_divider">"  oder  "</string>
     <string name="no_sensors_connected">Keine Sensoren verbunden</string>
     <string name="enter_sensor_codes">Sensorcodes eingeben</string>
@@ -505,7 +505,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="select_gallery_button">Aus Galerie auswählen</string>
     <string name="skip_fake_sensor">Überspringen (Fake-Sensor verwenden)</string>
     <string name="enter_code_manually">Code manuell eingeben</string>
-    <string name="choose_sibionics_variant">Wählen Sie Ihre Sibionics-Sensorvariante</string>
+    <string name="choose_sibionics_variant">Wählen Sie das Modell auf der Verpackung.</string>
     <string name="continue_action">Weiter</string>
     <string name="sensor_init_failed">Sensorinitialisierung fehlgeschlagen</string>
     <string name="sensor_lost_restart">Fehler: Sensor verloren. Bitte Setup neu starten.</string>
@@ -1368,7 +1368,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="sibionics_use_fake_qr_from_ble">Gefälschte QR-Daten aus diesem BLE-Namen verwenden</string>
     <string name="sibionics_use_ble_device">Dieses Bluetooth-Gerät verwenden</string>
     <string name="sibionics_legacy_driver_title">Legacy-Treiber</string>
-    <string name="sibionics_legacy_driver_desc">Verwendet die proprietäre native Sibionics-Bibliothek statt des Kotlin-Treibers. Nur als Kompatibilitätslösung aktivieren.</string>
+    <string name="sibionics_legacy_driver_desc">Den alten proprietären Treiber nur zur Kompatibilität mit einer vorhandenen Einrichtung verwenden.</string>
     <string name="sibionics_managed_sensor_added">Verwalteter Sibionics-Sensor hinzugefügt: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>

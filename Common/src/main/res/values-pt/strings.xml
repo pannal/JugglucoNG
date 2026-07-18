@@ -309,7 +309,7 @@
     <string name="import_history_desc">Importar dados de glicose de arquivo CSV</string>
     <string name="get_started_desc">Comece adicionando seu sensor</string>
     <string name="select_sensor">Selecionar Tipo de Sensor</string>
-    <string name="select_sibionics_type">Selecionar Tipo de Sensor</string>
+    <string name="select_sibionics_type">Escolha um sensor Sibionics</string>
     <string name="or_divider">"  ou  "</string>
     <string name="no_sensors_connected">Nenhum sensor conectado</string>
     <string name="enter_sensor_codes">Inserir Códigos do Sensor</string>
@@ -329,7 +329,7 @@
     <string name="select_gallery_button">Selecionar da Galeria</string>
     <string name="skip_fake_sensor">Pular (Usar sensor falso)</string>
     <string name="enter_code_manually">Inserir código manualmente</string>
-    <string name="choose_sibionics_variant">Escolha sua variante de sensor Sibionics</string>
+    <string name="choose_sibionics_variant">Selecione o modelo indicado na embalagem.</string>
     <string name="continue_action">Continuar</string>
     <string name="sensor_init_failed">Falha na inicialização do sensor</string>
     <string name="sensor_lost_restart">Erro: Sensor perdido. Reinicie a configuração.</string>
@@ -577,7 +577,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="calibrate_a">Modo visual</string>
     <string name="calibrated">Calibrated</string>
     <string name="calibratepast">Apply to past</string>
-    <string name="calibration">Calibration</string>
+    <string name="calibration">Calibração</string>
     <string name="calibration_algorithm">Calibration Algorithm</string>
     <string name="calibrations">Calibrations</string>
     <string name="can_t_play">"Can't play "</string>
@@ -1331,7 +1331,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sibionics_use_fake_qr_from_ble">Usar informações QR falsas deste nome BLE</string>
     <string name="sibionics_use_ble_device">Usar este dispositivo Bluetooth</string>
     <string name="sibionics_legacy_driver_title">Driver legado</string>
-    <string name="sibionics_legacy_driver_desc">Usa a biblioteca nativa proprietária da Sibionics em vez do driver Kotlin. Ative apenas como opção de compatibilidade.</string>
+    <string name="sibionics_legacy_driver_desc">Use o driver proprietário antigo apenas para compatibilidade com uma configuração existente.</string>
     <string name="sibionics_managed_sensor_added">Sensor Sibionics gerido adicionado: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>
