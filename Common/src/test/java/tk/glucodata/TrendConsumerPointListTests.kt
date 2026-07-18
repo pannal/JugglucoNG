@@ -142,9 +142,9 @@ class TrendConsumerPointListTests {
         val alarmVelocity =
             DisplayTrendSource.resolveArrowRate(alarmList(base, snap), snap, 0, false, Float.NaN)
 
-        // Broadcast (fork-only BroadcastTrendRate.java): the same canonical list; the
-        // snapshot is deliberately not handed to resolveArrowRate so a too-thin history
-        // falls back to the caller's native rate instead of the snapshot's own.
+        // Broadcast (BroadcastTrendRate.java): the same canonical list; the snapshot is
+        // deliberately not handed to resolveArrowRate so a too-thin history falls back
+        // to the caller's native rate instead of the snapshot's own.
         val broadcastVelocity =
             DisplayTrendSource.resolveArrowRate(alarmList(base, snap), null, 0, false, Float.NaN)
 
