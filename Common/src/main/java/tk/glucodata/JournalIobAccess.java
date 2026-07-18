@@ -44,8 +44,8 @@ public class JournalIobAccess {
         }
     }
 
-    // [classicIob, eiob, cob, iobNext30min, cobNext30min] in units/grams,
-    // NaN marking "no data of that kind"; null when unavailable.
+    // [classicIob, eiob, cob] in units/grams, NaN marking "no data of that
+    // kind"; null when unavailable.
     static float[] snapshot(long atMillis) {
         try {
             if (!snapshotResolved) {

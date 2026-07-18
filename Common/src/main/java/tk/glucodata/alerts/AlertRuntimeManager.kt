@@ -413,21 +413,6 @@ object AlertRuntimeManager {
         triggerAlert(type, glucoseValue, currentRateLocked(), message)
     }
 
-    /** Notification text naming the threshold that fired ("... in 3 days" / "... in 6 hours"). */
-    private fun sensorExpiryMessage(thresholdMinutes: Int): String {
-        val res = Applic.app.resources
-        return when {
-            thresholdMinutes >= 1440 && thresholdMinutes % 1440 == 0 -> {
-                val days = thresholdMinutes / 1440
-                res.getQuantityString(R.plurals.sensor_expires_in_days, days, days)
-            }
-            else -> {
-                val hours = (thresholdMinutes / 60).coerceAtLeast(1)
-                res.getQuantityString(R.plurals.sensor_expires_in_hours, hours, hours)
-            }
-        }
-    }
-
     private fun evaluateDeltaAlarmsLocked() {
         evaluateDeltaAlarmLocked(AlertType.FALLING_FAST, fallingDeltaState)
         evaluateDeltaAlarmLocked(AlertType.RISING_FAST, risingDeltaState)
@@ -495,6 +480,20 @@ object AlertRuntimeManager {
         triggerAlert(type, glucoseValue, currentRateLocked(), message)
     }
 
+    /** Notification text naming the threshold that fired ("... in 3 days" / "... in 6 hours"). */
+    private fun sensorExpiryMessage(thresholdMinutes: Int): String {
+        val res = Applic.app.resources
+        return when {
+            thresholdMinutes >= 1440 && thresholdMinutes % 1440 == 0 -> {
+                val days = thresholdMinutes / 1440
+                res.getQuantityString(R.plurals.sensor_expires_in_days, days, days)
+            }
+            else -> {
+                val hours = (thresholdMinutes / 60).coerceAtLeast(1)
+                res.getQuantityString(R.plurals.sensor_expires_in_hours, hours, hours)
+            }
+        }
+    }
     private fun triggerAlert(type: AlertType, glucoseValue: Float, rate: Float, message: String): Boolean {
         try {
             val triggered = Notify.triggerSupplementalGlucoseAlert(type.id, glucoseValue, rate, message)

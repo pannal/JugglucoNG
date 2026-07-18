@@ -115,7 +115,7 @@ static double journalvalue(float value,float next30,int64_t agemsec) {
    }
 
 static bool journalfresh(int64_t agemsec) {
-   return journaltime!=0&&agemsec<=journalwindowmsec;
+   return journaltime!=0&&agemsec>=0&&agemsec<=journalwindowmsec;
    }
 
 double getiob(uint32_t now);

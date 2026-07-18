@@ -452,8 +452,9 @@ class SensorViewModel : ViewModel() {
 
                         fun mapBleStatus(status: String): String = when {
                             status == "Status=133" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_connection_failed)
-                            status.startsWith("Status=") -> tk.glucodata.Applic.app.getString(
-                                tk.glucodata.R.string.status_disconnect_code, status.removePrefix("Status="))
+                            status.startsWith("Status=") ->
+                                tk.glucodata.Applic.app.getString(tk.glucodata.R.string.status_disconnected) +
+                                    " (" + status.removePrefix("Status=") + ")"
                             // Literals written by the GATT callbacks, localized at
                             // display time (they double as state markers in code).
                             status == "Loss of signal" -> tk.glucodata.Applic.app.getString(tk.glucodata.R.string.lossofsignal)

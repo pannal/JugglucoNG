@@ -53,6 +53,13 @@ object AlertRepository {
     private fun keyRetryEnabled(type: AlertType) = "alert_${type.id}_retryOn"
     private fun keyRetryInterval(type: AlertType) = "alert_${type.id}_retryInt"
     private fun keyRetryCount(type: AlertType) = "alert_${type.id}_retryCnt"
+    // Delta-counter keys (FALLING_FAST / RISING_FAST)
+    private fun keyDeltaThreshold(type: AlertType) = "alert_${type.id}_deltaThreshold"
+    private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
+    private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
+    private fun keyDeltaInterval(type: AlertType) = "alert_${type.id}_deltaInterval"
+    private fun keyEarlyTrigger(type: AlertType) = "alert_${type.id}_earlyTrigger"
+
     // Sound delay ("vibrate first, audio after N seconds")
     private fun keySoundDelayEnabled(type: AlertType) = "alert_${type.id}_soundDelayEnabled"
     private fun keySoundDelaySeconds(type: AlertType) = "alert_${type.id}_soundDelay"
@@ -73,13 +80,6 @@ object AlertRepository {
         val raw = prefs.getStringSet(keyExpiryWarnings(type), null) ?: return default
         return sanitizeExpiryWarningMinutes(raw.mapNotNull { it.toIntOrNull() }.toSet())
     }
-
-    // Delta-counter keys (FALLING_FAST / RISING_FAST)
-    private fun keyDeltaThreshold(type: AlertType) = "alert_${type.id}_deltaThreshold"
-    private fun keyDeltaCount(type: AlertType) = "alert_${type.id}_deltaCount"
-    private fun keyDeltaBorder(type: AlertType) = "alert_${type.id}_deltaBorder"
-    private fun keyDeltaInterval(type: AlertType) = "alert_${type.id}_deltaInterval"
-    private fun keyEarlyTrigger(type: AlertType) = "alert_${type.id}_earlyTrigger"
 
     private inline fun <reified T : Enum<T>> parseEnumPref(value: String?, fallback: T): T {
         return value?.let { raw ->
@@ -272,16 +272,16 @@ object AlertRepository {
             retryEnabled = prefs.getBoolean(keyRetryEnabled(type), false),
             retryIntervalMinutes = prefs.getInt(keyRetryInterval(type), 5),
             retryCount = prefs.getInt(keyRetryCount(type), 3),
-            soundDelayEnabled = prefs.getBoolean(keySoundDelayEnabled(type), false),
-            soundDelaySeconds = readSoundDelaySeconds(type),
-            expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes),
             deltaThreshold = prefs.getFloat(keyDeltaThreshold(type), default.deltaThreshold ?: 0f).takeIf { it > 0 },
             deltaCount = prefs.getInt(keyDeltaCount(type), default.deltaCount ?: 0).takeIf { it > 0 },
             deltaBorder = prefs.getFloat(keyDeltaBorder(type), default.deltaBorder ?: 0f).takeIf { it > 0 },
             // Missing/0 = follow the Δ readout's global interval.
             deltaIntervalMinutes = prefs.getInt(keyDeltaInterval(type), 0).takeIf { it > 0 }
                 ?.let { GlucoseDelta.sanitizeIntervalMinutes(it) },
-            earlyTriggerEnabled = prefs.getBoolean(keyEarlyTrigger(type), false)
+            earlyTriggerEnabled = prefs.getBoolean(keyEarlyTrigger(type), false),
+            soundDelayEnabled = prefs.getBoolean(keySoundDelayEnabled(type), false),
+            soundDelaySeconds = readSoundDelaySeconds(type),
+            expiryWarningMinutes = readExpiryWarnings(type, default.expiryWarningMinutes)
         )
     }
 
@@ -329,6 +329,11 @@ object AlertRepository {
             putBoolean(keyRetryEnabled(config.type), config.retryEnabled)
             putInt(keyRetryInterval(config.type), config.retryIntervalMinutes)
             putInt(keyRetryCount(config.type), config.retryCount)
+            if (config.deltaThreshold != null) putFloat(keyDeltaThreshold(config.type), config.deltaThreshold) else remove(keyDeltaThreshold(config.type))
+            if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
+            if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
+            if (config.deltaIntervalMinutes != null) putInt(keyDeltaInterval(config.type), config.deltaIntervalMinutes) else remove(keyDeltaInterval(config.type))
+            putBoolean(keyEarlyTrigger(config.type), config.earlyTriggerEnabled)
             putBoolean(keySoundDelayEnabled(config.type), config.soundDelayEnabled)
             putInt(keySoundDelaySeconds(config.type), sanitizeSoundDelaySeconds(config.type, config.soundDelaySeconds))
             // Type-specific: only the sensor-expiry alert carries pre-warnings.
@@ -338,11 +343,6 @@ object AlertRepository {
                     sanitizeExpiryWarningMinutes(config.expiryWarningMinutes).map { it.toString() }.toSet()
                 )
             }
-            if (config.deltaThreshold != null) putFloat(keyDeltaThreshold(config.type), config.deltaThreshold) else remove(keyDeltaThreshold(config.type))
-            if (config.deltaCount != null) putInt(keyDeltaCount(config.type), config.deltaCount) else remove(keyDeltaCount(config.type))
-            if (config.deltaBorder != null) putFloat(keyDeltaBorder(config.type), config.deltaBorder) else remove(keyDeltaBorder(config.type))
-            if (config.deltaIntervalMinutes != null) putInt(keyDeltaInterval(config.type), config.deltaIntervalMinutes) else remove(keyDeltaInterval(config.type))
-            putBoolean(keyEarlyTrigger(config.type), config.earlyTriggerEnabled)
         }
     }
     

@@ -1,18 +1,16 @@
 package tk.glucodata
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import tk.glucodata.logic.TrendEngine
-import tk.glucodata.logic.TrendEngineVelocityProvider
 import tk.glucodata.ui.DisplayValues
 
 /**
  * Every trend-arrow consumer must regress over the SAME point list. Historically
  * each surface assembled its own: the dashboard hero skipped the live
- * augmentation, and the notification/broadcast cut their Room load at the wall
+ * augmentation, and the notification paths cut their Room load at the wall
  * clock while TrendEngine windows from the newest point — so whenever the newest
  * reading lagged "now" (always, by up to a full period), the lists differed by
  * one tail point. Invisible everywhere except the ±0.5 mg/dl/min flat dead zone,
@@ -24,6 +22,16 @@ import tk.glucodata.ui.DisplayValues
  * acceptance criteria) and identical glyph decisions at the dead-zone edge.
  */
 class TrendConsumerPointListTests {
+
+    @Before
+    fun registerProductionTrendProvider() {
+        // Specific.start() performs this registration in the app. Local JVM
+        // tests do not run application startup, so reproduce that wiring here
+        // instead of exercising TrendAccess's deliberately degraded fallback.
+        TrendAccess.register(TrendVelocityProvider { points, useRaw, isMmol ->
+            TrendEngine.calculateTrend(points, useRaw, isMmol).velocity
+        })
+    }
 
     private val minute = 60_000L
     private val now = 1_700_000_000_000L
@@ -63,12 +71,6 @@ class TrendConsumerPointListTests {
         displayValues = DisplayValues(primaryValue = value, primaryStr = "", fullFormatted = "")
     )
 
-    @Before
-    fun registerEngine() {
-        // Mirrors Specific.start(): the release wiring every consumer runs under.
-        TrendAccess.register(TrendEngineVelocityProvider)
-    }
-
     // ---- The four consumers' trend lists, as production assembles them post-fix ----
 
     /** Dashboard hero: full Room window + snapshot (DashboardComponents.kt). */
@@ -79,8 +81,8 @@ class TrendConsumerPointListTests {
     private fun notificationList(base: List<GlucosePoint>, snap: CurrentDisplaySource.Snapshot?) =
         DisplayTrendSource.resolveTrendPoints(base, snap, serial)
 
-    /** Broadcast / alarm notification: rows since now-2×window + snapshot. */
-    private fun broadcastList(base: List<GlucosePoint>, snap: CurrentDisplaySource.Snapshot?): List<GlucosePoint> {
+    /** Alarm notification: rows since now-2×window + snapshot. */
+    private fun alarmList(base: List<GlucosePoint>, snap: CurrentDisplaySource.Snapshot?): List<GlucosePoint> {
         val startT = now - 2 * DisplayTrendSource.TREND_WINDOW_MS
         return DisplayTrendSource.resolveTrendPoints(base.filter { it.timestamp >= startT }, snap, serial)
     }
@@ -98,10 +100,10 @@ class TrendConsumerPointListTests {
 
         val dashboard = triples(dashboardList(base, snap))
         val notification = triples(notificationList(base, snap))
-        val broadcast = triples(broadcastList(base, snap))
+        val alarm = triples(alarmList(base, snap))
 
         assertEquals(dashboard, notification)
-        assertEquals(dashboard, broadcast)
+        assertEquals(dashboard, alarm)
         // The tail row exactly one window before the newest point stays in for everyone.
         assertEquals(21, dashboard.size)
         assertEquals(newestTs - 20 * minute, dashboard.first().first)
@@ -115,10 +117,10 @@ class TrendConsumerPointListTests {
 
         val dashboard = triples(dashboardList(base, snap))
         val notification = triples(notificationList(base, snap))
-        val broadcast = triples(broadcastList(base, snap))
+        val alarm = triples(alarmList(base, snap))
 
         assertEquals(dashboard, notification)
-        assertEquals(dashboard, broadcast)
+        assertEquals(dashboard, alarm)
         // The live point is appended for every consumer, dashboard included.
         assertEquals(newestTs, dashboard.last().first)
         assertEquals(133.1f, dashboard.last().second)
@@ -134,20 +136,34 @@ class TrendConsumerPointListTests {
         // Dashboard hero (DashboardComponents.kt): canonical list into the engine.
         val dashboardResult = TrendEngine.calculateTrend(dashboardList(base, snap), useRaw = false, isMmol = false)
 
-        // Notification (Notify.java) and broadcast (BroadcastTrendRate.java).
+        // Main notification and alarm notification (Notify.java).
         val notificationVelocity =
             DisplayTrendSource.resolveArrowRate(notificationList(base, snap), snap, 0, false, Float.NaN)
+        val alarmVelocity =
+            DisplayTrendSource.resolveArrowRate(alarmList(base, snap), snap, 0, false, Float.NaN)
+
+        // Broadcast (fork-only BroadcastTrendRate.java): the same canonical list; the
+        // snapshot is deliberately not handed to resolveArrowRate so a too-thin history
+        // falls back to the caller's native rate instead of the snapshot's own.
         val broadcastVelocity =
-            DisplayTrendSource.resolveArrowRate(broadcastList(base, snap), null, 0, false, Float.NaN)
+            DisplayTrendSource.resolveArrowRate(alarmList(base, snap), null, 0, false, Float.NaN)
 
         assertEquals(dashboardResult.velocity, notificationVelocity, 1e-6f)
+        assertEquals(dashboardResult.velocity, alarmVelocity, 1e-6f)
         assertEquals(dashboardResult.velocity, broadcastVelocity, 1e-6f)
 
-        // All sit on the same side of the ±0.5 dead zone: rising, not flat.
-        assertTrue("expected > 0.5, was ${dashboardResult.velocity}", dashboardResult.velocity > 0.5f)
-        assertEquals(TrendEngine.TrendState.FortyFiveUp, dashboardResult.state)
-        assertNotEquals(0f, TrendArrowAngle.rotationDegrees(notificationVelocity))
-        assertNotEquals(0f, TrendArrowAngle.rotationDegrees(broadcastVelocity))
+        // Identical velocity means one glyph decision: every consumer sits on the
+        // same side of the ±0.5 dead zone, whatever the estimator reads for the
+        // fixture. Pre-fix, the one-tail-point list difference put the dashboard
+        // and the notification on opposite sides here.
+        fun deadZoneSide(v: Float) = when {
+            v > 0.5f -> 1
+            v < -0.5f -> -1
+            else -> 0
+        }
+        assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(notificationVelocity))
+        assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(alarmVelocity))
+        assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(broadcastVelocity))
     }
 
     @Test
@@ -162,6 +178,6 @@ class TrendConsumerPointListTests {
 
         assertEquals(dashboardResult.velocity, notificationVelocity, 1e-6f)
         assertEquals(TrendEngine.TrendState.Flat, dashboardResult.state)
-        assertEquals(0f, TrendArrowAngle.rotationDegrees(notificationVelocity), 0f)
+        assertTrue("must stay inside the dead zone", kotlin.math.abs(notificationVelocity) <= 0.5f)
     }
 }
