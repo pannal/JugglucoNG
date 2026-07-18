@@ -142,8 +142,15 @@ class TrendConsumerPointListTests {
         val alarmVelocity =
             DisplayTrendSource.resolveArrowRate(alarmList(base, snap), snap, 0, false, Float.NaN)
 
+        // Broadcast (BroadcastTrendRate.java): the same canonical list; the snapshot is
+        // deliberately not handed to resolveArrowRate so a too-thin history falls back
+        // to the caller's native rate instead of the snapshot's own.
+        val broadcastVelocity =
+            DisplayTrendSource.resolveArrowRate(alarmList(base, snap), null, 0, false, Float.NaN)
+
         assertEquals(dashboardResult.velocity, notificationVelocity, 1e-6f)
         assertEquals(dashboardResult.velocity, alarmVelocity, 1e-6f)
+        assertEquals(dashboardResult.velocity, broadcastVelocity, 1e-6f)
 
         // Identical velocity means one glyph decision: every consumer sits on the
         // same side of the ±0.5 dead zone, whatever the estimator reads for the
@@ -156,6 +163,7 @@ class TrendConsumerPointListTests {
         }
         assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(notificationVelocity))
         assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(alarmVelocity))
+        assertEquals(deadZoneSide(dashboardResult.velocity), deadZoneSide(broadcastVelocity))
     }
 
     @Test
