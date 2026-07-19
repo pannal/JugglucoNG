@@ -54,6 +54,19 @@ internal fun resolveSensorExpiryEndMs(preferredSensorId: String?, nowMs: Long): 
 }
 
 /**
+ * Durable memory of which expiry thresholds already warned, keyed by the
+ * sensor's end time. Production backs this with SharedPreferences
+ * ([AlertRepository.sensorExpiryWarnedStore]); tests inject a fake.
+ */
+internal interface ExpiryWarnedStore {
+    /** Thresholds (minutes) already warned for the sensor ending at [endTimeMs]. */
+    fun load(endTimeMs: Long): Set<Int>
+
+    /** Replace the stored set with [thresholds] for [endTimeMs], dropping other sensors' entries. */
+    fun save(endTimeMs: Long, thresholds: Set<Int>)
+}
+
+/**
  * Edge-triggered latch for the sensor-expiry pre-warnings, one latch per
  * configured threshold. Each threshold fires exactly once per sensor when the
  * clock first crosses into its warning window (`endTimeMs - now <= threshold`).
@@ -62,16 +75,20 @@ internal fun resolveSensorExpiryEndMs(preferredSensorId: String?, nowMs: Long): 
  * threshold:
  *  - **Edge-triggered:** fire on window entry, not on every 15s tick.
  *  - **New sensor** (`endTimeMs` changes): rearm every threshold.
- *  - **Baseline:** the first active pass only records current window membership
- *    and fires nothing, so starting the app already inside several windows does
- *    not produce a burst of alerts.
- *  - **Newly enabled thresholds** whose window is already past are adopted like
- *    the baseline (marked warned, never fired retroactively).
+ *  - **Baseline:** the first active pass reloads the persisted warned-set for
+ *    the current sensor. Already-warned windows (from this or an earlier
+ *    process run) stay silent; open windows that were never warned are due
+ *    now, so a restart between window entry and the next tick cannot swallow
+ *    a warning. The cascade guard caps the catch-up at one alert.
+ *  - **Newly enabled thresholds** whose window is already open are adopted
+ *    (marked warned, never fired retroactively). Mid-process that happens
+ *    here; across a restart [AlertRepository.saveConfig] persists the
+ *    adoption at save time.
  *  - **Cascade guard:** if several thresholds come due in the same tick (e.g. the
  *    app resumes deep inside multiple windows), fire only the smallest (most
  *    urgent) and silently mark the rest as warned.
  */
-internal class SensorExpiryAlertState {
+internal class SensorExpiryAlertState(private val store: ExpiryWarnedStore) {
     private var baselineReady = false
     private var lastEndTimeMs = 0L
     private val wasInWindow = mutableMapOf<Int, Boolean>()   // threshold -> inside window last tick
@@ -101,12 +118,16 @@ internal class SensorExpiryAlertState {
             return emptySet()
         }
 
-        // New sensor -> new episode: rearm everything.
+        // New sensor -> new episode: rearm everything, then adopt what an
+        // earlier process run already warned for this end time.
         if (endTimeMs != lastEndTimeMs) {
             baselineReady = false
             lastEndTimeMs = endTimeMs
             wasInWindow.clear()
             alertedForEnd.clear()
+            for (t in store.load(endTimeMs)) {
+                alertedForEnd[t] = endTimeMs
+            }
         }
 
         // Forget thresholds the user has removed so the maps stay bounded.
@@ -120,31 +141,36 @@ internal class SensorExpiryAlertState {
         fun inWindow(minutes: Int): Boolean =
             endTimeMs - nowMs <= minutes.toLong() * 60_000L
 
-        // First active pass: adopt current membership, fire nothing.
+        val newlyDue = mutableListOf<Int>()
         if (!baselineReady) {
+            // First active pass: open windows that were never warned - not in
+            // this process, not in an earlier one - are due now.
             baselineReady = true
             for (t in thresholdsMinutes) {
                 val inside = inWindow(t)
                 wasInWindow[t] = inside
-                if (inside) alertedForEnd[t] = endTimeMs
+                if (inside && alertedForEnd[t] != endTimeMs) {
+                    newlyDue.add(t)
+                }
             }
-            return emptySet()
-        }
-
-        val newlyDue = mutableListOf<Int>()
-        for (t in thresholdsMinutes) {
-            val inside = inWindow(t)
-            val known = wasInWindow.containsKey(t)
-            val prev = wasInWindow[t] ?: false
-            wasInWindow[t] = inside
-            if (!known) {
-                // Threshold enabled mid-episode: adopt like the baseline, never
-                // fire retroactively for a window that is already open.
-                if (inside) alertedForEnd[t] = endTimeMs
-                continue
-            }
-            if (inside && !prev && alertedForEnd[t] != endTimeMs) {
-                newlyDue.add(t)
+        } else {
+            for (t in thresholdsMinutes) {
+                val inside = inWindow(t)
+                val known = wasInWindow.containsKey(t)
+                val prev = wasInWindow[t] ?: false
+                wasInWindow[t] = inside
+                if (!known) {
+                    // Threshold enabled mid-episode: adopt like the baseline, never
+                    // fire retroactively for a window that is already open.
+                    if (inside && alertedForEnd[t] != endTimeMs) {
+                        alertedForEnd[t] = endTimeMs
+                        persistWarned()
+                    }
+                    continue
+                }
+                if (inside && !prev && alertedForEnd[t] != endTimeMs) {
+                    newlyDue.add(t)
+                }
             }
         }
 
@@ -158,6 +184,13 @@ internal class SensorExpiryAlertState {
         for (t in newlyDue) {
             alertedForEnd[t] = endTimeMs
         }
+        persistWarned()
         return setOf(fire)
+    }
+
+    /** Union with the stored set so a concurrent settings-save adoption is not lost. */
+    private fun persistWarned() {
+        val warned = alertedForEnd.filterValues { it == lastEndTimeMs }.keys
+        store.save(lastEndTimeMs, store.load(lastEndTimeMs) + warned)
     }
 }

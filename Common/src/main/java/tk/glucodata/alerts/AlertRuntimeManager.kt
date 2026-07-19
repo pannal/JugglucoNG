@@ -32,7 +32,7 @@ object AlertRuntimeManager {
     private var persistentHighStartedAtMs: Long = 0L
     private var lastLoggedExpiryEndMs: Long = Long.MIN_VALUE
     private val standardEpisodes = AlertEpisodeState<AlertType>()
-    private val sensorExpiryState = SensorExpiryAlertState()
+    private val sensorExpiryState = SensorExpiryAlertState(AlertRepository.sensorExpiryWarnedStore)
     private val fallingDeltaState = DeltaAlarmState(falling = true)
     private val risingDeltaState = DeltaAlarmState(falling = false)
     private val calibrationReadingBarrier = ReadingTimestampBarrier()
