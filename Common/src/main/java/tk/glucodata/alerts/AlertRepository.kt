@@ -72,6 +72,61 @@ object AlertRepository {
     // Sensor-expiry pre-warning thresholds (minutes), stored as a StringSet.
     private fun keyExpiryWarnings(type: AlertType) = "alert_${type.id}_expiryWarnings"
 
+    // Thresholds already warned for, entries "endTimeMs:minutes". Saving keeps
+    // only the current sensor's entries, so the set stays bounded.
+    private fun keyExpiryWarned(type: AlertType) = "alert_${type.id}_expiryWarned"
+
+    internal val sensorExpiryWarnedStore: ExpiryWarnedStore = object : ExpiryWarnedStore {
+        override fun load(endTimeMs: Long): Set<Int> {
+            val raw = prefs.getStringSet(keyExpiryWarned(AlertType.SENSOR_EXPIRY), null)
+                ?: return emptySet()
+            val prefix = "$endTimeMs:"
+            return raw.mapNotNull { entry ->
+                entry.takeIf { it.startsWith(prefix) }?.removePrefix(prefix)?.toIntOrNull()
+            }.toSet()
+        }
+
+        override fun save(endTimeMs: Long, thresholds: Set<Int>) {
+            prefs.edit {
+                putStringSet(
+                    keyExpiryWarned(AlertType.SENSOR_EXPIRY),
+                    thresholds.map { "$endTimeMs:$it" }.toSet()
+                )
+            }
+        }
+    }
+
+    /**
+     * A threshold enabled mid-episode whose warning window is already open must
+     * not fire retroactively - not even after a process restart. Persist the
+     * adoption at save time; the runtime baseline then treats it like any
+     * already-warned window. Thresholds that were already configured keep their
+     * state: one that is due but was never warned (process was down at window
+     * entry) stays eligible for the catch-up warning.
+     */
+    private fun adoptOpenWindowsForNewExpiryThresholds(config: AlertConfig) {
+        if (!config.enabled) {
+            return
+        }
+        val nowMs = System.currentTimeMillis()
+        val endTimeMs = resolveSensorExpiryEndMs(preferredSensorId = null, nowMs = nowMs)
+        if (endTimeMs <= 0L) {
+            return
+        }
+        val previous = loadConfig(config.type)
+        val previouslyActive = if (previous.enabled) previous.expiryWarningMinutes else emptySet()
+        val newlyOpen = sanitizeExpiryWarningMinutes(config.expiryWarningMinutes).filter {
+            it !in previouslyActive && endTimeMs - nowMs <= it.toLong() * 60_000L
+        }
+        if (newlyOpen.isEmpty()) {
+            return
+        }
+        sensorExpiryWarnedStore.save(
+            endTimeMs,
+            sensorExpiryWarnedStore.load(endTimeMs) + newlyOpen
+        )
+    }
+
     /** Missing key -> default (24h migration); present-but-empty -> no pre-warning. */
     private fun readExpiryWarnings(type: AlertType, default: Set<Int>): Set<Int> {
         if (!prefs.contains(keyExpiryWarnings(type))) {
@@ -302,6 +357,9 @@ object AlertRepository {
     }
     
     private fun saveToPrefs(config: AlertConfig) {
+        if (config.type == AlertType.SENSOR_EXPIRY) {
+            adoptOpenWindowsForNewExpiryThresholds(config)
+        }
         prefs.edit {
             putBoolean(keyEnabled(config.type), config.enabled)
             if (config.threshold != null) putFloat(keyThreshold(config.type), config.threshold) else remove(keyThreshold(config.type))
