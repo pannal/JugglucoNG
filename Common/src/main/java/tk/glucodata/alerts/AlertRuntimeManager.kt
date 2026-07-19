@@ -7,7 +7,6 @@ import tk.glucodata.Applic
 import tk.glucodata.CurrentDisplaySource
 import tk.glucodata.GlucoseDelta
 import tk.glucodata.Log
-import tk.glucodata.Natives
 import tk.glucodata.Notify
 import tk.glucodata.R
 import tk.glucodata.SuperGattCallback
@@ -31,8 +30,9 @@ object AlertRuntimeManager {
     private var lastRate: Float = Float.NaN
     private var lastDisplaySnapshot: CurrentDisplaySource.Snapshot? = null
     private var persistentHighStartedAtMs: Long = 0L
+    private var lastLoggedExpiryEndMs: Long = Long.MIN_VALUE
     private val standardEpisodes = AlertEpisodeState<AlertType>()
-    private val sensorExpiryState = SensorExpiryAlertState()
+    private val sensorExpiryState = SensorExpiryAlertState(AlertRepository.sensorExpiryWarnedStore)
     private val fallingDeltaState = DeltaAlarmState(falling = true)
     private val risingDeltaState = DeltaAlarmState(falling = false)
     private val calibrationReadingBarrier = ReadingTimestampBarrier()
@@ -374,10 +374,19 @@ object AlertRuntimeManager {
             return
         }
 
-        val endTimeMs = try {
-            Natives.getendtime()
-        } catch (t: Throwable) {
-            0L
+        val endTimeMs = resolveSensorExpiryEndMs(lastDisplaySnapshot?.sensorId, nowMs)
+        if (endTimeMs != lastLoggedExpiryEndMs) {
+            // A sane source logs once per sensor; a bad one (0, past, or moving
+            // every tick like the old Natives.getendtime()) becomes visible log
+            // churn instead of silently swallowed warnings.
+            Log.i(LOG_ID, "Sensor expiry end resolved: $endTimeMs (now=$nowMs)")
+            lastLoggedExpiryEndMs = endTimeMs
+        }
+        if (endTimeMs <= 0L) {
+            // No plausible end: keep the latch untouched so a transient gatt
+            // dropout cannot re-baseline the episode.
+            clearRuntimeAlert(type, "sensor-expiry-no-endtime")
+            return
         }
 
         val thresholds = config.expiryWarningMinutes
@@ -394,7 +403,7 @@ object AlertRuntimeManager {
 
         // Not yet within even the longest configured lead time -> nothing pending.
         val largestThresholdMs = (thresholds.maxOrNull() ?: 0).toLong() * 60_000L
-        if (endTimeMs <= 0L || thresholds.isEmpty() || endTimeMs - nowMs > largestThresholdMs) {
+        if (thresholds.isEmpty() || endTimeMs - nowMs > largestThresholdMs) {
             clearRuntimeAlert(type, "sensor-expiry-not-due")
             return
         }
