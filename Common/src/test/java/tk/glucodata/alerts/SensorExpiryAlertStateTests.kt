@@ -221,6 +221,7 @@ class SensorExpiryAlertStateTests {
         val now = 1_000_000L
         val candidates = listOf("A" to now + 100_000L, "B" to now + 900_000L)
         assertEquals(now + 100_000L, selectSensorExpiryEndMs(candidates, "A", now))
+        assertEquals(now + 100_000L, selectSensorExpiryEndMs(candidates, "a", now))
         assertEquals(now + 900_000L, selectSensorExpiryEndMs(candidates, null, now))
         assertEquals(now + 900_000L, selectSensorExpiryEndMs(candidates, "unknown", now))
         // A displayed sensor without a plausible end must not shadow the running one.
