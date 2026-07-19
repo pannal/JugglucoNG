@@ -82,6 +82,7 @@ import java.text.DateFormat;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import tk.glucodata.alerts.AlertDisplayText;
 import tk.glucodata.alerts.AlertType;
 import tk.glucodata.alerts.SnoozeManager;
 import tk.glucodata.alerts.AlertConfig;
@@ -3022,12 +3023,12 @@ public class Notify {
                 RemoteViews remoteViewsHeadsUp = new RemoteViews(Applic.app.getPackageName(),
                         R.layout.notification_material_heads_up);
 
-                // Clean message: "Forecast Low 4.0 mmol/L" -> "Forecast Low"
-                String cleanMessage = customAlertId != null && !customAlertId.isEmpty()
-                        ? message
-                        : message.replaceAll("[0-9.,]+", "").replaceAll("mmol/L", "")
-                                .replaceAll("mg/dL", "").trim();
-                final String badgeText = cleanMessage.isEmpty() ? message : cleanMessage;
+                // "Forecast Low 4.0 mmol/L" -> "Forecast Low"; duration-carrying
+                // messages (sensor expiry, missed reading) keep their numbers.
+                final String badgeText = AlertDisplayText.notificationBadge(
+                        AlertType.Companion.fromId(alertTypeId),
+                        customAlertId != null && !customAlertId.isEmpty(),
+                        message);
                 final String alertMeta = timef.format(glucose.time);
                 final String plainValueText = valueText.toString();
 
