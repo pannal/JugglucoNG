@@ -238,7 +238,11 @@ object SibionicsRegistry {
         findRecord(context, sensorId)?.sensorId
 
     @JvmStatic
-    fun removeSensor(context: Context, sensorId: String?) {
+    fun removeSensor(
+        context: Context,
+        sensorId: String?,
+        preserveResumeState: Boolean = false,
+    ) {
         val record = findRecord(context, sensorId) ?: return
         val wasMainSensor = record.matchesId(SensorIdentity.resolveMainSensor())
         val replacementSensor = if (wasMainSensor) {
@@ -253,27 +257,33 @@ object SibionicsRegistry {
         val remainingRecords = persistedRecords(context).filter { !it.matchesId(record.sensorId) }
         val remainingSet = remainingRecords.map { encodeRecord(it) }.toSet()
         val committed = prefs(context).edit().apply {
-            // Keep record removal and all driver state deletion in one durable
-            // transaction. This is a lifecycle boundary: a process restart must
-            // never observe a deleted record with only half its state removed.
+            // Ordinary UI disconnect removes ownership but deliberately retains
+            // the exact algorithm cursor/checkpoint and raw source journal. If the
+            // same physical sensor is added again, it can continue at the first
+            // missing index instead of downloading and replacing its whole history.
+            // An explicit wipe still removes every piece of resumable state.
             putStringSet(PREF_SENSORS, remainingSet)
-            remove(PREF_LAST_INDEX_PREFIX + id)
-            remove(PREF_START_TIME_PREFIX + id)
-            remove(PREF_PROTOCOL_PREFIX + id)
-            remove(PREF_VARIANT_PREFIX + id)
-            remove(PREF_SHORT_CODE_PREFIX + id)
-            remove(PREF_LAST_GLUCOSE_MGDL_PREFIX + id)
-            remove(PREF_LAST_RAW_MGDL_PREFIX + id)
-            remove(PREF_LAST_READING_TIME_PREFIX + id)
-            remove(PREF_ALGORITHM_STATE_PREFIX + id)
-            remove(PREF_AUTO_RESET_DAYS_PREFIX + id)
+            if (!preserveResumeState) {
+                remove(PREF_LAST_INDEX_PREFIX + id)
+                remove(PREF_START_TIME_PREFIX + id)
+                remove(PREF_PROTOCOL_PREFIX + id)
+                remove(PREF_VARIANT_PREFIX + id)
+                remove(PREF_SHORT_CODE_PREFIX + id)
+                remove(PREF_LAST_GLUCOSE_MGDL_PREFIX + id)
+                remove(PREF_LAST_RAW_MGDL_PREFIX + id)
+                remove(PREF_LAST_READING_TIME_PREFIX + id)
+                remove(PREF_ALGORITHM_STATE_PREFIX + id)
+                remove(PREF_AUTO_RESET_DAYS_PREFIX + id)
+                remove(PREF_CUSTOM_ALGORITHM_PREFIX + id)
+                remove(PREF_ALGORITHM_SELECTION_PREFIX + id)
+                remove(PREF_LOCAL_REBUILD_FINGERPRINT_PREFIX + id)
+                remove(PREF_INTEGRATED_CALIBRATION_BASELINE_PREFIX + id)
+            }
+            // A detached sensor must never execute a stale scheduled reset when
+            // it is later re-added, even though its glucose continuation is kept.
             remove(PREF_RESET_POSTPONED_UNTIL_PREFIX + id)
             remove(PREF_RESET_REMINDER_AT_PREFIX + id)
             remove(PREF_RESET_REQUESTED_PREFIX + id)
-            remove(PREF_CUSTOM_ALGORITHM_PREFIX + id)
-            remove(PREF_ALGORITHM_SELECTION_PREFIX + id)
-            remove(PREF_LOCAL_REBUILD_FINGERPRINT_PREFIX + id)
-            remove(PREF_INTEGRATED_CALIBRATION_BASELINE_PREFIX + id)
         }.commit()
         if (!committed) {
             Log.e(SibionicsConstants.TAG, "Failed to persist removal of $id")
@@ -281,6 +291,7 @@ object SibionicsRegistry {
             runCatching { SensorBluetooth.setCurrentSensorSelection(replacementSensor.orEmpty()) }
                 .onFailure { Log.stack(SibionicsConstants.TAG, "removeSensor(rehomeCurrent)", it) }
         }
+        SibionicsResetReminder.cancel(context, id)
         ManagedSensorUiSignals.markDeviceListDirty()
         SensorIdentity.invalidateCaches()
     }
