@@ -137,10 +137,7 @@ fun JournalScreen(
         buildJournalChartMarkers(filteredEntries, presetsById, unit, sortedHistory, foodsById)
     }
     val entriesById = remember(filteredEntries) { filteredEntries.associateBy { it.id } }
-    val selectedTimestamp = viewportSnapshot?.selectedPoint?.timestamp
-        ?: sortedHistory.lastOrNull()?.timestamp
-        ?: journalEntries.maxOfOrNull { it.timestamp }
-        ?: System.currentTimeMillis()
+    val selectedPointTimestamp = viewportSnapshot?.selectedPoint?.timestamp
     val selectedDisplayGlucose = viewportSnapshot?.selectedPoint?.value
 
     fun clearChartAction() {
@@ -376,7 +373,7 @@ fun JournalScreen(
             },
             onTypeSelected = { type ->
                 onAddJournalEntry(
-                    selectedTimestamp,
+                    journalQuickAddTimestamp(selectedPointTimestamp, System.currentTimeMillis()),
                     type,
                     selectedDisplayGlucose.takeIf { type == JournalEntryType.FINGERSTICK },
                     null
@@ -388,6 +385,16 @@ fun JournalScreen(
         )
     }
 }
+
+/**
+ * Timestamp seed for quick-add entries created without an explicit chart selection.
+ * Tapping "+" means "log something happening now"; the last known reading or journal
+ * entry can lag minutes behind wall clock (e.g. right after resume, before the data
+ * flows re-emit) and must never seed the entry. Backdating stays an explicit act:
+ * selecting a chart point or using the timeline/long-press menus.
+ */
+internal fun journalQuickAddTimestamp(selectedPointTimestamp: Long?, nowMillis: Long): Long =
+    selectedPointTimestamp ?: nowMillis
 
 @Composable
 private fun JournalHeader(
