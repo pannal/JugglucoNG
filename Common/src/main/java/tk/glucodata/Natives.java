@@ -1500,8 +1500,17 @@ public class Natives {
 
         public static native long accuProcessData(long dataptr, byte[] value, long mmsec);
 
+        /**
+         * Pass as {@code trendByte} when the AiDex frame carried no trend field — the direct F003
+         * live frame does not, only the 0x11 broadcast sample does. Native stores NaN for the rate
+         * in that case and the exchange serializers derive a fallback from the poll series.
+         * Must match {@code aidextrendunknown} in cpp/aidex/java.cpp.
+         */
+        public static final int AIDEX_TREND_UNKNOWN = Integer.MIN_VALUE;
+
         public static native long aidexProcessData(long dataptr, byte[] value, long mmsec, float glucose,
-                                                   float rawGlucose, float calibrationFactor);
+                                                   float rawGlucose, float calibrationFactor,
+                                                   int trendByte);
 
         public static native void aidexStoreHistoryData(long dataptr, long mmsec, float glucose,
                                                         float rawGlucose);

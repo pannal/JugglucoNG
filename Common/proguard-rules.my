@@ -64,6 +64,12 @@
     public final float getCalibratedValue(float,long,boolean,boolean,java.lang.String);
     public final boolean shouldHideInitialWhenCalibrated();
     public final boolean shouldOverwriteSensorValues();
+    public final long getRevision();
+    public static void notifyExternalCalibrationPipelineChanged();
+    public static double[] getActiveCalibrationAnchors(java.lang.String,boolean);
+    public static float[] getIntegratedCalibratedSeries(float[],long[],boolean,java.lang.String);
+    public static long getIntegratedCalibrationFingerprint(java.lang.String,boolean);
+    public static void seedIntegratedCalibrationBaseline(float[],long[],boolean,java.lang.String);
     public final java.lang.String exportProfileForSensorAsJson(java.lang.String);
     public final *** importProfileFromJsonBlocking(java.lang.String,boolean,java.lang.String);
     public final *** importMirrorProfileFromJsonBlocking(java.lang.String,java.lang.String);

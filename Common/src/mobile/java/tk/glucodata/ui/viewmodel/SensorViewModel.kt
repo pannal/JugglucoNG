@@ -317,6 +317,8 @@ class SensorViewModel : ViewModel() {
         val isMq = snapshot.uiFamily == ManagedSensorUiFamily.MQ
         val isIcan = snapshot.uiFamily == ManagedSensorUiFamily.ICAN
         val isAnytime = snapshot.uiFamily == ManagedSensorUiFamily.ANYTIME
+        val isSibionics = snapshot.uiFamily == ManagedSensorUiFamily.SIBIONICS
+        val isSibionics2 = isSibionics && snapshot.vendorModel.equals("Sibionics 2", ignoreCase = true)
         val detailsConnectionStatus = if (snapshot.showConnectionStatusInDetails) {
             snapshot.connectionStatus
         } else {
@@ -324,7 +326,10 @@ class SensorViewModel : ViewModel() {
         }
         return SensorInfo(
             serial = snapshot.serial,
-            displayName = snapshot.displayName,
+            displayName = snapshot.displayName
+                .trim()
+                .takeIf { SensorIdentity.isUsableSensorId(it) }
+                ?: snapshot.serial,
             deviceAddress = snapshot.deviceAddress,
             connectionStatus = detailsConnectionStatus,
             starttime = if (snapshot.startTimeMs > 0) bluediag.datestr(snapshot.startTimeMs) else "",
@@ -334,9 +339,9 @@ class SensorViewModel : ViewModel() {
             officialEnd = if (snapshot.officialEndMs > 0) bluediag.datestr(snapshot.officialEndMs) else "",
             expectedEnd = if (snapshot.expectedEndMs > 0) bluediag.datestr(snapshot.expectedEndMs) else "",
             viewMode = snapshot.viewMode,
-            autoResetDays = 0,
-            isSibionics = false,
-            isSibionics2 = false,
+            autoResetDays = snapshot.autoResetDays,
+            isSibionics = isSibionics,
+            isSibionics2 = isSibionics2,
             isAidex = isAiDex,
             isMq = isMq,
             isIcan = isIcan,
@@ -344,8 +349,8 @@ class SensorViewModel : ViewModel() {
             startMs = snapshot.startTimeMs,
             officialEndMs = snapshot.officialEndMs,
             expectedEndMs = snapshot.expectedEndMs,
-            customCalEnabled = false,
-            customCalIndex = 0,
+            customCalEnabled = snapshot.customAlgorithmEnabled,
+            customCalIndex = snapshot.customAlgorithmMode,
             customCalAutoReset = false,
             supportsDisplayModes = snapshot.supportsDisplayModes,
             supportsManualCalibration = snapshot.supportsManualCalibration,
@@ -398,6 +403,10 @@ class SensorViewModel : ViewModel() {
                     // Edit 56c: Skip finished legacy sensors (not in activeSensors list).
                     // AiDex sensors bypass this check since they're tracked in SharedPreferences.
                     val serial = gatt.SerialNumber ?: ""
+                    if (!SensorIdentity.isUsableSensorId(serial)) {
+                        android.util.Log.e("SensorVM", "Discarding callback with invalid sensor identity")
+                        return@mapNotNull null
+                    }
                     val managedOutsideNative =
                         gatt is ManagedBluetoothSensorDriver && gatt.isManagedOutsideNativeActiveSet()
                     if (!managedOutsideNative && serial.isNotEmpty() && !activeSet.contains(serial)) {
@@ -417,10 +426,11 @@ class SensorViewModel : ViewModel() {
                         var autoResetDays = Natives.getAutoResetDays(gatt.dataptr)
                         val isSi2 = Natives.isSibionics2(gatt.dataptr)
                         val isSi = Natives.isSibionics(gatt.dataptr)
-                        // If 0 (Fresh), force to 21 (Default ON)
-                        if (isSi2 && autoResetDays == 0) {
-                            Natives.setAutoResetDays(gatt.dataptr, 21)
-                            autoResetDays = 21
+                        // Managed and legacy Sibionics 2 both default to 22 days, while preserving
+                        // an explicit earlier reset target selected with the sensor-card stepper.
+                        if (isSi2 && autoResetDays !in 1..22 && autoResetDays != 300) {
+                            Natives.setAutoResetDays(gatt.dataptr, 22)
+                            autoResetDays = 22
                         }
     
                         // Get custom calibration settings
@@ -555,8 +565,51 @@ class SensorViewModel : ViewModel() {
     fun setAutoResetDays(serial: String, days: Int) {
         val gatt = findGatt(serial)
         if (gatt != null) {
-            Natives.setAutoResetDays(gatt.dataptr, days)
+            if (gatt is ManagedSensorMaintenanceDriver && gatt.supportsAutoReset()) {
+                gatt.setAutoResetDays(days)
+            } else if (gatt.dataptr != 0L) {
+                Natives.setAutoResetDays(gatt.dataptr, days)
+            }
             refreshSensors()
+        }
+    }
+
+    fun setSibionicsCustomAlgorithm(serial: String, enabled: Boolean) {
+        val gatt = findGatt(serial) ?: return
+        if (gatt is ManagedSensorMaintenanceDriver && gatt.supportsCustomAlgorithm()) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                val success = runCatching { gatt.setCustomAlgorithmEnabled(enabled) }.getOrDefault(false)
+                android.util.Log.i("SensorVM", "Managed Sibionics custom algorithm=$enabled result=$success serial=$serial")
+                refreshSensors()
+            }
+            return
+        }
+        if (gatt.dataptr != 0L) {
+            if (enabled) updateCustomCalibration(serial, true, 9, false)
+            else disableCustomCalAndReplay(serial)
+        }
+    }
+
+    fun setSibionicsAlgorithmMode(serial: String, mode: Int) {
+        val gatt = findGatt(serial) ?: return
+        if (gatt is ManagedSensorMaintenanceDriver && gatt.supportsCustomAlgorithm()) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                val success = runCatching { gatt.setCustomAlgorithmMode(mode) }.getOrDefault(false)
+                android.util.Log.i("SensorVM", "Managed Sibionics algorithm mode=$mode result=$success serial=$serial")
+                refreshSensors()
+            }
+        }
+    }
+
+    fun restartSibionicsAlgorithm(serial: String) {
+        val gatt = findGatt(serial) ?: return
+        if (gatt is ManagedSensorMaintenanceDriver && gatt.supportsClearCalibrationAction()) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                gatt.clearSensorCalibration()
+                refreshSensors()
+            }
+        } else if (gatt.dataptr != 0L) {
+            localReplay(serial)
         }
     }
 
