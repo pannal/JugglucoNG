@@ -1976,8 +1976,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Hızlı Düşmek</string>
     <string name="alert_rising_fast">Hızla Yükseliyor</string>
-    <string name="broadcast_computed_trend_desc">Sensörün kendi tahmini yerine, uygulamanın 20 dakikalık trendini tüm çıkışlardaki oran olarak gönderin. Alıcı okları daha sonra bu uygulamayla eşleşir.</string>
-    <string name="broadcast_computed_trend_title">Yayın bilgisayarlı trend</string>
+    <string name="broadcast_computed_trend_title">Uygulama eğilimini yayınla</string>
+    <string name="broadcast_computed_trend_desc">Sensör eğilimi yerine uygulama eğilimini kullan</string>
     <string name="dashboard_show_delta_desc">Trend okunun altındaki delta aralığında ölçülen değişiklik</string>
     <string name="dashboard_show_delta_title">Gösterge tablosundaki Delta (Δ)</string>
     <string name="delta_alarm_interval_follow">Δ okuması gibi (şu anda %1$d dk)</string>

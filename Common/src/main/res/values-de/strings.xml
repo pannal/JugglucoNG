@@ -815,8 +815,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="forget_sensor_desc">Entfernt den Sensor aus der Liste. Nach erneutem Scannen kann er wieder erscheinen.</string>
     <string name="forget_sensor_title">Sensor vergessen?</string>
     <string name="glucodata_subtitle">Glucodata</string>
-    <string name="broadcast_computed_trend_title">Berechneten Trend senden</string>
-    <string name="broadcast_computed_trend_desc">Sendet den 20-Minuten-Trend der App statt der Sensor-Schätzung als Rate in allen Ausgaben. Empfänger-Pfeile entsprechen dann dieser App.</string>
+    <string name="broadcast_computed_trend_title">App-Trend senden</string>
+    <string name="broadcast_computed_trend_desc">App-Trend statt Sensortrend verwenden</string>
     <string name="glulisine">Insulin Glulisine/Apidra</string>
     <string name="googlescan">Google scan</string>
     <string name="gvi">GVI</string>

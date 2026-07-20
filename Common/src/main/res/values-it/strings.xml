@@ -1938,8 +1938,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Caduta veloce</string>
     <string name="alert_rising_fast">In rapida crescita</string>
-    <string name="broadcast_computed_trend_desc">Invia la tendenza di 20 minuti dell\'app come velocità di variazione in tutti gli output invece della stima del sensore. Le frecce dei ricevitori corrispondono così a questa app.</string>
-    <string name="broadcast_computed_trend_title">Andamento calcolato della trasmissione</string>
+    <string name="broadcast_computed_trend_title">Trasmetti trend app</string>
+    <string name="broadcast_computed_trend_desc">Usa il trend dell\'app invece di quello del sensore</string>
     <string name="dashboard_show_delta_desc">Variazione misurata nell\'intervallo delta, sotto la freccia di tendenza</string>
     <string name="dashboard_show_delta_title">Delta (Δ) sul cruscotto</string>
     <string name="delta_alarm_interval_follow">Come la lettura Δ (attualmente %1$d min)</string>

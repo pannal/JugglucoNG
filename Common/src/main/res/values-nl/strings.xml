@@ -1991,8 +1991,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Snel vallen</string>
     <string name="alert_rising_fast">Snel stijgen</string>
-    <string name="broadcast_computed_trend_desc">Verzend de trend van 20 minuten van de app als de snelheid in alle uitgangen in plaats van de eigen schatting van de sensor. Ontvangerpijlen komen dan overeen met deze app.</string>
-    <string name="broadcast_computed_trend_title">Uitgezonden berekende trend</string>
+    <string name="broadcast_computed_trend_title">Apptrend uitzenden</string>
+    <string name="broadcast_computed_trend_desc">Gebruik de apptrend in plaats van de sensortrend</string>
     <string name="dashboard_show_delta_desc">Gemeten verandering over het delta-interval, onder de trendpijl</string>
     <string name="dashboard_show_delta_title">Delta (Δ) op het dashboard</string>
     <string name="delta_alarm_interval_follow">Zoals Δ uitlezing (momenteel %1$d min)</string>

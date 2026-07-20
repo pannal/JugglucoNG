@@ -1983,8 +1983,8 @@
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Szybki spadek</string>
     <string name="alert_rising_fast">Szybko rośnie</string>
-    <string name="broadcast_computed_trend_desc">Wysyłaj 20-minutowy trend aplikacji jako tempo zmian we wszystkich wyjściach zamiast własnej oceny czujnika. Strzałki odbiorników będą wtedy zgodne z tą aplikacją.</string>
-    <string name="broadcast_computed_trend_title">Rozgłaszanie obliczonego trendu</string>
+    <string name="broadcast_computed_trend_title">Wysyłaj trend aplikacji</string>
+    <string name="broadcast_computed_trend_desc">Używaj trendu aplikacji zamiast trendu czujnika</string>
     <string name="dashboard_show_delta_desc">Zmierzona zmiana w przedziale delta, poniżej strzałki trendu</string>
     <string name="dashboard_show_delta_title">Delta (Δ) na desce rozdzielczej</string>
     <string name="delta_alarm_interval_follow">Podobnie jak odczyt Δ (obecnie %1$d min)</string>

@@ -1948,8 +1948,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Faller snabbt</string>
     <string name="alert_rising_fast">stiger snabbt</string>
-    <string name="broadcast_computed_trend_desc">Skicka appens 20-minuterstrend som frekvensen i alla utgångar istället för sensorns egen uppskattning. Mottagarpilarna matchar då denna app.</string>
-    <string name="broadcast_computed_trend_title">Broadcast beräknad trend</string>
+    <string name="broadcast_computed_trend_title">Sänd appens trend</string>
+    <string name="broadcast_computed_trend_desc">Använd appens trend i stället för sensorns</string>
     <string name="dashboard_show_delta_desc">Uppmätt förändring över deltaintervallet, under trendpilen</string>
     <string name="dashboard_show_delta_title">Delta (Δ) på instrumentbrädan</string>
     <string name="delta_alarm_interval_follow">Som Δ-avläsning (för närvarande %1$d min)</string>

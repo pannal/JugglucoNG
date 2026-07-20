@@ -1991,8 +1991,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Быстрое падение</string>
     <string name="alert_rising_fast">Быстрый рост</string>
-    <string name="broadcast_computed_trend_desc">Отправьте 20-минутный тренд приложения в качестве скорости на всех выходных данных вместо собственной оценки датчика. Стрелки приемника соответствуют этому приложению.</string>
-    <string name="broadcast_computed_trend_title">Трансляция рассчитанного тренда</string>
+    <string name="broadcast_computed_trend_title">Передавать тренд приложения</string>
+    <string name="broadcast_computed_trend_desc">Использовать тренд приложения вместо тренда датчика</string>
     <string name="dashboard_show_delta_desc">Измеренное изменение в интервале дельта, ниже стрелки тренда.</string>
     <string name="dashboard_show_delta_title">Дельта (Δ) на приборной панели</string>
     <string name="delta_alarm_interval_follow">Аналогично показанию Δ (в настоящее время %1$d мин)</string>

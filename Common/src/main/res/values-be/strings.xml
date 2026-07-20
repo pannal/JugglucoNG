@@ -2015,8 +2015,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Хуткае падзенне</string>
     <string name="alert_rising_fast">Хуткі рост</string>
-    <string name="broadcast_computed_trend_desc">Адпраўляць 20-хвілінны трэнд праграмы ў якасці хуткасці ва ўсіх выхадах замест уласнай ацэнкі датчыка. Затым стрэлкі прымача супадаюць з гэтай праграмай.</string>
-    <string name="broadcast_computed_trend_title">Трансляцыя вылічанага трэнду</string>
+    <string name="broadcast_computed_trend_title">Перадаваць трэнд праграмы</string>
+    <string name="broadcast_computed_trend_desc">Выкарыстоўваць трэнд праграмы замест трэнду датчыка</string>
     <string name="dashboard_show_delta_desc">Вымеранае змяненне ў дэльта-інтэрвале пад стрэлкай трэнду</string>
     <string name="dashboard_show_delta_title">Дэльта (Δ) на прыборнай панэлі</string>
     <string name="delta_alarm_interval_follow">Счытванне Like Δ (у цяперашні час мін. %1$d)</string>

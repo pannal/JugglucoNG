@@ -1964,8 +1964,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">快速下降</string>
     <string name="alert_rising_fast">快速崛起</string>
-    <string name="broadcast_computed_trend_desc">将应用程序的 20 分钟趋势作为所有输出中的速率发送，而不是传感器自己的估计。然后接收器箭头与该应用程序匹配。</string>
-    <string name="broadcast_computed_trend_title">广播计算趋势</string>
+    <string name="broadcast_computed_trend_title">广播应用趋势</string>
+    <string name="broadcast_computed_trend_desc">使用应用趋势代替传感器趋势</string>
     <string name="dashboard_show_delta_desc">趋势箭头下方的 Delta 间隔内测得的变化</string>
     <string name="dashboard_show_delta_title">仪表板上的 Delta (Δ)</string>
     <string name="delta_alarm_interval_follow">类似于 Δ 读数（当前为 %1$d 分钟）</string>

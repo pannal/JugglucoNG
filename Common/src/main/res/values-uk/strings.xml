@@ -2020,8 +2020,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Falling Fast</string>
     <string name="alert_rising_fast">Швидке зростання</string>
-    <string name="broadcast_computed_trend_desc">Надсилайте 20-хвилинний тренд програми як швидкість у всіх виходах замість власної оцінки датчика. Тоді стрілки приймача відповідають цій програмі.</string>
-    <string name="broadcast_computed_trend_title">Трансляція обчисленого тренду</string>
+    <string name="broadcast_computed_trend_title">Передавати тренд застосунку</string>
+    <string name="broadcast_computed_trend_desc">Використовувати тренд застосунку замість тренду датчика</string>
     <string name="dashboard_show_delta_desc">Виміряна зміна протягом дельта-інтервалу, під стрілкою тенденції</string>
     <string name="dashboard_show_delta_title">Дельта (Δ) на панелі приладів</string>
     <string name="delta_alarm_interval_follow">Зчитування Like Δ (наразі %1$d min)</string>
