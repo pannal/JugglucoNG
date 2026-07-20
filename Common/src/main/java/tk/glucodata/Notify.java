@@ -1664,6 +1664,10 @@ public class Notify {
     }
 
     private void vibratealarm(int kind, String hapticProfileName, int durationSeconds) {
+        vibratealarm(kind, hapticProfileName, durationSeconds, 0);
+    }
+
+    private void vibratealarm(int kind, String hapticProfileName, int durationSeconds, int soundDelayLeadInSeconds) {
         var context = Applic.app;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             vibrator = ((VibratorManager) (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE)))
@@ -1752,16 +1756,19 @@ public class Notify {
                         amplitudes[i] = 1; // Ensure non-zero if it was meant to be on
                 }
             }
-            final AlertVibrationPattern finitePattern = AlertVibrationPattern.buildFinite(timings, amplitudes, durationSeconds);
+            final AlertVibrationPattern finitePattern = AlertVibrationPattern.buildFinite(timings, amplitudes,
+                    durationSeconds, soundDelayLeadInSeconds);
             vibrateWaveform(vibrator, finitePattern.timings, finitePattern.amplitudes, -1);
         } else {
-            final AlertVibrationPattern finitePattern = AlertVibrationPattern.buildFinite(timings, amplitudes, durationSeconds);
+            final AlertVibrationPattern finitePattern = AlertVibrationPattern.buildFinite(timings, amplitudes,
+                    durationSeconds, soundDelayLeadInSeconds);
             vibrator.vibrate(finitePattern.timings, -1);
         }
 
         if (doLog) {
             Log.i(LOG_ID, "vibratealarm " + kind + " hapticProfile=" + hapticProfileName
-                    + " duration=" + sanitizeAlarmDurationSeconds(durationSeconds));
+                    + " duration=" + sanitizeAlarmDurationSeconds(durationSeconds)
+                    + (soundDelayLeadInSeconds > 0 ? " soundDelayLeadIn=" + soundDelayLeadInSeconds : ""));
         }
     }
 
@@ -2011,7 +2018,9 @@ public class Notify {
             }
         }
         if (vibrate) {
-            vibratealarm(kind, resolvedHapticProfile, duration);
+            // The finite pattern must also span the silent delay phase
+            // ("vibrate first"), else it runs out before the sound starts.
+            vibratealarm(kind, resolvedHapticProfile, duration, soundDelaySeconds);
         }
 
         if (canPlaySound) {
