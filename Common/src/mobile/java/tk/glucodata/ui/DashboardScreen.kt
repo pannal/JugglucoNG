@@ -313,6 +313,8 @@ fun DashboardScreen(
     val glucoseRangeColorsDisplayEnabled by viewModel.glucoseValueRangeColorsEnabled.collectAsState()
     val glucoseArrowForecastEnabled by viewModel.glucoseArrowForecastColorsEnabled.collectAsState()
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
+    val dashboardShowDelta by viewModel.dashboardShowDelta.collectAsState()
+    val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsState()
     val journalDoseCalculatorEnabled by viewModel.journalDoseCalculatorEnabled.collectAsState()
     val journalFoodMacrosEnabled by viewModel.journalFoodMacrosEnabled.collectAsState()
     val journalFoodLibraryEnabled by viewModel.journalFoodLibraryEnabled.collectAsState()
@@ -1191,7 +1193,9 @@ fun DashboardScreen(
                             sensorProgress = sensorProgress,
                             sensorHoursRemaining = sensorHoursRemaining,
                             currentDay = currentDay,
-                            history = consumerHistory, // Advanced Trend (smoothed when active)
+                            history = glucoseHistory, // Trend must see measured data: visual smoothing
+                            // reshapes the recent slope, and the notification/broadcast
+                            // arrow computes from unsmoothed history
                             calibratedValue = calibratedValue,
                             currentSnapshot = dashboardCurrentSnapshot,
                             dataState = dashboardDataState,
@@ -1203,6 +1207,8 @@ fun DashboardScreen(
                             veryLowThreshold = veryLowThreshold,
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
+                            showDelta = dashboardShowDelta,
+                            deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             onHeroClick = {
                                 val autoVal = latestPoint?.value ?: tk.glucodata.GlucoseValueParser.parseFirstOrZero(currentGlucose)
@@ -1430,7 +1436,9 @@ fun DashboardScreen(
                             sensorProgress = sensorProgress,
                             sensorHoursRemaining = sensorHoursRemaining,
                             currentDay = currentDay,
-                            history = consumerHistory, // Advanced Trend (smoothed when active)
+                            history = glucoseHistory, // Trend must see measured data: visual smoothing
+                            // reshapes the recent slope, and the notification/broadcast
+                            // arrow computes from unsmoothed history
                             calibratedValue = calibratedValue,
                             currentSnapshot = dashboardCurrentSnapshot,
                             dataState = dashboardDataState,
@@ -1442,6 +1450,8 @@ fun DashboardScreen(
                             veryLowThreshold = veryLowThreshold,
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
+                            showDelta = dashboardShowDelta,
+                            deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             onHeroClick = {
                                 val autoVal = latestPoint?.value ?: tk.glucodata.GlucoseValueParser.parseFirstOrZero(currentGlucose)

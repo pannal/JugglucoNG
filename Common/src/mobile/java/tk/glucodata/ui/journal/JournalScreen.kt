@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -48,6 +49,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import tk.glucodata.R
 import kotlinx.coroutines.delay
 import tk.glucodata.data.journal.JournalEntry
@@ -116,6 +120,20 @@ fun JournalScreen(
     val foodsById = remember(journalFoods) { journalFoods.associateBy { it.id } }
     var selectedChartRange by rememberSaveable { mutableStateOf(TimeRange.H3) }
     var viewportSnapshot by remember { mutableStateOf<ChartViewportSnapshot?>(null) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // A snapshot captured before the app went to background describes a
+                // stale viewport and possibly an hour-old point selection; drop it so
+                // quick-add seeds "now" and the chart re-anchors to the latest reading.
+                viewportSnapshot = null
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var selectedTypeFilters by rememberSaveable {
         mutableStateOf(JournalEntryType.entries.map { it.name })
     }
@@ -137,10 +155,7 @@ fun JournalScreen(
         buildJournalChartMarkers(filteredEntries, presetsById, unit, sortedHistory, foodsById)
     }
     val entriesById = remember(filteredEntries) { filteredEntries.associateBy { it.id } }
-    val selectedTimestamp = viewportSnapshot?.selectedPoint?.timestamp
-        ?: sortedHistory.lastOrNull()?.timestamp
-        ?: journalEntries.maxOfOrNull { it.timestamp }
-        ?: System.currentTimeMillis()
+    val selectedPointTimestamp = viewportSnapshot?.selectedPoint?.timestamp
     val selectedDisplayGlucose = viewportSnapshot?.selectedPoint?.value
 
     fun clearChartAction() {
@@ -376,7 +391,7 @@ fun JournalScreen(
             },
             onTypeSelected = { type ->
                 onAddJournalEntry(
-                    selectedTimestamp,
+                    journalQuickAddTimestamp(selectedPointTimestamp, System.currentTimeMillis()),
                     type,
                     selectedDisplayGlucose.takeIf { type == JournalEntryType.FINGERSTICK },
                     null
@@ -388,6 +403,16 @@ fun JournalScreen(
         )
     }
 }
+
+/**
+ * Timestamp seed for quick-add entries created without an explicit chart selection.
+ * Tapping "+" means "log something happening now"; the last known reading or journal
+ * entry can lag minutes behind wall clock (e.g. right after resume, before the data
+ * flows re-emit) and must never seed the entry. Backdating stays an explicit act:
+ * selecting a chart point or using the timeline/long-press menus.
+ */
+internal fun journalQuickAddTimestamp(selectedPointTimestamp: Long?, nowMillis: Long): Long =
+    selectedPointTimestamp ?: nowMillis
 
 @Composable
 private fun JournalHeader(

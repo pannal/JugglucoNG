@@ -1192,6 +1192,12 @@ public class Natives {
 
         public static native float getIOBvalue(long time);
 
+        // Hands the journal's insulin/carb totals to the native webserver for
+        // /pebble. NaN marks "no journal data of that kind"; the next30 values
+        // (delivered/absorbed within 30 minutes after timeMillis) let the
+        // native side decay-correct between pushes.
+        public static native void setJournalIob(float iob, float iobNext30, float cob, float cobNext30, long timeMillis);
+
         public static native String serverError();
 
         public static native String nightError();
