@@ -674,6 +674,7 @@ fun DashboardChartSection(
     onDismissJournalAction: (() -> Unit)? = null,
     onJournalMarkerClick: ((Long) -> Unit)? = null,
     chartBoostProgress: Float = 0f,
+    resetToLatestOnResume: Boolean = true,
     onViewportSnapshotChanged: ((ChartViewportSnapshot) -> Unit)? = null
 ) {
     val chartContent: @Composable () -> Unit = {
@@ -716,6 +717,7 @@ fun DashboardChartSection(
                         onDismissJournalAction = onDismissJournalAction,
                         onJournalMarkerClick = onJournalMarkerClick,
                         chartBoostProgress = chartBoostProgress,
+                        resetToLatestOnResume = resetToLatestOnResume,
                         onViewportSnapshotChanged = onViewportSnapshotChanged
                     )
                 } else {
@@ -782,6 +784,7 @@ fun InteractiveGlucoseChart(
     onDismissJournalAction: (() -> Unit)? = null,
     onJournalMarkerClick: ((Long) -> Unit)? = null,
     chartBoostProgress: Float = 0f,
+    resetToLatestOnResume: Boolean = true,
     onViewportSnapshotChanged: ((ChartViewportSnapshot) -> Unit)? = null
 ) {
     // --- THEME & PAINTS ---
@@ -1277,29 +1280,28 @@ fun InteractiveGlucoseChart(
     val currentLatestDataTimestamp by rememberUpdatedState(latestDataTimestamp)
     val currentSelectedTimeRange by rememberUpdatedState(selectedTimeRange)
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, resetToLatestOnResume) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 isResumed = true
 
-                // Returning to the chart is a "what's my glucose now" moment: always
-                // re-anchor to the live edge and drop any stale point selection, no
-                // matter how short the absence. Lifecycle observers receive ON_RESUME
-                // on registration too, so re-entering composition (tab return,
-                // orientation switch) lands on the latest value as well. Clearing
-                // lastAutoScrolledTimestamp lets the dataSeriesSignature path re-snap
-                // on the next emission.
-                val latestTimestamp = currentLatestDataTimestamp
-                visibleDuration = (currentSelectedTimeRange?.hours?.toLong() ?: 3L) * 60 * 60 * 1000
-                val targetCenter = if (latestTimestamp > 0L) {
-                    liveCenterTimeFor(latestTimestamp, visibleDuration)
-                } else {
-                    System.currentTimeMillis() - visibleDuration / 2
+                if (resetToLatestOnResume) {
+                    // Live dashboard and journal charts answer "what's my glucose
+                    // now" on return. The history browser opts out so a short
+                    // interruption does not destroy deliberate navigation to an
+                    // older date.
+                    val latestTimestamp = currentLatestDataTimestamp
+                    visibleDuration = (currentSelectedTimeRange?.hours?.toLong() ?: 3L) * 60 * 60 * 1000
+                    val targetCenter = if (latestTimestamp > 0L) {
+                        liveCenterTimeFor(latestTimestamp, visibleDuration)
+                    } else {
+                        System.currentTimeMillis() - visibleDuration / 2
+                    }
+                    centerTime = targetCenter
+                    previewCenterTime = previewCenterTimeForWindowEnd(targetCenter + visibleDuration / 2L)
+                    lastAutoScrolledTimestamp = 0L
+                    selectedPoint = null
                 }
-                centerTime = targetCenter
-                previewCenterTime = previewCenterTimeForWindowEnd(targetCenter + visibleDuration / 2L)
-                lastAutoScrolledTimestamp = 0L
-                selectedPoint = null
             }
             else if (event == Lifecycle.Event.ON_PAUSE) {
                 isResumed = false

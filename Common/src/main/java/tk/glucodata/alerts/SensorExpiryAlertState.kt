@@ -2,6 +2,7 @@ package tk.glucodata.alerts
 
 import tk.glucodata.Natives
 import tk.glucodata.SensorBluetooth
+import tk.glucodata.SensorIdentity
 import tk.glucodata.drivers.ManagedBluetoothSensorDriver
 
 /**
@@ -23,7 +24,8 @@ internal fun selectSensorExpiryEndMs(
     val plausible = candidates.filter { it.second > nowMs }
     if (plausible.isEmpty()) return 0L
     if (preferredSensorId != null) {
-        plausible.firstOrNull { it.first == preferredSensorId }?.let { return it.second }
+        plausible.firstOrNull { SensorIdentity.matches(it.first, preferredSensorId) }
+            ?.let { return it.second }
     }
     return plausible.maxOf { it.second }
 }

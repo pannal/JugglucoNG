@@ -110,9 +110,9 @@ class AlertDisplayTextTests {
     }
 
     @Test
-    fun alarmPrefersParsedMessageWhenMeaningful() {
+    fun alarmKeepsDurationFromRawMessageWhenParsingRemovedItsNumber() {
         assertEquals(
-            "Sensor expires in hours",
+            "Sensor expires in 12 hours",
             AlertDisplayText.alarmSupportingText(
                 parsedValueMessage = "Sensor expires in hours",
                 rawMessage = "Sensor expires in 12 hours",

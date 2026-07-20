@@ -47,17 +47,6 @@ object AlertDisplayText {
         alertLabel: String,
         unitLabels: List<String>
     ): String {
-        val fromParsed = parsedValueMessage.takeIf {
-            it.isNotBlank() &&
-                !it.equals(alertLabel, ignoreCase = true) &&
-                !it.equals("low", ignoreCase = true) &&
-                !it.equals("high", ignoreCase = true) &&
-                !it.equals("alarm", ignoreCase = true)
-        }
-        if (fromParsed != null) {
-            return fromParsed
-        }
-
         val withoutValues = unitLabels
             .fold(rawMessage.replace(Regex("[0-9.,:()]+"), " ")) { acc, unit ->
                 if (unit.isEmpty()) acc else acc.replace(unit, " ", ignoreCase = true)
@@ -73,6 +62,17 @@ object AlertDisplayText {
         }
         if (fromMessage != null) {
             return fromMessage
+        }
+
+        val fromParsed = parsedValueMessage.takeIf {
+            it.isNotBlank() &&
+                !it.equals(alertLabel, ignoreCase = true) &&
+                !it.equals("low", ignoreCase = true) &&
+                !it.equals("high", ignoreCase = true) &&
+                !it.equals("alarm", ignoreCase = true)
+        }
+        if (fromParsed != null) {
+            return fromParsed
         }
 
         return rawValue.takeIf { it.isNotBlank() && it != parsedValueRaw } ?: ""

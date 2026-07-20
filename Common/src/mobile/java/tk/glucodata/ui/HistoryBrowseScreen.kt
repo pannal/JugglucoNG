@@ -627,6 +627,7 @@ fun HistoryBrowseScreen(
                             onJournalMarkerClick = { entryId ->
                                 journalEntriesById[entryId]?.let { onJournalEntryClick?.invoke(it) }
                             },
+                            resetToLatestOnResume = false,
                             onViewportSnapshotChanged = { viewportSnapshot = it }
                         )
                     }
