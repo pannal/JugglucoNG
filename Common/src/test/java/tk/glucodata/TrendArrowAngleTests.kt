@@ -22,7 +22,27 @@ class TrendArrowAngleTests {
         // rotation in screen coordinates handled by callers via the sign).
         assertEquals(-45f, TrendArrowAngle.rotationDegrees(1f), 0.001f)
         assertEquals(45f, TrendArrowAngle.rotationDegrees(-1f), 0.001f)
-        assertEquals(-22.5f, TrendArrowAngle.rotationDegrees(0.5f), 0.001f)
+        assertEquals(0f, TrendArrowAngle.rotationDegrees(0.5f), 0.001f)
+    }
+    @Test
+    fun rampEasesOutOfTheDeadZone() {
+        assertEquals(-9f, TrendArrowAngle.rotationDegrees(0.6f), 0.001f)
+        assertEquals(9f, TrendArrowAngle.rotationDegrees(-0.6f), 0.001f)
+
+        assertEquals(-27f, TrendArrowAngle.rotationDegrees(0.8f), 0.001f)
+        assertEquals(27f, TrendArrowAngle.rotationDegrees(-0.8f), 0.001f)
+    }
+
+    @Test
+    fun mappingAboveRampIsUnchanged() {
+        assertEquals(-45f, TrendArrowAngle.rotationDegrees(1f), 0.001f)
+        assertEquals(45f, TrendArrowAngle.rotationDegrees(-1f), 0.001f)
+
+        assertEquals(-67.5f, TrendArrowAngle.rotationDegrees(1.5f), 0.001f)
+        assertEquals(67.5f, TrendArrowAngle.rotationDegrees(-1.5f), 0.001f)
+
+        assertEquals(-90f, TrendArrowAngle.rotationDegrees(2f), 0.001f)
+        assertEquals(90f, TrendArrowAngle.rotationDegrees(-2f), 0.001f)
     }
 
     @Test

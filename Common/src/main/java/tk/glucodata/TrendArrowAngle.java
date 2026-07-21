@@ -36,8 +36,19 @@ public final class TrendArrowAngle {
      * rotation both renderers apply.
      */
     public static float rotationDegrees(float rateMgdlPerMin) {
-        if (!Float.isFinite(rateMgdlPerMin) || Math.abs(rateMgdlPerMin) < FLAT_BELOW_RATE)
+        if (!Float.isFinite(rateMgdlPerMin))
             return 0f;
+
+        float magnitude = Math.abs(rateMgdlPerMin);
+        if (magnitude <= FLAT_BELOW_RATE)
+            return 0f;
+
+        if (magnitude < 1f) {
+            float rotation =
+                    2f * DEGREES_PER_UNIT * (magnitude - FLAT_BELOW_RATE);
+            return rateMgdlPerMin > 0f ? -rotation : rotation;
+        }
+
         float rotation = -rateMgdlPerMin * DEGREES_PER_UNIT;
         if (rotation < -90f)
             return -90f;
