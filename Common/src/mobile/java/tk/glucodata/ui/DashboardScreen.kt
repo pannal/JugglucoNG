@@ -1082,6 +1082,12 @@ fun DashboardScreen(
             val recentReadings = remember(consumerHistory) {
                 buildDisplayReadings(consumerHistory, limit = 10)
             }
+            // Rows drawn vs points the row arrows regress over — see buildTrendHistory.
+            // recentReadings stays an exact prefix of this, which is what keeps
+            // ReadingRow's `history.drop(index)` aligned to the displayed rows.
+            val recentReadingsTrendHistory = remember(consumerHistory) {
+                buildTrendHistory(consumerHistory)
+            }
             val recentReadingPeers = remember(recentReadings, multiSensorDisplay) {
                 recentReadings.map { reading -> multiSensorDisplay.peersAt(reading.timestamp) }
             }
@@ -1248,7 +1254,7 @@ fun DashboardScreen(
                                 viewMode = viewMode,
                                 index = index,
                                 totalCount = recentReadings.size,
-                                history = recentReadings,
+                                history = recentReadingsTrendHistory,
                                 peerReadings = recentReadingPeers.getOrNull(index).orEmpty(),
                                 peerSeries = peerSeriesById,
                                 multiSensorActive = multiSensorActive,
@@ -1620,7 +1626,7 @@ fun DashboardScreen(
                                 viewMode = viewMode,
                                 index = index,
                                 totalCount = recentReadings.size,
-                                history = recentReadings,
+                                history = recentReadingsTrendHistory,
                                 peerReadings = recentReadingPeers.getOrNull(index).orEmpty(),
                                 peerSeries = peerSeriesById,
                                 multiSensorActive = multiSensorActive,
