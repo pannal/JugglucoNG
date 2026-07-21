@@ -120,17 +120,22 @@ object TrendEngine {
      *
      *     fixed 20 min (unweighted)   17%    jitter 0.050
      *     cadence window, unweighted  30%    jitter 0.093
-     *     this, exp(-age/3.5*cadence) 48%    jitter 0.116
+     *     this, exp(-age/5*cadence)   42%    jitter 0.104
      *     pre-regression estimator    79%    jitter 0.394
      *
      * An arrow showing a sixth of what is happening is not a slow arrow, it is a wrong one.
      *
-     * 3.5 rather than something hotter is set by noise, not taste. The regression's own
+     * The multiple is bounded below by noise, not chosen for feel. The regression's own
      * guarantee — a steady 0.5 mg/dL/min fall with 3 mg/dL of jitter on the newest reading
-     * must still read as a fall — holds at 3.5 (-0.22) and breaks below 3 (-0.18 at 3.0,
-     * and +0.00 at 2.0, where an ordinary blip erases the trend outright). See
-     * TrendEngineVelocityTests.singleNoisyReadingDoesNotDominateTheTrend, which is the
-     * original PR's test and passes unchanged.
+     * must still read as a fall (< -0.2) — holds at 5 (-0.28) and at 3.5 (-0.22), but breaks
+     * at 3 (-0.18) and collapses at 2 (+0.00, where an ordinary blip erases the trend
+     * outright). See TrendEngineVelocityTests.singleNoisyReadingDoesNotDominateTheTrend,
+     * the original PR's test, which passes unchanged. 5 keeps a real margin on it.
+     *
+     * On a verified 1-minute excursion (a rise off a ~90 minute plateau) this reached the
+     * double-arrow state at 15:28 where the unweighted cadence window reached it at 15:29
+     * and the old fixed 20 minutes never did — it was still showing 58 degrees three
+     * minutes in.
      *
      * That pre-regression estimator also weighted recency — `0.6^i`, decaying over roughly
      * two samples. Its problem was never recency: it averaged *adjacent deltas*, where a
@@ -139,7 +144,7 @@ object TrendEngine {
      * responsiveness comes back at under a third of the jitter. The PR was right about the
      * fit and wrong to throw out recency with it.
      */
-    private const val DECAY_CADENCE_MULTIPLE = 3.5
+    private const val DECAY_CADENCE_MULTIPLE = 5.0
 
     /**
      * Calculates the trend based on a list of historical points.

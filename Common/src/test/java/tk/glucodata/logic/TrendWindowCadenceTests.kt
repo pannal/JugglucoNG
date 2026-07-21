@@ -135,7 +135,7 @@ class TrendWindowCadenceTests {
         // where one bad reading owned the answer.
         //
         // On a steady -0.8/min fall, an 8 mg/dL blip on the newest reading moves this fit
-        // from -0.80 to -1.55, a drift of 0.75. The `0.6^i` adjacent-delta estimator moved
+        // from -0.80 to -1.38, a drift of 0.58. The `0.6^i` adjacent-delta estimator moved
         // to -4.00 on the identical input, a drift of 3.20 — it turned an ordinary fall into
         // a full double-down. Holding the drift under 1.0 keeps one bad reading from
         // promoting the arrow across two trend states.
