@@ -1309,6 +1309,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="settings_changed_press_to_apply">Einstellungen geändert – zum Übernehmen drücken</string>
     <string name="shortcuthelp">Hilfe zu Verknüpfungen</string>
     <string name="show_trend_arrow">Trendpfeil anzeigen</string>
+    <string name="notification_large_arrow_title">Größerer Trendpfeil</string>
+    <string name="notification_large_arrow_desc">Trendpfeil überall mit längerem Schaft zeichnen (Benachrichtigungen, Widgets, AOD)</string>
     <string name="slope">Steigung</string>
     <string name="stathelp">Stat-Hilfe</string>
     <string name="staticnum">Staticnum</string>
