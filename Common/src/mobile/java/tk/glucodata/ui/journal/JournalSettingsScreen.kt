@@ -175,6 +175,7 @@ fun JournalSettingsScreen(
     val journalFoodLibraryEnabled by viewModel.journalFoodLibraryEnabled.collectAsState()
     val journalEiobDisplayEnabled by viewModel.journalEiobDisplayEnabled.collectAsState()
     val journalQuickAddAlwaysNow by viewModel.journalQuickAddAlwaysNow.collectAsState()
+    val journalDashboardQuickAddButton by viewModel.journalDashboardQuickAddButton.collectAsState()
     val journalHealthConnectActivityEnabled by viewModel.journalHealthConnectActivityEnabled.collectAsState()
     val aapsJournalImportEnabled by viewModel.aapsJournalImportEnabled.collectAsState()
     val allPresets by viewModel.journalInsulinPresets.collectAsState()
@@ -245,6 +246,18 @@ fun JournalSettingsScreen(
                     onCheckedChange = { viewModel.setJournalQuickAddAlwaysNow(it) },
                     icon = Icons.Default.History,
                     iconTint = MaterialTheme.colorScheme.secondary,
+                    position = CardPosition.SINGLE,
+                    enabled = journalEnabled
+                )
+            }
+            item(key = "journal_dashboard_quickadd") {
+                SettingsSwitchItem(
+                    title = stringResource(R.string.journal_dashboard_quickadd_title),
+                    subtitle = stringResource(R.string.journal_dashboard_quickadd_desc),
+                    checked = journalDashboardQuickAddButton,
+                    onCheckedChange = { viewModel.setJournalDashboardQuickAddButton(it) },
+                    icon = Icons.Default.Add,
+                    iconTint = MaterialTheme.colorScheme.primary,
                     position = CardPosition.SINGLE,
                     enabled = journalEnabled
                 )
