@@ -1570,6 +1570,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="settings_changed_press_to_apply">Settings changed — press to apply</string>
     <string name="shortcuthelp">Shortcut Help</string>
     <string name="show_trend_arrow">Show trend arrow</string>
+    <string name="notification_large_arrow_title">Larger trend arrow</string>
+    <string name="notification_large_arrow_desc">Draw the trend arrow with a longer shaft wherever it appears (notifications, widgets, AOD)</string>
     <string name="slope">Slope</string>
     <string name="start_time_with_value">Start: %1$s</string>
     <string name="stathelp">Stat Help</string>
