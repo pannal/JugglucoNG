@@ -425,6 +425,14 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="bloodafter">"Зөвхөн дараах хугацаанаас хойших глюкозын уншилтуудыг нэмэх: "</string>
     <string name="specifyblood">"Эхлээд цусны глюкозын шошгыг сонгоно уу"</string>
     <string name="meterlist">"Глюкоз хэмжигч төхөөрөмжүүд"</string>
+    <string name="glucose_meters_desc">Bluetooth глюкоз хэмжигч холбоно уу</string>
+    <string name="glucose_meters_journal_desc">Хэмжилтүүд өдрийн тэмдэглэлд цусан дахь глюкозын бичлэгээр хадгалагдаж, Nightscout руу илгээгдэх боломжтой.</string>
+    <string name="glucose_meters_configured">Тохируулсан хэмжигчүүд</string>
+    <string name="glucose_meters_none">Хэмжигч тохируулаагүй</string>
+    <string name="glucose_meters_none_desc">Хэмжилт импортлохын тулд ойролцоох хэмжигчийг олно уу.</string>
+    <string name="glucose_meters_nearby">Ойролцоох хэмжигчүүд</string>
+    <string name="glucose_meter_last_reading">Сүүлийн хэмжилт: %1$s</string>
+    <string name="glucose_meter_no_readings">Хэмжилт хараахан импортлоогүй</string>
     <string name="finddevices">"Төхөөрөмж хайх"</string>
     <string name="nonewdata">"Шинэ өгөгдөл алга"</string>
     <string name="newdata">"Шинэ өгөгдөл"</string>

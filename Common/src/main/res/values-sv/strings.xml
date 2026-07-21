@@ -795,6 +795,14 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="max_glucose">Max</string>
     <string name="median">Median</string>
     <string name="meterlist">"Glucose Meters"</string>
+    <string name="glucose_meters_desc">Anslut Bluetooth-blodsockermätare</string>
+    <string name="glucose_meters_journal_desc">Mätvärden sparas som blodsockerposter i journalen och kan skickas till Nightscout.</string>
+    <string name="glucose_meters_configured">Konfigurerade mätare</string>
+    <string name="glucose_meters_none">Inga mätare konfigurerade</string>
+    <string name="glucose_meters_none_desc">Hitta en mätare i närheten för att börja importera mätvärden.</string>
+    <string name="glucose_meters_nearby">Mätare i närheten</string>
+    <string name="glucose_meter_last_reading">Senaste mätning: %1$s</string>
+    <string name="glucose_meter_no_readings">Inga mätvärden har importerats ännu</string>
     <string name="min">Min</string>
     <string name="min_glucose">Min</string>
     <string name="newdata">"New data"</string>

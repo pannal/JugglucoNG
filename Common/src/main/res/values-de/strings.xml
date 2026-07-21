@@ -402,6 +402,14 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
  <string name="bloodafter">"Nur Glukosewerte hinzufügen ab:"</string>
 <string name="specifyblood">Zuerst das Etikett für Blutzucker angeben</string>
 <string name="meterlist">"Blutzuckermessgeräte"</string>
+<string name="glucose_meters_desc">Bluetooth-Blutzuckermessgeräte verbinden</string>
+<string name="glucose_meters_journal_desc">Messwerte werden als Blutzuckereinträge im Tagebuch gespeichert und können an Nightscout gesendet werden.</string>
+<string name="glucose_meters_configured">Eingerichtete Messgeräte</string>
+<string name="glucose_meters_none">Keine Messgeräte eingerichtet</string>
+<string name="glucose_meters_none_desc">Ein Messgerät in der Nähe suchen, um Messwerte zu importieren.</string>
+<string name="glucose_meters_nearby">Messgeräte in der Nähe</string>
+<string name="glucose_meter_last_reading">Letzter Messwert: %1$s</string>
+<string name="glucose_meter_no_readings">Noch keine Messwerte importiert</string>
 <string name="finddevices">"Geräte suchen"</string>
 <string name="nonewdata">"Keine neuen Daten"</string>
 <string name="newdata">"Neue Daten"</string>

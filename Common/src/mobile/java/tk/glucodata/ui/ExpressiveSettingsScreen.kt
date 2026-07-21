@@ -459,6 +459,15 @@ fun ExpressiveSettingsScreen(
                     )
                 }
                 SettingsItem(
+                    title = stringResource(R.string.meterlist),
+                    subtitle = stringResource(R.string.glucose_meters_desc),
+                    showArrow = true,
+                    icon = Icons.Default.Bloodtype,
+                    iconTint = exchangeColor,
+                    position = CardPosition.MIDDLE,
+                    onClick = { navController.navigate("settings/glucose-meters") }
+                )
+                SettingsItem(
                     title = stringResource(R.string.watches),
                     subtitle = "WearOS, Watchdrip, GadgetBridge, Kerfstok",
                     showArrow = true,

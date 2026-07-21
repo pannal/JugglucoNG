@@ -765,6 +765,14 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="max_glucose">Max.</string>
     <string name="median">Médiane</string>
     <string name="meterlist">"Glucose Meters"</string>
+    <string name="glucose_meters_desc">Connecter des lecteurs de glycémie Bluetooth</string>
+    <string name="glucose_meters_journal_desc">Les mesures sont enregistrées comme glycémies dans le journal et peuvent être envoyées à Nightscout.</string>
+    <string name="glucose_meters_configured">Lecteurs configurés</string>
+    <string name="glucose_meters_none">Aucun lecteur configuré</string>
+    <string name="glucose_meters_none_desc">Recherchez un lecteur à proximité pour importer des mesures.</string>
+    <string name="glucose_meters_nearby">Lecteurs à proximité</string>
+    <string name="glucose_meter_last_reading">Dernière mesure : %1$s</string>
+    <string name="glucose_meter_no_readings">Aucune mesure importée</string>
     <string name="mgdL">mg/dL</string>
     <string name="min">Min.</string>
     <string name="min_glucose">Min.</string>
