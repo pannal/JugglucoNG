@@ -162,6 +162,7 @@
   <string name="addsensorenddate">Enddatum des Sensors zur Kalender-App hinzufügen</string>
   <string name="enddatesensor">"Enddatumssensor "</string>
   <string name="open">Öffnen</string>
+  <string name="share">Teilen</string>
   <string name="withoutsensor">Ohne Sensor</string>
   <string name="wronglibrary">Bibliothek funktioniert nicht richtig, versuche es mit einer anderen</string>
   <string name="installedlibrary">Installierte Bibliothek</string>
@@ -484,7 +485,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="import_history_desc">Glukosedaten aus einem JugglucoNG-Export oder einer CSV-Datei importieren</string>
     <string name="get_started_desc">Zum Einstieg den Sensor hinzufügen</string>
     <string name="select_sensor">Sensortyp auswählen</string>
-    <string name="select_sibionics_type">Sensortyp auswählen</string>
+    <string name="select_sibionics_type">Sibionics-Sensor auswählen</string>
     <string name="or_divider">"  oder  "</string>
     <string name="no_sensors_connected">Keine Sensoren verbunden</string>
     <string name="enter_sensor_codes">Sensorcodes eingeben</string>
@@ -504,7 +505,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="select_gallery_button">Aus Galerie auswählen</string>
     <string name="skip_fake_sensor">Überspringen (Fake-Sensor verwenden)</string>
     <string name="enter_code_manually">Code manuell eingeben</string>
-    <string name="choose_sibionics_variant">Wählen Sie Ihre Sibionics-Sensorvariante</string>
+    <string name="choose_sibionics_variant">Wählen Sie das Modell auf der Verpackung.</string>
     <string name="continue_action">Weiter</string>
     <string name="sensor_init_failed">Sensorinitialisierung fehlgeschlagen</string>
     <string name="sensor_lost_restart">Fehler: Sensor verloren. Bitte Setup neu starten.</string>
@@ -617,7 +618,12 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="scan_libre_sensor">Libre Sensor scannen</string>
     <string name="libre_nfc_instruction">Halten Sie Ihr Telefon an den Sensor zum Scannen</string>
     <!-- New Code Translations -->
-    <string name="auto_calibration_mode">Automatische Kalibrierung</string>
+    <string name="auto_calibration_mode">Sensoralgorithmus</string>
+    <string name="sibionics_custom_algorithm">Adaptives Sensormodell (experimentell)</string>
+    <string name="sibionics_custom_algorithm_desc">Kompensation von Sensordrift, physiologischer Verzögerung und Artefakten</string>
+    <string name="sibionics_stock_algorithm_desc">Sibionics-Standard</string>
+    <string name="sibionics_stock_algorithm_detail">Kalibrierungen innerhalb des Sensoralgorithmus verwenden</string>
+    <string name="sibionics_restart_algorithm_desc">Minütlichen Algorithmuszustand aus dem gespeicherten Sensorverlauf neu aufbauen</string>
     <string name="juggluco_native">Juggluco nativ</string>
     <string name="window_label">Fenster</string>
     <string name="auto_restart_algorithm">Algorithmus neu starten</string>
@@ -809,8 +815,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="forget_sensor_desc">Entfernt den Sensor aus der Liste. Nach erneutem Scannen kann er wieder erscheinen.</string>
     <string name="forget_sensor_title">Sensor vergessen?</string>
     <string name="glucodata_subtitle">Glucodata</string>
-    <string name="broadcast_computed_trend_title">Berechneten Trend senden</string>
-    <string name="broadcast_computed_trend_desc">Sendet den 20-Minuten-Trend der App statt der Sensor-Schätzung als Rate in allen Ausgaben. Empfänger-Pfeile entsprechen dann dieser App.</string>
+    <string name="broadcast_computed_trend_title">App-Trend senden</string>
+    <string name="broadcast_computed_trend_desc">App-Trend statt Sensortrend verwenden</string>
     <string name="glulisine">Insulin Glulisine/Apidra</string>
     <string name="googlescan">Google scan</string>
     <string name="gvi">GVI</string>
@@ -1396,6 +1402,10 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="sibionics_ble_probe_empty">Noch keine Sibionics-FF30-Geräte gefunden.</string>
     <string name="sibionics_ble_selected">Ausgewählt: %1$s</string>
     <string name="sibionics_use_fake_qr_from_ble">Gefälschte QR-Daten aus diesem BLE-Namen verwenden</string>
+    <string name="sibionics_use_ble_device">Dieses Bluetooth-Gerät verwenden</string>
+    <string name="sibionics_legacy_driver_title">Legacy-Treiber</string>
+    <string name="sibionics_legacy_driver_desc">Den alten proprietären Treiber nur zur Kompatibilität mit einer vorhandenen Einrichtung verwenden.</string>
+    <string name="sibionics_managed_sensor_added">Verwalteter Sibionics-Sensor hinzugefügt: %1$s</string>
     <string name="wear_transport">Wear-Transport</string>
     <string name="wear_transport_desc">Wear-OS-Datenübertragung und Sync-Status konfigurieren.</string>
     <string name="wear_transport_runtime_available">Wear-Transport-Laufzeit ist verfügbar.</string>
@@ -2056,4 +2066,18 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_import_export_ready">Gespeicherte Materialien für %1$s sind bereit.</string>
     <string name="ottai_credentials_import">Importieren</string>
     <string name="ottai_credentials_replace">Ersetzen</string>
+    <string name="sibionics_glucose_model">Glukosemodell</string>
+    <string name="sibionics_stock_model_detail">Exakter Sibionics-Sensoralgorithmus</string>
+    <string name="sibionics_responsive_algorithm">Schnelle Reaktion</string>
+    <string name="sibionics_responsive_algorithm_desc">Ursprünglicher trendbasierter Glukose- und Geschwindigkeitsschätzer</string>
+    <string name="sibionics_balanced_algorithm">Leichte Glättung</string>
+    <string name="sibionics_balanced_algorithm_desc">Begrenzte Rauschminderung nahe am Standardmodell</string>
+    <string name="sibionics_state_algorithm">Adaptive Korrektur</string>
+    <string name="sibionics_state_algorithm_desc">Kompensation von Sensordrift, physiologischer Verzögerung und Artefakten</string>
+    <string name="sibionics_auto_reset_22_desc">Rücksetzung um Tag 22, bevorzugt bei ruhigerem Glukoseverlauf. Vor Ablauf erfolgt eine Sicherheitsrücksetzung, auch wenn dies deaktiviert ist.</string>
+    <string name="sibionics_reset_reminder_title">Sibionics-2-Reset steht bevor</string>
+    <string name="sibionics_reset_reminder_text">Der Sensor erreicht seinen Reset-Zeitpunkt in etwa %1$d Stunden. Setze ihn rechtzeitig zurück, damit er weiterläuft.</string>
+    <string name="sibionics_reset_postpone">2 Stunden verschieben</string>
+    <string name="sibionics_reset_reminder_channel">Sibionics-Reset-Erinnerungen</string>
+    <string name="sibionics_reset_reminder_channel_desc">Erinnerungen und Aktionen zum Zurücksetzen von Sibionics 2 vor Ablauf</string>
 </resources>

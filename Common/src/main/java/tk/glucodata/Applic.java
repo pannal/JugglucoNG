@@ -836,6 +836,10 @@ public class Applic extends Application implements androidx.work.Configuration.P
             // Compose) renders with the user's choice too.
             GlucoseRangeColors.initFromPrefs(this);
 
+            // Driver-owned one-time handoff. This must run after native storage initialization
+            // and before SensorBluetooth creates callbacks for the active native sensor list.
+            tk.glucodata.drivers.sibionics.SibionicsLegacyMigration.migrateActiveSensors(this);
+
             // Preserve an explicit non-active selection across startup. Historical sensors
             // are still valid dashboard targets even if they are not in activeSensors().
             // Virtual/cloud-only sensors must not stay in native lastsensorname: native

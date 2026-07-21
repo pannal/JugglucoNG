@@ -2,7 +2,10 @@
 
 package tk.glucodata.ui.stats
 
+import android.content.ClipData
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.toArgb
 import android.view.HapticFeedbackConstants
@@ -54,6 +57,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -62,6 +66,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Info
@@ -87,6 +92,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -147,6 +153,7 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import tk.glucodata.GlucoseRangeColors
 import tk.glucodata.ui.theme.labelLargeExpressive
 
@@ -228,6 +235,8 @@ fun StatsScreen(
     val selectedReportStyle = StatsReportExporter.PdfVisualStyle.fromPref(reportStylePref)
     var selectedTirBand by remember(uiState.summary.tir) { mutableStateOf<TirBand?>(null) }
     var pendingPatientInfo by remember { mutableStateOf<StatsReportExporter.PatientInfo?>(null) }
+    var exportedReportUri by remember { mutableStateOf<Uri?>(null) }
+
     var isPublishing by remember { mutableStateOf(false) }
     var showDateRangePicker by rememberSaveable { mutableStateOf(false) }
     val clearSelectionInteraction = remember { MutableInteractionSource() }
@@ -268,16 +277,25 @@ fun StatsScreen(
                 patientInfo = pendingPatientInfo,
                 reportStyle = StatsReportExporter.PdfVisualStyle.fromPref(pendingReportStylePref)
             )
-            Toast.makeText(
-                context,
-                if (result.isSuccess) context.getString(R.string.export_successful)
-                else context.getString(
-                    R.string.export_failed_with_error,
-                    result.exceptionOrNull()?.message ?: context.getString(R.string.unknown_error)
-                ),
-                Toast.LENGTH_LONG
-            ).show()
+            result.onSuccess {
+                exportedReportUri = uri
+            }.onFailure { throwable ->
+                Toast.makeText(
+                    context,
+                    context.getString(
+                        R.string.export_failed_with_error,
+                        throwable.message ?: context.getString(R.string.unknown_error)
+                    ),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
+    }
+
+    LaunchedEffect(exportedReportUri) {
+        val shownUri = exportedReportUri ?: return@LaunchedEffect
+        delay(12_000L)
+        if (exportedReportUri == shownUri) exportedReportUri = null
     }
 
     Box(
@@ -662,6 +680,125 @@ fun StatsScreen(
                 )
             }
         }
+
+        AnimatedVisibility(
+            visible = exportedReportUri != null,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            enter = fadeIn(tween(180)) + slideInVertically(tween(220)) { it / 2 },
+            exit = fadeOut(tween(140)) + slideOutVertically(tween(180)) { it / 2 }
+        ) {
+            ReportExportConfirmation(
+                onOpen = {
+                    exportedReportUri?.let { openPdfReport(context, it) }
+                    exportedReportUri = null
+                },
+                onShare = {
+                    exportedReportUri?.let { sharePdfReport(context, it) }
+                    exportedReportUri = null
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReportExportConfirmation(
+    onOpen: () -> Unit,
+    onShare: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.inverseSurface,
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.inversePrimary,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(R.string.export_successful),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                Surface(
+                    onClick = onOpen,
+                    shape = RoundedCornerShape(topStartPercent = 50, bottomStartPercent = 50),
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .padding(horizontal = 18.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.open),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+                Surface(
+                    onClick = onShare,
+                    shape = RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50),
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            contentDescription = stringResource(R.string.share),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun openPdfReport(context: Context, uri: Uri) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "application/pdf")
+        clipData = ClipData.newUri(context.contentResolver, "CGM report", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    runCatching { context.startActivity(intent) }
+        .onFailure {
+            Toast.makeText(context, context.getString(R.string.wentwrong), Toast.LENGTH_SHORT).show()
+        }
+}
+
+private fun sharePdfReport(context: Context, uri: Uri) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newUri(context.contentResolver, "CGM report", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    runCatching {
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+    }.onFailure {
+        Toast.makeText(context, context.getString(R.string.wentwrong), Toast.LENGTH_SHORT).show()
+
     }
 }
 

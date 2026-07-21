@@ -32,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -49,9 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import tk.glucodata.R
 import kotlinx.coroutines.delay
 import tk.glucodata.data.journal.JournalEntry
@@ -120,20 +116,6 @@ fun JournalScreen(
     val foodsById = remember(journalFoods) { journalFoods.associateBy { it.id } }
     var selectedChartRange by rememberSaveable { mutableStateOf(TimeRange.H3) }
     var viewportSnapshot by remember { mutableStateOf<ChartViewportSnapshot?>(null) }
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                // A snapshot captured before the app went to background describes a
-                // stale viewport and possibly an hour-old point selection; drop it so
-                // quick-add seeds "now" and the chart re-anchors to the latest reading.
-                viewportSnapshot = null
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
     var selectedTypeFilters by rememberSaveable {
         mutableStateOf(JournalEntryType.entries.map { it.name })
     }

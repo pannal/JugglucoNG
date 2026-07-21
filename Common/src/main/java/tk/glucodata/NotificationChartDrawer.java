@@ -947,12 +947,12 @@ public class NotificationChartDrawer {
         // center, so a shaft of up to ~95% of the box never clips at any
         // angle; the old 50% factor left a stubby glyph next to what other
         // apps render for the same rate.
-        float arrowLenFactor = showDouble ? 0.62f : 0.82f;
+        float arrowLenFactor = showDouble ? 0.42f : 0.62f;
 
         // Slight growth with speed, capped so the double-head variant still
         // fits inside the bitmap.
         float speed = Math.abs(rate);
-        float totalScale = 1.0f + (Math.min(speed * 0.05f, 0.12f));
+        float totalScale = 1.0f + Math.min(speed * 0.04f, 0.18f);
 
         float arrowLen = drawSize * arrowLenFactor * totalScale;
         float totalVisualLen = arrowLen;

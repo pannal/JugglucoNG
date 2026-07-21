@@ -161,6 +161,7 @@
     <string name="addsensorenddate">Мэдрэгчийн дуусах огноог календарьт нэмэх</string>
     <string name="enddatesensor">"Мэдрэгчийн дуусах огноо "</string>
     <string name="open">Нээх</string>
+    <string name="share">Хуваалцах</string>
     <string name="withoutsensor">Мэдрэгчгүй</string>
     <string name="wronglibrary">Library зөв ажиллахгүй байна. Өөрийг туршина уу.</string>
     <string name="installedlibrary">Суулгасан library</string>
@@ -760,7 +761,6 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="select_gallery_button">Галлерейгаас сонгох</string>
     <string name="skip_fake_sensor">Алгасах (Хуурамч мэдрэгч ашиглах)</string>
     <string name="enter_code_manually">Кодыг гараар оруулах</string>
-    <string name="choose_sibionics_variant">Sibionics мэдрэгчийн хувилбараа сонгоно уу</string>
     <string name="continue_action">Үргэлжлүүлэх</string>
     <string name="sensor_init_failed">Мэдрэгчийг эхлүүлэхэд алдаа гарлаа</string>
     <string name="sensor_lost_restart">Алдаа: Мэдрэгч алга боллоо. Тохиргоог дахин эхлүүлнэ үү.</string>
@@ -769,7 +769,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="sensor_not_init">Мэдрэгч эхлээгүй байна. Эхлээд Мэдрэгч уншуулах-ыг ашиглана уу.</string>
     <string name="invalid_code_format">Кодын формат буруу байна. Дахин оролдоно уу.</string>
     <string name="no_qr_found">Зурагнаас QR код олдсонгүй</string>
-    <!-- ComposeHost Strings -->
+    <string name="choose_sibionics_variant">Савлагаан дээрх загварыг сонгоно уу.</string>
+      <!-- ComposeHost Strings -->
     <string name="go">Явах</string>
     <string name="filter_by_date">Огноогоор шүүх</string>
     <string name="select_export_format">Экспортлох форматыг сонгох</string>
@@ -807,7 +808,12 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="about_text">GPL-3.0 • Juggluco-ийн салаа (Fork)</string>
     <string name="refreshing">Шинэчилж байна...</string>
     <!-- Missing UI Strings -->
-    <string name="auto_calibration_mode">Автомат каллибрацийн горим</string>
+    <string name="auto_calibration_mode">Мэдрэгчийн алгоритм</string>
+    <string name="sibionics_custom_algorithm">Дасан зохицох мэдрэгчийн загвар (туршилтын)</string>
+    <string name="sibionics_custom_algorithm_desc">Мэдрэгчийн хазайлт, физиологийн хоцролт ба артефактын нөхөн олговор</string>
+    <string name="sibionics_stock_algorithm_desc">Sibionics үндсэн</string>
+    <string name="sibionics_stock_algorithm_detail">Глюкометрийн тохируулгыг мэдрэгчийн алгоритмд ашиглах</string>
+    <string name="sibionics_restart_algorithm_desc">Хадгалсан мэдрэгчийн түүхээс минутын алгоритмын төлөвийг сэргээнэ</string>
     <string name="juggluco_native">Juggluco native</string>
     <string name="window_label">цонх</string>
     <string name="auto_restart_algorithm">Алгоритмыг автоматаар дахин эхлүүлэх</string>
@@ -1356,6 +1362,10 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="sibionics_ble_probe_empty">No FF30 Sibionics devices found yet.</string>
     <string name="sibionics_ble_selected">Selected: %1$s</string>
     <string name="sibionics_use_fake_qr_from_ble">Use fake QR info from this BLE name</string>
+    <string name="sibionics_use_ble_device">Use this Bluetooth device</string>
+    <string name="sibionics_legacy_driver_title">Хуучин драйвер</string>
+    <string name="sibionics_legacy_driver_desc">Хуучин өмчийн драйверийг зөвхөн одоогийн тохиргоотой нийцүүлэхэд ашиглана.</string>
+    <string name="sibionics_managed_sensor_added">Managed Sibionics sensor added: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>
     <string name="wear_transport_runtime_available">Wear transport runtime is available.</string>
@@ -1932,6 +1942,20 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="ottai_sign_out">Гарах</string>
     <string name="ottai_verify_code_hint">Баталгаажуулах код</string>
     <string name="wrongcode">Wrong QR code</string>
+    <string name="sibionics_glucose_model">Глюкозын загвар</string>
+    <string name="sibionics_stock_model_detail">Sibionics мэдрэгчийн нарийн алгоритм</string>
+    <string name="sibionics_responsive_algorithm">Хурдан хариу</string>
+    <string name="sibionics_responsive_algorithm_desc">Глюкоз ба өөрчлөлтийн хурдыг чиг хандлагаар үнэлэх анхны загвар</string>
+    <string name="sibionics_balanced_algorithm">Хөнгөн жигдрүүлэлт</string>
+    <string name="sibionics_balanced_algorithm_desc">Үндсэн загварыг ойроос дагасан хязгаарлагдмал шуугиан бууруулалт</string>
+    <string name="sibionics_state_algorithm">Дасан зохицох залруулга</string>
+    <string name="sibionics_state_algorithm_desc">Мэдрэгчийн хазайлт, физиологийн хоцролт ба артефактын нөхөн олговор</string>
+    <string name="sibionics_auto_reset_22_desc">22 дахь хоногийн орчим, глюкоз тогтуун үед дахин тохируулна. Үүнийг унтраасан ч хугацаа дуусахаас өмнө хамгаалалтын дахин тохируулга хийгдэнэ.</string>
+    <string name="sibionics_reset_reminder_title">Sibionics 2 дахин тохируулах хугацаа ойртож байна</string>
+    <string name="sibionics_reset_reminder_text">Мэдрэгч ойролцоогоор %1$d цагийн дараа дахин тохируулах цэгт хүрнэ. Ажиллуулахын тулд хугацаанд нь тохируулна уу.</string>
+    <string name="sibionics_reset_postpone">2 цагаар хойшлуулах</string>
+    <string name="sibionics_reset_reminder_channel">Sibionics дахин тохируулах сануулга</string>
+    <string name="sibionics_reset_reminder_channel_desc">Sibionics 2 дуусахаас өмнө дахин тохируулах сануулга ба үйлдэл</string>
 
     <!-- Preserved current-main entries added after the translation branch split. -->
     <string name="gs3">Sibionics GS3</string>
@@ -2053,8 +2077,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Хурдан унах</string>
     <string name="alert_rising_fast">Хурдан өсөх</string>
-    <string name="broadcast_computed_trend_desc">Мэдрэгчийн өөрийн тооцооны оронд бүх гаралтын хурдаар програмын 20 минутын трендийг илгээнэ үү. Хүлээн авагчийн сумнууд энэ апп-тай таарна.</string>
-    <string name="broadcast_computed_trend_title">Өргөн нэвтрүүлгийн тооцоолсон чиг хандлага</string>
+    <string name="broadcast_computed_trend_title">Аппын трендийг дамжуулах</string>
+    <string name="broadcast_computed_trend_desc">Мэдрэгчийн оронд аппын трендийг ашиглах</string>
     <string name="dashboard_show_delta_desc">Тренд сумны доор дельта интервал дээрх хэмжсэн өөрчлөлт</string>
     <string name="dashboard_show_delta_title">Хяналтын самбар дээрх Delta (Δ).</string>
     <string name="delta_alarm_interval_follow">Δ унших дуртай (одоогоор %1$d мин)</string>

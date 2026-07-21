@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -259,6 +260,11 @@ public abstract class SuperGattCallback extends BluetoothGattCallback {
                     onScanRecord(bytes);
             }
         }
+    }
+
+    /** Optional metadata match for advertisements without a usable local name. */
+    public boolean matchScanResult(ScanResult result) {
+        return false;
     }
 
     public void onScanRecord(byte[] scanRecord) {
@@ -928,6 +934,12 @@ public abstract class SuperGattCallback extends BluetoothGattCallback {
     }
 
     public void close() {
+        closeGattTransport();
+    }
+
+    /** Close only the current Android GATT transport, without invoking a
+     * managed driver's terminal close override. */
+    public final void closeGattTransport() {
         clearPendingConnect();
         {
             if (doLog) {
@@ -973,7 +985,7 @@ public abstract class SuperGattCallback extends BluetoothGattCallback {
             // stale reference to allow reconnection (fixes Sibionics 1 CN reconnect bug).
             if (doLog)
                 Log.d(LOG_ID, SerialNumber + " getConnectDevice: clearing stale mBluetoothGatt");
-            close();
+            closeGattTransport();
         }
         if (cb.mActiveDeviceAddress == null || cb.mActiveBluetoothDevice == null) {
             {

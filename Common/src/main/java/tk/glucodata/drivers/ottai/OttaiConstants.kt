@@ -209,6 +209,9 @@ object OttaiConstants {
             nowMs >= activeTimeMs &&
             nowMs < activeTimeMs + EXTENDED_LIFETIME_MS
 
+    /** Sensor command state is authoritative; cloud/provisional timestamps are not. */
+    fun commandNeedsActivation(commandStatus: Int): Boolean = commandStatus in 0..2
+
     /** Past the extended end, only declare the sensor expired once samples stop this long. */
     const val EXPIRED_STALE_GRACE_MS = 6L * 3600L * 1000L
 

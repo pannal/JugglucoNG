@@ -165,6 +165,7 @@
  <string name="addsensorenddate">Dodaj termin zakończenia działania sensora do kalendarza</string>
  <string name="enddatesensor">&quot;Koniec działania sensora &quot;</string>
  <string name="open">Otwórz</string>
+ <string name="share">Udostępnij</string>
  <string name="withoutsensor">Bez sensora</string>
  <string name="wronglibrary">Biblioteka nie działa prawidłowo, spróbuj innej</string>
  <string name="installedlibrary">Zainstalowana biblioteka</string>
@@ -484,7 +485,7 @@
     <string name="import_history_desc">Importuj dane glukozy z eksportu JugglucoNG lub pliku CSV</string>
     <string name="get_started_desc">Rozpocznij, dodając swój sensor</string>
     <string name="select_sensor">Wybierz Typ Sensora</string>
-    <string name="select_sibionics_type">Wybierz Typ Sensora</string>
+    <string name="select_sibionics_type">Wybierz sensor Sibionics</string>
     <string name="or_divider">"  lub  "</string>
     <string name="no_sensors_connected">Brak połączonych sensorów</string>
     <string name="enter_sensor_codes">Wprowadź Kody Sensora</string>
@@ -504,7 +505,7 @@
     <string name="select_gallery_button">Wybierz z Galerii</string>
     <string name="skip_fake_sensor">Pomiń (Użyj fałszywego sensora)</string>
     <string name="enter_code_manually">Wprowadź kod ręcznie</string>
-    <string name="choose_sibionics_variant">Wybierz wariant sensora Sibionics</string>
+    <string name="choose_sibionics_variant">Wybierz model podany na opakowaniu.</string>
     <string name="continue_action">Kontynuuj</string>
     <string name="sensor_init_failed">Inicjalizacja sensora nie powiodła się</string>
     <string name="sensor_lost_restart">Błąd: Utracono sensor. Uruchom ponownie konfigurację.</string>
@@ -617,7 +618,12 @@
     <string name="scan_libre_sensor">Skanuj Sensor Libre</string>
     <string name="libre_nfc_instruction">Przytrzymaj telefon przy sensorze, aby zeskanować</string>
     <!-- New Code Translations -->
-    <string name="auto_calibration_mode">Tryb autokalibracji</string>
+    <string name="auto_calibration_mode">Algorytm sensora</string>
+    <string name="sibionics_custom_algorithm">Adaptacyjny model sensora (eksperymentalny)</string>
+    <string name="sibionics_custom_algorithm_desc">Kompensacja dryfu sensora, opóźnienia fizjologicznego i artefaktów</string>
+    <string name="sibionics_stock_algorithm_desc">Domyślny Sibionics</string>
+    <string name="sibionics_stock_algorithm_detail">Używaj kalibracji wewnątrz algorytmu sensora</string>
+    <string name="sibionics_restart_algorithm_desc">Odtwórz stan minutowego algorytmu z zapisanej historii sensora</string>
     <string name="juggluco_native">Natywny Juggluco</string>
     <string name="window_label">okno</string>
     <string name="auto_restart_algorithm">Restart algorytmu</string>
@@ -1361,6 +1367,10 @@
     <string name="sibionics_ble_probe_empty">Nie znaleziono jeszcze urządzeń Sibionics FF30.</string>
     <string name="sibionics_ble_selected">Wybrano: %1$s</string>
     <string name="sibionics_use_fake_qr_from_ble">Użyj fałszywych danych QR z tej nazwy BLE</string>
+    <string name="sibionics_use_ble_device">Użyj tego urządzenia Bluetooth</string>
+    <string name="sibionics_legacy_driver_title">Starszy sterownik</string>
+    <string name="sibionics_legacy_driver_desc">Używaj starego zastrzeżonego sterownika tylko ze zgodną istniejącą konfiguracją.</string>
+    <string name="sibionics_managed_sensor_added">Dodano zarządzany sensor Sibionics: %1$s</string>
     <string name="wear_transport">Wear transport</string>
     <string name="wear_transport_desc">Configure Wear OS data transport and sync state.</string>
     <string name="wear_transport_runtime_available">Wear transport runtime is available.</string>
@@ -1973,8 +1983,8 @@
     <!-- PR feature translations: trend, alerts, palette, and expiry. -->
     <string name="alert_falling_fast">Szybki spadek</string>
     <string name="alert_rising_fast">Szybko rośnie</string>
-    <string name="broadcast_computed_trend_desc">Wysyłaj 20-minutowy trend aplikacji jako tempo zmian we wszystkich wyjściach zamiast własnej oceny czujnika. Strzałki odbiorników będą wtedy zgodne z tą aplikacją.</string>
-    <string name="broadcast_computed_trend_title">Rozgłaszanie obliczonego trendu</string>
+    <string name="broadcast_computed_trend_title">Wysyłaj trend aplikacji</string>
+    <string name="broadcast_computed_trend_desc">Używaj trendu aplikacji zamiast trendu czujnika</string>
     <string name="dashboard_show_delta_desc">Zmierzona zmiana w przedziale delta, poniżej strzałki trendu</string>
     <string name="dashboard_show_delta_title">Delta (Δ) na desce rozdzielczej</string>
     <string name="delta_alarm_interval_follow">Podobnie jak odczyt Δ (obecnie %1$d min)</string>
@@ -2026,4 +2036,18 @@
         <item quantity="one">Czujnik traci ważność za godzinę %d</item>
         <item quantity="other">Ważność czujnika wygasa za %d godzin</item>
     </plurals>
+    <string name="sibionics_glucose_model">Model glukozy</string>
+    <string name="sibionics_stock_model_detail">Dokładny algorytm sensora Sibionics</string>
+    <string name="sibionics_responsive_algorithm">Szybka reakcja</string>
+    <string name="sibionics_responsive_algorithm_desc">Pierwotny estymator glukozy i szybkości oparty na trendzie</string>
+    <string name="sibionics_balanced_algorithm">Lekkie wygładzanie</string>
+    <string name="sibionics_balanced_algorithm_desc">Ograniczona redukcja szumu blisko modelu standardowego</string>
+    <string name="sibionics_state_algorithm">Korekcja adaptacyjna</string>
+    <string name="sibionics_state_algorithm_desc">Kompensacja dryfu sensora, opóźnienia fizjologicznego i artefaktów</string>
+    <string name="sibionics_auto_reset_22_desc">Reset około 22. dnia, najlepiej przy stabilniejszej glukozie. Przed wygaśnięciem reset bezpieczeństwa nastąpi nawet po wyłączeniu tej opcji.</string>
+    <string name="sibionics_reset_reminder_title">Zbliża się reset Sibionics 2</string>
+    <string name="sibionics_reset_reminder_text">Sensor osiągnie moment resetu za około %1$d godz. Zresetuj go na czas, aby działał dalej.</string>
+    <string name="sibionics_reset_postpone">Odłóż o 2 godziny</string>
+    <string name="sibionics_reset_reminder_channel">Przypomnienia o resecie Sibionics</string>
+    <string name="sibionics_reset_reminder_channel_desc">Przypomnienia i działania do resetowania Sibionics 2 przed wygaśnięciem</string>
 </resources>

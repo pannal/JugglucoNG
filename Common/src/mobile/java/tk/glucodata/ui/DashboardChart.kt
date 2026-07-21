@@ -1120,6 +1120,42 @@ fun InteractiveGlucoseChart(
         }
     }
 
+    // TRACKING INACTIVITY FOR GRAPH RESET
+    var lastActiveTime by rememberSaveable { mutableLongStateOf(System.currentTimeMillis()) }
+    val currentLatestDataTimestamp by rememberUpdatedState(latestDataTimestamp)
+    val currentSelectedTimeRange by rememberUpdatedState(selectedTimeRange)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isResumed = true
+
+                val currentTime = System.currentTimeMillis()
+                val latestTimestamp = currentLatestDataTimestamp
+                // Bound how long the chart may keep a frozen viewport. After 5 min away,
+                // anchor the view to "now" even if the data flow has not re-emitted yet
+                // (cold start / process death restore). Clearing lastAutoScrolledTimestamp
+                // lets the dataSeriesSignature path re-snap on the next emission.
+                if (currentTime - lastActiveTime > 5 * 60 * 1000L) {
+                    visibleDuration = (currentSelectedTimeRange?.hours?.toLong() ?: 3L) * 60 * 60 * 1000
+                    val targetCenter = if (latestTimestamp > 0L) {
+                        liveCenterTimeFor(latestTimestamp, visibleDuration)
+                    } else {
+                        currentTime - visibleDuration / 2
+                    }
+                    centerTime = targetCenter
+                    previewCenterTime = previewCenterTimeForWindowEnd(targetCenter + visibleDuration / 2L)
+                    lastAutoScrolledTimestamp = 0L
+                }
+            }
+            else if (event == Lifecycle.Event.ON_PAUSE) {
+                isResumed = false
+                lastActiveTime = System.currentTimeMillis() // Save time on pause
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     // React to parent range state only when it represents a new range button choice.
     // Range changes alter the visible duration inside the current frame; tapping the
     // already-active range button is the explicit "back to now" action.
@@ -1255,14 +1291,128 @@ fun InteractiveGlucoseChart(
     )
     val minYAxisSpan = if (isMmol) 6f else 108f
 
-    // --- Y-AXIS SCALING ---
-    var yMin by rememberSaveable { mutableFloatStateOf(graphRangeDefaults.first) }
-    var yMax by rememberSaveable { mutableFloatStateOf(graphRangeDefaults.second) }
+    val isRawModeChart = viewMode == 1 || viewMode == 3
+    val hasCalibration = calibratedValueResolver.hasCalibration(isRawModeChart)
+    val hideInitialWhenCalibrated = hasCalibration &&
+        tk.glucodata.data.calibration.CalibrationManager.shouldHideInitialWhenCalibrated()
+
+    val visibleValueRange = remember(
+        renderData,
+        peerChartSeries,
+        resolvedPredictionSeries,
+        peerPredictionSeries,
+        centerTime,
+        visibleDuration,
+        viewMode,
+        hasCalibration,
+        hideInitialWhenCalibrated,
+        calibratedValueResolver
+    ) {
+        val viewportStart = centerTime - visibleDuration / 2L
+        val viewportEnd = centerTime + visibleDuration / 2L
+        var visibleMin = Float.POSITIVE_INFINITY
+        var visibleMax = Float.NEGATIVE_INFINITY
+
+        fun include(value: Float) {
+            if (value.isFinite() && value > 0.1f) {
+                visibleMin = minOf(visibleMin, value)
+                visibleMax = maxOf(visibleMax, value)
+            }
+        }
+
+        fun visibleIndices(points: List<GlucosePoint>): IntRange? {
+            if (points.isEmpty()) return null
+            val start = points.binarySearchBy(viewportStart) { it.timestamp }
+                .let { if (it >= 0) it else -it - 1 }
+            val endExclusive = points.binarySearchBy(viewportEnd) { it.timestamp }
+                .let { if (it >= 0) it + 1 else -it - 1 }
+                .coerceAtMost(points.size)
+            return if (start < endExclusive) start until endExclusive else null
+        }
+
+        val drawRaw = !hideInitialWhenCalibrated && (viewMode == 1 || viewMode == 2 || viewMode == 3)
+        val drawAuto = !hideInitialWhenCalibrated && (viewMode == 0 || viewMode == 2 || viewMode == 3)
+        visibleIndices(renderData)?.forEach { index ->
+            val point = renderData[index]
+            if (drawRaw) include(point.rawValue)
+            if (drawAuto) include(point.value)
+            if (hasCalibration) include(calibratedValueResolver.valueAt(index, isRawModeChart))
+        }
+
+        peerChartSeries.forEach { series ->
+            val drawRawPeer = series.viewMode == 1 || series.viewMode == 2 || series.viewMode == 3
+            val drawAutoPeer = series.viewMode == 0 || series.viewMode == 2 || series.viewMode == 3
+            visibleIndices(series.points)?.forEach { index ->
+                val point = series.points[index]
+                if (drawRawPeer) include(point.rawValue)
+                if (drawAutoPeer) include(point.value)
+            }
+        }
+
+        fun includePredictions(series: List<GlucosePredictionSeries>) {
+            series.forEach { prediction ->
+                prediction.points.forEach { point ->
+                    if (point.timestamp in viewportStart..viewportEnd) include(point.value)
+                }
+            }
+        }
+        includePredictions(resolvedPredictionSeries)
+        peerChartSeries.forEach { peer ->
+            includePredictions(peerPredictionSeries[peer.sensorId].orEmpty())
+        }
+
+        visibleMin.takeIf { it.isFinite() } to visibleMax.takeIf { it.isFinite() }
+    }
+
+    // Manual scaling establishes the baseline; visible outliers may temporarily expand it.
+    var baselineYMin by rememberSaveable { mutableFloatStateOf(graphRangeDefaults.first) }
+    var baselineYMax by rememberSaveable { mutableFloatStateOf(graphRangeDefaults.second) }
+    var isYAxisAdjusting by remember { mutableStateOf(false) }
 
     LaunchedEffect(graphRangeDefaults) {
-        yMin = graphRangeDefaults.first
-        yMax = graphRangeDefaults.second
+        baselineYMin = graphRangeDefaults.first
+        baselineYMax = graphRangeDefaults.second
     }
+
+    val automaticYRange = remember(
+        baselineYMin,
+        baselineYMax,
+        visibleValueRange,
+        isMmol,
+        isYAxisAdjusting
+    ) {
+        if (isYAxisAdjusting) {
+            ChartYRange(min = baselineYMin, max = baselineYMax)
+        } else {
+            autoExpandedChartYRange(
+                baselineMin = baselineYMin,
+                baselineMax = baselineYMax,
+                visibleMin = visibleValueRange.first,
+                visibleMax = visibleValueRange.second,
+                isMmol = isMmol
+            )
+        }
+    }
+    val yRangeAnimationSpec = if (isYAxisAdjusting) {
+        tween<Float>(durationMillis = 0)
+    } else {
+        spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    }
+    val displayYMin by animateFloatAsState(
+        targetValue = automaticYRange.min,
+        animationSpec = yRangeAnimationSpec,
+        label = "ChartYMinAutoRange"
+    )
+    val displayYMax by animateFloatAsState(
+        targetValue = automaticYRange.max,
+        animationSpec = yRangeAnimationSpec,
+        label = "ChartYMaxAutoRange"
+    )
+    val renderedYMin = if (isYAxisAdjusting) baselineYMin else displayYMin
+    val renderedYMax = if (isYAxisAdjusting) baselineYMax else displayYMax
 
     // --- INTERACTION STATE ---
     var selectedPoint by remember { mutableStateOf<GlucosePoint?>(null) }
@@ -1276,40 +1426,6 @@ fun InteractiveGlucoseChart(
         pendingTimelineTapJob = null
     }
 
-    // GRAPH RESET ON RESUME
-    val currentLatestDataTimestamp by rememberUpdatedState(latestDataTimestamp)
-    val currentSelectedTimeRange by rememberUpdatedState(selectedTimeRange)
-
-    DisposableEffect(lifecycleOwner, resetToLatestOnResume) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isResumed = true
-
-                if (resetToLatestOnResume) {
-                    // Live dashboard and journal charts answer "what's my glucose
-                    // now" on return. The history browser opts out so a short
-                    // interruption does not destroy deliberate navigation to an
-                    // older date.
-                    val latestTimestamp = currentLatestDataTimestamp
-                    visibleDuration = (currentSelectedTimeRange?.hours?.toLong() ?: 3L) * 60 * 60 * 1000
-                    val targetCenter = if (latestTimestamp > 0L) {
-                        liveCenterTimeFor(latestTimestamp, visibleDuration)
-                    } else {
-                        System.currentTimeMillis() - visibleDuration / 2
-                    }
-                    centerTime = targetCenter
-                    previewCenterTime = previewCenterTimeForWindowEnd(targetCenter + visibleDuration / 2L)
-                    lastAutoScrolledTimestamp = 0L
-                    selectedPoint = null
-                }
-            }
-            else if (event == Lifecycle.Event.ON_PAUSE) {
-                isResumed = false
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     // Auto-dismiss selection if off-screen (User Request)
     LaunchedEffect(centerTime, visibleDuration, selectedPoint) {
@@ -1419,6 +1535,8 @@ fun InteractiveGlucoseChart(
     val currentInteractionData by rememberUpdatedState(interactionData)
     val currentViewMode by rememberUpdatedState(viewMode)
     val currentCalibratedValueResolver by rememberUpdatedState(calibratedValueResolver)
+    val currentRenderedYMin by rememberUpdatedState(renderedYMin)
+    val currentRenderedYMax by rememberUpdatedState(renderedYMax)
     // The pointerInput lambda below is keyed on previewWindowReservedIntPx and otherwise
     // long-lived, so it would otherwise capture these as stale snapshots — when the
     // prediction horizon, zoom level, or expansion progress change, gesture clamping
@@ -1541,6 +1659,7 @@ fun InteractiveGlucoseChart(
                             }
                         }
                         isUserInteracting = true
+                        isYAxisAdjusting = false
                         try {
                             // FIX: Use requireUnconsumed = true (default) to respect z-order.
                             // This prevents the chart from hijacking touches meant for the floating buttons.
@@ -1706,10 +1825,10 @@ fun InteractiveGlucoseChart(
                                 val clampedX = position.x.coerceIn(0f, usefulWidth)
                                 val tapTime = viewportStart + ((clampedX / usefulWidth).toDouble() * downDuration)
                                 val normalizedY = 1f - (position.y / chartHeight).coerceIn(0f, 1f)
-                                val suggestedValue = if (yMax - yMin < 0.001f) {
-                                    yMin
+                                val suggestedValue = if (currentRenderedYMax - currentRenderedYMin < 0.001f) {
+                                    currentRenderedYMin
                                 } else {
-                                    (normalizedY * (yMax - yMin)) + yMin
+                                    (normalizedY * (currentRenderedYMax - currentRenderedYMin)) + currentRenderedYMin
                                 }
                                 return ChartTimelineTapSuggestion(
                                     timestamp = tapTime.toLong(),
@@ -1723,6 +1842,12 @@ fun InteractiveGlucoseChart(
                             var longPressTriggered = false
                             var change = down
                             var totalDragDistance = 0f
+                            var accumulatedPanX = 0f
+                            var accumulatedPanY = 0f
+                            var lockedPanAxis = 0 // 0 undecided, 1 horizontal, 2 vertical
+                            var yGestureStartMin = 0f
+                            var yGestureStartMax = 0f
+                            var yGestureAdjustsMax = false
                             var lastPointerCount = 1
                             val longPressJob = if (onTimelineTap != null && !isDoubleTapStart) {
                                 coroutineScope.launch {
@@ -1755,8 +1880,8 @@ fun InteractiveGlucoseChart(
                                     } else {
                                         pointAtTouch.value
                                     }
-                                    val liveYMin = yMin
-                                    val liveYMax = yMax
+                                    val liveYMin = currentRenderedYMin
+                                    val liveYMax = currentRenderedYMax
                                     val dataY =
                                         chartHeight - ((v - liveYMin) / (liveYMax - liveYMin)) * chartHeight
                                     abs(down.position.y - dataY) < touchThreshold
@@ -1780,6 +1905,11 @@ fun InteractiveGlucoseChart(
                                 if (pointerCount == 0 || newChange.changedToUp()) break
                                 if (pointerCount != lastPointerCount) {
                                     longPressJob?.cancel()
+                                    lockedPanAxis = 0
+                                    accumulatedPanX = 0f
+                                    accumulatedPanY = 0f
+                                    isYAxisAdjusting = false
+                                    totalDragDistance = maxOf(totalDragDistance, viewConfiguration.touchSlop)
                                     change = newChange
                                     lastPointerCount = pointerCount
                                     velocityTracker.resetTracking()
@@ -1861,27 +1991,43 @@ fun InteractiveGlucoseChart(
                                         val panY = newChange.position.y - change.position.y
                                         val dragDist = kotlin.math.sqrt(panX * panX + panY * panY)
                                         totalDragDistance += dragDist
+                                        accumulatedPanX += panX
+                                        accumulatedPanY += panY
 
-                                        if (totalDragDistance > viewConfiguration.touchSlop) {
+                                        val displacement = kotlin.math.sqrt(
+                                            accumulatedPanX * accumulatedPanX + accumulatedPanY * accumulatedPanY
+                                        )
+                                        if (displacement > viewConfiguration.touchSlop) {
                                             longPressJob?.cancel()
                                             dismissJournalActionIfNeeded()
+                                            if (lockedPanAxis == 0) {
+                                                lockedPanAxis = if (abs(accumulatedPanX) > abs(accumulatedPanY)) 1 else 2
+                                                if (lockedPanAxis == 2) {
+                                                    yGestureStartMin = currentRenderedYMin
+                                                    yGestureStartMax = currentRenderedYMax
+                                                    yGestureAdjustsMax = newChange.position.y < contentHeight / 2f
+                                                    baselineYMin = yGestureStartMin
+                                                    baselineYMax = yGestureStartMax
+                                                    isYAxisAdjusting = true
+                                                }
+                                            }
                                         }
 
-                                        if (abs(panX) > abs(panY)) {
+                                        if (lockedPanAxis == 1) {
                                             // Horizontal pan
                                             panViewportByPixels(panX, usefulWidth)
-                                        } else if (totalDragDistance > 30f) {
+                                        } else if (lockedPanAxis == 2 && abs(accumulatedPanY) > 30f) {
                                             // Vertical scale
-                                            val liveYMin = yMin
-                                            val liveYMax = yMax
-                                            val scaleFactor =
-                                                panY * (liveYMax - liveYMin) / contentHeight * 2f
-                                            if (change.position.y < contentHeight / 2f) {
-                                                yMax =
-                                                    (liveYMax + scaleFactor).coerceAtLeast(liveYMin + minYAxisSpan)
-                                            } else {
-                                                yMin = (liveYMin + scaleFactor).coerceAtLeast(0f)
-                                            }
+                                            val manualRange = manuallyAdjustedChartYRange(
+                                                startMin = yGestureStartMin,
+                                                startMax = yGestureStartMax,
+                                                totalDragY = accumulatedPanY,
+                                                chartHeight = contentHeight,
+                                                adjustsMax = yGestureAdjustsMax,
+                                                minimumSpan = minYAxisSpan
+                                            )
+                                            baselineYMin = manualRange.min
+                                            baselineYMax = manualRange.max
                                         }
                                     }
                                     newChange.consume()
@@ -1953,7 +2099,7 @@ fun InteractiveGlucoseChart(
                                             }
                                         }
                                     }
-                                } else if (!isOneFingerZoom) {
+                                } else if (!isOneFingerZoom && lockedPanAxis != 2) {
                                     // FLING - simple defaults
                                     val velocity = velocityTracker.calculateVelocity()
                                     val vx = velocity.x
@@ -1988,6 +2134,7 @@ fun InteractiveGlucoseChart(
                                 }
                             }
                         } finally {
+                            isYAxisAdjusting = false
                             isUserInteracting = false
                             lastInteractionTimestamp = System.currentTimeMillis()
                         }
@@ -2014,10 +2161,10 @@ fun InteractiveGlucoseChart(
             val heightPx = constraints.maxHeight.toFloat()
             val chartHeightPx = (heightPx - chartUnderlayBottomPx - previewWindowReservedPx - bottomAxisHeightPx - chartPlotBottomGapPx).coerceAtLeast(1f)
             
-            val ySpanForGradient = yMax - yMin
+            val ySpanForGradient = renderedYMax - renderedYMin
             fun thresholdY(value: Float): Float {
                 return if (ySpanForGradient > 0.001f) {
-                    (chartHeightPx * (1f - (value - yMin) / ySpanForGradient)).coerceIn(-2000f, chartHeightPx + 2000f)
+                    (chartHeightPx * (1f - (value - renderedYMin) / ySpanForGradient)).coerceIn(-2000f, chartHeightPx + 2000f)
                 } else {
                     0f
                 }
@@ -2210,8 +2357,9 @@ fun InteractiveGlucoseChart(
 
                 // Maps Value to Y (Inverted: High value = Low Y)
                 // Hoist state reads for performance loop
-                val cYMin = yMin
-                val cYRange = yMax - cYMin
+                val cYMin = renderedYMin
+                val cYMax = renderedYMax
+                val cYRange = cYMax - cYMin
                 
                 fun valToY(v: Float): Float {
                     if (cYRange < 0.001f) return chartHeight / 2 // Prevent div/0
@@ -2226,9 +2374,9 @@ fun InteractiveGlucoseChart(
 
                 // --- 1. DRAW Y-AXIS GRID ---
                 val yStep = if (cYRange < 25) 2f else 50f
-                var yVal = (kotlin.math.ceil(yMin / yStep) * yStep).toInt() // integer steps
+                var yVal = (kotlin.math.ceil(cYMin / yStep) * yStep).toInt() // integer steps
                 
-                while (yVal < yMax) {
+                while (yVal < cYMax) {
                     val y = valToY(yVal.toFloat())
                     if (y in 0f..chartHeight) {
                         drawLine(gridColor, Offset(0f, y), Offset(width, y), 1f)
@@ -2312,11 +2460,6 @@ fun InteractiveGlucoseChart(
                         tGrid += gridInterval
                     }
                 }
-
-                val isRawModeChart = viewMode == 1 || viewMode == 3
-                val hasCalibration = calibratedValueResolver.hasCalibration(isRawModeChart)
-                val hideInitialWhenCalibrated = hasCalibration &&
-                    tk.glucodata.data.calibration.CalibrationManager.shouldHideInitialWhenCalibrated()
 
                 if (peerChartSeries.isNotEmpty()) {
                     val peerGapThreshold = 900000L // 15 mins
@@ -3193,8 +3336,8 @@ fun InteractiveGlucoseChart(
             val journalChipMinGapPx = with(LocalDensity.current) { 90.dp.toPx() }
             val journalActionChipYOffsetPx = with(LocalDensity.current) { (chartHeightPx - 34.dp.toPx()).coerceAtLeast(12.dp.toPx()) }
             val overlayValueToY: (Float) -> Float = { value ->
-                val range = (yMax - yMin).takeIf { it > 0.001f } ?: 1f
-                (chartHeightPx - ((value - yMin) / range) * chartHeightPx).coerceIn(0f, chartHeightPx)
+                val range = (renderedYMax - renderedYMin).takeIf { it > 0.001f } ?: 1f
+                (chartHeightPx - ((value - renderedYMin) / range) * chartHeightPx).coerceIn(0f, chartHeightPx)
             }
             fun markerOverlayY(marker: JournalChartMarker): Float? {
                 return marker.chartGlucoseValue
