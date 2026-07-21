@@ -1212,6 +1212,8 @@
     <string name="nightnumhelp">Pomoc Nightnum</string>
     <string name="nightscout_enable_upload">Włącz przesyłanie Nightscout</string>
     <string name="nightscout_send_amounts_desc">Prześlij insulinę/węglowodany (leczenia)</string>
+    <string name="nightscout_send_long_insulin">Wysyłaj insulinę długodziałającą</string>
+    <string name="nightscout_send_long_insulin_desc">Uwzględniaj insulinę bazową i ultradługodziałającą w wysyłaniu do Nightscout</string>
     <string name="nightscout_receive_amounts">Odbieraj wartości</string>
     <string name="nightscout_receive_amounts_desc">Importuj insulinę/węglowodany z Nightscout do dziennika</string>
     <string name="nightscout_settings_title">Ustawienia Nightscouta</string>
