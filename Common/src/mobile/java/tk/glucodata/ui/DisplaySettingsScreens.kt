@@ -97,6 +97,7 @@ fun NotificationSettingsScreen(
     val chartRangeColorsEnabled by viewModel.glucoseChartRangeColorsEnabled.collectAsState()
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
     val dashboardDeltaEnabled by viewModel.dashboardShowDelta.collectAsState()
+    val dashboardRowsDeltaEnabled by viewModel.dashboardRowsShowDelta.collectAsState()
     val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsState()
 
     var fontSize by rememberSaveable { mutableFloatStateOf(prefs.getFloat("notification_font_size", 1.0f)) }
@@ -288,6 +289,14 @@ fun NotificationSettingsScreen(
                 subtitle = stringResource(R.string.dashboard_show_delta_desc),
                 checked = dashboardDeltaEnabled,
                 onCheckedChange = { viewModel.setDashboardShowDelta(it) },
+                icon = null,
+                position = CardPosition.MIDDLE
+            )
+            SettingsSwitchItem(
+                title = stringResource(R.string.dashboard_rows_show_delta_title),
+                subtitle = stringResource(R.string.dashboard_rows_show_delta_desc),
+                checked = dashboardRowsDeltaEnabled,
+                onCheckedChange = { viewModel.setDashboardRowsShowDelta(it) },
                 icon = null,
                 position = CardPosition.MIDDLE
             )
