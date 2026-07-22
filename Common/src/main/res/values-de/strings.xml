@@ -1633,6 +1633,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="notification_show_delta_desc">Gemessene Änderung über das Delta-Intervall, neben dem Pfeil</string>
     <string name="dashboard_show_delta_title">Delta (Δ) auf dem Dashboard</string>
     <string name="dashboard_show_delta_desc">Gemessene Änderung über das Delta-Intervall, unter dem Trendpfeil</string>
+    <string name="dashboard_rows_show_delta_title">Delta (Δ) in der Messwert-Liste</string>
+    <string name="dashboard_rows_show_delta_desc">Gemessene Änderung je Messwert über das Delta-Intervall, neben dem Wert</string>
     <string name="delta_interval_title">Delta-Intervall (Δ)</string>
     <string name="delta_interval_desc">Zeitfenster für die Δ-Anzeige; die Schnell-fallend/steigend-Alarme folgen ihm, solange kein eigenes Fenster gesetzt ist</string>
     <string name="delta_interval_1min">1 Min</string>

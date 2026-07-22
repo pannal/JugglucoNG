@@ -1888,6 +1888,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_show_delta_desc">Measured change over the delta interval, next to the arrow</string>
     <string name="dashboard_show_delta_title">Delta (Δ) on the dashboard</string>
     <string name="dashboard_show_delta_desc">Measured change over the delta interval, below the trend arrow</string>
+    <string name="dashboard_rows_show_delta_title">Delta (Δ) in the readings list</string>
+    <string name="dashboard_rows_show_delta_desc">Each reading\'s measured change over the delta interval, next to its value</string>
     <string name="delta_interval_title">Delta (Δ) interval</string>
     <string name="delta_interval_desc">Time window for the Δ readout; the falling/rising alarms follow it unless given their own window</string>
     <string name="delta_interval_1min">1 min</string>
