@@ -96,7 +96,7 @@ class SibionicsDeviceBindingTest {
     }
 
     @Test
-    fun v120XptAi21KeepsItsIdentityAndDoesNotInventSensitivity() {
+    fun v120XptAi21KeepsItsIdentityAndUsesVariantFallbackSensitivity() {
         val qr = "\u001D0106972831641476112512181727061710LT46251212C" +
             "\u001D21XPT1EEX2NRU16U"
         val identity = SibionicsRegistry.buildIdentity(
@@ -109,6 +109,14 @@ class SibionicsDeviceBindingTest {
         assertEquals("SIBI:1EEX2NRU16U", identity.sensorId)
         assertEquals("1EEX2NRU", identity.shortCode)
         assertEquals(null, SibionicsSensitivity.tryDecode(identity.shortCode))
+        assertEquals(
+            1.44f,
+            SibionicsSensitivity.sensitivityFor(
+                identity.shortCode,
+                SibionicsConstants.Variant.SIBIONICS2,
+            ),
+            0.0001f,
+        )
         assertTrue(identity.qrDerived)
     }
 
@@ -126,6 +134,14 @@ class SibionicsDeviceBindingTest {
         assertEquals("121023GG", identity.shortCode)
         val sensitivity = SibionicsSensitivity.tryDecode(identity.shortCode)
         assertEquals(1.39f, sensitivity!!, 0.0001f)
+        assertEquals(
+            1.39f,
+            SibionicsSensitivity.sensitivityFor(
+                identity.shortCode,
+                SibionicsConstants.Variant.SIBIONICS2,
+            ),
+            0.0001f,
+        )
     }
 
     @Test

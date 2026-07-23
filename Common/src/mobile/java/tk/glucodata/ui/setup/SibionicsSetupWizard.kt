@@ -55,7 +55,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.glucodata.drivers.sibionics.SibionicsConstants
 import tk.glucodata.drivers.sibionics.SibionicsRegistry
-import tk.glucodata.drivers.sibionics.SibionicsSensitivity
 
 enum class SibionicsType(val displayNameRes: Int, val subtype: Int, val setupVisible: Boolean = true) {
     EU(R.string.eusibionics, 0),
@@ -199,11 +198,7 @@ fun ManualSensorEntryDialog(
                     value = serial,
                     onValueChange = {
                         serial = it.uppercase().filter { c -> c.isLetterOrDigit() }
-                        serialValid = if (type == SibionicsType.SIBIONICS2) {
-                            serial.length == 16 && serial.startsWith('P')
-                        } else {
-                            serial.length in 10..20
-                        }
+                        serialValid = serial.length in 10..20
                     },
                     label = { Text(stringResource(R.string.serial_number_label)) },
                     placeholder = { Text(serialExample, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
@@ -576,7 +571,7 @@ fun SibionicsSetupWizard(
                             )
                         }
                     },
-                    onManagedEntry = { raw, device, shortCodeOverride ->
+                    onManagedEntry = { raw, device ->
                         val record = SibionicsRegistry.addSensorAndStart(
                             context = context.applicationContext,
                             rawInput = raw,
@@ -584,7 +579,6 @@ fun SibionicsSetupWizard(
                             displayName = null,
                             variant = selectedType.toManagedVariant(),
                             bleName = device?.name,
-                            shortCodeOverride = shortCodeOverride,
                         )
                         sensorName = record.displayName
                         currentStep = SibionicsSetupStep.CONNECTING
@@ -732,7 +726,7 @@ fun ScanSensorStep(
     useManagedDriver: Boolean,
     onInlineScanResult: (String) -> Unit,
     onManualEntry: (String) -> Unit,
-    onManagedEntry: (String, BleDeviceScanner.SibionicsBleDevice?, String?) -> Unit,
+    onManagedEntry: (String, BleDeviceScanner.SibionicsBleDevice?) -> Unit,
     onBleDeviceEntry: (BleDeviceScanner.SibionicsBleDevice) -> Unit,
     onScannerTouchInteractionChanged: (Boolean) -> Unit
 ) {
@@ -746,7 +740,6 @@ fun ScanSensorStep(
     var bleProbeDevices by remember { mutableStateOf(listOf<BleDeviceScanner.SibionicsBleDevice>()) }
     var selectedBleAddress by remember { mutableStateOf<String?>(null) }
     var galleryDecodeInProgress by remember { mutableStateOf(false) }
-    var pendingManagedQrRaw by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val matchingBleDevices = remember(bleProbeDevices, selectedType) {
@@ -755,27 +748,6 @@ fun ScanSensorStep(
     val selectedBleDevice = remember(matchingBleDevices, selectedBleAddress) {
         matchingBleDevices.firstOrNull { it.address == selectedBleAddress }
     }
-    val submitManagedScan: (String) -> Unit = { raw ->
-        val identity = SibionicsRegistry.buildIdentity(
-            rawInput = raw,
-            bleName = selectedBleDevice?.name,
-            variant = selectedType.toManagedVariant(),
-        )
-        if (
-            selectedType == SibionicsType.SIBIONICS2 &&
-            SibionicsSensitivity.tryDecode(identity.shortCode) == null
-        ) {
-            // Some V120 DataMatrix labels carry XPT... as AI (21), while the
-            // calibration-bearing P... serial is printed separately. Do not
-            // silently substitute the generic sensitivity: ask for the printed
-            // batch and serial using the existing label-entry flow.
-            pendingManagedQrRaw = raw
-            showManualEntry = true
-        } else {
-            pendingManagedQrRaw = null
-            onManagedEntry(raw, selectedBleDevice, null)
-        }
-    }
     val launchFullscreenScan = rememberUnifiedQrScanLauncher(
         requestCode = tk.glucodata.MainActivity.REQUEST_BARCODE,
         title = stringResource(R.string.sibionics_setup_title),
@@ -783,7 +755,7 @@ fun ScanSensorStep(
             if (!handledScan) {
                 handledScan = true
                 if (useManagedDriver) {
-                    submitManagedScan(raw)
+                    onManagedEntry(raw, selectedBleDevice)
                 } else {
                     onInlineScanResult(raw)
                 }
@@ -829,7 +801,7 @@ fun ScanSensorStep(
                     val decoded = decodeBitmapQr(context, uri)
                     if (decoded != null) {
                         if (useManagedDriver) {
-                            submitManagedScan(decoded)
+                            onManagedEntry(decoded, selectedBleDevice)
                         } else {
                             onManualEntry(decoded)
                         }
@@ -848,36 +820,11 @@ fun ScanSensorStep(
     if (showManualEntry) {
         ManualSensorEntryDialog(
             type = selectedType,
-            onDismiss = {
-                showManualEntry = false
-                handledScan = false
-                pendingManagedQrRaw = null
-            },
+            onDismiss = { showManualEntry = false },
             onConfirm = { code ->
                 showManualEntry = false
                 if (useManagedDriver) {
-                    val payload = constructFakeSibionicsQr(code, targetLength = 70)
-                    val printedShortCode = if (selectedType == SibionicsType.SIBIONICS2) {
-                        SibionicsRegistry.deriveV120CalibrationShortCode(code)
-                    } else {
-                        null
-                    }
-                    val invalidManagedEntry = payload == null ||
-                        (selectedType == SibionicsType.SIBIONICS2 && printedShortCode == null)
-                    if (invalidManagedEntry) {
-                        tk.glucodata.Applic.Toaster(
-                            tk.glucodata.Applic.app.getString(R.string.invalid_code_format)
-                        )
-                        handledScan = false
-                    } else {
-                        val scannedQr = pendingManagedQrRaw
-                        pendingManagedQrRaw = null
-                        if (scannedQr != null) {
-                            onManagedEntry(scannedQr, selectedBleDevice, printedShortCode)
-                        } else {
-                            onManagedEntry(payload, selectedBleDevice, printedShortCode)
-                        }
-                    }
+                    onManagedEntry(code, selectedBleDevice)
                 } else {
                     onManualEntry(code)
                 }
@@ -903,7 +850,7 @@ fun ScanSensorStep(
                     if (!handledScan) {
                         handledScan = true
                         if (useManagedDriver) {
-                            submitManagedScan(raw)
+                            onManagedEntry(raw, selectedBleDevice)
                         } else {
                             onInlineScanResult(raw)
                         }

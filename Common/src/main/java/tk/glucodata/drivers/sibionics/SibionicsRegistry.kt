@@ -127,11 +127,7 @@ object SibionicsRegistry {
         val sensorId = identity.sensorId
         val shortCode = shortCodeOverride
             ?.let { SibionicsConstants.normalizeBleName(it) }
-            ?.takeIf {
-                it.length == 8 &&
-                    (variant != SibionicsConstants.Variant.SIBIONICS2 ||
-                        SibionicsSensitivity.tryDecode(it) != null)
-            }
+            ?.takeIf { it.length == 8 }
             ?: identity.shortCode
         val records = persistedRecords(context).toMutableList()
         val idx = records.indexOfFirst {
@@ -177,7 +173,6 @@ object SibionicsRegistry {
         displayName: String?,
         variant: SibionicsConstants.Variant,
         bleName: String? = null,
-        shortCodeOverride: String? = null,
     ): SensorRecord {
         val record = ensureSensorRecord(
             context = context,
@@ -185,7 +180,6 @@ object SibionicsRegistry {
             address = address,
             displayName = displayName,
             variant = variant,
-            shortCodeOverride = shortCodeOverride,
             bleNameOverride = bleName,
         )
         runCatching {
@@ -833,21 +827,6 @@ object SibionicsRegistry {
             .takeIf { serial ->
                 serial.startsWith('P') && serial.all(Char::isLetterOrDigit)
             }
-    }
-
-    /**
-     * Extracts the native eight-character calibration window from the printed
-     * V120 P-format serial. XPT-format probe identifiers do not expose this
-     * locally decoded token and are deliberately rejected.
-     */
-    internal fun deriveV120CalibrationShortCode(source: String?): String? {
-        val normalized = SibionicsConstants.normalizeBleName(source)
-        val serial = normalized.takeLast(16)
-            .takeIf { it.length == 16 && it.startsWith('P') }
-            ?: return null
-        val nativeName = "1" + serial.dropLast(1)
-        val shortCode = nativeName.takeLast(11).take(8)
-        return shortCode.takeIf { SibionicsSensitivity.tryDecode(it) != null }
     }
 
     private fun cleanQrPayload(source: String?): String =
