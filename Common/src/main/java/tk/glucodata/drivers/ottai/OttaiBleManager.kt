@@ -816,6 +816,10 @@ class OttaiBleManager(
             activationCandidateDiscoveryPending = false
             rejectedActivationCandidateAddresses.clear()
             mActiveDeviceAddress = verifiedAddress
+            SerialNumber?.let { sensorId ->
+                Applic.app?.let { OttaiNfcWakeReminder.cancel(it, sensorId) }
+                OttaiNfc.disarmActivationRetry(sensorId)
+            }
             Log.i(TAG, "activation retry candidate verified address=$verifiedAddress")
             replayDeferredActivationCandidateCgmInfo()
         }
@@ -1531,6 +1535,10 @@ class OttaiBleManager(
     }
 
     private fun resetActivationNegotiation(failed: Boolean = false) {
+        SerialNumber?.let { sensorId ->
+            Applic.app?.let { OttaiNfcWakeReminder.cancel(it, sensorId) }
+            OttaiNfc.disarmActivationRetry(sensorId)
+        }
         activationNegotiationActive = false
         activationRetryPending = false
         activationRetryAddress = null
@@ -1691,6 +1699,12 @@ class OttaiBleManager(
         searchforDeviceAddress()
         mActiveDeviceAddress = activationRetryAddress
         Log.w(TAG, "activation retry scanning for an authenticated Ottai candidate: $reason")
+        if (OttaiRegistry.loadApiBase(Applic.app) == OttaiConstants.API_BASE) {
+            SerialNumber?.takeIf { it.isNotBlank() }?.let { sensorId ->
+                OttaiNfc.armForActivationRetry(sensorId)
+                Applic.app?.let { OttaiNfcWakeReminder.show(it, sensorId) }
+            }
+        }
         SensorBluetooth.blueone?.scanStarter(250L)
         UiRefreshBus.requestStatusRefresh()
     }

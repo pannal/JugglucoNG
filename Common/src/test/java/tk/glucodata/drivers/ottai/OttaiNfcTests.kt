@@ -1,6 +1,8 @@
 package tk.glucodata.drivers.ottai
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OttaiNfcTests {
@@ -35,5 +37,17 @@ class OttaiNfcTests {
             OttaiNfc.WakeInterface.UNSUPPORTED,
             OttaiNfc.classifyTechs(arrayOf("android.nfc.tech.IsoDep")),
         )
+    }
+
+    @Test
+    fun activationWakeIsDisarmedOnlyByTheMatchingSensor() {
+        OttaiNfc.armForActivationRetry("6CA04230E260")
+        assertTrue(OttaiNfc.dumpMode)
+
+        OttaiNfc.disarmActivationRetry("08FD5266CCB5")
+        assertTrue(OttaiNfc.dumpMode)
+
+        OttaiNfc.disarmActivationRetry("6CA04230E260")
+        assertFalse(OttaiNfc.dumpMode)
     }
 }

@@ -248,7 +248,15 @@ fun OttaiSetupWizard(
     var step by remember { mutableStateOf(OttaiSetupStep.SENSOR) }
 
     var phone by remember { mutableStateOf("") }
-    var region by remember { mutableStateOf(OttaiRegion.GLOBAL) }  // default to the non-CN app flow
+    var region by remember {
+        mutableStateOf(
+            if (alreadySignedIn && OttaiRegistry.loadApiBase(context) == OttaiConstants.API_BASE) {
+                OttaiRegion.CN
+            } else {
+                OttaiRegion.GLOBAL
+            },
+        )
+    }
     var code by remember { mutableStateOf("") }
     var requestId by remember { mutableStateOf("") }
     var smsStatus by remember { mutableStateOf("") }
@@ -337,6 +345,16 @@ fun OttaiSetupWizard(
             }
         } else {
             materialLoading = false
+        }
+    }
+
+    LaunchedEffect(step, region, currentMaterials) {
+        if (step == OttaiSetupStep.SENSOR &&
+            region == OttaiRegion.CN &&
+            ottaiMaterialState(currentMaterials) == OttaiMaterialState.READY_TO_ACTIVATE
+        ) {
+            OttaiNfc.armForSetup()
+            status = context.getString(R.string.ottai_nfc_dump_armed)
         }
     }
 
@@ -571,7 +589,7 @@ fun OttaiSetupWizard(
                                 }
                             }
                         }
-                        OttaiNfc.dumpMode = true
+                        OttaiNfc.armForSetup()
                     }
 
                     Column(

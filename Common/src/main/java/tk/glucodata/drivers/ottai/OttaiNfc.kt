@@ -16,6 +16,7 @@ import android.nfc.Tag
 import android.nfc.tech.MifareUltralight
 import android.nfc.tech.NfcV
 import android.os.SystemClock
+import tk.glucodata.Applic
 import tk.glucodata.Log
 
 object OttaiNfc {
@@ -47,6 +48,32 @@ object OttaiNfc {
     @Volatile var onResult: ((Result) -> Unit)? = null
     @Volatile private var consumedTagId: String? = null
     @Volatile private var consumeTagUntilMs: Long = 0L
+    @Volatile private var wakeHapticPending: Boolean = false
+    @Volatile private var activationSensorId: String? = null
+
+    fun armForSetup() {
+        dumpMode = true
+    }
+
+    fun armForActivationRetry(sensorId: String) {
+        activationSensorId = OttaiConstants.canonicalSensorId(sensorId)
+        dumpMode = true
+    }
+
+    fun disarmActivationRetry(sensorId: String) {
+        val canonical = OttaiConstants.canonicalSensorId(sensorId)
+        if (activationSensorId.equals(canonical, ignoreCase = true)) {
+            activationSensorId = null
+            dumpMode = false
+        }
+    }
+
+    @JvmStatic
+    fun consumeWakeHaptic(): Boolean {
+        if (!wakeHapticPending) return false
+        wakeHapticPending = false
+        return true
+    }
 
     /** Returns true if the tag belongs to the active/recent Ottai wake flow. */
     @JvmStatic
@@ -62,6 +89,12 @@ object OttaiNfc {
         if (result.wakeDetected) {
             consumedTagId = tagId
             consumeTagUntilMs = SystemClock.elapsedRealtime() + CONSUMED_TAG_WINDOW_MS
+            wakeHapticPending = true
+            dumpMode = false
+            activationSensorId?.let { sensorId ->
+                activationSensorId = null
+                Applic.app?.let { OttaiNfcWakeReminder.cancel(it, sensorId) }
+            }
         }
         lastDump = details
         Log.i(TAG, "\n$details")
