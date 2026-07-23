@@ -439,8 +439,7 @@ class OttaiBleManager(
     override fun matchDeviceName(deviceName: String?, address: String?): Boolean {
         val scanned = OttaiConstants.normalizeBleAddress(address, allowPlain = false) ?: return false
         if (activationCandidateDiscoveryPending) {
-            if (scanned in rejectedActivationCandidateAddresses) return false
-            return deviceName?.contains("ottai", ignoreCase = true) == true
+            return scanned.equals(activationRetryAddress, ignoreCase = true)
         }
         val known = OttaiConstants.normalizeBleAddress(mActiveDeviceAddress, allowPlain = false)
             ?: OttaiConstants.normalizeBleAddress(
@@ -456,17 +455,7 @@ class OttaiBleManager(
             runCatching { result.device.address }.getOrNull(),
             allowPlain = false,
         ) ?: return false
-        if (scanned in rejectedActivationCandidateAddresses) return false
-        val record = result.scanRecord ?: return false
-        val services = record.serviceUuids?.map { it.uuid }.orEmpty()
-        val nameLooksOttai = sequenceOf(
-            record.deviceName,
-            runCatching { result.device.name }.getOrNull(),
-        ).filterNotNull().any { it.contains("ottai", ignoreCase = true) }
-        val advertisesAuth = services.contains(OttaiConstants.SERVICE_AUTH)
-        val advertisesCgm = services.contains(OttaiConstants.SERVICE_CGM)
-        val advertisesDeviceInfo = services.contains(OttaiConstants.SERVICE_DEVICE_INFO)
-        return nameLooksOttai || advertisesAuth || (advertisesCgm && advertisesDeviceInfo)
+        return scanned.equals(activationRetryAddress, ignoreCase = true)
     }
 
     override fun setDeviceAddress(address: String?) {
@@ -2045,13 +2034,23 @@ class OttaiBleManager(
             ?: materials.activeExpireTimeMs.takeIf { it > 0L }
             ?: OttaiConstants.DEFAULT_ACTIVE_EXPIRE_MS
         val days = (targetMs / (24L * 60L * 60L * 1000L)).toInt()
-        return appString(
-            R.string.ottai_status_activating_days,
-            "Activating: $days days (${maxActiveCandidateIndex + 1}/$total)",
-            days,
-            maxActiveCandidateIndex + 1,
-            total,
-        )
+        return if (activationCandidateDiscoveryPending) {
+            appString(
+                R.string.ottai_status_waiting_for_sensor,
+                "Waiting for sensor • next: $days days (${maxActiveCandidateIndex + 1}/$total)",
+                days,
+                maxActiveCandidateIndex + 1,
+                total,
+            )
+        } else {
+            appString(
+                R.string.ottai_status_activating_days,
+                "Activating: $days days (${maxActiveCandidateIndex + 1}/$total)",
+                days,
+                maxActiveCandidateIndex + 1,
+                total,
+            )
+        }
     }
 
     override fun getDetailedBleStatus(): String {
