@@ -2070,6 +2070,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Diagram</string>
     <string name="notification_status_line_section">Statusrad</string>
     <string name="display_colors_title">Visning och färger</string>
-    <string name="display_colors_desc">Glukosfärger, översiktsvärden och gemensamt utseende</string>
+    <string name="display_colors_desc">Färger, översiktsvärden och diagram</string>
     <string name="display_readouts_section">Översiktsvärden</string>
 </resources>

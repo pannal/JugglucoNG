@@ -2109,6 +2109,6 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="notification_charts_section">Diagramme</string>
     <string name="notification_status_line_section">Statuszeile</string>
     <string name="display_colors_title">Anzeige &amp; Farben</string>
-    <string name="display_colors_desc">Glukosefarben, Dashboard-Werte und gemeinsame Darstellung</string>
+    <string name="display_colors_desc">Farben, Dashboard-Werte und Diagramme</string>
     <string name="display_readouts_section">Dashboard-Anzeigen</string>
 </resources>

@@ -2105,6 +2105,6 @@
     <string name="notification_charts_section">Wykresy</string>
     <string name="notification_status_line_section">Wiersz stanu</string>
     <string name="display_colors_title">Wyświetlanie i kolory</string>
-    <string name="display_colors_desc">Kolory glukozy, odczyty pulpitu i wspólny wygląd</string>
+    <string name="display_colors_desc">Kolory, wartości pulpitu i wykresy</string>
     <string name="display_readouts_section">Odczyty pulpitu</string>
 </resources>

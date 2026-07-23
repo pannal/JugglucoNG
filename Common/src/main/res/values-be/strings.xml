@@ -2137,6 +2137,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Графікі</string>
     <string name="notification_status_line_section">Радок стану</string>
     <string name="display_colors_title">Экран і колеры</string>
-    <string name="display_colors_desc">Колеры глюкозы, даныя на галоўнай і агульны выгляд</string>
+    <string name="display_colors_desc">Колеры, даныя на галоўнай і графікі</string>
     <string name="display_readouts_section">Даныя на галоўнай</string>
 </resources>

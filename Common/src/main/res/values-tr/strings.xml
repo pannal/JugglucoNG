@@ -2098,6 +2098,6 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="notification_charts_section">Grafikler</string>
     <string name="notification_status_line_section">Durum satırı</string>
     <string name="display_colors_title">Görünüm ve renkler</string>
-    <string name="display_colors_desc">Glikoz renkleri, pano değerleri ve ortak görünüm</string>
+    <string name="display_colors_desc">Renkler, pano değerleri ve grafikler</string>
     <string name="display_readouts_section">Pano değerleri</string>
 </resources>

@@ -2278,6 +2278,6 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="notification_charts_section">Jaantusyada</string>
     <string name="notification_status_line_section">Xariiqda xaaladda</string>
     <string name="display_colors_title">Muuqaalka &amp; midabada</string>
-    <string name="display_colors_desc">Midabada gulukooska, akhrisyada dashboard-ka iyo muuqaalka guud</string>
+    <string name="display_colors_desc">Midabada, qiyamka dashboard-ka iyo garaafyada</string>
     <string name="display_readouts_section">Akhrisyada dashboard-ka</string>
 </resources>

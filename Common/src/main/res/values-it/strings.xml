@@ -2060,6 +2060,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Grafici</string>
     <string name="notification_status_line_section">Riga di stato</string>
     <string name="display_colors_title">Display e colori</string>
-    <string name="display_colors_desc">Colori del glucosio, letture della dashboard e aspetto condiviso</string>
+    <string name="display_colors_desc">Colori, valori della dashboard e grafici</string>
     <string name="display_readouts_section">Letture della dashboard</string>
 </resources>

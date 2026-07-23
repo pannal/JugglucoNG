@@ -125,6 +125,7 @@ import tk.glucodata.data.journal.normalizeJournalCurvePoints
 import tk.glucodata.data.journal.serializeJournalCurve
 import tk.glucodata.ui.alerts.AddCustomAlertButton
 import tk.glucodata.ui.components.CardPosition
+import tk.glucodata.ui.components.ColorSwatchButton
 import tk.glucodata.ui.components.CompactSheetDragHandle
 import tk.glucodata.ui.components.ExpressiveHueWheelPicker
 import tk.glucodata.ui.components.MasterSwitchCard
@@ -1378,19 +1379,10 @@ private fun JournalFoodSheet(
                             .weight(1f)
                             .widthIn(min = 0.dp)
                     )
-                    FilledTonalIconButton(
+                    ColorSwatchButton(
+                        color = Color(draft.accentColor),
                         onClick = { showColorDialog = true },
-                        modifier = Modifier.size(56.dp),
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                        )
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(22.dp),
-                            shape = CircleShape,
-                            color = Color(draft.accentColor)
-                        ) {}
-                    }
+                    )
                 }
             }
 

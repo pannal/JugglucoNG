@@ -2185,6 +2185,6 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="notification_charts_section">Графикууд</string>
     <string name="notification_status_line_section">Төлөвийн мөр</string>
     <string name="display_colors_title">Дэлгэц ба өнгө</string>
-    <string name="display_colors_desc">Глюкозын өнгө, хяналтын самбарын утга болон нийтлэг төрх</string>
+    <string name="display_colors_desc">Өнгө, хяналтын самбарын утга болон график</string>
     <string name="display_readouts_section">Хяналтын самбарын утга</string>
 </resources>

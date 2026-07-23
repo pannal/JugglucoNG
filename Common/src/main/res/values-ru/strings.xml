@@ -2113,6 +2113,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Графики</string>
     <string name="notification_status_line_section">Строка состояния</string>
     <string name="display_colors_title">Экран и цвета</string>
-    <string name="display_colors_desc">Цвета глюкозы, данные на главной и общий вид</string>
+    <string name="display_colors_desc">Цвета, данные на главной и графики</string>
     <string name="display_readouts_section">Данные на главной</string>
 </resources>

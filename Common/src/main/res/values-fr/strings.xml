@@ -2076,6 +2076,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Graphiques</string>
     <string name="notification_status_line_section">Ligne d’état</string>
     <string name="display_colors_title">Affichage et couleurs</string>
-    <string name="display_colors_desc">Couleurs du glucose, valeurs du tableau de bord et apparence partagée</string>
+    <string name="display_colors_desc">Couleurs, valeurs du tableau de bord et graphiques</string>
     <string name="display_readouts_section">Valeurs du tableau de bord</string>
 </resources>

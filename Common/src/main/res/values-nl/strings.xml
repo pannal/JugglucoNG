@@ -2113,6 +2113,6 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="notification_charts_section">Grafieken</string>
     <string name="notification_status_line_section">Statusregel</string>
     <string name="display_colors_title">Weergave &amp; kleuren</string>
-    <string name="display_colors_desc">Glucosekleuren, dashboardwaarden en gedeelde vormgeving</string>
+    <string name="display_colors_desc">Kleuren, dashboardwaarden en grafieken</string>
     <string name="display_readouts_section">Dashboardwaarden</string>
 </resources>

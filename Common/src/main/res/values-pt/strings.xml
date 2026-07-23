@@ -2071,6 +2071,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Gráficos</string>
     <string name="notification_status_line_section">Linha de estado</string>
     <string name="display_colors_title">Ecrã e cores</string>
-    <string name="display_colors_desc">Cores da glicose, leituras do painel e aspeto partilhado</string>
+    <string name="display_colors_desc">Cores, valores do painel e gráficos</string>
     <string name="display_readouts_section">Leituras do painel</string>
 </resources>

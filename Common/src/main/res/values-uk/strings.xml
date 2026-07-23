@@ -2142,6 +2142,6 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="notification_charts_section">Графіки</string>
     <string name="notification_status_line_section">Рядок стану</string>
     <string name="display_colors_title">Екран і кольори</string>
-    <string name="display_colors_desc">Кольори глюкози, дані на головній і спільний вигляд</string>
+    <string name="display_colors_desc">Кольори, дані на головній і графіки</string>
     <string name="display_readouts_section">Дані на головній</string>
 </resources>

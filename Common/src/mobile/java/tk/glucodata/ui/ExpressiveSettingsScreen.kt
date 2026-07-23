@@ -63,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.glucodata.BuildConfig
 import tk.glucodata.DataSmoothing
+import tk.glucodata.GlucoseRangeColors.Band
 import tk.glucodata.Natives
 import tk.glucodata.R
 import tk.glucodata.SensorBluetooth
@@ -936,6 +937,7 @@ private fun GlucoseRangeExpandableSettingsItem(
     var veryHighSlider by remember(veryLowValue, veryHighValue, isMmol) {
         mutableFloatStateOf(normalizedVeryHigh)
     }
+    var expandedRangeSection by rememberSaveable { mutableIntStateOf(1) }
 
     val targetSummary = remember(targetLowSlider, targetHighSlider, isMmol) {
         formatRangeSummary(targetLowSlider, targetHighSlider, isMmol)
@@ -952,8 +954,8 @@ private fun GlucoseRangeExpandableSettingsItem(
     val verySummary = remember(veryLowSlider, veryHighSlider, isMmol) {
         formatRangeSummary(veryLowSlider, veryHighSlider, isMmol)
     }
-    val collapsedSummary = remember(targetShortTitle, chartShortTitle, veryShortTitle, targetSummary, chartSummary, verySummary) {
-        "$targetShortTitle $targetSummary • $chartShortTitle $chartSummary • $veryShortTitle $verySummary"
+    val collapsedSummary = remember(chartShortTitle, targetShortTitle, veryShortTitle, chartSummary, targetSummary, verySummary) {
+        "$chartShortTitle $chartSummary • $targetShortTitle $targetSummary • $veryShortTitle $verySummary"
     }
 
     Surface(
@@ -1003,49 +1005,15 @@ private fun GlucoseRangeExpandableSettingsItem(
                 Column {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
 
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    GlucoseRangeAccordionSection(
+                        title = chartTitle,
+                        summary = chartSummary,
+                        expanded = expandedRangeSection == 0,
+                        onExpandedChange = {
+                            expandedRangeSection = if (expandedRangeSection == 0) -1 else 0
+                        }
                     ) {
                         GlucoseRangeEditorSection(
-                            title = targetTitle,
-                            lowLabel = stringResource(R.string.low_label),
-                            highLabel = stringResource(R.string.high_label),
-                            lowValue = targetLowSlider,
-                            highValue = targetHighSlider,
-                            lowBounds = targetLowBounds,
-                            highBounds = targetHighBounds,
-                            isMmol = isMmol,
-                            onLowValueChange = { candidate ->
-                                targetLowSlider = clampLowerRangeValue(
-                                    value = candidate,
-                                    upperValue = targetHighSlider,
-                                    bounds = targetLowBounds,
-                                    step = valueStep,
-                                    isMmol = isMmol
-                                )
-                            },
-                            onHighValueChange = { candidate ->
-                                targetHighSlider = clampUpperRangeValue(
-                                    value = candidate,
-                                    lowerValue = targetLowSlider,
-                                    bounds = targetHighBounds,
-                                    step = valueStep,
-                                    isMmol = isMmol
-                                )
-                            },
-                            onLowValueChangeFinished = {
-                                onTargetRangeChange(targetLowSlider, targetHighSlider)
-                            },
-                            onHighValueChangeFinished = {
-                                onTargetRangeChange(targetLowSlider, targetHighSlider)
-                            }
-                        )
-
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                        GlucoseRangeEditorSection(
-                            title = chartTitle,
                             lowLabel = stringResource(R.string.low_label),
                             highLabel = stringResource(R.string.high_label),
                             lowValue = chartLowSlider,
@@ -1078,11 +1046,77 @@ private fun GlucoseRangeExpandableSettingsItem(
                                 onChartRangeChange(chartLowSlider, chartHighSlider)
                             }
                         )
+                    }
 
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+                    GlucoseRangeAccordionSection(
+                        title = targetTitle,
+                        summary = targetSummary,
+                        expanded = expandedRangeSection == 1,
+                        onExpandedChange = {
+                            expandedRangeSection = if (expandedRangeSection == 1) -1 else 1
+                        },
+                        trailingContent = {
+                            GlucoseBandColorButton(Band.LOW, Modifier.size(40.dp))
+                            GlucoseBandColorButton(Band.IN_RANGE, Modifier.size(40.dp))
+                            GlucoseBandColorButton(Band.HIGH, Modifier.size(40.dp))
+                        }
+                    ) {
                         GlucoseRangeEditorSection(
-                            title = veryTitle,
+                            lowLabel = stringResource(R.string.low_label),
+                            highLabel = stringResource(R.string.high_label),
+                            lowValue = targetLowSlider,
+                            highValue = targetHighSlider,
+                            lowBounds = targetLowBounds,
+                            highBounds = targetHighBounds,
+                            isMmol = isMmol,
+                            onLowValueChange = { candidate ->
+                                targetLowSlider = clampLowerRangeValue(
+                                    value = candidate,
+                                    upperValue = targetHighSlider,
+                                    bounds = targetLowBounds,
+                                    step = valueStep,
+                                    isMmol = isMmol
+                                )
+                            },
+                            onHighValueChange = { candidate ->
+                                targetHighSlider = clampUpperRangeValue(
+                                    value = candidate,
+                                    lowerValue = targetLowSlider,
+                                    bounds = targetHighBounds,
+                                    step = valueStep,
+                                    isMmol = isMmol
+                                )
+                            },
+                            onLowValueChangeFinished = {
+                                onTargetRangeChange(targetLowSlider, targetHighSlider)
+                            },
+                            onHighValueChangeFinished = {
+                                onTargetRangeChange(targetLowSlider, targetHighSlider)
+                            }
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+                    GlucoseRangeAccordionSection(
+                        title = veryTitle,
+                        summary = verySummary,
+                        expanded = expandedRangeSection == 2,
+                        onExpandedChange = {
+                            expandedRangeSection = if (expandedRangeSection == 2) -1 else 2
+                        },
+                        trailingContent = {
+                            GlucoseBandColorButton(Band.VERY_LOW, Modifier.size(40.dp))
+                            GlucoseBandColorButton(Band.VERY_HIGH, Modifier.size(40.dp))
+                        }
+                    ) {
+                        GlucoseRangeEditorSection(
                             lowLabel = stringResource(R.string.very_low_label),
                             highLabel = stringResource(R.string.very_high_label),
                             lowValue = veryLowSlider,
@@ -1123,8 +1157,69 @@ private fun GlucoseRangeExpandableSettingsItem(
 }
 
 @Composable
-private fun GlucoseRangeEditorSection(
+private fun GlucoseRangeAccordionSection(
     title: String,
+    summary: String,
+    expanded: Boolean,
+    onExpandedChange: () -> Unit,
+    trailingContent: @Composable RowScope.() -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "glucoseRangeSectionChevron"
+    )
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onExpandedChange)
+                .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                content = trailingContent
+            )
+            Icon(
+                imageVector = Icons.Default.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = 2.dp)
+                    .graphicsLayer { rotationZ = chevronRotation }
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Box(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp)
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlucoseRangeEditorSection(
     lowLabel: String,
     highLabel: String,
     lowValue: Float,
@@ -1138,11 +1233,6 @@ private fun GlucoseRangeEditorSection(
     onHighValueChangeFinished: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
-        )
         Text(
             text = "$lowLabel: ${formatRangeValue(lowValue, isMmol)}",
             style = MaterialTheme.typography.bodyMedium,
