@@ -1913,8 +1913,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_failed">Importen misslyckades — ingen giltig Ottai-uppgiftsfil.</string>
     <string name="ottai_login_password">Lösenord</string>
     <string name="ottai_login_sms">SMS-kod</string>
-    <string name="ottai_nfc_dump">Skanna Ottai-NFC</string>
-    <string name="ottai_nfc_dump_armed">NFC-skanning redo — håll sensorn plant mot telefonens baksida.</string>
+    <string name="ottai_nfc_dump">Väck sensorn med NFC</string>
+    <string name="ottai_nfc_dump_armed">Kinesiska Ottai-sensorer måste väckas med NFC före den första anslutningen. Håll sensorn plant mot telefonens baksida tills den identifieras.</string>
     <string name="ottai_no_account_sensors">Inga sensorer på detta konto ännu — skanna eller ange sensorkoden nedan.</string>
     <string name="ottai_password_hint">Lösenord</string>
     <string name="ottai_password_rule">8–20 tecken, med en bokstav, en siffra och ett specialtecken.</string>
@@ -1928,7 +1928,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_register_title">Skapa konto</string>
     <string name="ottai_save_nothing">Inget att spara — läs in uppgifter först.</string>
     <string name="ottai_save_ok">Uppgifter sparade till fil.</string>
-    <string name="ottai_nfc_read_ok">NFC-läsning klar. Försök ansluta igen.</string>
+    <string name="ottai_nfc_read_ok">NFC-väckning identifierad. Håll telefonen nära sensorn och tryck på ”Anslut”.</string>
+    <string name="ottai_nfc_read_failed">NFC-tagg identifierad, men sensorns väckning kunde inte bekräftas.</string>
     <string name="ottai_search_ble">Sök via Bluetooth</string>
     <string name="ottai_sensor_active">Aktiv</string>
     <string name="ottai_sensor_past">Tidigare använd</string>
@@ -1951,6 +1952,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">Autentiseringsnycklar finns, men method/coefficient-data saknas. Hämta eller importera komplett material innan du förväntar dig glukosvärden.</string>
     <string name="ottai_state_not_activated">Redo att aktiveras</string>
     <string name="ottai_state_not_activated_desc">Sensorn har nycklar men ingen starttid ännu. Anslutning autentiserar och startar uppvärmningen.</string>
+    <string name="ottai_status_activating_days">Aktiverar: %1$d dagar (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Väntar på sensorn • nästa försök: %1$d dagar (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Aktiveringen misslyckades</string>
     <string name="ottai_state_warmup">Uppvärmning pågår</string>
     <string name="ottai_state_warmup_desc">Sensorn har en starttid och bör börja strömma efter uppvärmningen.</string>
     <string name="ottai_state_active">Aktiv sensor</string>

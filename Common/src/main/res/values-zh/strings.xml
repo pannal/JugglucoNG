@@ -1929,8 +1929,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_failed">导入失败 — 不是有效的 Ottai 凭据文件。</string>
     <string name="ottai_login_password">密码</string>
     <string name="ottai_login_sms">短信验证码</string>
-    <string name="ottai_nfc_dump">扫描 Ottai NFC</string>
-    <string name="ottai_nfc_dump_armed">NFC 扫描已就绪 — 将传感器平贴在手机背面。</string>
+    <string name="ottai_nfc_dump">使用 NFC 唤醒传感器</string>
+    <string name="ottai_nfc_dump_armed">中国版 Ottai 传感器首次连接前需要通过 NFC 唤醒。请将传感器平贴在手机背面，直到检测成功。</string>
     <string name="ottai_no_account_sensors">此账户暂无传感器 — 在下方扫描或输入传感器代码。</string>
     <string name="ottai_password_hint">密码</string>
     <string name="ottai_password_rule">8–20 个字符，含字母、数字和特殊字符。</string>
@@ -1944,7 +1944,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_register_title">创建账户</string>
     <string name="ottai_save_nothing">没有可保存内容 — 请先加载凭据。</string>
     <string name="ottai_save_ok">凭据已保存到文件。</string>
-    <string name="ottai_nfc_read_ok">NFC 读取完成。请再次尝试连接。</string>
+    <string name="ottai_nfc_read_ok">已检测到 NFC 唤醒。请让手机靠近传感器，然后点按“连接”。</string>
+    <string name="ottai_nfc_read_failed">已检测到 NFC 标签，但无法确认传感器已唤醒。</string>
     <string name="ottai_search_ble">通过蓝牙搜索</string>
     <string name="ottai_sensor_active">使用中</string>
     <string name="ottai_sensor_past">曾用过</string>
@@ -1967,6 +1968,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">认证密钥已存在，但缺少 method/coefficient 数据。请先获取或导入完整材料，再期待葡萄糖值。</string>
     <string name="ottai_state_not_activated">可激活</string>
     <string name="ottai_state_not_activated_desc">该传感器已有密钥，但还没有开始时间。连接后会认证并开始预热。</string>
+    <string name="ottai_status_activating_days">正在激活：%1$d 天（%2$d/%3$d）</string>
+    <string name="ottai_status_waiting_for_sensor">正在等待传感器 • 下次尝试：%1$d 天（%2$d/%3$d）</string>
+    <string name="ottai_status_activation_failed">激活失败</string>
     <string name="ottai_state_warmup">预热中</string>
     <string name="ottai_state_warmup_desc">传感器已有开始时间，预热结束后应开始传输数据。</string>
     <string name="ottai_state_active">传感器已激活</string>

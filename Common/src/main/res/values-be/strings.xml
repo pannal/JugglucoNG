@@ -1980,8 +1980,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_failed">Памылка імпарту — несапраўдны файл уліковых даных Ottai.</string>
     <string name="ottai_login_password">Пароль</string>
     <string name="ottai_login_sms">SMS-код</string>
-    <string name="ottai_nfc_dump">Сканаваць NFC Ottai</string>
-    <string name="ottai_nfc_dump_armed">Сканаванне NFC гатова — прыцісніце датчык плоска да задняй часткі тэлефона.</string>
+    <string name="ottai_nfc_dump">Абудзіць датчык праз NFC</string>
+    <string name="ottai_nfc_dump_armed">Кітайскія датчыкі Ottai патрабуюць абуджэння праз NFC перад першым падключэннем. Прыцісніце датчык плоска да задняй часткі тэлефона да выяўлення.</string>
     <string name="ottai_no_account_sensors">У гэтым акаўнце пакуль няма сэнсараў — адсканіруйце або ўвядзіце код сэнсара ніжэй.</string>
     <string name="ottai_password_hint">Пароль</string>
     <string name="ottai_password_rule">8–20 сімвалаў: літара, лічба і спецсімвал.</string>
@@ -1995,7 +1995,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_register_title">Стварыць акаўнт</string>
     <string name="ottai_save_nothing">Няма чаго захоўваць — спачатку загрузіце ўліковыя даныя.</string>
     <string name="ottai_save_ok">Уліковыя даныя захаваны ў файл.</string>
-    <string name="ottai_nfc_read_ok">NFC прачытаны. Паспрабуйце падключыцца зноў.</string>
+    <string name="ottai_nfc_read_ok">Абуджэнне праз NFC выяўлена. Трымайце тэлефон каля датчыка і націсніце «Падключыць».</string>
+    <string name="ottai_nfc_read_failed">NFC-метка выяўлена, але абуджэнне датчыка не пацверджана.</string>
     <string name="ottai_search_ble">Пошук праз Bluetooth</string>
     <string name="ottai_sensor_active">Актыўны</string>
     <string name="ottai_sensor_past">Выкарыстоўваўся раней</string>
@@ -2018,6 +2019,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">Ключы аўтэнтыфікацыі ёсць, але бракуе даных method/coefficient. Загрузіце або імпартуйце поўныя матэрыялы, перш чым чакаць значэнні глюкозы.</string>
     <string name="ottai_state_not_activated">Гатовы да актывацыі</string>
     <string name="ottai_state_not_activated_desc">У гэтага датчыка ёсць ключы, але яшчэ няма часу старту. Падключэнне выканае аўтэнтыфікацыю і пачне прагрэў.</string>
+    <string name="ottai_status_activating_days">Актывацыя: %1$d дз. (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Чаканне датчыка • далей: %1$d дз. (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Памылка актывацыі</string>
     <string name="ottai_state_warmup">Ідзе прагрэў</string>
     <string name="ottai_state_warmup_desc">Датчык мае час старту і павінен пачаць перадаваць даныя пасля прагрэву.</string>
     <string name="ottai_state_active">Актыўны датчык</string>

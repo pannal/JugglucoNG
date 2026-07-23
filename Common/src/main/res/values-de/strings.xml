@@ -2033,8 +2033,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_import_failed">Import fehlgeschlagen — keine gültige Ottai-Zugangsdaten-Datei.</string>
     <string name="ottai_login_password">Passwort</string>
     <string name="ottai_login_sms">SMS-Code</string>
-    <string name="ottai_nfc_dump">Ottai-NFC scannen</string>
-    <string name="ottai_nfc_dump_armed">NFC-Scan bereit — Sensor flach an die Rückseite des Telefons halten.</string>
+    <string name="ottai_nfc_dump">Sensor per NFC wecken</string>
+    <string name="ottai_nfc_dump_armed">Chinesische Ottai-Sensoren müssen vor der ersten Verbindung per NFC geweckt werden. Halte den Sensor flach an die Rückseite des Telefons, bis er erkannt wird.</string>
     <string name="ottai_no_account_sensors">Noch keine Sensoren in diesem Konto — unten scannen oder Sensorcode eingeben.</string>
     <string name="ottai_password_hint">Passwort</string>
     <string name="ottai_password_rule">8–20 Zeichen, mit Buchstabe, Zahl und Sonderzeichen.</string>
@@ -2048,7 +2048,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_register_title">Konto erstellen</string>
     <string name="ottai_save_nothing">Nichts zu speichern — zuerst Zugangsdaten laden.</string>
     <string name="ottai_save_ok">Zugangsdaten in Datei gespeichert.</string>
-    <string name="ottai_nfc_read_ok">NFC gelesen. Versuche erneut zu verbinden.</string>
+    <string name="ottai_nfc_read_ok">NFC-Wecksignal erkannt. Halte das Telefon beim Sensor und tippe auf „Verbinden“.</string>
+    <string name="ottai_nfc_read_failed">NFC-Tag erkannt, aber das Wecken des Sensors konnte nicht bestätigt werden.</string>
     <string name="ottai_search_ble">Über Bluetooth suchen</string>
     <string name="ottai_sensor_active">Aktiv</string>
     <string name="ottai_sensor_past">Zuvor verwendet</string>
@@ -2071,6 +2072,9 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_materials_partial_desc">Authentifizierungsschlüssel sind vorhanden, aber method/coefficient fehlen. Lade oder importiere vollständige Materialien, bevor Glukosewerte erwartet werden.</string>
     <string name="ottai_state_not_activated">Bereit zur Aktivierung</string>
     <string name="ottai_state_not_activated_desc">Dieser Sensor hat Schlüssel, aber noch keine Startzeit. Verbinden authentifiziert ihn und startet die Aufwärmphase.</string>
+    <string name="ottai_status_activating_days">Aktivierung: %1$d Tage (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Warte auf Sensor • nächster Versuch: %1$d Tage (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Aktivierung fehlgeschlagen</string>
     <string name="ottai_state_warmup">Aufwärmphase läuft</string>
     <string name="ottai_state_warmup_desc">Der Sensor hat eine Startzeit und sollte nach der Aufwärmphase streamen.</string>
     <string name="ottai_state_active">Aktiver Sensor</string>

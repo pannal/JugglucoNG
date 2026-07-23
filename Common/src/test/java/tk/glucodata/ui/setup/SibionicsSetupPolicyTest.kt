@@ -2,8 +2,12 @@ package tk.glucodata.ui.setup
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import tk.glucodata.drivers.sibionics.SibionicsConstants
+import tk.glucodata.drivers.sibionics.SibionicsRegistry
+import tk.glucodata.drivers.sibionics.SibionicsSensitivity
 
 class SibionicsSetupPolicyTest {
     @Test
@@ -39,5 +43,33 @@ class SibionicsSetupPolicyTest {
         assertEquals(70, payload.length)
         assertEquals("000003JMVP225043", nativeLongName)
         assertEquals("3JMVP225043", nativeLongName.takeLast(11))
+    }
+
+    @Test
+    fun `printed v120 batch and serial recover exact sensitivity`() {
+        val payload = constructFakeSibionicsQr(
+            "LT46251212C" + "P2251212013AHF20",
+            targetLength = 70,
+        )
+        assertNotNull(payload)
+
+        val identity = SibionicsRegistry.buildIdentity(
+            rawInput = payload,
+            bleName = "P225043JMV",
+            variant = SibionicsConstants.Variant.SIBIONICS2,
+        )
+
+        assertEquals("1212013A", identity.shortCode)
+        assertEquals(1.26f, SibionicsSensitivity.tryDecode(identity.shortCode)!!, 0.0001f)
+        assertEquals(
+            "1212013A",
+            SibionicsRegistry.deriveV120CalibrationShortCode(
+                "LT46251212C" + "P2251212013AHF20"
+            ),
+        )
+        assertEquals(
+            null,
+            SibionicsRegistry.deriveV120CalibrationShortCode("XPT1EEX2NRU16U"),
+        )
     }
 }

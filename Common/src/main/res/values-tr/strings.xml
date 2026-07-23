@@ -1941,8 +1941,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="ottai_import_failed">İçe aktarma başarısız — geçerli bir Ottai kimlik dosyası değil.</string>
     <string name="ottai_login_password">Parola</string>
     <string name="ottai_login_sms">SMS kodu</string>
-    <string name="ottai_nfc_dump">Ottai NFC tara</string>
-    <string name="ottai_nfc_dump_armed">NFC taraması hazır — sensörü telefonun arkasına düz şekilde tutun.</string>
+    <string name="ottai_nfc_dump">Sensörü NFC ile uyandır</string>
+    <string name="ottai_nfc_dump_armed">Çin Ottai sensörleri ilk bağlantıdan önce NFC ile uyandırılmalıdır. Algılanana kadar sensörü telefonun arkasına düz şekilde tutun.</string>
     <string name="ottai_no_account_sensors">Bu hesapta henüz sensör yok — aşağıdan tarayın veya sensör kodunu girin.</string>
     <string name="ottai_password_hint">Parola</string>
     <string name="ottai_password_rule">8–20 karakter; bir harf, bir rakam ve bir özel karakter.</string>
@@ -1956,7 +1956,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="ottai_register_title">Hesap oluştur</string>
     <string name="ottai_save_nothing">Kaydedilecek bir şey yok — önce kimlik bilgilerini yükleyin.</string>
     <string name="ottai_save_ok">Kimlik bilgileri dosyaya kaydedildi.</string>
-    <string name="ottai_nfc_read_ok">NFC okundu. Yeniden bağlanmayı deneyin.</string>
+    <string name="ottai_nfc_read_ok">NFC uyandırması algılandı. Telefonu sensörün yanında tutun ve “Bağlan”a dokunun.</string>
+    <string name="ottai_nfc_read_failed">NFC etiketi algılandı ancak sensörün uyandığı doğrulanamadı.</string>
     <string name="ottai_search_ble">Bluetooth ile ara</string>
     <string name="ottai_sensor_active">Etkin</string>
     <string name="ottai_sensor_past">Daha önce kullanıldı</string>
@@ -1979,6 +1980,9 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="ottai_materials_partial_desc">Kimlik doğrulama anahtarları var, ancak method/coefficient verisi eksik. Glikoz değerleri beklemeden önce tam materyalleri alın veya içe aktarın.</string>
     <string name="ottai_state_not_activated">Etkinleştirmeye hazır</string>
     <string name="ottai_state_not_activated_desc">Bu sensörde anahtarlar var ama başlangıç zamanı yok. Bağlanma kimlik doğrulaması yapar ve ısınmayı başlatır.</string>
+    <string name="ottai_status_activating_days">Etkinleştiriliyor: %1$d gün (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Sensör bekleniyor • sonraki deneme: %1$d gün (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Etkinleştirme başarısız</string>
     <string name="ottai_state_warmup">Isınma sürüyor</string>
     <string name="ottai_state_warmup_desc">Sensörde başlangıç zamanı var ve ısınmadan sonra veri akışına başlamalı.</string>
     <string name="ottai_state_active">Aktif sensör</string>

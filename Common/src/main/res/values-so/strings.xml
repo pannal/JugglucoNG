@@ -999,10 +999,11 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="ottai_search_ble">Ka raadi Bluetooth</string>
     <string name="ottai_hide_ble_scan">Qari iskaanka Bluetooth</string>
     <string name="ottai_device_version_label">Nooca aaladda: %1$s</string>
-    <string name="ottai_nfc_dump">Iskaan Ottai NFC</string>
-    <string name="ottai_nfc_dump_armed">Sawirka NFC oo diyaar ah - dareemaha si siman ugu qabo xagga dambe ee taleefanka.</string>
+    <string name="ottai_nfc_dump">Dareemaha ku kici NFC</string>
+    <string name="ottai_nfc_dump_armed">Dareemayaasha Ottai ee Shiinaha waxay u baahan yihiin kicinta NFC ka hor isku xirka koowaad. Dareemaha si siman ugu qabo dhabarka taleefanka ilaa la ogaado.</string>
     <string name="ottai_save_ok">Shahaadooyinka lagu kaydiyay faylka</string>
-    <string name="ottai_nfc_read_ok">Akhriska NFC oo dhamaystiran Isku day mar labaad Isku xidh</string>
+    <string name="ottai_nfc_read_ok">Kicinta NFC waa la ogaaday. Taleefanka ku hay dareemaha agtiisa, dabadeed taabo «Ku xidh».</string>
+    <string name="ottai_nfc_read_failed">Summadda NFC waa la ogaaday, laakiin kicinta dareemaha lama xaqiijin.</string>
     <string name="ottai_save_nothing">Ma jiraan wax la badbaadiyo - marka hore soo rar warqadaha aqoonsiga.</string>
     <string name="ottai_settings_desc">Maamul gelitaanka akoontiga Ottai, agabka kaydsan, iyo habaynta dareenka Ottai ee ku xidhan.</string>
     <string name="ottai_account_sensors_title">Dareemayaasha xisaabta Ottai</string>
@@ -1018,6 +1019,9 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="ottai_materials_partial_desc">Furayaasha xaqiijinta ayaa jira, laakiin habka/ xogta isku xidhka ayaa maqan. Soo qaado ama soo deji agab buuxa ka hor inta aanad filaynin qiimayaasha gulukooska.</string>
     <string name="ottai_state_not_activated">Diyaar u ah in la hawlgeliyo</string>
     <string name="ottai_state_not_activated_desc">Dareemahani wuxuu leeyahay fureyaal laakiin wali wakhti bilow ah ma jiro. Xiriirinta ayaa xaqiijin doonta oo bilaabi doonta kululaynta.</string>
+    <string name="ottai_status_activating_days">Hawlgelin: %1$d maalmood (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Sugaya dareemaha • isku dayga xiga: %1$d maalmood (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Hawlgelintu way fashilantay</string>
     <string name="ottai_state_warmup">Diirintu waa socotaa</string>
     <string name="ottai_state_warmup_desc">Dareemuhu wuu bilaabmay, wuxuuna gudbinta bilaabi doonaa marka muddada diirimaadku dhammaato.</string>
     <string name="ottai_state_active">Dareemuhu waa firfircoon</string>

@@ -1938,8 +1938,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="ottai_import_failed">Импорт амжилтгүй — Ottai-н хүчинтэй мэдээллийн файл биш.</string>
     <string name="ottai_login_password">Нууц үг</string>
     <string name="ottai_login_sms">SMS код</string>
-    <string name="ottai_nfc_dump">Ottai NFC унших</string>
-    <string name="ottai_nfc_dump_armed">NFC уншихад бэлэн — мэдрэгчийг утасны ар талд хавтгай барина уу.</string>
+    <string name="ottai_nfc_dump">Мэдрэгчийг NFC-ээр сэрээх</string>
+    <string name="ottai_nfc_dump_armed">Хятадын Ottai мэдрэгчийг анх холбохын өмнө NFC-ээр сэрээх шаардлагатай. Илрэх хүртэл мэдрэгчийг утасны ар талд хавтгай барина уу.</string>
     <string name="ottai_no_account_sensors">Энэ бүртгэлд одоогоор мэдрэгч алга — доор сканердах эсвэл мэдрэгчийн кодыг оруулна уу.</string>
     <string name="ottai_password_hint">Нууц үг</string>
     <string name="ottai_password_rule">8–20 тэмдэгт; үсэг, тоо, тусгай тэмдэгт.</string>
@@ -1953,7 +1953,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="ottai_register_title">Бүртгэл үүсгэх</string>
     <string name="ottai_save_nothing">Хадгалах зүйл алга — эхлээд нэвтрэх мэдээлэл ачаална уу.</string>
     <string name="ottai_save_ok">Мэдээлэл файлд хадгалагдсан.</string>
-    <string name="ottai_nfc_read_ok">NFC уншиж дууслаа. Дахин холбож үзнэ үү.</string>
+    <string name="ottai_nfc_read_ok">NFC сэрээлт илэрлээ. Утсаа мэдрэгчийн ойролцоо байлгаад «Холбох»-ыг дарна уу.</string>
+    <string name="ottai_nfc_read_failed">NFC шошго илэрсэн ч мэдрэгч сэрснийг баталгаажуулж чадсангүй.</string>
     <string name="ottai_search_ble">Bluetooth-ээр хайх</string>
     <string name="ottai_sensor_active">Идэвхтэй</string>
     <string name="ottai_sensor_past">Өмнө ашигласан</string>
@@ -2005,6 +2006,9 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="ottai_materials_partial_desc">Баталгаажуулалтын түлхүүрүүд байгаа боловч method/coefficient өгөгдөл дутуу байна. Глюкозын утга хүлээхээс өмнө бүрэн материалыг татах эсвэл импортлоно уу.</string>
     <string name="ottai_state_not_activated">Идэвхжүүлэхэд бэлэн</string>
     <string name="ottai_state_not_activated_desc">Энэ мэдрэгчид түлхүүрүүд байна, гэхдээ эхлэх цаг хараахан алга. Холбох үед баталгаажуулж, халаалтыг эхлүүлнэ.</string>
+    <string name="ottai_status_activating_days">Идэвхжүүлж байна: %1$d өдөр (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Мэдрэгчийг хүлээж байна • дараагийн оролдлого: %1$d өдөр (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Идэвхжүүлэлт амжилтгүй</string>
     <string name="ottai_state_warmup">Халаалт явагдаж байна</string>
     <string name="ottai_state_warmup_desc">Мэдрэгч эхлэх цагтай бөгөөд халаалтын дараа өгөгдөл дамжуулж эхлэх ёстой.</string>
     <string name="ottai_state_active">Идэвхтэй мэдрэгч</string>

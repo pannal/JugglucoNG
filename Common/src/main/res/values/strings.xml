@@ -1032,10 +1032,11 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_search_ble">Search over Bluetooth</string>
     <string name="ottai_hide_ble_scan">Hide Bluetooth scan</string>
     <string name="ottai_device_version_label">Device version: %1$s</string>
-    <string name="ottai_nfc_dump">Scan Ottai NFC</string>
-    <string name="ottai_nfc_dump_armed">NFC scan ready — hold the sensor flat against the back of the phone.</string>
+    <string name="ottai_nfc_dump">Wake sensor with NFC</string>
+    <string name="ottai_nfc_dump_armed">Chinese Ottai sensors require an NFC wake before first connection. Hold the sensor flat against the back of the phone until detected.</string>
     <string name="ottai_save_ok">Credentials saved to file.</string>
-    <string name="ottai_nfc_read_ok">NFC read complete. Try Connect again.</string>
+    <string name="ottai_nfc_read_ok">NFC wake detected. Keep the phone near the sensor, then press Connect.</string>
+    <string name="ottai_nfc_read_failed">NFC tag detected, but sensor wake could not be confirmed.</string>
     <string name="ottai_save_nothing">Nothing to save — load credentials first.</string>
     <string name="ottai_settings_desc">Manage Ottai account access, saved materials, and setup for the connected Ottai sensor.</string>
     <string name="ottai_account_sensors_title">Ottai account sensors</string>
@@ -1051,6 +1052,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">Authentication keys are present, but method/coefficient data is missing. Fetch or import full materials before expecting glucose values.</string>
     <string name="ottai_state_not_activated">Ready to activate</string>
     <string name="ottai_state_not_activated_desc">This sensor has keys but no start time yet. Connect will authenticate and start warmup.</string>
+    <string name="ottai_status_activating_days">Activating: %1$d days (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Waiting for sensor • next: %1$d days (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Activation failed</string>
     <string name="ottai_state_warmup">Warmup in progress</string>
     <string name="ottai_state_warmup_desc">The sensor has a start time and should begin streaming after warmup.</string>
     <string name="ottai_state_active">Active sensor</string>

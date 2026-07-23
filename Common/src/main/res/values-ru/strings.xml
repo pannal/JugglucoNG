@@ -1956,8 +1956,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_failed">Сбой импорта — недействительный файл учётных данных Ottai.</string>
     <string name="ottai_login_password">Пароль</string>
     <string name="ottai_login_sms">SMS-код</string>
-    <string name="ottai_nfc_dump">Сканировать NFC Ottai</string>
-    <string name="ottai_nfc_dump_armed">Сканирование NFC готово — прижмите датчик плашмя к задней стороне телефона.</string>
+    <string name="ottai_nfc_dump">Разбудить датчик по NFC</string>
+    <string name="ottai_nfc_dump_armed">Китайским датчикам Ottai перед первым подключением требуется NFC-пробуждение. Прижмите датчик плашмя к задней стороне телефона до обнаружения.</string>
     <string name="ottai_no_account_sensors">На этом аккаунте пока нет сенсоров — отсканируйте или введите код сенсора ниже.</string>
     <string name="ottai_password_hint">Пароль</string>
     <string name="ottai_password_rule">8–20 символов: буква, цифра и спецсимвол.</string>
@@ -1971,7 +1971,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_register_title">Создать аккаунт</string>
     <string name="ottai_save_nothing">Нечего сохранять — сначала загрузите учётные данные.</string>
     <string name="ottai_save_ok">Учётные данные сохранены в файл.</string>
-    <string name="ottai_nfc_read_ok">NFC считан. Попробуйте подключиться снова.</string>
+    <string name="ottai_nfc_read_ok">NFC-пробуждение обнаружено. Оставьте телефон рядом с датчиком и нажмите «Подключить».</string>
+    <string name="ottai_nfc_read_failed">NFC-метка обнаружена, но пробуждение датчика не подтверждено.</string>
     <string name="ottai_search_ble">Поиск по Bluetooth</string>
     <string name="ottai_sensor_active">Активен</string>
     <string name="ottai_sensor_past">Использовался ранее</string>
@@ -1994,6 +1995,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">Ключи аутентификации есть, но method/coefficient отсутствуют. Загрузите или импортируйте полные материалы перед ожиданием значений глюкозы.</string>
     <string name="ottai_state_not_activated">Готов к активации</string>
     <string name="ottai_state_not_activated_desc">У датчика есть ключи, но ещё нет времени старта. Подключение выполнит аутентификацию и начнёт прогрев.</string>
+    <string name="ottai_status_activating_days">Активация: %1$d дн. (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Ожидание датчика • далее: %1$d дн. (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Ошибка активации</string>
     <string name="ottai_state_warmup">Идёт прогрев</string>
     <string name="ottai_state_warmup_desc">У датчика есть время старта; данные должны появиться после прогрева.</string>
     <string name="ottai_state_active">Активный датчик</string>

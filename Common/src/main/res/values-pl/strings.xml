@@ -1948,8 +1948,8 @@
     <string name="ottai_import_failed">Import nieudany — nieprawidłowy plik danych logowania Ottai.</string>
     <string name="ottai_login_password">Hasło</string>
     <string name="ottai_login_sms">Kod SMS</string>
-    <string name="ottai_nfc_dump">Skanuj NFC Ottai</string>
-    <string name="ottai_nfc_dump_armed">Skanowanie NFC gotowe — przyłóż sensor płasko do tylnej części telefonu.</string>
+    <string name="ottai_nfc_dump">Wybudź sensor przez NFC</string>
+    <string name="ottai_nfc_dump_armed">Chińskie sensory Ottai wymagają wybudzenia przez NFC przed pierwszym połączeniem. Przyłóż sensor płasko do tylnej części telefonu, aż zostanie wykryty.</string>
     <string name="ottai_no_account_sensors">Brak sensorów na tym koncie — zeskanuj lub wpisz kod sensora poniżej.</string>
     <string name="ottai_password_hint">Hasło</string>
     <string name="ottai_password_rule">8–20 znaków, z literą, cyfrą i znakiem specjalnym.</string>
@@ -1963,7 +1963,8 @@
     <string name="ottai_register_title">Utwórz konto</string>
     <string name="ottai_save_nothing">Nie ma czego zapisać — najpierw wczytaj dane logowania.</string>
     <string name="ottai_save_ok">Dane logowania zapisane do pliku.</string>
-    <string name="ottai_nfc_read_ok">Odczyt NFC zakończony. Spróbuj połączyć ponownie.</string>
+    <string name="ottai_nfc_read_ok">Wykryto wybudzenie NFC. Trzymaj telefon blisko sensora i naciśnij „Połącz”.</string>
+    <string name="ottai_nfc_read_failed">Wykryto tag NFC, ale nie udało się potwierdzić wybudzenia sensora.</string>
     <string name="ottai_search_ble">Szukaj przez Bluetooth</string>
     <string name="ottai_sensor_active">Aktywny</string>
     <string name="ottai_sensor_past">Wcześniej używany</string>
@@ -1986,6 +1987,9 @@
     <string name="ottai_materials_partial_desc">Klucze uwierzytelniania są obecne, ale brakuje danych method/coefficient. Pobierz lub zaimportuj kompletne materiały, zanim oczekujesz wartości glukozy.</string>
     <string name="ottai_state_not_activated">Gotowy do aktywacji</string>
     <string name="ottai_state_not_activated_desc">Ten sensor ma klucze, ale nie ma jeszcze czasu startu. Połączenie uwierzytelni go i rozpocznie rozgrzewanie.</string>
+    <string name="ottai_status_activating_days">Aktywacja: %1$d dni (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Oczekiwanie na sensor • następna próba: %1$d dni (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Aktywacja nie powiodła się</string>
     <string name="ottai_state_warmup">Rozgrzewanie trwa</string>
     <string name="ottai_state_warmup_desc">Sensor ma czas startu i powinien zacząć przesyłać dane po rozgrzewaniu.</string>
     <string name="ottai_state_active">Aktywny sensor</string>

@@ -1956,8 +1956,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="ottai_import_failed">Importeren mislukt — geen geldig Ottai-inloggegevensbestand.</string>
     <string name="ottai_login_password">Wachtwoord</string>
     <string name="ottai_login_sms">Sms-code</string>
-    <string name="ottai_nfc_dump">Ottai-NFC scannen</string>
-    <string name="ottai_nfc_dump_armed">NFC-scan gereed — houd de sensor plat tegen de achterkant van de telefoon.</string>
+    <string name="ottai_nfc_dump">Sensor wekken met NFC</string>
+    <string name="ottai_nfc_dump_armed">Chinese Ottai-sensoren moeten vóór de eerste verbinding via NFC worden gewekt. Houd de sensor plat tegen de achterkant van de telefoon tot deze wordt gedetecteerd.</string>
     <string name="ottai_no_account_sensors">Nog geen sensoren op dit account — scan of voer hieronder de sensorcode in.</string>
     <string name="ottai_password_hint">Wachtwoord</string>
     <string name="ottai_password_rule">8–20 tekens, met een letter, een cijfer en een speciaal teken.</string>
@@ -1971,7 +1971,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="ottai_register_title">Account aanmaken</string>
     <string name="ottai_save_nothing">Niets om op te slaan — laad eerst aanmeldgegevens.</string>
     <string name="ottai_save_ok">Inloggegevens opgeslagen in bestand.</string>
-    <string name="ottai_nfc_read_ok">NFC gelezen. Probeer opnieuw te verbinden.</string>
+    <string name="ottai_nfc_read_ok">NFC-wake gedetecteerd. Houd de telefoon bij de sensor en tik op ‘Verbinden’.</string>
+    <string name="ottai_nfc_read_failed">NFC-tag gedetecteerd, maar het wekken van de sensor kon niet worden bevestigd.</string>
     <string name="ottai_search_ble">Zoeken via Bluetooth</string>
     <string name="ottai_sensor_active">Actief</string>
     <string name="ottai_sensor_past">Eerder gebruikt</string>
@@ -1994,6 +1995,9 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="ottai_materials_partial_desc">Authenticatiesleutels zijn aanwezig, maar method/coefficient-gegevens ontbreken. Haal volledige materialen op of importeer ze voordat je glucosewaarden verwacht.</string>
     <string name="ottai_state_not_activated">Klaar voor activatie</string>
     <string name="ottai_state_not_activated_desc">Deze sensor heeft sleutels maar nog geen starttijd. Verbinden authenticeert en start de opwarming.</string>
+    <string name="ottai_status_activating_days">Activeren: %1$d dagen (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">Wachten op sensor • volgende poging: %1$d dagen (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Activering mislukt</string>
     <string name="ottai_state_warmup">Opwarming bezig</string>
     <string name="ottai_state_warmup_desc">De sensor heeft een starttijd en zou na de opwarming moeten gaan streamen.</string>
     <string name="ottai_state_active">Actieve sensor</string>

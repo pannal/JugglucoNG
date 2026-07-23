@@ -1903,8 +1903,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_import_failed">Importazione non riuscita — file di credenziali Ottai non valido.</string>
     <string name="ottai_login_password">Password</string>
     <string name="ottai_login_sms">Codice SMS</string>
-    <string name="ottai_nfc_dump">Scansiona NFC Ottai</string>
-    <string name="ottai_nfc_dump_armed">Scansione NFC pronta — tieni il sensore piatto sul retro del telefono.</string>
+    <string name="ottai_nfc_dump">Riattiva il sensore con NFC</string>
+    <string name="ottai_nfc_dump_armed">I sensori Ottai cinesi richiedono una riattivazione NFC prima della prima connessione. Tieni il sensore piatto sul retro del telefono finché non viene rilevato.</string>
     <string name="ottai_no_account_sensors">Nessun sensore su questo account — scansiona o inserisci il codice del sensore qui sotto.</string>
     <string name="ottai_password_hint">Password</string>
     <string name="ottai_password_rule">8–20 caratteri, con una lettera, un numero e un carattere speciale.</string>
@@ -1918,7 +1918,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_register_title">Crea account</string>
     <string name="ottai_save_nothing">Nulla da salvare — carica prima le credenziali.</string>
     <string name="ottai_save_ok">Credenziali salvate su file.</string>
-    <string name="ottai_nfc_read_ok">Lettura NFC completata. Prova a connetterti di nuovo.</string>
+    <string name="ottai_nfc_read_ok">Riattivazione NFC rilevata. Tieni il telefono vicino al sensore, quindi premi «Connetti».</string>
+    <string name="ottai_nfc_read_failed">Tag NFC rilevato, ma non è stato possibile confermare la riattivazione del sensore.</string>
     <string name="ottai_search_ble">Cerca tramite Bluetooth</string>
     <string name="ottai_sensor_active">Attivo</string>
     <string name="ottai_sensor_past">Usato in precedenza</string>
@@ -1941,6 +1942,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_materials_partial_desc">Le chiavi di autenticazione sono presenti, ma mancano i dati method/coefficient. Recupera o importa materiali completi prima di aspettarti valori glicemici.</string>
     <string name="ottai_state_not_activated">Pronto per l’attivazione</string>
     <string name="ottai_state_not_activated_desc">Questo sensore ha le chiavi ma non ha ancora un’ora di avvio. La connessione autenticherà e avvierà il riscaldamento.</string>
+    <string name="ottai_status_activating_days">Attivazione: %1$d giorni (%2$d/%3$d)</string>
+    <string name="ottai_status_waiting_for_sensor">In attesa del sensore • prossimo tentativo: %1$d giorni (%2$d/%3$d)</string>
+    <string name="ottai_status_activation_failed">Attivazione non riuscita</string>
     <string name="ottai_state_warmup">Riscaldamento in corso</string>
     <string name="ottai_state_warmup_desc">Il sensore ha un’ora di avvio e dovrebbe iniziare a trasmettere dopo il riscaldamento.</string>
     <string name="ottai_state_active">Sensore attivo</string>
