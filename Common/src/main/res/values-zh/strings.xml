@@ -807,6 +807,14 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="max_glucose">最大</string>
     <string name="median">中位数</string>
     <string name="meterlist">"Glucose Meters"</string>
+    <string name="glucose_meters_desc">连接蓝牙血糖仪</string>
+    <string name="glucose_meters_journal_desc">读数会作为血糖记录保存到日志中，并可发送到 Nightscout。</string>
+    <string name="glucose_meters_configured">已配置的血糖仪</string>
+    <string name="glucose_meters_none">尚未配置血糖仪</string>
+    <string name="glucose_meters_none_desc">查找附近的血糖仪以开始导入读数。</string>
+    <string name="glucose_meters_nearby">附近的血糖仪</string>
+    <string name="glucose_meter_last_reading">最近读数：%1$s</string>
+    <string name="glucose_meter_no_readings">尚未导入读数</string>
     <string name="mgdL">mg/dL</string>
     <string name="min">最小</string>
     <string name="min_glucose">最小</string>

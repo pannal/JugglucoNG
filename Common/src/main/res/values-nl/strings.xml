@@ -395,6 +395,14 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
 <string name="bloodafter">"Voeg alleen glucosemetingen toe van na: "</string>
 <string name="specifyblood">"Selecteer eerst het bloedglucose label"</string>
 <string name="meterlist">"Glucosemeters"</string>
+<string name="glucose_meters_desc">Bluetooth-glucosemeters verbinden</string>
+<string name="glucose_meters_journal_desc">Metingen worden als bloedglucose in het dagboek opgeslagen en kunnen naar Nightscout worden verzonden.</string>
+<string name="glucose_meters_configured">Ingestelde meters</string>
+<string name="glucose_meters_none">Geen meters ingesteld</string>
+<string name="glucose_meters_none_desc">Zoek een meter in de buurt om metingen te importeren.</string>
+<string name="glucose_meters_nearby">Meters in de buurt</string>
+<string name="glucose_meter_last_reading">Laatste meting: %1$s</string>
+<string name="glucose_meter_no_readings">Nog geen metingen geïmporteerd</string>
 <string name="finddevices">"Apparaten zoeken"</string>
 <string name="nonewdata">"Geen nieuwe gegevens"</string>
 <string name="newdata">"Nieuwe gegevens"</string>

@@ -848,6 +848,14 @@
     <string name="max_glucose">Maks</string>
     <string name="median">Mediana</string>
     <string name="meterlist">"Glukometry"</string>
+    <string name="glucose_meters_desc">Połącz glukometry Bluetooth</string>
+    <string name="glucose_meters_journal_desc">Pomiary są zapisywane jako wpisy glikemii w dzienniku i mogą być wysyłane do Nightscout.</string>
+    <string name="glucose_meters_configured">Skonfigurowane glukometry</string>
+    <string name="glucose_meters_none">Brak skonfigurowanych glukometrów</string>
+    <string name="glucose_meters_none_desc">Znajdź pobliski glukometr, aby rozpocząć import pomiarów.</string>
+    <string name="glucose_meters_nearby">Glukometry w pobliżu</string>
+    <string name="glucose_meter_last_reading">Ostatni pomiar: %1$s</string>
+    <string name="glucose_meter_no_readings">Nie zaimportowano jeszcze pomiarów</string>
     <string name="min">Min</string>
     <string name="min_glucose">Min</string>
     <string name="newdata">"Nowe dane"</string>

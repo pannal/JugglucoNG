@@ -807,6 +807,14 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="max_glucose">Макс</string>
     <string name="median">Медіана</string>
     <string name="meterlist">"Glucose Meters"</string>
+    <string name="glucose_meters_desc">Підключення Bluetooth-глюкометрів</string>
+    <string name="glucose_meters_journal_desc">Вимірювання зберігаються в журналі як значення глюкози крові та можуть надсилатися до Nightscout.</string>
+    <string name="glucose_meters_configured">Налаштовані глюкометри</string>
+    <string name="glucose_meters_none">Немає налаштованих глюкометрів</string>
+    <string name="glucose_meters_none_desc">Знайдіть глюкометр поблизу, щоб імпортувати вимірювання.</string>
+    <string name="glucose_meters_nearby">Глюкометри поблизу</string>
+    <string name="glucose_meter_last_reading">Останнє вимірювання: %1$s</string>
+    <string name="glucose_meter_no_readings">Вимірювання ще не імпортовано</string>
     <string name="min">Мін</string>
     <string name="min_glucose">Мін</string>
     <string name="newdata">"New data"</string>

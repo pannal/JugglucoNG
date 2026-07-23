@@ -830,6 +830,14 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="max_glucose">Maksimum</string>
     <string name="median">Medyan</string>
     <string name="meterlist">"Glucose Meters"</string>
+    <string name="glucose_meters_desc">Bluetooth glikoz ölçerleri bağlayın</string>
+    <string name="glucose_meters_journal_desc">Ölçümler günlükte kan şekeri kaydı olarak saklanır ve Nightscout\'a gönderilebilir.</string>
+    <string name="glucose_meters_configured">Yapılandırılmış ölçerler</string>
+    <string name="glucose_meters_none">Yapılandırılmış ölçer yok</string>
+    <string name="glucose_meters_none_desc">Ölçümleri içe aktarmak için yakındaki bir ölçeri bulun.</string>
+    <string name="glucose_meters_nearby">Yakındaki ölçerler</string>
+    <string name="glucose_meter_last_reading">Son ölçüm: %1$s</string>
+    <string name="glucose_meter_no_readings">Henüz ölçüm içe aktarılmadı</string>
     <string name="min">Min.</string>
     <string name="min_glucose">Min.</string>
     <string name="newdata">"New data"</string>
