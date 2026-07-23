@@ -1467,6 +1467,8 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_status_last_attempt">Isku daygii ugu dambeeyay: %1$s</string>
     <string name="nightscout_status_last_success">Guushii u dambaysay: %1$s</string>
     <string name="nightscout_send_amounts_desc">Soo rar Insulin/Carbs (Daawaynta)</string>
+    <string name="nightscout_send_long_insulin">Dir insuliinta muddada dheer</string>
+    <string name="nightscout_send_long_insulin_desc">Ku dar insuliinta basal iyo tan aadka u dheer gelinta Nightscout</string>
     <string name="nightscout_receive_amounts">Hesho qaddaro</string>
     <string name="nightscout_receive_amounts_desc">Soo rar Nightscout insulin/carbs joornaalka</string>
     <string name="nightscout_settings_title">Goobaha Nightscoout</string>

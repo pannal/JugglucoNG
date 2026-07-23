@@ -1193,6 +1193,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightnumhelp">Nightnum 帮助</string>
     <string name="nightscout_enable_upload">启用 Nightscout 上传</string>
     <string name="nightscout_send_amounts_desc">上传胰岛素/碳水化合物（治疗）</string>
+    <string name="nightscout_send_long_insulin">发送长效胰岛素</string>
+    <string name="nightscout_send_long_insulin_desc">在 Nightscout 上传中包含基础和超长效胰岛素治疗</string>
     <string name="nightscout_receive_amounts">接收用量</string>
     <string name="nightscout_receive_amounts_desc">将 Nightscout 胰岛素/碳水导入日志</string>
     <string name="nightscout_settings_title">夜巡设置</string>

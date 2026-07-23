@@ -1177,6 +1177,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightnumhelp">Nightnum Hjälp</string>
     <string name="nightscout_enable_upload">Aktivera uppladdning av Nightscout</string>
     <string name="nightscout_send_amounts_desc">Ladda upp insulin/kolhydrater (behandlingar)</string>
+    <string name="nightscout_send_long_insulin">Skicka långverkande insulin</string>
+    <string name="nightscout_send_long_insulin_desc">Inkludera basinsulin och ultralångverkande insulin i Nightscout-uppladdningar</string>
     <string name="nightscout_receive_amounts">Ta emot mängder</string>
     <string name="nightscout_receive_amounts_desc">Importera Nightscout-insulin/kolhydrater till journalen</string>
     <string name="nightscout_settings_title">Nightscout-inställningar</string>

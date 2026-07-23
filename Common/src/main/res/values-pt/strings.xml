@@ -1178,6 +1178,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightnumhelp">Ajuda do Nightnum</string>
     <string name="nightscout_enable_upload">Ativar upload do Nightscout</string>
     <string name="nightscout_send_amounts_desc">Carregar insulina/carboidratos (tratamentos)</string>
+    <string name="nightscout_send_long_insulin">Enviar insulina de ação prolongada</string>
+    <string name="nightscout_send_long_insulin_desc">Incluir insulina basal e de ação ultralonga nos envios para o Nightscout</string>
     <string name="nightscout_receive_amounts">Receber valores</string>
     <string name="nightscout_receive_amounts_desc">Importar insulina/carboidratos do Nightscout para o diário</string>
     <string name="nightscout_settings_title">Configurações do Nightscout</string>
