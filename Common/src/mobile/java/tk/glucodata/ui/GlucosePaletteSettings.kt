@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,8 +35,18 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import tk.glucodata.GlucoseRangeColors
 import tk.glucodata.GlucoseRangeColors.Band
+import tk.glucodata.GlucoseRangeColors.Palette
 import tk.glucodata.R
 import tk.glucodata.ui.components.ColorSwatchButton
+
+private val BASE_PRESETS = listOf(Palette.MUTED, Palette.VIBRANT, Palette.GDH_LIKE)
+
+private fun presetLabelRes(palette: Palette): Int = when (palette) {
+    Palette.MUTED -> R.string.glucose_palette_preset_muted
+    Palette.VIBRANT -> R.string.glucose_palette_preset_vibrant
+    Palette.GDH_LIKE -> R.string.glucose_palette_preset_gdh
+    Palette.CUSTOM -> R.string.glucose_palette_preset_custom
+}
 
 private fun bandLabelRes(band: Band): Int = when (band) {
     Band.VERY_LOW -> R.string.glucose_palette_band_very_low
@@ -54,9 +65,35 @@ private fun effectiveBandColor(band: Band, dark: Boolean): Int = when (band) {
 }
 
 @Composable
+fun GlucosePalettePresetSelector(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val revision = GlucosePaletteState.revision
+    val activePreset = remember(revision) { GlucosePaletteState.palette() }
+    val hasOverrides = remember(revision) { GlucosePaletteState.hasAnyOverride() }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        BASE_PRESETS.forEach { preset ->
+            FilterChip(
+                selected = activePreset == preset && !hasOverrides,
+                onClick = {
+                    GlucosePaletteState.setPalette(context, preset)
+                    GlucosePaletteState.clearOverrides(context)
+                },
+                label = { Text(stringResource(presetLabelRes(preset))) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
 fun GlucoseBandColorButton(
     band: Band,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     val context = LocalContext.current
     val revision = GlucosePaletteState.revision
@@ -67,7 +104,8 @@ fun GlucoseBandColorButton(
     ColorSwatchButton(
         color = Color(color),
         onClick = { showDialog = true },
-        modifier = modifier
+        modifier = modifier,
+        containerColor = containerColor
     )
 
     if (showDialog) {

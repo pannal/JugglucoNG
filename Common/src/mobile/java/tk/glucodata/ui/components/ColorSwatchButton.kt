@@ -15,13 +15,14 @@ import androidx.compose.ui.unit.dp
 fun ColorSwatchButton(
     color: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     FilledTonalIconButton(
         onClick = onClick,
         modifier = modifier.size(56.dp),
         colors = IconButtonDefaults.filledTonalIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = containerColor
         )
     ) {
         Surface(

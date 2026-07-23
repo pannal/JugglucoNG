@@ -354,9 +354,10 @@ fun DisplayAndColorSettingsScreen(
         navController = navController,
         title = stringResource(R.string.display_colors_title)
     ) {
+        GlucoseRangeDisplaySettings(viewModel)
+
         SectionLabel(
             stringResource(R.string.glucose_palette_edit_title),
-            topPadding = 0.dp,
             modifier = Modifier.padding(horizontal = legacySettingsHorizontalPadding)
         )
         Column(
