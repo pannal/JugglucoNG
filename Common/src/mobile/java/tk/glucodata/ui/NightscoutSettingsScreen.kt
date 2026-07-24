@@ -137,6 +137,7 @@ fun NightscoutSettingsScreen(navController: NavController) {
     val followerConfig = remember { NightscoutFollowerRegistry.loadConfig(context) }
     var isActive by rememberSaveable { mutableStateOf(initialUploaderActive || followerConfig.enabled) }
     var sendTreatments by rememberSaveable { mutableStateOf(Natives.getpostTreatments()) }
+    var sendLongInsulin by rememberSaveable { mutableStateOf(JournalTreatmentUploader.getSendLongInsulin()) }
     var receiveTreatments by rememberSaveable { mutableStateOf(JournalTreatmentUploader.getReceiveTreatments()) }
     var isV3 by rememberSaveable { mutableStateOf(Natives.getnightscoutV3()) }
     var showSecret by rememberSaveable { mutableStateOf(false) }
@@ -164,6 +165,7 @@ fun NightscoutSettingsScreen(navController: NavController) {
 
         Natives.setNightUploader(url.trim(), secret.trim(), uploadActive, isV3)
         Natives.setpostTreatments(sendTreatments)
+        JournalTreatmentUploader.setSendLongInsulin(sendLongInsulin)
         JournalTreatmentUploader.setReceiveTreatments(receiveTreatments)
         if (followActive) {
             if (normalizedUrl.isBlank()) {
@@ -489,6 +491,20 @@ fun NightscoutSettingsScreen(navController: NavController) {
                             icon = Icons.Default.Link,
                             iconTint = MaterialTheme.colorScheme.secondary,
                             enabled = isActive,
+                            position = CardPosition.MIDDLE
+                        )
+                        SettingsSwitchItem(
+                            title = stringResource(R.string.nightscout_send_long_insulin),
+                            subtitle = stringResource(R.string.nightscout_send_long_insulin_desc),
+                            checked = sendLongInsulin,
+                            onCheckedChange = {
+                                sendLongInsulin = it
+                                JournalTreatmentUploader.setSendLongInsulin(it)
+                                if (it) Natives.wakeuploader()
+                            },
+                            icon = Icons.Default.Medication,
+                            iconTint = MaterialTheme.colorScheme.tertiary,
+                            enabled = isActive && sendTreatments,
                             position = CardPosition.MIDDLE
                         )
                         SettingsSwitchItem(
