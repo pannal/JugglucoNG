@@ -1359,27 +1359,28 @@ static int compactRawMgdl(jfloat rawGlucose) {
   return (int)roundf(rawGlucose * mgdlToMmol * 10.0f);
 }
 
-static void addGlucoseStreamInternal(JNIEnv *env, jlong timestamp, jfloat glucose,
+static bool addGlucoseStreamInternal(JNIEnv *env, jlong timestamp, jfloat glucose,
                                      jfloat rawGlucose, jfloat temperatureC,
                                      jstring sensorId, bool overwriteRaw,
                                      bool overwriteTemp) {
   if (!sensors || !sensorId)
-    return;
+    return false;
   const char *str = env->GetStringUTFChars(sensorId, NULL);
   if (!str)
-    return;
+    return false;
 
+  bool stored = false;
   if (timestamp > 0) {
     if (SensorGlucoseData *hist = ensureDirectStreamShellForId(str, 0)) {
       if (hist->error()) {
         env->ReleaseStringUTFChars(sensorId, str);
-        return;
+        return false;
       }
       seedDirectStreamStateIfMissing(hist, timestamp);
       auto *info = hist->getinfo();
       if (!info) {
         env->ReleaseStringUTFChars(sensorId, str);
-        return;
+        return false;
       }
 
       uint32_t start = info->starttime;
@@ -1399,7 +1400,7 @@ static void addGlucoseStreamInternal(JNIEnv *env, jlong timestamp, jfloat glucos
       // Use savepollallIDs to update the stream data (index = lifeCount).
       // Preserve existing raw/temperature channels when overwriting auto value
       // so calibrated stream rewrites don't zero out raw data.
-      if (lifeCount >= 0 && lifeCount < hist->maxstreampos()) {
+      if (hist->validPollIndex(lifeCount)) {
         int preservedRaw = 0;
         uint16_t preservedTemp = 0;
         if (hist->hasStreamID(lifeCount)) {
@@ -1423,6 +1424,7 @@ static void addGlucoseStreamInternal(JNIEnv *env, jlong timestamp, jfloat glucos
                                                    mgVal, timestamp);
         hist->savepollallIDs<60>(timestamp, lifeCount, mgVal, 0, change,
                                  preservedRaw, preservedTemp);
+        stored = true;
         if (backup) {
           // Kotlin calibration rewrites touch historical stream points. Rewind
           // both stream and history mirror cursors so followers receive the
@@ -1435,26 +1437,33 @@ static void addGlucoseStreamInternal(JNIEnv *env, jlong timestamp, jfloat glucos
     }
   }
   env->ReleaseStringUTFChars(sensorId, str);
+  return stored;
 }
 
-extern "C" JNIEXPORT void JNICALL fromjava(addGlucoseStream)(
+extern "C" JNIEXPORT jboolean JNICALL fromjava(addGlucoseStream)(
     JNIEnv *env, jclass cl, jlong timestamp, jfloat glucose, jstring sensorId) {
-  addGlucoseStreamInternal(env, timestamp, glucose, 0.0f, 0.0f, sensorId, false,
-                           false);
+  return addGlucoseStreamInternal(env, timestamp, glucose, 0.0f, 0.0f, sensorId,
+                                  false, false)
+             ? JNI_TRUE
+             : JNI_FALSE;
 }
 
-extern "C" JNIEXPORT void JNICALL fromjava(addGlucoseStreamWithTemp)(
+extern "C" JNIEXPORT jboolean JNICALL fromjava(addGlucoseStreamWithTemp)(
     JNIEnv *env, jclass cl, jlong timestamp, jfloat glucose, jfloat temperatureC,
     jstring sensorId) {
-  addGlucoseStreamInternal(env, timestamp, glucose, 0.0f, temperatureC,
-                           sensorId, false, true);
+  return addGlucoseStreamInternal(env, timestamp, glucose, 0.0f, temperatureC,
+                                  sensorId, false, true)
+             ? JNI_TRUE
+             : JNI_FALSE;
 }
 
-extern "C" JNIEXPORT void JNICALL fromjava(addGlucoseStreamWithRawTemp)(
+extern "C" JNIEXPORT jboolean JNICALL fromjava(addGlucoseStreamWithRawTemp)(
     JNIEnv *env, jclass cl, jlong timestamp, jfloat glucose, jfloat rawGlucose,
     jfloat temperatureC, jstring sensorId) {
-  addGlucoseStreamInternal(env, timestamp, glucose, rawGlucose, temperatureC,
-                           sensorId, true, true);
+  return addGlucoseStreamInternal(env, timestamp, glucose, rawGlucose,
+                                  temperatureC, sensorId, true, true)
+             ? JNI_TRUE
+             : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jlong JNICALL fromjava(ensureSensorShell)(
@@ -1494,6 +1503,44 @@ extern "C" JNIEXPORT jlong JNICALL fromjava(ensureSensorShell)(
 
   env->ReleaseStringUTFChars(sensorId, str);
   return reinterpret_cast<jlong>(hist);
+}
+
+// Set the wear duration (days) for a direct-stream sensor (e.g. Ottai) by id. The
+// AiDex helper aidexSetWearDays takes an aidexstream* and cannot be reused here —
+// direct-stream sensors are plain SensorGlucoseData*. Writes info->wearduration2
+// (minutes) so officialendtime()/expectedEndTime() reflect the real activated life.
+extern "C" JNIEXPORT void JNICALL fromjava(setSensorWearDays)(
+    JNIEnv *env, jclass cl, jstring sensorId, jint days) {
+  if (!sensors || !sensorId || days <= 0)
+    return;
+  const char *str = env->GetStringUTFChars(sensorId, NULL);
+  if (!str)
+    return;
+  if (SensorGlucoseData *hist = ensureDirectStreamShellForId(str, 0)) {
+    if (!hist->error()) {
+      if (auto *info = hist->getinfo()) {
+        info->wearduration2 = static_cast<uint16_t>(days * 24 * 60);
+        LOGGER("setSensorWearDays: %s days=%d wear=%u\n", str, days,
+               info->wearduration2);
+      }
+    }
+  }
+  env->ReleaseStringUTFChars(sensorId, str);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL fromjava(hasSensorStreamCapacity)(
+    JNIEnv *env, jclass cl, jstring sensorId, jint minimumRecords) {
+  if (!sensors || !sensorId || minimumRecords <= 0)
+    return JNI_FALSE;
+  const char *str = env->GetStringUTFChars(sensorId, nullptr);
+  if (!str)
+    return JNI_FALSE;
+  SensorGlucoseData *hist = ensureDirectStreamShellForId(str, 0);
+  const bool ready =
+      hist && !hist->error() &&
+      hist->pollStorageCapacity() >= static_cast<size_t>(minimumRecords);
+  env->ReleaseStringUTFChars(sensorId, str);
+  return ready ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL fromjava(rebaseDirectStreamWindow)(
@@ -1549,10 +1596,8 @@ fromjava(addRawGlucoseStream)(JNIEnv *env, jclass cl, jlong timestamp,
         lifeCount = (timestamp - start) / 60;
       }
 
-      if (lifeCount >= 0 && lifeCount < hist->maxstreampos() &&
-          hist->hasStreamID(lifeCount)) {
-        auto polls = hist->getPolldata();
-        int preservedAuto = polls[lifeCount].g;
+      if (hist->validPollIndex(lifeCount) && hist->hasStreamID(lifeCount)) {
+        int preservedAuto = hist->getPollsData()[lifeCount].g;
         uint16_t preservedTemp = hist->getTempForPoll(lifeCount);
         int rawVal = 0;
         if (rawGlucose > 0) {

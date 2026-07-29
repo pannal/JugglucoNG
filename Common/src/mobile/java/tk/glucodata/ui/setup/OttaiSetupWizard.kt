@@ -75,6 +75,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.glucodata.Log
 import tk.glucodata.R
+import tk.glucodata.SensorBluetooth
+import tk.glucodata.drivers.ottai.OttaiBleManager
 import tk.glucodata.drivers.ottai.OttaiCloudClient
 import tk.glucodata.drivers.ottai.OttaiConstants
 import tk.glucodata.drivers.ottai.OttaiNfc
@@ -105,7 +107,7 @@ private enum class OttaiRegion(
     GLOBAL(R.string.ottai_region_global, OttaiConstants.API_BASE_GLOBAL, false, OttaiConstants.WEB_BASE_OTTAI),
     SYAI(R.string.ottai_region_syai, OttaiConstants.API_BASE_SYAI, false, OttaiConstants.WEB_BASE_SYAI),
 }
-private const val OTTAI_OFFICIAL_SCAN_DURATION_MS = 10_000L
+private const val OTTAI_SCAN_DURATION_MS = 30_000L
 private const val OTTAI_OFFICIAL_RSSI_THRESHOLD = -70
 
 /**
@@ -178,6 +180,10 @@ private fun connectOttaiSensor(
         ble,
         OttaiConstants.DEFAULT_DISPLAY_NAME,
         activate = activate,
+        // Cloud activeTime is not authoritative. The explicit setup action may safely
+        // arm activation and let the authenticated command byte decide: <3 activates,
+        // 3 streams, and >=4 remains ended without a lifetime write.
+        activateIfNeeded = true,
     ) != null
 }
 
@@ -220,15 +226,25 @@ private enum class OttaiMaterialState {
 
 private fun ottaiMaterialState(
     materials: OttaiRegistry.DeviceMaterials?,
+    recoveredStartMs: Long = 0L,
+    activatedLifetimeMs: Long = 0L,
     nowMs: Long = System.currentTimeMillis(),
 ): OttaiMaterialState {
     if (materials?.authKeys == null) return OttaiMaterialState.MISSING
     if (materials.method.isBlank() || materials.coefficient.isBlank()) return OttaiMaterialState.PARTIAL
-    val start = materials.activeTimeMs.takeIf { it > 0L } ?: return OttaiMaterialState.READY_TO_ACTIVATE
-    val expires = materials.activeExpireTimeMs.takeIf { it > 0L } ?: OttaiConstants.DEFAULT_ACTIVE_EXPIRE_MS
-    if (expires > 0L && nowMs >= start + expires) return OttaiMaterialState.EXPIRED
+    // Prefer the cloud activeTime. When it's absent — a sensor activated in the vendor app, or
+    // materials saved/imported before activation — fall back to a start we already recovered over
+    // BLE (persisted activeTime/stream anchor) so a reconnect isn't mistaken for a fresh sensor.
+    val start = materials.activeTimeMs.takeIf { it > 0L } ?: recoveredStartMs.takeIf { it > 0L }
+        ?: return OttaiMaterialState.READY_TO_ACTIVATE
     val preheat = materials.preheatPeriodMs.takeIf { it > 0L } ?: OttaiConstants.DEFAULT_PREHEAT_PERIOD_MS
     if (preheat > 0L && nowMs < start + preheat) return OttaiMaterialState.WARMING_UP
+    // Expire on the real accepted lifetime (extended, e.g. 25d) when we know it, not the rated
+    // activeExpire — so a still-streaming extended sensor isn't shown as finished.
+    val lifetime = activatedLifetimeMs.takeIf { it > 0L }
+        ?: materials.activeExpireTimeMs.takeIf { it > 0L }
+        ?: OttaiConstants.DEFAULT_ACTIVE_EXPIRE_MS
+    if (lifetime > 0L && nowMs >= start + lifetime) return OttaiMaterialState.EXPIRED
     return OttaiMaterialState.ACTIVE
 }
 
@@ -243,7 +259,12 @@ fun OttaiSetupWizard(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val alreadySignedIn = remember { OttaiRegistry.loadAccessToken(context).isNotBlank() }
+    // A Syai web JWT alone can validate IDs but cannot decrypt sensor materials. Older builds
+    // persisted that partial session, so require both mobile credentials before hiding login.
+    val alreadySignedIn = remember {
+        OttaiRegistry.loadAccessToken(context).isNotBlank() &&
+            OttaiRegistry.loadGlucoseSecretKey(context).isNotBlank()
+    }
     var signedIn by remember { mutableStateOf(alreadySignedIn) }
     var step by remember { mutableStateOf(OttaiSetupStep.SENSOR) }
 
@@ -277,6 +298,7 @@ fun OttaiSetupWizard(
     // Locally-saved sensors (imported or fetched) that can connect with no network.
     var savedSensors by remember { mutableStateOf<List<OttaiRegistry.SensorRecord>>(emptyList()) }
     var savedRefresh by remember { mutableStateOf(0) }
+    var nfcScanRestartKey by remember { mutableStateOf(0) }
 
     // When signed in and the account picker is relevant, pull the account's sensor list once.
     LaunchedEffect(signedIn, step) {
@@ -358,9 +380,25 @@ fun OttaiSetupWizard(
         }
     }
 
-    // Never leave debug NFC-dump mode armed (it would swallow normal/Libre taps).
+    // Keep one callback for the whole wizard so an automatically armed CN wake also
+    // restarts BLE discovery. Never leave NFC routing armed after the wizard closes.
     DisposableEffect(Unit) {
-        onDispose { OttaiNfc.dumpMode = false; OttaiNfc.onResult = null }
+        val callback: (OttaiNfc.Result) -> Unit = { result ->
+            scope.launch {
+                savedRefresh += 1
+                if (result.wakeDetected) nfcScanRestartKey += 1
+                status = if (result.wakeDetected) {
+                    context.getString(R.string.ottai_nfc_read_ok)
+                } else {
+                    context.getString(R.string.ottai_nfc_read_failed)
+                }
+            }
+        }
+        OttaiNfc.onResult = callback
+        onDispose {
+            OttaiNfc.dumpMode = false
+            if (OttaiNfc.onResult === callback) OttaiNfc.onResult = null
+        }
     }
 
     // Save the decrypted per-sensor materials to a file (portable to any device).
@@ -531,7 +569,16 @@ fun OttaiSetupWizard(
                 }
 
                 OttaiSetupStep.SENSOR -> {
-                    val materialState = ottaiMaterialState(currentMaterials)
+                    // A start we recovered over BLE on a previous session (persisted, and carried in
+                    // exported JSON) lets us recognise an already-activated sensor even when the
+                    // cloud/imported materials carry no activeTime — so the button reads "reconnect",
+                    // not "start warmup".
+                    val canonicalSensorId = OttaiConstants.canonicalSensorId(cloudId).takeIf { it.isNotBlank() }
+                    val recoveredStartMs = canonicalSensorId
+                        ?.let { OttaiRegistry.loadProvisionalActiveTime(context, it) } ?: 0L
+                    val activatedLifetimeMs = canonicalSensorId
+                        ?.let { OttaiRegistry.loadAcceptedMaxActive(context, it) } ?: 0L
+                    val materialState = ottaiMaterialState(currentMaterials, recoveredStartMs, activatedLifetimeMs)
                     val hasSensorCode = OttaiConstants.looksLikeMac(cloudId)
                     val hasMaterials = currentMaterials?.authKeys != null
                     val canConnect = hasSensorCode && (signedIn || hasMaterials)
@@ -577,18 +624,6 @@ fun OttaiSetupWizard(
 
                     val armNfcRead: () -> Unit = {
                         status = context.getString(R.string.ottai_nfc_dump_armed)
-                        OttaiNfc.onResult = { result ->
-                            OttaiNfc.dumpMode = false
-                            OttaiNfc.onResult = null
-                            scope.launch {
-                                savedRefresh += 1
-                                status = if (result.wakeDetected) {
-                                    context.getString(R.string.ottai_nfc_read_ok)
-                                } else {
-                                    context.getString(R.string.ottai_nfc_read_failed)
-                                }
-                            }
-                        }
                         OttaiNfc.armForSetup()
                     }
 
@@ -604,11 +639,23 @@ fun OttaiSetupWizard(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    stringResource(R.string.ottai_already_signed_in),
-                                    modifier = Modifier.weight(1f),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(R.string.ottai_already_signed_in),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                    // Prefer the login the user typed; fall back to the numeric userId
+                                    // for sessions signed in before the login was persisted.
+                                    val signedInLogin = remember(signedIn) {
+                                        OttaiRegistry.loadAccountLogin(context)
+                                            .ifBlank { OttaiRegistry.loadUserId(context) }
+                                    }
+                                    if (signedInLogin.isNotBlank()) Text(
+                                        stringResource(R.string.ottai_account_id, signedInLogin),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                                 TextButton(onClick = {
                                     scope.launch {
                                         withContext(Dispatchers.IO) { OttaiCloudClient.logout(context) }
@@ -623,6 +670,7 @@ fun OttaiSetupWizard(
                         OttaiBleScanPanel(
                             ui = ui,
                             selectedAddress = bleAddress,
+                            restartKey = nfcScanRestartKey,
                             onAddressSelected = { address ->
                                 bleAddress = address
                                 val id = OttaiConstants.canonicalSensorId(address)
@@ -740,6 +788,7 @@ fun OttaiSetupWizard(
                                             }
                                             busy = false
                                             if (ok) {
+                                                OttaiRegistry.saveAccountLogin(context, phone.trim())
                                                 smsStatus = ""
                                                 signedIn = true
                                             } else {
@@ -779,11 +828,11 @@ fun OttaiSetupWizard(
                                                         OttaiCloudClient.mailLogin(context, id, password, wb)
                                                     else
                                                         OttaiCloudClient.passwordLogin(context, id, password, region.base)
-                                                    r?.accessToken?.isNotBlank() == true
+                                                    r?.ok == true
                                                 }.onFailure { Log.w(tag, "passwordLogin: ${it.message}") }.getOrDefault(false)
                                             }
                                             busy = false
-                                            if (ok) signedIn = true
+                                            if (ok) { OttaiRegistry.saveAccountLogin(context, phone.trim()); signedIn = true }
                                             else status = context.getString(R.string.ottai_login_fail) +
                                                 OttaiCloudClient.lastError.takeIf { it.isNotBlank() }?.let { "\n$it" }.orEmpty()
                                         }
@@ -954,9 +1003,33 @@ fun OttaiSetupWizard(
                 }
 
                 OttaiSetupStep.CONNECTING -> {
-                    LaunchedScreenAdvance { step = OttaiSetupStep.SUCCESS }
+                    var connectionStatus by remember(cloudId) {
+                        mutableStateOf(context.getString(R.string.connecting_to_sensor_wait))
+                    }
+                    LaunchedEffect(cloudId) {
+                        val canonical = OttaiConstants.canonicalSensorId(cloudId)
+                        while (true) {
+                            val manager = SensorBluetooth.gattcallbacks
+                                .filterIsInstance<OttaiBleManager>()
+                                .firstOrNull { it.matchesManagedSensorId(canonical) }
+                            if (manager != null) {
+                                connectionStatus = manager.getDetailedBleStatus()
+                                    .takeIf { it.isNotBlank() }
+                                    ?: context.getString(R.string.connecting_to_sensor_wait)
+                                if (manager.isSetupConnectionComplete()) {
+                                    step = OttaiSetupStep.SUCCESS
+                                    break
+                                }
+                            }
+                            delay(500L)
+                        }
+                    }
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        SensorSetupConnectingScreen(ui = ui, sensorLabel = cloudId.ifBlank { null })
+                        SensorSetupConnectingScreen(
+                            ui = ui,
+                            sensorLabel = cloudId.ifBlank { null },
+                            supportingText = connectionStatus,
+                        )
                     }
                 }
 
@@ -1118,6 +1191,7 @@ private fun OttaiSensorMaterialCard(
 private fun OttaiBleScanPanel(
     ui: WizardUiMetrics,
     selectedAddress: String,
+    restartKey: Int,
     onAddressSelected: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1163,7 +1237,7 @@ private fun OttaiBleScanPanel(
         }
     }
 
-    DisposableEffect(scanPermissionGranted, bluetoothEnabled, scanRetryKey) {
+    DisposableEffect(scanPermissionGranted, bluetoothEnabled, scanRetryKey, restartKey) {
         if (!scanPermissionGranted || !bluetoothEnabled) {
             scanner.stopScan()
             scanStats = emptyMap()
@@ -1171,7 +1245,6 @@ private fun OttaiBleScanPanel(
             return@DisposableEffect onDispose { scanner.stopScan() }
         }
 
-        scanStats = emptyMap()
         scanError = null
         scanActive = true
         scanner.startScan(
@@ -1217,9 +1290,9 @@ private fun OttaiBleScanPanel(
         onDispose { scanner.stopScan() }
     }
 
-    LaunchedEffect(scanPermissionGranted, bluetoothEnabled, scanRetryKey) {
+    LaunchedEffect(scanPermissionGranted, bluetoothEnabled, scanRetryKey, restartKey) {
         if (scanPermissionGranted && bluetoothEnabled) {
-            delay(OTTAI_OFFICIAL_SCAN_DURATION_MS)
+            delay(OTTAI_SCAN_DURATION_MS)
             scanActive = false
             scanner.stopScan()
         }
@@ -1233,6 +1306,16 @@ private fun OttaiBleScanPanel(
                 .thenByDescending { it.bestRssi },
         )
         .take(8)
+
+    // Sensors already added to the app that the scan cannot see. A connected peripheral
+    // stops advertising, and the stability filter above additionally drops anything that
+    // is not mostly above OTTAI_OFFICIAL_RSSI_THRESHOLD — so a perfectly healthy sensor
+    // reads as "not found here". List it explicitly instead of leaving the user to guess.
+    val scannedAddresses = stableDevices.map { it.candidate.address.uppercase() }.toSet()
+    val registeredElsewhere = remember(restartKey, scannedAddresses) {
+        OttaiRegistry.persistedRecords(context)
+            .filter { it.address.isNotBlank() && it.address.uppercase() !in scannedAddresses }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -1250,12 +1333,12 @@ private fun OttaiBleScanPanel(
             )
             OutlinedButton(
                 onClick = {
+                    scanStats = emptyMap()
                     scanError = null
                     scanPermissionGranted = hasBleScanPermissions(context)
                     bluetoothEnabled = scanner.isBluetoothEnabled()
                     scanRetryKey += 1
                 },
-                enabled = !scanActive,
             ) {
                 Text(stringResource(R.string.search_bluetooth))
             }
@@ -1341,6 +1424,40 @@ private fun OttaiBleScanPanel(
                             )
                         },
                         modifier = Modifier.clickable { onAddressSelected(device.address) },
+                    )
+                    HorizontalDivider()
+                }
+            }
+        }
+
+        if (registeredElsewhere.isNotEmpty()) {
+            Text(
+                stringResource(R.string.ottai_ble_scan_registered_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Column {
+                registeredElsewhere.forEach { record ->
+                    val selected = selectedAddress.equals(record.address, ignoreCase = true)
+                    ListItem(
+                        headlineContent = {
+                            Text(record.displayName.ifBlank { record.sensorId })
+                        },
+                        supportingContent = {
+                            Text("${stringResource(R.string.ottai_ble_scan_registered)} · ${record.address}")
+                        },
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.Bluetooth,
+                                contentDescription = null,
+                                tint = if (selected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        },
+                        modifier = Modifier.clickable { onAddressSelected(record.address) },
                     )
                     HorizontalDivider()
                 }
@@ -1487,14 +1604,6 @@ private fun UUID.toLittleEndianBytes(): ByteArray {
     val text = toString().replace("-", "")
     val bigEndian = text.chunked(2).map { it.toInt(16).toByte() }
     return bigEndian.asReversed().toByteArray()
-}
-
-@Composable
-private fun LaunchedScreenAdvance(onAdvance: () -> Unit) {
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        delay(2000)
-        onAdvance()
-    }
 }
 
 @Composable

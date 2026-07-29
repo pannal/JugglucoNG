@@ -64,6 +64,7 @@ import kotlinx.coroutines.withContext
 import tk.glucodata.BuildConfig
 import tk.glucodata.DataSmoothing
 import tk.glucodata.Natives
+import tk.glucodata.OutboundApiSettings
 import tk.glucodata.R
 import tk.glucodata.SensorBluetooth
 import tk.glucodata.data.calibration.CalibrationManager
@@ -99,6 +100,13 @@ fun ExpressiveSettingsScreen(
             mqAccountState.hasCredentials ||
             mqAccountState.hasToken ||
             tk.glucodata.drivers.mq.MQRegistry.isCloudSyncEnabled(context)
+    // LibreView is relevant whenever the account is already set up *or* a Libre-family
+    // sensor is active — the account no longer has to be configured in the setup wizard first.
+    val showLibreView = remember {
+        runCatching { Natives.getuselibreview() }.getOrDefault(false) ||
+            runCatching { Natives.getlibreAccountIDnumber() }.getOrDefault(0L) > 0L ||
+            hasActiveLibreSensor()
+    }
     val showOttaiSettings = remember {
         SensorBluetooth.mygatts().any { callback ->
             (callback as? tk.glucodata.drivers.ottai.OttaiDriver)?.isUiEnabled() == true
@@ -372,15 +380,25 @@ fun ExpressiveSettingsScreen(
                     position = CardPosition.MIDDLE,
                     onCheckedChange = { viewModel.toggleGlucodataBroadcast(it) }
                 )
-                SettingsSwitchItem(
-                    title = stringResource(R.string.broadcast_computed_trend_title),
-                    subtitle = stringResource(R.string.broadcast_computed_trend_desc),
-                    checked = broadcastComputedTrend,
-                    icon = Icons.AutoMirrored.Filled.TrendingUp,
-                    iconTint = exchangeColor,
-                    position = CardPosition.MIDDLE,
-                    onCheckedChange = { viewModel.setBroadcastComputedTrend(it) }
-                )
+                // The computed trend only ever reaches an ExchangeGlucosePayload consumer, so the
+                // row is noise until one of them is on. Stay visible while the setting itself is
+                // enabled, otherwise turning the last consumer off would strand it out of reach.
+                val anyExchangeConsumer = patchedLibreEnabled || xdripEnabled || glucodataBroadcastEnabled ||
+                        OutboundApiSettings.isEnabled() ||
+                        Natives.geteverSensebroadcast() ||
+                        Natives.getgadgetbridge() ||
+                        Natives.getwatchdrip()
+                if (anyExchangeConsumer || broadcastComputedTrend) {
+                    SettingsSwitchItem(
+                        title = stringResource(R.string.broadcast_computed_trend_title),
+                        subtitle = stringResource(R.string.broadcast_computed_trend_desc),
+                        checked = broadcastComputedTrend,
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        iconTint = exchangeColor,
+                        position = CardPosition.MIDDLE,
+                        onCheckedChange = { viewModel.setBroadcastComputedTrend(it) }
+                    )
+                }
                 SettingsItem(
                     title = stringResource(R.string.outbound_api_title),
                     subtitle = stringResource(R.string.outbound_api_desc),
@@ -400,7 +418,6 @@ fun ExpressiveSettingsScreen(
                     onClick = { navController.navigate("settings/mirror") }
                 )
                 // Edit 67b: Determine if LibreView is visible to adjust card positions
-                val showLibreView = Natives.getuselibreview() || Natives.getlibreAccountIDnumber() > 0L
                 SettingsItem(
                     title = stringResource(R.string.nightscout_config),
                     subtitle = stringResource(R.string.nightscout_desc),
@@ -590,7 +607,15 @@ fun ExpressiveSettingsScreen(
                     iconTint = dataColor,
                     position = CardPosition.BOTTOM,
                     onClick = { 
-                        importLauncher.launch(arrayOf("application/json", "text/*", "text/csv", "*/*"))
+                        importLauncher.launch(
+                            arrayOf(
+                                "application/json",
+                                "text/*",
+                                "text/csv",
+                                "text/tab-separated-values",
+                                "*/*"
+                            )
+                        )
                     }
                 )
             }
@@ -1709,7 +1734,7 @@ private fun UnitPickerDialog(isMmol: Boolean, onSelect: (Int) -> Unit, onDismiss
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
-                listOf(stringResource(R.string.unit_mg) to 0, stringResource(R.string.unit_mmol) to 1).forEach { (label, value) ->
+                listOf(stringResource(R.string.unit_mg) to 2, stringResource(R.string.unit_mmol) to 1).forEach { (label, value) ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -1718,7 +1743,7 @@ private fun UnitPickerDialog(isMmol: Boolean, onSelect: (Int) -> Unit, onDismiss
                             .padding(horizontal = 24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RadioButton(selected = (if (isMmol) 1 else 0) == value, onClick = null)
+                        RadioButton(selected = (if (isMmol) 1 else 2) == value, onClick = null)
                         Spacer(Modifier.width(16.dp))
                         Text(label, style = MaterialTheme.typography.bodyLarge)
                     }
