@@ -67,7 +67,9 @@ import tk.glucodata.Natives
 import tk.glucodata.OutboundApiSettings
 import tk.glucodata.R
 import tk.glucodata.SensorBluetooth
+import tk.glucodata.SensorSourceResolver
 import tk.glucodata.data.calibration.CalibrationManager
+import tk.glucodata.drivers.ManagedSensorRuntime
 import tk.glucodata.ui.components.StyledSwitch
 import tk.glucodata.ui.theme.labelLargeExpressive
 import tk.glucodata.ui.viewmodel.DashboardViewModel
@@ -105,7 +107,7 @@ fun ExpressiveSettingsScreen(
     val showLibreView = remember {
         runCatching { Natives.getuselibreview() }.getOrDefault(false) ||
             runCatching { Natives.getlibreAccountIDnumber() }.getOrDefault(0L) > 0L ||
-            hasActiveLibreSensor()
+            hasActiveLibreSensorForLibreView()
     }
     val showOttaiSettings = remember {
         SensorBluetooth.mygatts().any { callback ->
@@ -1082,25 +1084,13 @@ fun PredictiveSimulationSettingsScreen(
     navController: NavController,
     viewModel: DashboardViewModel
 ) {
-    val unit by viewModel.unit.collectAsState()
-    val isMmol = tk.glucodata.ui.util.GlucoseFormatter.isMmol(unit)
     val journalEnabled by viewModel.journalEnabled.collectAsState()
     val predictiveSimulationEnabled by viewModel.predictiveSimulationEnabled.collectAsState()
     val notificationChartPredictionEnabled by viewModel.predictiveSimulationNotificationChartEnabled.collectAsState()
     val trendMomentumEnabled by viewModel.predictionTrendMomentumEnabled.collectAsState()
-    val carbRatioGramsPerUnit by viewModel.predictionCarbRatioGramsPerUnit.collectAsState()
-    val insulinSensitivityMgDlPerUnit by viewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsState()
+    val modelProfile by viewModel.predictionModelProfile.collectAsState()
     val carbAbsorptionGramsPerHour by viewModel.predictionCarbAbsorptionGramsPerHour.collectAsState()
     val horizonMinutes by viewModel.predictionHorizonMinutes.collectAsState()
-    val insulinSensitivityDisplay = remember(insulinSensitivityMgDlPerUnit, isMmol) {
-        tk.glucodata.ui.util.GlucoseFormatter.displayFromMgDl(insulinSensitivityMgDlPerUnit, isMmol)
-    }
-    val sensitivityValue = if (isMmol) {
-        stringResource(R.string.predictive_sensitivity_value_mmol, insulinSensitivityDisplay)
-    } else {
-        stringResource(R.string.predictive_sensitivity_value_mgdl, insulinSensitivityMgDlPerUnit)
-    }
-    val sensitivityRange = if (isMmol) 0.6f..10f else 10f..180f
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
@@ -1171,36 +1161,27 @@ fun PredictiveSimulationSettingsScreen(
             }
 
             if (journalEnabled) {
-                item(key = "model_label") {
-                    SectionLabel(
-                        stringResource(R.string.predictive_model_tuning),
-                        topPadding = 4.dp
+                item(key = "model") {
+                    SettingsItem(
+                        title = stringResource(R.string.predictive_model_tuning),
+                        subtitle = if (modelProfile.blocks.size == 1) {
+                            stringResource(R.string.predictive_model_profile_summary_single)
+                        } else {
+                            stringResource(
+                                R.string.predictive_model_profile_summary_count,
+                                modelProfile.blocks.size
+                            )
+                        },
+                        showArrow = true,
+                        onClick = {
+                            navController.navigate("settings/predictive-simulation/model-profile")
+                        },
+                        icon = Icons.Default.Schedule,
+                        iconTint = MaterialTheme.colorScheme.secondary
                     )
                 }
-                item(key = "model") {
+                item(key = "absorption") {
                     PredictiveSimulationSettingsCard(enabled = predictiveSimulationEnabled) {
-                        PredictiveSimulationParameterRow(
-                            title = stringResource(R.string.predictive_carb_ratio),
-                            valueLabel = stringResource(R.string.predictive_carb_ratio_value, carbRatioGramsPerUnit),
-                            value = carbRatioGramsPerUnit,
-                            valueRange = 3f..30f,
-                            enabled = predictiveSimulationEnabled,
-                            onValueChange = { viewModel.setPredictionCarbRatioGramsPerUnit(it) }
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f))
-                        PredictiveSimulationParameterRow(
-                            title = stringResource(R.string.predictive_insulin_sensitivity),
-                            valueLabel = sensitivityValue,
-                            value = insulinSensitivityDisplay,
-                            valueRange = sensitivityRange,
-                            enabled = predictiveSimulationEnabled,
-                            onValueChange = { displayValue ->
-                                viewModel.setPredictionInsulinSensitivityMgDlPerUnit(
-                                    if (isMmol) tk.glucodata.ui.util.GlucoseFormatter.mmolToMg(displayValue) else displayValue
-                                )
-                            }
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f))
                         PredictiveSimulationParameterRow(
                             title = stringResource(R.string.predictive_carb_absorption),
                             valueLabel = stringResource(R.string.predictive_absorption_value, carbAbsorptionGramsPerHour),
@@ -1236,7 +1217,7 @@ private fun PredictiveSimulationSettingsCard(
 }
 
 @Composable
-private fun PredictiveSimulationParameterRow(
+internal fun PredictiveSimulationParameterRow(
     title: String,
     valueLabel: String,
     value: Float,
@@ -1947,3 +1928,26 @@ private fun ConfirmActionDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }
+
+/**
+ * True when a currently active sensor is genuinely a Libre 2 / Libre 3.
+ *
+ * Deliberately does NOT reuse the native Libre check used for NFC readiness:
+ * native `isLibre2()`/`isLibre3()` are defined by *exclusion* (anything that is
+ * not AccuChek/Sibionics/Dexcom is reported as Libre), so Kotlin-driver sensors
+ * such as Ottai — which have no native family flag but are mirrored into the
+ * native glucose stream — come back as "Libre". Here we require a positive
+ * LIBRE2/LIBRE3 kind and additionally drop any sensor claimed by a managed
+ * Kotlin BLE driver.
+ */
+private fun hasActiveLibreSensorForLibreView(): Boolean = runCatching {
+    Natives.activeSensors()?.filterNotNull().orEmpty().any { sensorId ->
+        // Owned by a Kotlin BLE driver (Ottai, MQ, iCan, AiDex, Anytime, Sibionics) -> not Libre.
+        val managed = runCatching { ManagedSensorRuntime.resolveDriver(sensorId) }.getOrNull()
+        if (managed != null) return@any false
+        val kind = runCatching {
+            SensorSourceResolver.resolveSensorKind(sensorId, SensorSourceResolver.SENSOR_KIND_UNKNOWN)
+        }.getOrDefault(SensorSourceResolver.SENSOR_KIND_UNKNOWN)
+        kind == SensorSourceResolver.SENSOR_KIND_LIBRE2 || kind == SensorSourceResolver.SENSOR_KIND_LIBRE3
+    }
+}.getOrDefault(false)
