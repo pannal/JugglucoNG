@@ -1103,6 +1103,65 @@ private fun AlertSettingsExpanded(
                     }
                 }
 
+                // === Rearm hysteresis ===
+                // The margin is how far the MEASURED value must recover before the
+                // episode ends and the alert can fire again; the interval (forecast
+                // only) is a hard floor between firings, whatever value and
+                // projection do.
+                val rearmMarginTypes = setOf(
+                    AlertType.PRE_LOW, AlertType.PRE_HIGH,
+                    AlertType.LOW, AlertType.HIGH,
+                    AlertType.VERY_LOW, AlertType.VERY_HIGH
+                )
+                if (config.type in rearmMarginTypes) {
+                    ThresholdSlider(
+                        label = stringResource(R.string.rearm_margin_label),
+                        value = config.rearmMargin ?: 0f,
+                        isMmol = isMmol,
+                        range = if (isMmol) 0f..3f else 0f..50f,
+                        onValueChange = { onConfigChange(config.copy(rearmMargin = it)) }
+                    )
+                }
+                if (config.type == AlertType.PRE_LOW || config.type == AlertType.PRE_HIGH) {
+                    DurationSlider(
+                        label = stringResource(R.string.rearm_min_interval_label),
+                        value = config.rearmMinIntervalMinutes ?: 0,
+                        range = 0..60,
+                        stepSize = 5,
+                        onValueChange = { v -> onConfigChange(config.copy(rearmMinIntervalMinutes = v)) }
+                    )
+                }
+
+                // === IOB coverage (PRE_HIGH only; insulin makes a predicted LOW
+                // more likely, so PRE_LOW must never get this control) ===
+                if (config.type == AlertType.PRE_HIGH) {
+                    DurationSlider(
+                        label = stringResource(R.string.pre_high_iob_coverage_label),
+                        value = ((config.iobCoverageFactor ?: 0f) * 100f).toInt(),
+                        range = 0..200,
+                        stepSize = 10,
+                        onValueChange = { v -> onConfigChange(config.copy(iobCoverageFactor = v / 100f)) },
+                        valueText = { if (it == 0) stringResource(R.string.alert_feature_off) else "$it%" }
+                    )
+                }
+
+                // === Falling-value suppression (PERSISTENT_HIGH only) ===
+                // The alert says "your correction was not enough"; a steep fall
+                // proves it was. Slider in tenths of mg/dl per minute; 0 = off.
+                if (config.type == AlertType.PERSISTENT_HIGH) {
+                    DurationSlider(
+                        label = stringResource(R.string.persistent_high_fall_suppress_label),
+                        value = (((config.fallRateSuppress ?: 0f) * 10f) + 0.5f).toInt(),
+                        range = 0..20,
+                        stepSize = 1,
+                        onValueChange = { v -> onConfigChange(config.copy(fallRateSuppress = v / 10f)) },
+                        valueText = {
+                            if (it == 0) stringResource(R.string.alert_feature_off)
+                            else String.format(java.util.Locale.getDefault(), "-%.1f mg/dL/min", it / 10f)
+                        }
+                    )
+                }
+
                 // === Sensor-expiry pre-warnings (multi-select, this type only) ===
                 if (config.type == AlertType.SENSOR_EXPIRY) {
                     SensorExpiryThresholdSelector(
@@ -1325,7 +1384,12 @@ private fun ThresholdSlider(
                 text = label,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                // A long (localised) label must wrap, not push the value out
+                // of the row.
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
             )
             Text(
                 // Use LOCAL sliderValue for real-time updates
@@ -1389,7 +1453,15 @@ internal fun DurationSlider(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                // A long (localised) label must wrap, not push the value out
+                // of the row.
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            )
             Text(
                 valueText(displayValue),
                 style = MaterialTheme.typography.bodyMedium,
