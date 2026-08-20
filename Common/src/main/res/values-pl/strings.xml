@@ -1454,6 +1454,8 @@
     <string name="nightscout_status_treatments_upload_failing">Leczenia: wysyłanie nie działa od %1$s (%2$s)</string>
     <string name="nightscout_status_treatments_delete_failing">Leczenia: usunięcia odrzucane od %1$s (%2$s)</string>
     <string name="nightscout_status_treatments_no_response">brak odpowiedzi</string>
+    <string name="nightscout_status_iob_no_token">Wysyłka IOB: pominięta - brak jeszcze tokenu Nightscout</string>
+    <string name="nightscout_status_iob_rejected">Wysyłka IOB: odrzucona (%1$s)</string>
     <string name="nightscout_sync_actions_title">Akcje synchronizacji</string>
     <string name="expand_action">Rozwiń</string>
     <string name="collapse_action">Zwiń</string>

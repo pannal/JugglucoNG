@@ -1493,6 +1493,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="nightscout_status_treatments_upload_failing">Behandlungen: Senden schlägt seit %1$s fehl (%2$s)</string>
     <string name="nightscout_status_treatments_delete_failing">Behandlungen: Löschungen seit %1$s abgelehnt (%2$s)</string>
     <string name="nightscout_status_treatments_no_response">keine Antwort</string>
+    <string name="nightscout_status_iob_no_token">IOB-Upload: übersprungen - noch kein Nightscout-Token</string>
+    <string name="nightscout_status_iob_rejected">IOB-Upload: abgelehnt (%1$s)</string>
     <string name="nightscout_sync_actions_title">Synchronisierungsaktionen</string>
     <string name="expand_action">Erweitern</string>
     <string name="collapse_action">Einklappen</string>

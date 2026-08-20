@@ -1419,6 +1419,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_status_treatments_upload_failing">Behandlingar: sändning misslyckas sedan %1$s (%2$s)</string>
     <string name="nightscout_status_treatments_delete_failing">Behandlingar: raderingar nekas sedan %1$s (%2$s)</string>
     <string name="nightscout_status_treatments_no_response">inget svar</string>
+    <string name="nightscout_status_iob_no_token">IOB-uppladdning: överhoppad - ingen Nightscout-token ännu</string>
+    <string name="nightscout_status_iob_rejected">IOB-uppladdning: avvisad (%1$s)</string>
     <string name="nightscout_sync_actions_title">Synkåtgärder</string>
     <string name="expand_action">Expandera</string>
     <string name="collapse_action">Fäll ihop</string>

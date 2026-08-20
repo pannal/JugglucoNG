@@ -1447,6 +1447,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="nightscout_status_treatments_upload_failing">Tedaviler: %1$s tarihinden beri gönderim başarısız (%2$s)</string>
     <string name="nightscout_status_treatments_delete_failing">Tedaviler: %1$s tarihinden beri silmeler reddediliyor (%2$s)</string>
     <string name="nightscout_status_treatments_no_response">yanıt yok</string>
+    <string name="nightscout_status_iob_no_token">IOB gönderimi: atlandı - henüz Nightscout belirteci yok</string>
+    <string name="nightscout_status_iob_rejected">IOB gönderimi: reddedildi (%1$s)</string>
     <string name="nightscout_sync_actions_title">Senkronizasyon işlemleri</string>
     <string name="expand_action">Genişlet</string>
     <string name="collapse_action">Daralt</string>
