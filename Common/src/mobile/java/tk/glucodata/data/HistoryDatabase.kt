@@ -40,7 +40,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalInsulinPresetEntity::class,
         JournalPendingDeleteEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -251,6 +251,17 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v13 -> v14: track LibreView delivery per journal row. Without its own column the
+         * LibreView uploader would have to share nsUploadedAt with Nightscout, and either
+         * destination succeeding would mark the entry sent to both.
+         */
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN lvUploadedAt INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -269,7 +280,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_9_10,
                     MIGRATION_10_11,
                     MIGRATION_11_12,
-                    MIGRATION_12_13
+                    MIGRATION_12_13,
+                    MIGRATION_13_14
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }
