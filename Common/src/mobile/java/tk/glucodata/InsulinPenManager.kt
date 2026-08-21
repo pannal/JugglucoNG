@@ -14,7 +14,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import tk.glucodata.NovoPen.PenDose
 import tk.glucodata.NovoPen.PenDoseParser
+import tk.glucodata.NovoPen.PenDropTally
 import tk.glucodata.NovoPen.PenDuplicateReconciler
+import tk.glucodata.NovoPen.PenImportCursor
 import tk.glucodata.NovoPen.PenJournalEntry
 import tk.glucodata.NovoPen.PenReconcilePlan
 import tk.glucodata.NovoPen.PenSourceIds
@@ -111,19 +113,36 @@ object InsulinPenManager {
      * Called from the NFC protocol thread while the pen is still in the field, to stop
      * reading segments once everything they hold is already in the journal.
      *
-     * The pen sends newest first, so once a chunk's newest dose is one we already have,
-     * everything behind it is older and known too.
+     * The pen sends newest first — a real NovoPen 6 segment in `PenDoseParserTests` shows
+     * it, and native's `oldnovopenvalue` relied on it by testing a chunk's last record —
+     * so once a chunk's newest dose is one we already have, everything behind it is older
+     * and known too. The cursor is on the pen's own counter, the same number the chunk is
+     * compared on; it is 0 for a pen never imported on this build, and then the whole log
+     * is walked once on purpose.
      */
     @JvmStatic
     fun isFullyImported(serial: String?, referenceTimeSeconds: Long, raw: ByteArray?): Boolean {
         val known = serial?.let(::pen) ?: return false
-        if (known.fullReadArmed) return false
+        if (known.fullReadArmed) {
+            if (Log.doLog) Log.i(LOG_ID, "Pen $serial: full read armed, reading on")
+            return false
+        }
         val cursor = known.lastImportedDoseRelativeSeconds
-        if (cursor <= 0L) return false
-        val newest = PenDoseParser.parse(referenceTimeSeconds, raw, nowSeconds())
-            .maxOfOrNull(PenDose::relativeSeconds)
-            ?: return false
-        return newest <= cursor
+        if (cursor <= 0L) {
+            if (Log.doLog) Log.i(LOG_ID, "Pen $serial: no cursor yet, reading the whole log")
+            return false
+        }
+        val chunk = PenDoseParser.parse(referenceTimeSeconds, raw, nowSeconds())
+        val newest = chunk.maxOfOrNull(PenDose::relativeSeconds)
+        val done = newest != null && newest <= cursor
+        if (Log.doLog) {
+            Log.i(
+                LOG_ID,
+                "Pen $serial: chunk of ${chunk.size} dose(s), newest rel=$newest, " +
+                    "cursor rel=$cursor -> ${if (done) "all known, stop reading" else "reading on"}",
+            )
+        }
+        return done
     }
 
     /**
@@ -137,25 +156,38 @@ object InsulinPenManager {
         update(serial) { it.copy(lastScanAt = System.currentTimeMillis(), fullReadArmed = false) }
         scope.launch {
             val now = nowSeconds()
-            val doses = PenDoseParser.merge(
-                chunks.map { PenDoseParser.parse(it.referencetime, it.rawdoses, now) }
-            )
+            val dropped = PenDropTally()
+            val parsed = chunks.map { PenDoseParser.parse(it.referencetime, it.rawdoses, now, dropped) }
+            val doses = PenDoseParser.merge(parsed)
             val cutoff = now - REVIEW_WINDOW_SECONDS
             val repository = JournalRepository()
             rememberScan(serial, doses)
             val duplicates = reconcile(serial, doses, repository)
-            val fresh = doses
-                .filter { it.timestampSeconds > cutoff }
-                .filterNot { repository.hasEntryWithSourceRecordId(sourceRecordId(serial, it)) }
+            val inWindow = doses.filter { it.timestampSeconds > cutoff }
+            val present = inWindow
+                .filter { repository.hasEntryWithSourceRecordId(sourceRecordId(serial, it)) }
+                .mapTo(HashSet(), PenDose::relativeSeconds)
+            val fresh = inWindow.filterNot { it.relativeSeconds in present }
+            Log.i(
+                LOG_ID,
+                "Pen $serial: ${chunks.size} chunk(s), ${parsed.sumOf { it.size }} parsed, " +
+                    "${doses.size} after merge, newest rel=${doses.maxOfOrNull(PenDose::relativeSeconds)}, " +
+                    "cursor rel=${known?.lastImportedDoseRelativeSeconds ?: 0L}, " +
+                    "${inWindow.size} within ${REVIEW_WINDOW_SECONDS / 86_400} days, " +
+                    "${fresh.size} not in the journal; ${dropped.describe()}",
+            )
             if (duplicates > 0) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, duplicates))
             } else if (fresh.isEmpty()) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_no_new_doses))
             }
             if (fresh.isEmpty()) {
-                // A scan with nothing to offer still says how far the journal reaches. Without
-                // recording that, the next tap would walk the pen's whole log again.
-                doses.maxOfOrNull(PenDose::relativeSeconds)?.let { advanceCursor(serial, it) }
+                // A scan with nothing to offer still says how far the journal reaches, so the
+                // next tap does not walk the pen's whole log again — but only as far as it was
+                // seen to reach. A dose this scan never found in the journal stays ahead of the
+                // cursor, whatever kept it out, so the next scan looks at it again.
+                PenImportCursor.provenUpTo(inWindow) { it.relativeSeconds in present }
+                    ?.let { advanceCursor(serial, it) }
                 return@launch
             }
             val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
@@ -232,6 +264,11 @@ object InsulinPenManager {
                 importedDoseCount = it.importedDoseCount + saved,
             )
         }
+        Log.i(
+            LOG_ID,
+            "Pen $serial: ${doses.size} dose(s) confirmed, $saved written, " +
+                "cursor rel=${pen(serial)?.lastImportedDoseRelativeSeconds}",
+        )
         if (saved > 0) {
             UiRefreshBus.requestDataRefresh()
             if (Natives.getpostTreatments()) Natives.wakeuploader()
