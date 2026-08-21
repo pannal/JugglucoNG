@@ -256,7 +256,11 @@ object JournalTreatmentUploader {
         var uploadOk = true
         var acceptedDocument = false
         var deleteFailureCode: Int? = null
+        var deleteFailureMessage = ""
         var uploadFailureCode: Int? = null
+        var uploadFailureMessage = ""
+        // A cycle that only waited out a hold attempted nothing, so it has nothing to report.
+        var uploadHeld = false
 
         // Deletes and creates are independent, so a refused delete must not cost us the
         // pending entries: it used to break out of the whole run and, since the tombstone
@@ -282,6 +286,7 @@ object JournalTreatmentUploader {
                         )
                         dao.recordFailedNightscoutDelete(tomb.entryId, attempts, System.currentTimeMillis())
                         deleteFailureCode = code
+                        deleteFailureMessage = serverMessage(NightPost.getLastPrimaryResponseBody())
                     }
                     TombstoneAction.GIVE_UP -> {
                         Log.e(
@@ -291,6 +296,7 @@ object JournalTreatmentUploader {
                         )
                         dao.clearPendingNightscoutDelete(tomb.entryId)
                         deleteFailureCode = code
+                        deleteFailureMessage = serverMessage(NightPost.getLastPrimaryResponseBody())
                     }
                 }
             }
@@ -310,6 +316,7 @@ object JournalTreatmentUploader {
 
                 if (sendBackoff.shouldHold(entry.id, System.currentTimeMillis())) {
                     // Same entry, same refusal a moment ago: reported then, not again now.
+                    uploadHeld = true
                     uploadOk = false
                     break
                 }
@@ -347,6 +354,7 @@ object JournalTreatmentUploader {
                 if (!isUploadOk(result.code, useV3)) {
                     Log.e(LOG_ID, "upload failed entry id=${entry.id} code=${failureText(result.code, result.message)}")
                     uploadFailureCode = result.code
+                    uploadFailureMessage = result.message
                     sendBackoff.recordFailure(entry.id, now)
                     uploadOk = false
                     break
@@ -373,8 +381,8 @@ object JournalTreatmentUploader {
             }
         }
 
-        if (sendEnabled) {
-            recordSendStatus(uploadFailureCode, deleteFailureCode, acceptedDocument)
+        if (sendEnabled && !uploadHeld) {
+            recordSendStatus(uploadFailureCode, uploadFailureMessage, deleteFailureCode, deleteFailureMessage, acceptedDocument)
         }
 
         val receiveOk = if (receiveEnabled) {
@@ -394,15 +402,17 @@ object JournalTreatmentUploader {
      */
     private fun recordSendStatus(
         uploadFailureCode: Int?,
+        uploadFailureMessage: String,
         deleteFailureCode: Int?,
+        deleteFailureMessage: String,
         acceptedDocument: Boolean
     ) {
         val now = System.currentTimeMillis()
         when {
             uploadFailureCode != null ->
-                JournalSyncStatus.recordFailure(now, uploadFailureCode, JournalSyncFailure.UPLOAD)
+                JournalSyncStatus.recordFailure(now, uploadFailureCode, JournalSyncFailure.UPLOAD, uploadFailureMessage)
             deleteFailureCode != null ->
-                JournalSyncStatus.recordFailure(now, deleteFailureCode, JournalSyncFailure.DELETE)
+                JournalSyncStatus.recordFailure(now, deleteFailureCode, JournalSyncFailure.DELETE, deleteFailureMessage)
             else -> JournalSyncStatus.recordSuccess(now, acceptedDocument)
         }
     }

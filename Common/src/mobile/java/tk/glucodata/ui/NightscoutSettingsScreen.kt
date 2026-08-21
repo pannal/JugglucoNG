@@ -107,10 +107,14 @@ private sealed class TokenState {
 
 private val SHA1_SECRET_REGEX = Regex("^[0-9a-fA-F]{40}$")
 
-/** "HTTP 403" reads the same in every locale; a request that never got an answer does not. */
-private fun failureDetail(context: android.content.Context, code: Int): String =
+/**
+ * "HTTP 403" reads the same in every locale; a request that never got an answer does not.
+ * The server's own sentence rides along when there is one: "HTTP 403: Missing permission
+ * api:treatments:update" says which role to fix, "HTTP 403" alone does not.
+ */
+private fun failureDetail(context: android.content.Context, code: Int, message: String = ""): String =
     if (code > 0) {
-        "HTTP $code"
+        if (message.isBlank()) "HTTP $code" else "HTTP $code: $message"
     } else {
         context.getString(R.string.nightscout_status_treatments_no_response)
     }
@@ -348,12 +352,12 @@ fun NightscoutSettingsScreen(navController: NavController) {
         treatmentSync.failure == JournalSyncFailure.UPLOAD -> context.getString(
             R.string.nightscout_status_treatments_upload_failing,
             formatStatusMillis(treatmentSync.failingSince),
-            failureDetail(context, treatmentSync.failureCode)
+            failureDetail(context, treatmentSync.failureCode, treatmentSync.failureMessage)
         )
         treatmentSync.failure == JournalSyncFailure.DELETE -> context.getString(
             R.string.nightscout_status_treatments_delete_failing,
             formatStatusMillis(treatmentSync.failingSince),
-            failureDetail(context, treatmentSync.failureCode)
+            failureDetail(context, treatmentSync.failureCode, treatmentSync.failureMessage)
         )
         treatmentSync.lastSuccessAt > 0L -> context.getString(
             R.string.nightscout_status_treatments_ok,
