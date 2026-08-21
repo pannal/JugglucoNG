@@ -161,6 +161,8 @@ private fun HistoryRoute(
     val journalFoods by dashboardViewModel.journalFoods.collectAsStateWithLifecycle()
     val journalQuickAddAlwaysNow by dashboardViewModel.journalQuickAddAlwaysNow.collectAsStateWithLifecycle()
     val appChartRangeColorsEnabled by dashboardViewModel.glucoseAppChartRangeColorsEnabled.collectAsStateWithLifecycle()
+    val rowsShowDelta by dashboardViewModel.dashboardRowsShowDelta.collectAsStateWithLifecycle()
+    val deltaIntervalMinutes by dashboardViewModel.deltaIntervalMinutes.collectAsStateWithLifecycle()
     val predictionCarbRatioGramsPerUnit by dashboardViewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
     val predictionInsulinSensitivityMgDlPerUnit by dashboardViewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
     val predictionModelProfile by dashboardViewModel.predictionModelProfile.collectAsStateWithLifecycle()
@@ -197,6 +199,8 @@ private fun HistoryRoute(
         journalInsulinPresets = journalInsulinPresets,
         journalFoods = journalFoods,
         quickAddAlwaysNow = journalQuickAddAlwaysNow,
+        showRowDelta = rowsShowDelta,
+        deltaIntervalMinutes = deltaIntervalMinutes,
         onBack = onBack,
         onPointClick = { point ->
             onTriggerCalibration(
