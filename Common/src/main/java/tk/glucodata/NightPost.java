@@ -192,6 +192,18 @@ final  static String nothing=Applic.getContext().getString(R.string.triednothing
 final static String success=Applic.getContext().getString(R.string.success).intern();
 static private String uploadstatus=nothing;
 /**
+ * Body of the last answer the primary (treatment) path got from Nightscout, for the
+ * journal uploader. A refusal there carries the reason in the body ("Missing permission
+ * api:treatments:update"), and the bare status code the call returns is not enough to
+ * act on it. Empty when the last request never got an answer.
+ */
+private static volatile String lastPrimaryResponseBody="";
+
+@Keep
+static public String getLastPrimaryResponseBody() {
+    return lastPrimaryResponseBody;
+    }
+/**
  * Called from native (uploadtreatment.cpp) via JNI, so the signature stays boolean.
  * New callers should prefer {@link #deleteUrlCode}, which keeps the status apart
  * from "already gone" and from a network failure worth retrying.
@@ -239,6 +251,7 @@ static public int deleteUrlCode(String urlstring,String secret) {
 
         final int code=urlConnection.getResponseCode();
         String res=getstring(urlConnection);
+        lastPrimaryResponseBody=res;
         if(code==HTTP_OK || code==HttpURLConnection.HTTP_NO_CONTENT) {
             {if(doLog) {Log.i(LOG_ID,"deleteUrl success "+res);};};
             uploadstatus=success;
@@ -251,6 +264,7 @@ static public int deleteUrlCode(String urlstring,String secret) {
         return code;
         }
     catch(Throwable th) {
+        lastPrimaryResponseBody="";
         String error ="deleteUrl error:\n"+stackline(th);
         uploadstatus=error;
         Log.e(LOG_ID,error);
@@ -286,6 +300,50 @@ static JSONObject  readJSONObject(HttpURLConnection urlConnection)  throws IOExc
      return new JSONObject(ant);
     }
 
+/**
+ * One token exchange with Nightscout: the grant when it gave one, otherwise the reason it
+ * did not, in its own words where it had any.
+ */
+public record TokenExchange(NightscoutTokenGrant grant,int code,String error) {
+    public boolean ok() { return grant!=null; }
+    }
+
+private static TokenExchange exchangeToken(int connectTimeoutMs,int readTimeoutMs) {
+    var Nighturl=Natives.getnightuploadurl();
+    var secret=Natives.getnightuploadsecret();
+    var authstr=Nighturl+ "/api/v2/authorization/request/"+secret;
+    HttpURLConnection urlConnection=null;
+    try {
+        URL url = new URL(authstr);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setConnectTimeout(connectTimeoutMs);
+        urlConnection.setReadTimeout(readTimeoutMs);
+        urlConnection.setRequestMethod("GET");
+        final int code=urlConnection.getResponseCode();
+        final String body=getstring(urlConnection);
+        if(doLog) {
+            Log.format("%s: token exchange code=%d len=%d %s",LOG_ID,code,body.length(),body);
+            }
+        final NightscoutTokenGrant grant=code==HTTP_OK?NightscoutTokenGrant.parse(body):null;
+        if(grant!=null)
+            return new TokenExchange(grant,code,"");
+        final String reason=NightscoutTokenGrant.refusalMessage(body);
+        return new TokenExchange(null,code,"HTTP "+code+(reason.isEmpty()?"":": "+reason));
+        }
+    catch(Throwable th) {
+        return new TokenExchange(null,-1,th==null?"Network error":String.valueOf(th.getMessage()));
+        }
+    finally {
+        if(urlConnection!=null)
+            urlConnection.disconnect();
+        }
+    }
+
+private static void cacheGrant(NightscoutTokenGrant grant) {
+    expire=grant.getExpiresAtMillis();
+    token="Bearer "+grant.getToken();
+    }
+
 private static synchronized String gettoken(
         long now,
         int connectTimeoutMs,
@@ -294,46 +352,37 @@ private static synchronized String gettoken(
 ) {
     if(now<expire)
         return token;
-    var Nighturl=Natives.getnightuploadurl();
-    var secret=Natives.getnightuploadsecret();
-    var authstr=Nighturl+ "/api/v2/authorization/request/"+secret;
-    HttpURLConnection urlConnection=null;
-    try {
+    final TokenExchange exchange=exchangeToken(connectTimeoutMs,readTimeoutMs);
+    if(exchange.ok()) {
+        cacheGrant(exchange.grant());
+        return token;
+        }
+    final String error="gettoken failed "+exchange.error();
+    if(updateVisibleStatus)
+        uploadstatus=error;
+    Log.e(LOG_ID,error);
+    return "";
+    }
 
-        URL url = new URL(authstr);
-        urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setConnectTimeout(connectTimeoutMs);
-        urlConnection.setReadTimeout(readTimeoutMs);
-        urlConnection.setRequestMethod("GET");
-        final int code=urlConnection.getResponseCode();
-        if(code==HTTP_OK) {
-            JSONObject object =  readJSONObject(urlConnection) ;
-            final String tokenin=object.getString( "token");
-            final var expirein=object.getLong( "exp");
-            expire=expirein*1000L;
-            token="Bearer "+tokenin;
-            return token;
-            }
-        else {
-            final String error="gettoken failed code="+code;
-            if(updateVisibleStatus)
-                uploadstatus=error;
-            Log.e(LOG_ID,error);
-            return "";
-            }
-
-        }
-    catch(Throwable th) {
-        final String error="gettoken:\n"+(th==null?"Network error ":th.getMessage());
-        if(updateVisibleStatus)
-            uploadstatus=error;
-        Log.e(LOG_ID,error);
-        return "";
-        }
-    finally {
-        if(urlConnection!=null)
-            urlConnection.disconnect();
-        }
+/**
+ * Drops the cached token and exchanges the access token for a fresh one right away.
+ *
+ * <p>Nightscout puts the permissions inside the JWT and this class keeps that JWT until it
+ * expires -- hours, typically -- so a role corrected on the server looks like it did nothing
+ * until then. This is the settings screen's way out: it forces the exchange and hands back
+ * what the new token grants, so whether the change landed can be seen rather than inferred
+ * from the next 403. The uploader's status line is left alone; the screen reports this itself.
+ */
+@Keep
+static public synchronized TokenExchange refreshToken() {
+    expire=0L;
+    token="";
+    final TokenExchange exchange=exchangeToken(UPLOAD_CONNECT_TIMEOUT_MS,UPLOAD_READ_TIMEOUT_MS);
+    if(exchange.ok())
+        cacheGrant(exchange.grant());
+    else
+        Log.e(LOG_ID,"token refresh failed "+exchange.error());
+    return exchange;
     }
 
 /**
@@ -665,6 +714,8 @@ private static int uploadWithTimeouts(
         }
         final int code=urlConnection.getResponseCode();
         String res=getstring(urlConnection);
+        if(updateVisibleStatus)
+            lastPrimaryResponseBody=res;
         final String resstr=requestKind+" upload ResponseCode="+code+"\n"+res;
         if(code!=200&&code!=201) {
             if(updateVisibleStatus)
@@ -680,8 +731,10 @@ private static int uploadWithTimeouts(
          }
     catch(Throwable th) {
         final String posterror=requestKind+" upload failure:\n"+stackline(th);
-        if(updateVisibleStatus)
+        if(updateVisibleStatus) {
+            lastPrimaryResponseBody="";
             uploadstatus=posterror;
+            }
         Log.e(LOG_ID,posterror);
         return -1;
         }

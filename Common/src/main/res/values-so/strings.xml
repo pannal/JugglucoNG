@@ -1514,7 +1514,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_status_treatments_no_response">jawaab ma jirto</string>
     <string name="nightscout_status_iob_no_token">Dirista IOB: waa la booday - weli token Nightscout ma jiro</string>
     <string name="nightscout_status_iob_rejected">Dirista IOB: waa la diiday (%1$s)</string>
-    <string name="nightscout_send_amounts_desc">Soo rar Insulin/Carbs (Daawaynta)</string>
+    <string name="nightscout_send_amounts_desc">Soo rar Insulin/Carbs (Daawaynta). Token-ka gelitaanka wuxuu u baahan yahay api:treatments:create, api:treatments:update iyo api:treatments:delete.</string>
     <string name="nightscout_send_long_insulin">Dir insuliinta muddada dheer</string>
     <string name="nightscout_send_long_insulin_desc">Ku dar insuliinta basal iyo tan aadka u dheer gelinta Nightscout</string>
     <string name="nightscout_receive_amounts">Hesho qaddaro</string>
@@ -1532,6 +1532,10 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_test_ok">Ku xidhan - HTTP %1$d</string>
     <string name="nightscout_test_error">Fashilmay - %1$s</string>
     <string name="nightscout_test_testing">Tijaabinta...</string>
+    <string name="nightscout_refresh_token">Cusboonaysii token-ka</string>
+    <string name="nightscout_token_refreshing">Token-ka waa la cusboonaysiinayaa...</string>
+    <string name="nightscout_token_ok">Token-ku wuxuu shaqaynayaa ilaa %1$s - oggolaanshaha: %2$s</string>
+    <string name="nightscout_token_error">Cusboonaysiinta token-ka way fashilantay - %1$s</string>
     <string name="no_active_sensor_selected">Dareem firfircoon lama dooran</string>
     <string name="no_calibrations_to_export">Ma jiro wax qiyaas ah oo la dhoofiyo</string>
     <string name="not_implemented_natively">Aan si asal ah loo hirgelin</string>
@@ -2514,7 +2518,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sensor_handover_multiple_text">Dareemuhu wuu dhacay, laakiin dhowr dareeme oo beddel ah ayaa shaqaynaya. Wareejinta otomaatiga ah waa la dhaafay; fadlan gacanta ku beddel.</string>
     <string name="sensor_handover_successor_ready">Dareemaha beddelka ah wuu diyaar yahay; wareejinta otomaatiga ah ayaa la wareegaysa marka uu dhaco</string>
     <string name="nightscout_upload_iob">U dir IOB Nightscout</string>
-    <string name="nightscout_upload_iob_desc">Nightscout wuxuu markaas muujinayaa qiimahan halkii uu ka isticmaali lahaa xisaabtiisa ku salaysan borofaylka. eIOB iyo COB sidoo kale waxaa lagu diraa meel gaar ah.</string>
+    <string name="nightscout_upload_iob_desc">Nightscout wuxuu markaas muujinayaa qiimahan halkii uu ka isticmaali lahaa xisaabtiisa ku salaysan borofaylka. eIOB iyo COB sidoo kale waxaa lagu diraa meel gaar ah. Token-ka gelitaanka wuxuu u baahan yahay api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Qiimayaasha qalabka xogta diraya (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Akoonka Ottai weli waxaa ku xiran dareeme kale. Ka fur app-ka Ottai ama halkan ka saar dareemahaas si xiriirka loo sii daayo, dabadeed mar kale isku day.</string>
     <string name="ottai_cloud_offline_routes">Soo deji faylka aqoonsiyada si aad u sii waddo adigoon daruurta isticmaalin — iskaanka QR wuxuu keliya buuxiyaa koodhka dareemaha, NFC-na keliya ayuu kiciyaa.</string>
