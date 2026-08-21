@@ -20,6 +20,7 @@ object AlertRepository {
     private const val DEFAULT_THRESHOLD_MIGRATION_KEY = "alert_threshold_defaults_v3"
     private const val KEY_NOTIFICATION_DISMISS_ACTION = "notification_dismiss_action"
     private const val KEY_RETURN_TO_PREVIOUS_APP_AFTER_ALARM = "alarm_return_to_previous_app"
+    private const val KEY_SAME_DIRECTION_SUPPRESSION_MINUTES = "same_direction_suppression_min"
     @Volatile
     private var hiddenLegacyAlertCleanupDone = false
     @Volatile
@@ -214,6 +215,27 @@ object AlertRepository {
         prefs.edit {
             putBoolean(KEY_RETURN_TO_PREVIOUS_APP_AFTER_ALARM, enabled)
         }
+    }
+
+    /**
+     * Minutes during which, after one trend alert fires, another alert of the
+     * same direction stays quiet (see SameDirectionAlertSuppression). 0 turns
+     * the quiet period off, which is the behaviour before it existed.
+     */
+    fun loadSameDirectionSuppressionMinutes(): Int {
+        return sanitizeSameDirectionSuppressionMinutes(
+            prefs.getInt(KEY_SAME_DIRECTION_SUPPRESSION_MINUTES, AlertDefaults.SAME_DIRECTION_SUPPRESSION_MINUTES)
+        )
+    }
+
+    fun saveSameDirectionSuppressionMinutes(minutes: Int) {
+        prefs.edit {
+            putInt(KEY_SAME_DIRECTION_SUPPRESSION_MINUTES, sanitizeSameDirectionSuppressionMinutes(minutes))
+        }
+    }
+
+    private fun sanitizeSameDirectionSuppressionMinutes(minutes: Int): Int {
+        return minutes.coerceIn(0, AlertDefaults.SAME_DIRECTION_SUPPRESSION_MAX_MINUTES)
     }
     
     /**

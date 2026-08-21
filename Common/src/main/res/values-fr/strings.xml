@@ -577,6 +577,8 @@
     <string name="notification_dismiss_action_snooze">Répéter</string>
     <string name="alarm_return_to_previous_app_title">Revenir à l\'application précédente après une alarme</string>
     <string name="alarm_return_to_previous_app_summary">Après une alarme plein écran, revenir à l\'application que vous utilisiez au lieu d\'ouvrir JugglucoNG</string>
+    <string name="same_direction_suppression_title">Période de silence après une alerte de même direction</string>
+    <string name="same_direction_suppression_summary">Après une alerte de baisse ou de hausse, les autres alertes de même direction restent muettes pendant cette durée. Bas, très bas, haut et très haut se déclenchent toujours.</string>
     <string name="realert_if_not_dismissed">Realerter si non ignoree</string>
     <string name="retry_every">Reessayer toutes les</string>
     <string name="retry_if_no_reaction">Reessayer si aucune reaction</string>

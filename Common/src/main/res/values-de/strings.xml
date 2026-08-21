@@ -721,6 +721,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="notification_dismiss_action_snooze">Schlummern</string>
     <string name="alarm_return_to_previous_app_title">Nach Alarm zur vorherigen App zurückkehren</string>
     <string name="alarm_return_to_previous_app_summary">Nach einem Vollbild-Alarm zur zuvor geöffneten App zurückkehren, statt JugglucoNG zu öffnen</string>
+    <string name="same_direction_suppression_title">Ruhezeit nach Alarm gleicher Richtung</string>
+    <string name="same_direction_suppression_summary">Nach einem fallenden oder steigenden Alarm bleiben weitere Alarme derselben Richtung so lange stumm. Niedrig, sehr niedrig, hoch und sehr hoch melden sich immer.</string>
     <string name="realert_if_not_dismissed">Erneut alarmieren, wenn nicht verworfen</string>
     <string name="retry_every">Wiederholen alle</string>
     <string name="retry_if_no_reaction">Wiederholen bei keiner Reaktion</string>
