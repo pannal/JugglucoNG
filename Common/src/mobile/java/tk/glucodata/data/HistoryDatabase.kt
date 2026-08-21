@@ -11,6 +11,10 @@ import tk.glucodata.data.journal.JournalEntryEntity
 import tk.glucodata.data.journal.JournalFoodEntity
 import tk.glucodata.data.journal.JournalInsulinPresetEntity
 import tk.glucodata.data.journal.JournalPendingDeleteEntity
+import tk.glucodata.data.meal.MealDao
+import tk.glucodata.data.meal.MealEntity
+import tk.glucodata.data.meal.MealItemEntity
+import tk.glucodata.data.meal.MealProductEntity
 
 /**
  * Room database for independent glucose history storage.
@@ -30,6 +34,8 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
  *   v11 — journal food library and macro metadata for carb entries
  *   v12 — per-preset dose-calculation eligibility
  *   v13 — retry accounting on journal delete tombstones
+ *   v14 — LibreView delivery tracking on journal entries
+ *   v15 — meals (composition + product cache) and the mealId correlation on journal entries
  */
 @Database(
     entities = [
@@ -38,15 +44,19 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalEntryEntity::class,
         JournalFoodEntity::class,
         JournalInsulinPresetEntity::class,
-        JournalPendingDeleteEntity::class
+        JournalPendingDeleteEntity::class,
+        MealEntity::class,
+        MealItemEntity::class,
+        MealProductEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
     
     abstract fun historyDao(): HistoryDao
     abstract fun journalDao(): JournalDao
+    abstract fun mealDao(): MealDao
     
     companion object {
         @Volatile
@@ -262,6 +272,106 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v14 -> v15: meals. A meal is composition (what is on the table) plus a product cache that
+         * doubles as the learned product preset; what was eaten stays a journal entry, now with a
+         * nullable mealId pointing back. The CREATE statements mirror the Room entities exactly —
+         * Room validates them on open.
+         */
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN mealId INTEGER")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_mealId ON journal_entries (mealId)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS meals (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        label TEXT NOT NULL,
+                        servings REAL,
+                        cookedWeightGrams REAL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        archivedAt INTEGER
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_meals_archivedAt ON meals (archivedAt)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_meals_updatedAt ON meals (updatedAt)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS meal_items (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        mealId INTEGER NOT NULL,
+                        position INTEGER NOT NULL,
+                        barcode TEXT,
+                        source TEXT NOT NULL,
+                        displayName TEXT NOT NULL,
+                        brand TEXT,
+                        basis TEXT NOT NULL,
+                        carbsGrams REAL NOT NULL,
+                        proteinGrams REAL,
+                        fatGrams REAL,
+                        fiberGrams REAL,
+                        sugarsGrams REAL,
+                        polyolsGrams REAL,
+                        kcal REAL,
+                        netQuantity REAL,
+                        netUnit TEXT,
+                        servingText TEXT,
+                        servingQuantity REAL,
+                        servingUnit TEXT,
+                        servingPieces REAL,
+                        servingPieceLabel TEXT,
+                        servingsPerBatch REAL,
+                        densityGramsPerMl REAL,
+                        pieceGrams REAL,
+                        quantityText TEXT NOT NULL,
+                        factor REAL,
+                        amountGrams REAL,
+                        amountMilliliters REAL,
+                        plausibilityFlags TEXT,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_items_mealId ON meal_items (mealId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_items_barcode ON meal_items (barcode)")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS meal_products (
+                        barcode TEXT NOT NULL,
+                        source TEXT NOT NULL,
+                        displayName TEXT NOT NULL,
+                        brand TEXT,
+                        basis TEXT NOT NULL,
+                        carbsGrams REAL NOT NULL,
+                        proteinGrams REAL,
+                        fatGrams REAL,
+                        fiberGrams REAL,
+                        sugarsGrams REAL,
+                        polyolsGrams REAL,
+                        kcal REAL,
+                        netQuantity REAL,
+                        netUnit TEXT,
+                        servingText TEXT,
+                        servingQuantity REAL,
+                        servingUnit TEXT,
+                        servingPieces REAL,
+                        servingPieceLabel TEXT,
+                        densityGramsPerMl REAL,
+                        pieceGrams REAL,
+                        plausibilityFlags TEXT,
+                        fetchedAt INTEGER NOT NULL,
+                        lastUsedAt INTEGER NOT NULL,
+                        PRIMARY KEY(barcode)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_products_lastUsedAt ON meal_products (lastUsedAt)")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -281,7 +391,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_10_11,
                     MIGRATION_11_12,
                     MIGRATION_12_13,
-                    MIGRATION_13_14
+                    MIGRATION_13_14,
+                    MIGRATION_14_15
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }

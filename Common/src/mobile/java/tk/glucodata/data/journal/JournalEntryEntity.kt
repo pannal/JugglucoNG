@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey
         Index(value = ["entryType"]),
         Index(value = ["insulinPresetId"]),
         Index(value = ["foodId"]),
+        Index(value = ["mealId"]),
         Index(value = ["sourceRecordId"], unique = true)
     ]
 )
@@ -41,5 +42,10 @@ data class JournalEntryEntity(
      * every upload pass. Tracked separately from [nsUploadedAt] because the two
      * destinations succeed and fail independently.
      */
-    val lvUploadedAt: Long? = null
+    val lvUploadedAt: Long? = null,
+    /**
+     * Correlates this fact (eaten, injected) with the meal it belongs to. The meal holds the
+     * composition; the journal stays the log. Nullable, and never set by the meal itself.
+     */
+    val mealId: Long? = null
 )
