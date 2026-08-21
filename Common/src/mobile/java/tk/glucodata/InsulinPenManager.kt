@@ -1,6 +1,8 @@
 package tk.glucodata
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +19,11 @@ import tk.glucodata.NovoPen.PenDoseParser
 import tk.glucodata.NovoPen.PenDropTally
 import tk.glucodata.NovoPen.PenDuplicateReconciler
 import tk.glucodata.NovoPen.PenImportCursor
+import tk.glucodata.NovoPen.PenImportNotifier
 import tk.glucodata.NovoPen.PenJournalEntry
 import tk.glucodata.NovoPen.PenReconcilePlan
 import tk.glucodata.NovoPen.PenSourceIds
+import tk.glucodata.NovoPen.PenUnattendedImportPolicy
 import tk.glucodata.NovoPen.opennov.OpContext
 import tk.glucodata.data.journal.JournalEntryInput
 import tk.glucodata.data.journal.JournalEntrySource
@@ -56,6 +60,7 @@ object InsulinPenManager {
     private const val LOG_ID = "InsulinPen"
     private const val PREFS_NAME = "tk.glucodata_preferences"
     private const val ENABLED_KEY = "insulin_pen_enabled"
+    private const val BACKGROUND_IMPORT_KEY = "insulin_pen_background_import"
     private const val PENS_KEY = "insulin_pen_registry"
     private const val SNAPSHOT_KEY_PREFIX = "insulin_pen_last_scan_"
 
@@ -90,6 +95,48 @@ object InsulinPenManager {
     fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled
         prefs.edit().putBoolean(ENABLED_KEY, enabled).apply()
+        syncBackgroundReceiver(Applic.app)
+    }
+
+    private val _backgroundImportEnabled = MutableStateFlow(prefs.getBoolean(BACKGROUND_IMPORT_KEY, false))
+    val backgroundImportEnabled: StateFlow<Boolean> = _backgroundImportEnabled.asStateFlow()
+
+    /**
+     * Off until asked for: with the app in the background a pen tap imports without a
+     * review sheet, so it is the reader's choice to take that. See
+     * [tk.glucodata.ui.PenTagReceiverActivity].
+     */
+    @JvmStatic
+    fun isBackgroundImportEnabled(): Boolean = _backgroundImportEnabled.value
+
+    fun setBackgroundImportEnabled(context: Context, enabled: Boolean) {
+        _backgroundImportEnabled.value = enabled
+        prefs.edit().putBoolean(BACKGROUND_IMPORT_KEY, enabled).apply()
+        syncBackgroundReceiver(context)
+    }
+
+    /**
+     * The receiver activity is a manifest component, so the system only hands it a tag
+     * while it is enabled: enabled exactly when pens are read and the background import
+     * is on. Called on each change and once per start, so an upgrade or a restored
+     * backup ends up matching the settings.
+     */
+    fun syncBackgroundReceiver(context: Context) {
+        val wanted = isEnabled() && isBackgroundImportEnabled()
+        runCatching {
+            val pm = context.packageManager
+            val receiver = ComponentName(context, tk.glucodata.ui.PenTagReceiverActivity::class.java)
+            val state = if (wanted) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            }
+            if (pm.getComponentEnabledSetting(receiver) != state) {
+                pm.setComponentEnabledSetting(receiver, state, PackageManager.DONT_KILL_APP)
+            }
+        }.onFailure { error ->
+            Log.e(LOG_ID, "Pen receiver component: ${Log.stackline(error)}")
+        }
     }
 
     fun pen(serial: String): InsulinPen? = _pens.value.firstOrNull { it.serial == serial }
@@ -156,37 +203,10 @@ object InsulinPenManager {
         update(serial) { it.copy(lastScanAt = System.currentTimeMillis(), fullReadArmed = false) }
         scope.launch {
             val now = nowSeconds()
-            val dropped = PenDropTally()
-            val parsed = chunks.map { PenDoseParser.parse(it.referencetime, it.rawdoses, now, dropped) }
-            val doses = PenDoseParser.merge(parsed)
-            val cutoff = now - REVIEW_WINDOW_SECONDS
-            val repository = JournalRepository()
-            rememberScan(serial, doses)
-            val duplicates = reconcile(serial, doses, repository)
-            val inWindow = doses.filter { it.timestampSeconds > cutoff }
-            val present = inWindow
-                .filter { repository.hasEntryWithSourceRecordId(sourceRecordId(serial, it)) }
-                .mapTo(HashSet(), PenDose::relativeSeconds)
-            // Not in the journal is not enough to be offered: a dose the reader unticked at
-            // the last import was never written, and would otherwise come back as new on
-            // every tap. The cursor says where that review ended; only what lies past it is
-            // new, unless the reader asked to see the whole log again.
-            val cursor = known?.lastImportedDoseRelativeSeconds ?: 0L
-            val fullRead = known?.fullReadArmed ?: false
-            val fresh = inWindow
-                .filterNot { it.relativeSeconds in present }
-                .filter { PenImportCursor.isAhead(it, cursor, fullRead) }
-            Log.i(
-                LOG_ID,
-                "Pen $serial: ${chunks.size} chunk(s), ${parsed.sumOf { it.size }} parsed, " +
-                    "${doses.size} after merge, newest rel=${doses.maxOfOrNull(PenDose::relativeSeconds)}, " +
-                    "cursor rel=$cursor${if (fullRead) " (full read)" else ""}, " +
-                    "${inWindow.size} within ${REVIEW_WINDOW_SECONDS / 86_400} days, " +
-                    "${inWindow.size - present.size} not in the journal, ${fresh.size} to offer; " +
-                    dropped.describe(),
-            )
-            if (duplicates > 0) {
-                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, duplicates))
+            val scan = freshDoses(serial, chunks, now, known)
+            val fresh = scan.fresh
+            if (scan.duplicates > 0) {
+                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, scan.duplicates))
             } else if (fresh.isEmpty()) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_no_new_doses))
             }
@@ -195,19 +215,109 @@ object InsulinPenManager {
                 // next tap does not walk the pen's whole log again — but only as far as it was
                 // seen to reach. A dose this scan never found in the journal stays ahead of the
                 // cursor, whatever kept it out, so the next scan looks at it again.
-                PenImportCursor.provenUpTo(inWindow) { it.relativeSeconds in present }
-                    ?.let { advanceCursor(serial, it) }
+                scan.provenCursor()?.let { advanceCursor(serial, it) }
                 return@launch
             }
             val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
-            InsulinPenScanBus.offer(
-                PenScanResult(
-                    serial = serial,
-                    doses = fresh.sortedByDescending(PenDose::timestampSeconds),
-                    preselectFromSeconds = preselectFrom,
-                )
-            )
+            InsulinPenScanBus.offer(PenScanResult(serial, fresh, preselectFrom))
         }
+    }
+
+    /**
+     * The same read, taken with the app in the background: nobody will see a sheet, so
+     * what a foreground scan would have offered is written — the pen's insulin, air shots
+     * left out — and a notification says what happened. A pen without an insulin chosen
+     * has nothing to name its doses with, so its doses wait for the sheet instead and the
+     * notification says so. The decision itself is [PenUnattendedImportPolicy].
+     */
+    @JvmStatic
+    fun onScannedUnattended(serial: String, chunks: List<OpContext.Doses>) {
+        val known = pen(serial)
+        update(serial) { it.copy(lastScanAt = System.currentTimeMillis(), fullReadArmed = false) }
+        scope.launch {
+            val context = Applic.app
+            val now = nowSeconds()
+            val scan = freshDoses(serial, chunks, now, known)
+            val presetName = known?.insulinName?.takeIf { it.isNotBlank() }
+            when (val plan = PenUnattendedImportPolicy.plan(scan.fresh, hasPreset = presetName != null)) {
+                PenUnattendedImportPolicy.Plan.NothingNew -> {
+                    // As the foreground scan: record how far the journal was seen to reach.
+                    scan.provenCursor()?.let { advanceCursor(serial, it) }
+                    PenImportNotifier.nothingNew(context, serial)
+                }
+
+                is PenUnattendedImportPolicy.Plan.Import -> {
+                    // importDoses moves the cursor over the doses it is handed, nothing
+                    // beyond — so the air shots left out here never mark a later real
+                    // dose as done. That is the rule the review sheet already relies on.
+                    val saved = importDoses(serial, plan.doses, known?.insulinPresetId ?: 0L, presetName!!)
+                    PenImportNotifier.imported(context, serial, saved)
+                }
+
+                is PenUnattendedImportPolicy.Plan.Review -> {
+                    val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
+                    InsulinPenScanBus.offer(PenScanResult(serial, plan.doses, preselectFrom))
+                    PenImportNotifier.awaitingReview(context, serial, plan.doses.size)
+                }
+            }
+        }
+    }
+
+    /** One scan, sorted out: what to offer, and what it saw on the way there. */
+    private class FreshScan(
+        /** Newest first: in the window, not in the journal, past the cursor. */
+        val fresh: List<PenDose>,
+        val inWindow: List<PenDose>,
+        val present: Set<Long>,
+        val duplicates: Int,
+    ) {
+        /** How far the journal was seen to reach, for a scan that offers nothing. */
+        fun provenCursor(): Long? = PenImportCursor.provenUpTo(inWindow) { it.relativeSeconds in present }
+    }
+
+    /**
+     * What a scan has to offer, newest first: the chunks parsed and merged, the read
+     * remembered and reconciled against the journal's older copies, cut to the review
+     * window, minus what the journal already holds, and past the cursor. One function for
+     * both the review sheet and the unattended import, so the two cannot come to differ.
+     */
+    private suspend fun freshDoses(
+        serial: String,
+        chunks: List<OpContext.Doses>,
+        now: Long,
+        known: InsulinPen?,
+    ): FreshScan {
+        val dropped = PenDropTally()
+        val parsed = chunks.map { PenDoseParser.parse(it.referencetime, it.rawdoses, now, dropped) }
+        val doses = PenDoseParser.merge(parsed)
+        val cutoff = now - REVIEW_WINDOW_SECONDS
+        val repository = JournalRepository()
+        rememberScan(serial, doses)
+        val duplicates = reconcile(serial, doses, repository)
+        val inWindow = doses.filter { it.timestampSeconds > cutoff }
+        val present = inWindow
+            .filter { repository.hasEntryWithSourceRecordId(sourceRecordId(serial, it)) }
+            .mapTo(HashSet(), PenDose::relativeSeconds)
+        // Not in the journal is not enough to be offered: a dose the reader unticked at
+        // the last import was never written, and would otherwise come back as new on
+        // every tap. The cursor says where that review ended; only what lies past it is
+        // new, unless the reader asked to see the whole log again.
+        val cursor = known?.lastImportedDoseRelativeSeconds ?: 0L
+        val fullRead = known?.fullReadArmed ?: false
+        val fresh = inWindow
+            .filterNot { it.relativeSeconds in present }
+            .filter { PenImportCursor.isAhead(it, cursor, fullRead) }
+            .sortedByDescending(PenDose::timestampSeconds)
+        Log.i(
+            LOG_ID,
+            "Pen $serial: ${chunks.size} chunk(s), ${parsed.sumOf { it.size }} parsed, " +
+                "${doses.size} after merge, newest rel=${doses.maxOfOrNull(PenDose::relativeSeconds)}, " +
+                "cursor rel=$cursor${if (fullRead) " (full read)" else ""}, " +
+                "${inWindow.size} within ${REVIEW_WINDOW_SECONDS / 86_400} days, " +
+                "${inWindow.size - present.size} not in the journal, ${fresh.size} to offer; " +
+                dropped.describe(),
+        )
+        return FreshScan(fresh, inWindow, present, duplicates)
     }
 
     /**
