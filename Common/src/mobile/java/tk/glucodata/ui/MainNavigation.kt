@@ -114,6 +114,7 @@ private fun DashboardRoute(
 ) {
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
     val newMealAction = tk.glucodata.ui.meal.rememberNewMealAction(navController)
+    val currentMeal = tk.glucodata.ui.meal.rememberCurrentMeal()
 
     DashboardScreen(
         viewModel = dashboardViewModel,
@@ -124,6 +125,8 @@ private fun DashboardRoute(
         onNavigateToReadiness = { navController.navigate("settings/cgm-readiness") },
         onNavigateToAppUpdates = { navController.navigate("settings/app-updates") },
         onNewMeal = newMealAction,
+        currentMealLabel = currentMeal?.label,
+        onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
         onTriggerCalibration = onTriggerCalibration
     )
 }
@@ -326,6 +329,7 @@ private fun JournalRoute(
     var journalEditorRequest by remember { mutableStateOf<JournalEditorRequest?>(null) }
     var lastJournalType by rememberSaveable { mutableStateOf(JournalEntryType.INSULIN) }
     val newMealAction = tk.glucodata.ui.meal.rememberNewMealAction(navController)
+    val currentMeal = tk.glucodata.ui.meal.rememberCurrentMeal()
 
     fun openJournalEditor(
         timestamp: Long,
@@ -389,6 +393,8 @@ private fun JournalRoute(
         onOpenInsulinLibrary = { navController.navigate("settings/journal/insulin") },
         onOpenMeals = { navController.navigate("journal/meals") },
         onNewMeal = newMealAction,
+        currentMealLabel = currentMeal?.label,
+        onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
         modifier = modifier,
         showTitle = showTitle,
         useStatusBarsPadding = useStatusBarsPadding,
