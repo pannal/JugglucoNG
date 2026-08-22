@@ -24,8 +24,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,6 +108,7 @@ fun JournalScreen(
     onOpenInsulinLibrary: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenMeals: (() -> Unit)? = null,
+    onNewMeal: (() -> Unit)? = null,
     showTitle: Boolean = true,
     useStatusBarsPadding: Boolean = true,
     bottomContentPadding: Dp = 104.dp,
@@ -372,6 +373,7 @@ fun JournalScreen(
         }
 
         JournalExpandableFab(
+            onMealSelected = onNewMeal,
             expanded = fabExpanded,
             onExpandedChange = {
                 fabExpanded = it
@@ -437,7 +439,7 @@ private fun JournalHeader(
             onOpenMeals?.let { openMeals ->
                 IconButton(onClick = openMeals, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        imageVector = Icons.Default.LunchDining,
+                        imageVector = Icons.Default.Restaurant,
                         contentDescription = stringResource(R.string.meal_title),
                         tint = journalTypeColor(JournalEntryType.CARBS)
                     )
@@ -445,7 +447,7 @@ private fun JournalHeader(
             }
             IconButton(onClick = onOpenFoodLibrary, modifier = Modifier.size(40.dp)) {
                 Icon(
-                    imageVector = Icons.Default.Restaurant,
+                    imageVector = Icons.Default.LunchDining,
                     contentDescription = stringResource(R.string.journal_food_library),
                     tint = journalTypeColor(JournalEntryType.CARBS)
                 )
@@ -555,7 +557,7 @@ private fun JournalMetricsPanel(
                     R.string.journal_events_today,
                     todaysEntries.count { it.type == JournalEntryType.CARBS }
                 ),
-                icon = Icons.Default.Restaurant,
+                icon = Icons.Default.LunchDining,
                 type = JournalEntryType.CARBS,
                 modifier = Modifier.weight(1f)
             )

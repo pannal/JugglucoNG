@@ -282,6 +282,7 @@ fun DashboardScreen(
     onNavigateToMqAccount: () -> Unit = {},
     onNavigateToReadiness: () -> Unit = {},
     onNavigateToAppUpdates: () -> Unit = {},
+    onNewMeal: (() -> Unit)? = null,
     onTriggerCalibration: (CalibrationSheetState) -> Unit = {}
 ) {
     // Read once here: the LazyColumns below use Arrangement.spacedBy, which reserves its gap
@@ -1946,6 +1947,7 @@ fun DashboardScreen(
 
             if (journalEnabled && journalDashboardQuickAdd) {
                 JournalExpandableFab(
+                    onMealSelected = onNewMeal,
                     expanded = dashboardFabExpanded,
                     onExpandedChange = {
                         dashboardFabExpanded = it
