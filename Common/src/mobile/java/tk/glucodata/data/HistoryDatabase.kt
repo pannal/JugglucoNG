@@ -38,6 +38,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v15 — meals (composition + product cache) and the mealId correlation on journal entries
  *   v16 — contributedAt on the product cache (sent to Open Food Facts)
  *   v17 — saturated fat, salt and an OFF category on the product cache (Nutri-Score inputs)
+ *   v18 — hypo episode classification marks (sensor-pressure vs real, user-togglable)
  */
 @Database(
     entities = [
@@ -49,9 +50,10 @@ import tk.glucodata.data.meal.MealProductEntity
         JournalPendingDeleteEntity::class,
         MealEntity::class,
         MealItemEntity::class,
-        MealProductEntity::class
+        MealProductEntity::class,
+        HypoEpisodeMark::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -59,6 +61,7 @@ abstract class HistoryDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
     abstract fun journalDao(): JournalDao
     abstract fun mealDao(): MealDao
+    abstract fun hypoEpisodeDao(): HypoEpisodeDao
     
     companion object {
         @Volatile
@@ -390,6 +393,24 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v17 -> v18: user-togglable sensor-pressure classification per hypo episode. */
+        private val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS hypo_episode_marks (
+                        episodeKeyMs INTEGER PRIMARY KEY NOT NULL,
+                        endMs INTEGER NOT NULL,
+                        nadirMgdl REAL NOT NULL,
+                        classification TEXT NOT NULL,
+                        source TEXT NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -412,7 +433,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_13_14,
                     MIGRATION_14_15,
                     MIGRATION_15_16,
-                    MIGRATION_16_17
+                    MIGRATION_16_17,
+                    MIGRATION_17_18
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }

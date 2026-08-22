@@ -226,6 +226,9 @@ object AlertRuntimeManager {
 
         transition.cleared.forEach { type ->
             clearRuntimeAlert(type, standardClearReason(type, configs[type], glucoseValue, rate))
+            if (type == AlertType.LOW) {
+                CompressionHoldRuntime.onLowCleared()
+            }
         }
 
         val type = standardGlucoseAlertTypes.firstOrNull { it in activeTypes }
@@ -238,7 +241,22 @@ object AlertRuntimeManager {
 
         logStandardCondition(type, condition, rate)
 
-        if (SnoozeManager.isSnoozed(type)) {
+        // Sensor-pressure hold: only ever the LOW type — VERY_LOW is picked first when
+        // active and fires untouched, which is the hard floor working through the
+        // priority order. When VERY_LOW takes over a RUNNING hold, its own snooze does
+        // not apply: the user snoozed a very-low of their own, not the low the hold
+        // was already withholding, and a held LOW parked behind that snooze would be
+        // silent for the snooze, not the hold window.
+        val veryLowEndsHold = type == AlertType.VERY_LOW && CompressionHoldRuntime.onVeryLowTakingOver()
+
+        if (SnoozeManager.isSnoozed(type) && !veryLowEndsHold) {
+            standardEpisodes.markPendingDelivery(type)
+            return AlertRuntimeEvaluation()
+        }
+
+        // Like snooze, a held LOW episode stays pending so the alarm fires the moment
+        // the hold lifts.
+        if (type == AlertType.LOW && CompressionHoldRuntime.gateLow(condition.glucoseValue, rate)) {
             standardEpisodes.markPendingDelivery(type)
             return AlertRuntimeEvaluation()
         }

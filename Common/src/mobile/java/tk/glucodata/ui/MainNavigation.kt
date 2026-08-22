@@ -888,7 +888,14 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                             tk.glucodata.ui.meal.MealScreen(mealId, navController, dashboardViewModel)
                         }
                     }
-                    composable("stats") { tk.glucodata.ui.stats.StatsScreen() }
+                    composable("stats") {
+                        tk.glucodata.ui.stats.StatsScreen(
+                            onOpenHypoEpisodes = { navController.navigate("stats/hypo-episodes") }
+                        )
+                    }
+                    composable("stats/hypo-episodes") {
+                        tk.glucodata.ui.stats.HypoEpisodeLogScreen(navController)
+                    }
                     composable("sensors") {
                         SensorScreen(
                             onNavigateToMqAccount = { navController.navigate("settings/mq-account") },
@@ -1049,7 +1056,14 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                         tk.glucodata.ui.meal.MealScreen(mealId, navController, dashboardViewModel)
                     }
                 }
-                composable("stats") { tk.glucodata.ui.stats.StatsScreen() }
+                composable("stats") {
+                    tk.glucodata.ui.stats.StatsScreen(
+                        onOpenHypoEpisodes = { navController.navigate("stats/hypo-episodes") }
+                    )
+                }
+                composable("stats/hypo-episodes") {
+                    tk.glucodata.ui.stats.HypoEpisodeLogScreen(navController)
+                }
                 composable("sensors") {
                     SensorScreen(
                         onNavigateToMqAccount = { navController.navigate("settings/mq-account") },
