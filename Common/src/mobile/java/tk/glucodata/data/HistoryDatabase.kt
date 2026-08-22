@@ -36,6 +36,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v13 — retry accounting on journal delete tombstones
  *   v14 — LibreView delivery tracking on journal entries
  *   v15 — meals (composition + product cache) and the mealId correlation on journal entries
+ *   v16 — contributedAt on the product cache (sent to Open Food Facts)
  */
 @Database(
     entities = [
@@ -49,7 +50,7 @@ import tk.glucodata.data.meal.MealProductEntity
         MealItemEntity::class,
         MealProductEntity::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -372,6 +373,13 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v15 -> v16: remember when a cached product was sent to Open Food Facts. */
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE meal_products ADD COLUMN contributedAt INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -392,7 +400,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_11_12,
                     MIGRATION_12_13,
                     MIGRATION_13_14,
-                    MIGRATION_14_15
+                    MIGRATION_14_15,
+                    MIGRATION_15_16
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }
