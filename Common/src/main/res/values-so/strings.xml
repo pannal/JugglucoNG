@@ -2868,6 +2868,9 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="quiet_window_add_tile">Ku dar tiirka dejinta degdegga</string>
     <string name="quiet_window_add_tile_hint">Tiirka waxaa lagu dari karaa tafatiraha dejinta degdegga ee barta xaaladda.</string>
     <string name="quiet_window_select_end_time">Aamusan ilaa</string>
+    <string name="meal_recent_title">Alaabta dhowaan</string>
+    <string name="meal_recent_search">Raadi magac, summad ama baarkoodh</string>
+    <string name="meal_recent_empty">Weli waxba lama iskaan garayn lamana darin.</string>
     <string name="meal_ocr_title">Akhri calaamadda</string>
     <string name="meal_ocr_intro">Sawir shaxda nafaqada; ku dar dhinaca hore magaca iyo cabbirka baakadda, iyo dhinac kasta oo kale oo aad u baahan tahay. Wax walba waxaa lagu akhriyaa taleefankan.</string>
     <string name="meal_ocr_intro_barcode">Weli alaab looma helin %1$s. Sawir shaxda nafaqada; ku dar dhinaca hore magaca iyo cabbirka baakadda, iyo dhinac kasta oo kale. Qiyamka waxaa lagu kaydinayaa baarkoodhkan hoostiisa.</string>

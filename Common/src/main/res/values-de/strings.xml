@@ -2707,6 +2707,9 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="quiet_window_add_tile">Schnelleinstellungs-Kachel hinzufügen</string>
     <string name="quiet_window_add_tile_hint">Die Kachel lässt sich im Editor der Schnelleinstellungen in der Statusleiste hinzufügen.</string>
     <string name="quiet_window_select_end_time">Stumm bis</string>
+    <string name="meal_recent_title">Zuletzt verwendet</string>
+    <string name="meal_recent_search">Name, Marke oder Barcode suchen</string>
+    <string name="meal_recent_empty">Noch nichts gescannt oder hinzugefügt.</string>
     <string name="meal_ocr_title">Etikett lesen</string>
     <string name="meal_ocr_intro">Nährwerttabelle fotografieren; für Name und Packungsgröße die Vorderseite dazu, und jede weitere Seite, die du brauchst. Alles wird auf diesem Telefon gelesen.</string>
     <string name="meal_ocr_intro_barcode">Noch kein Produkt zu %1$s. Nährwerttabelle fotografieren; für Name und Packungsgröße die Vorderseite dazu, und jede weitere Seite. Die Werte werden unter diesem Barcode gespeichert.</string>

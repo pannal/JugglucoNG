@@ -2684,6 +2684,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="quiet_window_add_tile">添加快捷设置图块</string>
     <string name="quiet_window_add_tile_hint">可在状态栏的快捷设置编辑器中添加该图块。</string>
     <string name="quiet_window_select_end_time">静音至</string>
+    <string name="meal_recent_title">最近的产品</string>
+    <string name="meal_recent_search">搜索名称、品牌或条形码</string>
+    <string name="meal_recent_empty">尚未扫描或添加任何产品。</string>
     <string name="meal_ocr_title">读取标签</string>
     <string name="meal_ocr_intro">拍摄营养成分表；再拍正面以获取名称和净含量，需要时拍其他面。全部在本机识别。</string>
     <string name="meal_ocr_intro_barcode">还没有 %1$s 的产品。拍摄营养成分表；再拍正面以获取名称和净含量，需要时拍其他面。数值将保存在此条形码下。</string>

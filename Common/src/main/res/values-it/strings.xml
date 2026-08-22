@@ -2658,6 +2658,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="quiet_window_add_tile">Aggiungi riquadro impostazioni rapide</string>
     <string name="quiet_window_add_tile_hint">Il riquadro si aggiunge dall’editor delle impostazioni rapide nella barra di stato.</string>
     <string name="quiet_window_select_end_time">Silenzio fino alle</string>
+    <string name="meal_recent_title">Prodotti recenti</string>
+    <string name="meal_recent_search">Cerca nome, marca o codice a barre</string>
+    <string name="meal_recent_empty">Ancora niente scansionato o aggiunto.</string>
     <string name="meal_ocr_title">Leggi l’etichetta</string>
     <string name="meal_ocr_intro">Fotografa la tabella nutrizionale; aggiungi il fronte per nome e formato, e ogni altro lato che serve. Tutto viene letto su questo telefono.</string>
     <string name="meal_ocr_intro_barcode">Nessun prodotto per %1$s. Fotografa la tabella nutrizionale; aggiungi il fronte per nome e formato, e ogni altro lato. I valori vengono salvati sotto questo codice a barre.</string>

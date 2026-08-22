@@ -2893,6 +2893,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="quiet_window_add_tile">Add quick-settings tile</string>
     <string name="quiet_window_add_tile_hint">The tile can be added from the quick-settings editor in the status bar.</string>
     <string name="quiet_window_select_end_time">Silent until</string>
+    <string name="meal_recent_title">Recent products</string>
+    <string name="meal_recent_search">Search name, brand or barcode</string>
+    <string name="meal_recent_empty">Nothing scanned or added yet.</string>
     <string name="meal_ocr_title">Read the label</string>
     <string name="meal_ocr_intro">Photograph the nutrition table; add the front for name and pack size, and any other side you need. Everything is read on this phone.</string>
     <string name="meal_ocr_intro_barcode">No product for %1$s yet. Photograph the nutrition table; add the front for name and pack size, and any other side. The values are stored under this barcode.</string>

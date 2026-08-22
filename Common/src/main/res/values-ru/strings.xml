@@ -2715,6 +2715,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="quiet_window_add_tile">Добавить плитку быстрых настроек</string>
     <string name="quiet_window_add_tile_hint">Плитку можно добавить в редакторе быстрых настроек в строке состояния.</string>
     <string name="quiet_window_select_end_time">Без звука до</string>
+    <string name="meal_recent_title">Недавние продукты</string>
+    <string name="meal_recent_search">Поиск по названию, марке или штрихкоду</string>
+    <string name="meal_recent_empty">Пока ничего не отсканировано и не добавлено.</string>
     <string name="meal_ocr_title">Прочитать этикетку</string>
     <string name="meal_ocr_intro">Сфотографируйте таблицу пищевой ценности; добавьте лицевую сторону для названия и объёма упаковки и любую другую нужную сторону. Всё распознаётся на этом телефоне.</string>
     <string name="meal_ocr_intro_barcode">Продукта для %1$s пока нет. Сфотографируйте таблицу пищевой ценности; добавьте лицевую сторону для названия и объёма упаковки и любую другую сторону. Значения сохранятся под этим штрихкодом.</string>

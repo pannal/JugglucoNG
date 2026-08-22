@@ -2696,6 +2696,9 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="quiet_window_add_tile">Hızlı ayarlar kutucuğu ekle</string>
     <string name="quiet_window_add_tile_hint">Kutucuk, durum çubuğundaki hızlı ayarlar düzenleyicisinden eklenebilir.</string>
     <string name="quiet_window_select_end_time">Şu saate kadar sessiz</string>
+    <string name="meal_recent_title">Son ürünler</string>
+    <string name="meal_recent_search">Ad, marka veya barkod ara</string>
+    <string name="meal_recent_empty">Henüz bir şey taranmadı veya eklenmedi.</string>
     <string name="meal_ocr_title">Etiketi oku</string>
     <string name="meal_ocr_intro">Besin değerleri tablosunu fotoğraflayın; ad ve paket boyutu için ön yüzü, gerekirse diğer yüzleri ekleyin. Her şey bu telefonda okunur.</string>
     <string name="meal_ocr_intro_barcode">%1$s için henüz ürün yok. Besin değerleri tablosunu fotoğraflayın; ad ve paket boyutu için ön yüzü ve diğer yüzleri ekleyin. Değerler bu barkodun altına kaydedilir.</string>

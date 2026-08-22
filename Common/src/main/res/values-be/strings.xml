@@ -2739,6 +2739,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="quiet_window_add_tile">Дадаць плітку хуткіх налад</string>
     <string name="quiet_window_add_tile_hint">Плітку можна дадаць у рэдактары хуткіх налад у радку стану.</string>
     <string name="quiet_window_select_end_time">Без гуку да</string>
+    <string name="meal_recent_title">Нядаўнія прадукты</string>
+    <string name="meal_recent_search">Пошук па назве, марцы або штрыхкодзе</string>
+    <string name="meal_recent_empty">Пакуль нічога не адсканавана і не дададзена.</string>
     <string name="meal_ocr_title">Прачытаць этыкетку</string>
     <string name="meal_ocr_intro">Сфатаграфуйце табліцу харчовай каштоўнасці; дадайце пярэдні бок для назвы і аб’ёму ўпакоўкі і любы іншы патрэбны бок. Усё распазнаецца на гэтым тэлефоне.</string>
     <string name="meal_ocr_intro_barcode">Прадукту для %1$s пакуль няма. Сфатаграфуйце табліцу харчовай каштоўнасці; дадайце пярэдні бок для назвы і аб’ёму ўпакоўкі і любы іншы бок. Значэнні захаваюцца пад гэтым штрыхкодам.</string>

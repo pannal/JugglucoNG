@@ -2706,6 +2706,9 @@
     <string name="quiet_window_add_tile">Dodaj kafelek szybkich ustawień</string>
     <string name="quiet_window_add_tile_hint">Kafelek można dodać w edytorze szybkich ustawień na pasku stanu.</string>
     <string name="quiet_window_select_end_time">Cisza do</string>
+    <string name="meal_recent_title">Ostatnie produkty</string>
+    <string name="meal_recent_search">Szukaj nazwy, marki lub kodu</string>
+    <string name="meal_recent_empty">Nic jeszcze nie zeskanowano ani nie dodano.</string>
     <string name="meal_ocr_title">Odczytaj etykietę</string>
     <string name="meal_ocr_intro">Sfotografuj tabelę wartości odżywczych; dodaj przód dla nazwy i wielkości opakowania oraz każdą inną potrzebną stronę. Wszystko jest odczytywane na tym telefonie.</string>
     <string name="meal_ocr_intro_barcode">Brak produktu dla %1$s. Sfotografuj tabelę wartości odżywczych; dodaj przód dla nazwy i wielkości opakowania oraz każdą inną stronę. Wartości zostaną zapisane pod tym kodem.</string>
