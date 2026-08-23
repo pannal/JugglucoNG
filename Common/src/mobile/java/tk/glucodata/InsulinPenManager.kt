@@ -20,8 +20,11 @@ import tk.glucodata.NovoPen.PenDropTally
 import tk.glucodata.NovoPen.PenDuplicateReconciler
 import tk.glucodata.NovoPen.PenImportCursor
 import tk.glucodata.NovoPen.PenImportNotifier
+import tk.glucodata.NovoPen.PenImportPlan
 import tk.glucodata.NovoPen.PenJournalEntry
+import tk.glucodata.NovoPen.PenManualMerge
 import tk.glucodata.NovoPen.PenManualMergePlanner
+import tk.glucodata.NovoPen.PenSheetOffer
 import tk.glucodata.NovoPen.PenReconcilePlan
 import tk.glucodata.NovoPen.PenSourceIds
 import tk.glucodata.NovoPen.PenUnattendedImportPolicy
@@ -205,27 +208,30 @@ object InsulinPenManager {
         scope.launch {
             val now = nowSeconds()
             val scan = freshDoses(serial, chunks, now, known)
-            val fresh = scan.fresh
-            // Duplicates to clean up and doses merged onto entries are separate news, and
-            // the cleanup is the one that asks for something, so it is said first.
+            val offer = scan.fresh
             if (scan.duplicates > 0) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, scan.duplicates))
-            }
-            if (scan.merged > 0) {
-                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_merged_manual, scan.merged))
-            } else if (scan.duplicates == 0 && fresh.isEmpty()) {
+            } else if (offer.isEmpty()) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_no_new_doses))
             }
-            if (fresh.isEmpty()) {
-                // A scan with nothing to offer still says how far the journal reaches, so the
-                // next tap does not walk the pen's whole log again — but only as far as it was
-                // seen to reach. A dose this scan never found in the journal stays ahead of the
-                // cursor, whatever kept it out, so the next scan looks at it again.
+            if (offer.isEmpty()) {
+                // Nothing to confirm, so no sheet: a dialog with an empty list and a disabled
+                // button is a dead end. A scan with nothing to offer still says how far the
+                // journal reaches, so the next tap does not walk the pen's whole log again —
+                // but only as far as it was seen to reach.
                 scan.provenCursor()?.let { advanceCursor(serial, it) }
                 return@launch
             }
             val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
-            InsulinPenScanBus.offer(PenScanResult(serial, fresh, preselectFrom))
+            InsulinPenScanBus.offer(
+                PenScanResult(
+                    serial = serial,
+                    doses = offer,
+                    preselectFromSeconds = preselectFrom,
+                    merges = scan.mergeable,
+                    skippedPrimingDoses = scan.skippedPrimingDoses,
+                )
+            )
         }
     }
 
@@ -249,25 +255,42 @@ object InsulinPenManager {
                 PenUnattendedImportPolicy.Plan.NothingNew -> {
                     // As the foreground scan: record how far the journal was seen to reach.
                     scan.provenCursor()?.let { advanceCursor(serial, it) }
-                    if (scan.merged > 0) {
-                        PenImportNotifier.mergedManual(context, serial, scan.merged)
-                    } else {
-                        PenImportNotifier.nothingNew(context, serial)
-                    }
+                    PenImportNotifier.nothingNew(context, serial)
                 }
 
                 is PenUnattendedImportPolicy.Plan.Import -> {
                     // importDoses moves the cursor over the doses it is handed, nothing
                     // beyond — so the air shots left out here never mark a later real
                     // dose as done. That is the rule the review sheet already relies on.
-                    val saved = importDoses(serial, plan.doses, known?.insulinPresetId ?: 0L, presetName!!)
-                    PenImportNotifier.imported(context, serial, saved)
+                    // Nobody is watching, so the proposals are carried out unasked: that is
+                    // the trade-off this mode is documented to make.
+                    val outcome = importDoses(
+                        serial,
+                        plan.doses,
+                        known?.insulinPresetId ?: 0L,
+                        presetName!!,
+                        scan.mergeable,
+                    )
+                    if (outcome.inserted == 0 && outcome.merged > 0) {
+                        PenImportNotifier.mergedManual(context, serial, outcome.merged)
+                    } else {
+                        PenImportNotifier.imported(context, serial, outcome.total)
+                    }
                 }
 
                 is PenUnattendedImportPolicy.Plan.Review -> {
                     val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
-                    InsulinPenScanBus.offer(PenScanResult(serial, plan.doses, preselectFrom))
-                    PenImportNotifier.awaitingReview(context, serial, plan.doses.size)
+                    val offer = PenSheetOffer.offerable(plan.doses)
+                    InsulinPenScanBus.offer(
+                        PenScanResult(
+                            serial = serial,
+                            doses = offer,
+                            preselectFromSeconds = preselectFrom,
+                            merges = scan.mergeable,
+                            skippedPrimingDoses = PenSheetOffer.skipped(plan.doses),
+                        )
+                    )
+                    PenImportNotifier.awaitingReview(context, serial, offer.size)
                 }
             }
         }
@@ -275,14 +298,15 @@ object InsulinPenManager {
 
     /** One scan, sorted out: what to offer, and what it saw on the way there. */
     private class FreshScan(
-        /** Newest first: in the window, not in the journal, past the cursor, not merged. */
+        /** Newest first: what may be offered, air shots and the already-written left out. */
         val fresh: List<PenDose>,
         val inWindow: List<PenDose>,
-        /** What the journal was seen to hold, the doses merged onto entries included. */
         val present: Set<Long>,
         val duplicates: Int,
-        /** How many doses were merged onto entries the reader had written by hand. */
-        val merged: Int,
+        /** Per dose counter, the hand-written entry it would take over if confirmed. */
+        val mergeable: Map<Long, PenManualMerge>,
+        /** Air shots this read found and left out, so a sheet can say so. */
+        val skippedPrimingDoses: Int,
     ) {
         /** How far the journal was seen to reach, for a scan that offers nothing. */
         fun provenCursor(): Long? = PenImportCursor.provenUpTo(inWindow) { it.relativeSeconds in present }
@@ -322,27 +346,35 @@ object InsulinPenManager {
             .filter { PenImportCursor.isAhead(it, cursor, fullRead) }
             .sortedByDescending(PenDose::timestampSeconds)
         // A dose the reader wrote down before injecting is already in the journal, just not
-        // under the pen's name. Merging it onto that entry has to happen before anything is
-        // offered or imported, so the same injection does not become a second row. A full
-        // read is the reader asking to see the whole log and decide on it themselves, so it
-        // merges nothing: that is the one scan that can carry weeks of doses.
-        val merged = if (fullRead) {
-            emptySet()
+        // under the pen's name. What it would be merged onto is worked out here and carried
+        // out when the doses are imported, so a sheet can propose it first. A full read
+        // proposes nothing: it is the one scan that can carry weeks of doses.
+        val mergeable = if (fullRead) {
+            emptyMap()
         } else {
-            mergeManualEntries(serial, ahead, known?.insulinPresetId, repository)
+            planManualMerges(serial, ahead, known?.insulinPresetId, repository)
         }
-        val fresh = ahead.filterNot { it.relativeSeconds in merged }
+        // Air shots are never written, so they are not something to offer or to count.
+        val fresh = PenSheetOffer.offerable(ahead)
         Log.i(
             LOG_ID,
             "Pen $serial: ${chunks.size} chunk(s), ${parsed.sumOf { it.size }} parsed, " +
                 "${doses.size} after merge, newest rel=${doses.maxOfOrNull(PenDose::relativeSeconds)}, " +
                 "cursor rel=$cursor${if (fullRead) " (full read)" else ""}, " +
                 "${inWindow.size} within ${REVIEW_WINDOW_SECONDS / 86_400} days, " +
-                "${inWindow.size - present.size} not in the journal, ${merged.size} merged " +
-                "onto hand-written entries, ${fresh.size} to offer; " +
+                "${inWindow.size - present.size} not in the journal, " +
+                "${PenSheetOffer.skipped(ahead)} air shot(s) skipped, " +
+                "${mergeable.size} to propose merging, ${fresh.size} to offer; " +
                 dropped.describe(),
         )
-        return FreshScan(fresh, inWindow, present + merged, duplicates, merged.size)
+        return FreshScan(
+            fresh = fresh,
+            inWindow = inWindow,
+            present = present,
+            duplicates = duplicates,
+            mergeable = mergeable,
+            skippedPrimingDoses = PenSheetOffer.skipped(ahead),
+        )
     }
 
     /**
@@ -354,10 +386,21 @@ object InsulinPenManager {
         doses: List<PenDose>,
         presetId: Long,
         presetName: String,
+        merges: Map<Long, PenManualMerge> = emptyMap(),
     ) {
         scope.launch {
-            val saved = importDoses(serial, doses, presetId, presetName)
-            Applic.Toaster(Applic.app.getString(R.string.insulin_pen_doses_added, saved))
+            val outcome = importDoses(serial, doses, presetId, presetName, merges)
+            if (outcome.inserted > 0) {
+                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_doses_added, outcome.inserted))
+            }
+            if (outcome.merged > 0) {
+                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_merged_manual, outcome.merged))
+            }
+            if (outcome.total == 0) {
+                // Confirming and being told nothing is worse than being told it was already
+                // there, which is what an empty outcome means.
+                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_no_new_doses))
+            }
         }
     }
 
@@ -371,11 +414,25 @@ object InsulinPenManager {
         doses: List<PenDose>,
         presetId: Long,
         presetName: String,
-    ): Int = withContext(Dispatchers.IO) {
-        if (doses.isEmpty()) return@withContext 0
+        merges: Map<Long, PenManualMerge> = emptyMap(),
+    ): PenImportOutcome = withContext(Dispatchers.IO) {
+        if (doses.isEmpty()) return@withContext PenImportOutcome.NOTHING
         val repository = JournalRepository()
+        // What to take over and what to write, worked out before anything is written: a
+        // dose that lands on the entry the reader already wrote must not also become a row
+        // of its own.
+        val written = doses
+            .filter { repository.hasEntryWithSourceRecordId(sourceRecordId(serial, it)) }
+            .mapTo(HashSet(), PenDose::relativeSeconds)
+        val plan = PenImportPlan.of(doses, merges) { it.relativeSeconds in written }
+        val mergedRelatives = applyManualMerges(serial, plan.adopt, repository)
+        // A proposal that no longer holds is not a reason to lose the dose: it is written
+        // as a row of its own instead.
+        val toInsert = plan.insert + plan.adopt
+            .filterNot { it.doseRelativeSeconds in mergedRelatives }
+            .mapNotNull { merge -> doses.firstOrNull { it.relativeSeconds == merge.doseRelativeSeconds } }
         var saved = 0
-        doses.forEach { dose ->
+        toInsert.forEach { dose ->
             val recordId = sourceRecordId(serial, dose)
             runCatching {
                 if (repository.hasEntryWithSourceRecordId(recordId)) return@forEach
@@ -405,19 +462,20 @@ object InsulinPenManager {
                 insulinPresetId = presetId,
                 insulinName = presetName,
                 lastImportedDoseRelativeSeconds = maxOf(it.lastImportedDoseRelativeSeconds, newest),
-                importedDoseCount = it.importedDoseCount + saved,
+                importedDoseCount = it.importedDoseCount + saved + mergedRelatives.size,
             )
         }
         Log.i(
             LOG_ID,
             "Pen $serial: ${doses.size} dose(s) confirmed, $saved written, " +
+                "${mergedRelatives.size} merged onto hand-written entries, " +
                 "cursor rel=${pen(serial)?.lastImportedDoseRelativeSeconds}",
         )
         if (saved > 0) {
             UiRefreshBus.requestDataRefresh()
             if (Natives.getpostTreatments()) Natives.wakeuploader()
         }
-        saved
+        PenImportOutcome(inserted = saved, merged = mergedRelatives.size)
     }
 
     private fun sourceRecordId(serial: String, dose: PenDose) = PenSourceIds.stable(serial, dose)
@@ -465,20 +523,17 @@ object InsulinPenManager {
     }
 
     /**
-     * Merges doses onto insulin entries the reader wrote by hand shortly before injecting,
-     * so one injection stays one row. The decision is [PenManualMergePlanner]'s; this reads
-     * the candidates and writes the outcome.
-     *
-     * @return the pen counters of the doses that found an entry — they are in the journal
-     *   now and must not be offered again
+     * What could be merged, worked out but not carried out. The sheet shows this as a
+     * proposal; only confirming it writes anything, since the sheet is the one place the
+     * reader can say the pairing is wrong.
      */
-    private suspend fun mergeManualEntries(
+    private suspend fun planManualMerges(
         serial: String,
         doses: List<PenDose>,
         penInsulinPresetId: Long?,
         repository: JournalRepository,
-    ): Set<Long> {
-        if (doses.isEmpty()) return emptySet()
+    ): Map<Long, PenManualMerge> {
+        if (doses.isEmpty()) return emptyMap()
         return runCatching {
             val window = PenManualMergePlanner.MATCH_WINDOW_SECONDS
             val from = (doses.minOf(PenDose::timestampSeconds) - window) * 1000L
@@ -495,25 +550,47 @@ object InsulinPenManager {
                         "${stop.secondsApart}s apart); matching the rest by time and amount",
                 )
             }
-            val merged = LinkedHashSet<Long>()
-            plan.merges.forEach { merge ->
-                val adopted = repository.adoptPenDose(
+            plan.merges.associateBy(PenManualMerge::doseRelativeSeconds)
+        }.getOrElse { error ->
+            Log.e(LOG_ID, "Pen manual merge planning failed: ${Log.stackline(error)}")
+            emptyMap()
+        }
+    }
+
+    /**
+     * Carries out what [planManualMerges] proposed. Each adoption is guarded on its own, so
+     * an entry deleted or already claimed since the plan was made simply does not merge and
+     * its dose is written as a new row instead.
+     *
+     * @return the pen counters of the doses whose entry was adopted
+     */
+    private suspend fun applyManualMerges(
+        serial: String,
+        merges: Collection<PenManualMerge>,
+        repository: JournalRepository,
+    ): Set<Long> {
+        if (merges.isEmpty()) return emptySet()
+        val merged = LinkedHashSet<Long>()
+        merges.forEach { merge ->
+            val adopted = runCatching {
+                repository.adoptPenDose(
                     merge.entryId,
                     merge.sourceRecordId,
                     merge.timestampSeconds * 1000L,
+                    merge.entryUnits,
                 )
-                if (adopted) merged.add(merge.doseRelativeSeconds)
+            }.getOrElse { error ->
+                Log.e(LOG_ID, "Pen manual merge failed: ${Log.stackline(error)}")
+                false
             }
-            if (merged.isNotEmpty()) {
-                Log.i(LOG_ID, "Pen $serial: ${merged.size} dose(s) merged onto hand-written entries")
-                UiRefreshBus.requestDataRefresh()
-                if (Natives.getpostTreatments()) Natives.wakeuploader()
-            }
-            merged as Set<Long>
-        }.getOrElse { error ->
-            Log.e(LOG_ID, "Pen manual merge failed: ${Log.stackline(error)}")
-            emptySet()
+            if (adopted) merged.add(merge.doseRelativeSeconds)
         }
+        if (merged.isNotEmpty()) {
+            Log.i(LOG_ID, "Pen $serial: ${merged.size} dose(s) merged onto hand-written entries")
+            UiRefreshBus.requestDataRefresh()
+            if (Natives.getpostTreatments()) Natives.wakeuploader()
+        }
+        return merged
     }
 
     /** Matches the pen's log against what earlier scans of it wrote to the journal. */
@@ -682,9 +759,23 @@ data class PenDuplicateEntry(
 /** A finished pen read waiting for the reader to confirm what goes into the journal. */
 data class PenScanResult(
     val serial: String,
+    /** What the sheet may offer: air shots are not among them. */
     val doses: List<PenDose>,
     val preselectFromSeconds: Long,
+    /** Per dose counter, the hand-written entry it would be merged onto if confirmed. */
+    val merges: Map<Long, PenManualMerge> = emptyMap(),
+    /** Air shots this read found and left out, so the sheet can say so. */
+    val skippedPrimingDoses: Int = 0,
 )
+
+/** What confirming a sheet did: rows written, and rows the pen took over. */
+data class PenImportOutcome(val inserted: Int, val merged: Int) {
+    val total: Int get() = inserted + merged
+
+    companion object {
+        val NOTHING = PenImportOutcome(0, 0)
+    }
+}
 
 /**
  * A pen is tapped against the phone from wherever the user happens to be, so the review
