@@ -127,6 +127,9 @@ private fun DashboardRoute(
         onNewMeal = newMealAction,
         currentMealLabel = currentMeal?.label,
         onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
+        onNavigateToPredictionModelProfile = {
+            navController.navigate("settings/predictive-simulation/model-profile")
+        },
         onTriggerCalibration = onTriggerCalibration
     )
 }
