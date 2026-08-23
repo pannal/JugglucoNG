@@ -235,6 +235,20 @@ object AlertRuntimeManager {
             ?: return AlertRuntimeEvaluation()
         val condition = activeConditions[type] ?: return AlertRuntimeEvaluation()
 
+        // Coming down fast enough that the alert's own sentence is being disproved as it is
+        // read. It waits rather than resolves: the episode stays open, so a dismissal and
+        // whatever was queued on it survive, and the moment the fall stops it can speak
+        // without waiting out a fresh episode. Anything already repeating stops now.
+        if (type == AlertType.HIGH &&
+            FallSuppressionPolicy.highFallingSuppresses(rate, configs[type]?.fallRateSuppress)
+        ) {
+            Notify.cancelRetrySession(type.id, "high-falling")
+            if (transition.shouldTryFire(type)) {
+                standardEpisodes.markPendingDelivery(type)
+            }
+            return AlertRuntimeEvaluation(standardGlucoseAlertHandled = true)
+        }
+
         if (!transition.shouldTryFire(type)) {
             return AlertRuntimeEvaluation(standardGlucoseAlertHandled = true)
         }
@@ -529,7 +543,7 @@ object AlertRuntimeManager {
         // running retries, but do NOT reset the timer: if the value stagnates
         // above the threshold again, the high phase was continuous and the
         // alarm must not wait out a fresh full duration.
-        if (PersistentHighPolicy.fallingSuppresses(currentRateLocked(), config.fallRateSuppress)) {
+        if (FallSuppressionPolicy.fallingSuppresses(currentRateLocked(), config.fallRateSuppress)) {
             clearRuntimeAlert(type, "persistent-high-falling")
             return
         }

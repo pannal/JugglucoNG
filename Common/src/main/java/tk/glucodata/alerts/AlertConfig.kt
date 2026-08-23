@@ -295,7 +295,27 @@ object AlertDefaults {
     const val THRESHOLD_REARM_MARGIN_MMOL = 0.6f
 
     // PERSISTENT_HIGH: silent while falling at least this fast (mg/dl/min).
-    const val PERSISTENT_HIGH_FALL_RATE_MGDL_PER_MIN = 0.5f
+    /**
+     * PERSISTENT_HIGH's bar. That alert has already waited out a duration and its sentence is
+     * "this is not coming down", so any steady downward movement answers it.
+     */
+    const val FALL_RATE_SUPPRESS_MGDL_PER_MIN = 0.5f
+
+    /**
+     * HIGH's bar, and it is a different question. That alert fires the moment the line is
+     * crossed and is the one somebody relies on to hear about a high at all, so silencing it
+     * needs a fall this app would actually call a fall. Its own vocabulary: TrendArrowAngle
+     * draws anything under 0.5 as level, and ExchangeTrend, which is what it tells other
+     * apps, does not say "falling" until 2.0 and "falling fast" until 3.0. Two is a real
+     * downward arrow, around 120 mg/dl an hour.
+     */
+    const val HIGH_FALL_RATE_MGDL_PER_MIN = 2.0f
+
+    /**
+     * And nothing quieter than this may silence a high, whatever is stored: one is where this
+     * app stops calling the movement level. A setting below it is treated as this.
+     */
+    const val HIGH_FALL_RATE_FLOOR_MGDL_PER_MIN = 1.0f
 
     // PRE_HIGH IOB coverage: suppress when remaining insulin effect covers the
     // full projected overshoot (factor 1.0). Conservative: only a complete
@@ -340,6 +360,13 @@ object AlertDefaults {
                 deliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
                 hapticProfile = HapticProfile.STEADY,
                 overrideDND = false,
+                // Off unless asked for. The same rule as PERSISTENT_HIGH, but this is the
+                // alarm somebody relies on to hear about a high at all, and it is on by
+                // default: switching it to conditional under everybody who upgrades is not
+                // a decision to make on their behalf. The slider turns it on, and the
+                // magnitude it lands on is the flat-arrow boundary, so a drift the app draws
+                // as level does not silence anything unless that is what was asked for.
+                fallRateSuppress = null,
                 defaultSnoozeMinutes = 30
             )
             AlertType.VERY_LOW -> AlertConfig(
@@ -399,7 +426,7 @@ object AlertDefaults {
                 enabled = false,
                 threshold = if (isMmol) PERSISTENT_HIGH_THRESHOLD_MMOL else PERSISTENT_HIGH_THRESHOLD_MGDL,
                 durationMinutes = PERSISTENT_HIGH_MINUTES,
-                fallRateSuppress = PERSISTENT_HIGH_FALL_RATE_MGDL_PER_MIN,
+                fallRateSuppress = FALL_RATE_SUPPRESS_MGDL_PER_MIN,
                 deliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
                 hapticProfile = HapticProfile.STEADY,
                 defaultSnoozeMinutes = 60
