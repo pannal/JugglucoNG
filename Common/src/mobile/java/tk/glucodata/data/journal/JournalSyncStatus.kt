@@ -18,6 +18,9 @@ enum class JournalSyncFailure(val storageValue: Int) {
 /**
  * @param lastSuccessAt when Nightscout last accepted a treatment document from us.
  * @param failingSince the start of the current run of failures, 0 while healthy.
+ * @param lastAttemptAt when the treatment path was last exercised at all, whatever came of
+ *   it. "Failing since" without it reads as something being tried and refused over and over,
+ *   which is not the same state as one refusal hours ago that nothing has followed.
  */
 data class JournalSyncState(
     val lastSuccessAt: Long = 0L,
@@ -25,7 +28,8 @@ data class JournalSyncState(
     val failureCode: Int = 0,
     val failure: JournalSyncFailure = JournalSyncFailure.NONE,
     /** The server's own reason, when it gave one ("Missing permission api:treatments:update"). */
-    val failureMessage: String = ""
+    val failureMessage: String = "",
+    val lastAttemptAt: Long = 0L
 ) {
     val isFailing: Boolean get() = failure != JournalSyncFailure.NONE
 }
@@ -41,7 +45,8 @@ internal fun applySyncSuccess(
     failingSince = 0L,
     failureCode = 0,
     failure = JournalSyncFailure.NONE,
-    failureMessage = ""
+    failureMessage = "",
+    lastAttemptAt = now
 )
 
 internal fun applySyncFailure(
@@ -56,7 +61,8 @@ internal fun applySyncFailure(
     failingSince = if (state.isFailing && state.failingSince > 0L) state.failingSince else now,
     failureCode = code,
     failure = failure,
-    failureMessage = message.take(MAX_FAILURE_MESSAGE_LENGTH)
+    failureMessage = message.take(MAX_FAILURE_MESSAGE_LENGTH),
+    lastAttemptAt = now
 )
 
 /** Long enough for a permission sentence, short enough for a status line. */
@@ -76,6 +82,7 @@ object JournalSyncStatus {
     private const val KEY_FAILURE_CODE = "journal_sync_failure_code"
     private const val KEY_FAILURE_KIND = "journal_sync_failure_kind"
     private const val KEY_FAILURE_MESSAGE = "journal_sync_failure_message"
+    private const val KEY_LAST_ATTEMPT = "journal_sync_last_attempt"
 
     @Volatile
     private var cached: JournalSyncState? = null
@@ -91,7 +98,8 @@ object JournalSyncStatus {
             failingSince = getLong(KEY_FAILING_SINCE, 0L),
             failureCode = getInt(KEY_FAILURE_CODE, 0),
             failure = JournalSyncFailure.fromStorage(getInt(KEY_FAILURE_KIND, 0)),
-            failureMessage = getString(KEY_FAILURE_MESSAGE, "").orEmpty()
+            failureMessage = getString(KEY_FAILURE_MESSAGE, "").orEmpty(),
+            lastAttemptAt = getLong(KEY_LAST_ATTEMPT, 0L)
         )
     }
 
@@ -111,6 +119,7 @@ object JournalSyncStatus {
             .putInt(KEY_FAILURE_CODE, next.failureCode)
             .putInt(KEY_FAILURE_KIND, next.failure.storageValue)
             .putString(KEY_FAILURE_MESSAGE, next.failureMessage)
+            .putLong(KEY_LAST_ATTEMPT, next.lastAttemptAt)
             .apply()
     }
 }
