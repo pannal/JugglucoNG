@@ -19,6 +19,7 @@ import tk.glucodata.NovoPen.PenDoseParser
 import tk.glucodata.NovoPen.PenDropTally
 import tk.glucodata.NovoPen.PenDuplicateReconciler
 import tk.glucodata.NovoPen.PenImportCursor
+import tk.glucodata.NovoPen.PenImportNotificationPolicy
 import tk.glucodata.NovoPen.PenImportNotifier
 import tk.glucodata.NovoPen.PenImportPlan
 import tk.glucodata.NovoPen.PenJournalEntry
@@ -65,6 +66,7 @@ object InsulinPenManager {
     private const val PREFS_NAME = "tk.glucodata_preferences"
     private const val ENABLED_KEY = "insulin_pen_enabled"
     private const val BACKGROUND_IMPORT_KEY = "insulin_pen_background_import"
+    private const val IMPORT_NOTIFICATION_DURATION_KEY = "insulin_pen_import_notification_duration_minutes"
     private const val PENS_KEY = "insulin_pen_registry"
     private const val SNAPSHOT_KEY_PREFIX = "insulin_pen_last_scan_"
 
@@ -117,6 +119,26 @@ object InsulinPenManager {
         _backgroundImportEnabled.value = enabled
         prefs.edit().putBoolean(BACKGROUND_IMPORT_KEY, enabled).apply()
         syncBackgroundReceiver(context)
+    }
+
+    private val _importNotificationDurationMinutes = MutableStateFlow(
+        PenImportNotificationPolicy.normalizeDurationMinutes(
+            prefs.getInt(
+                IMPORT_NOTIFICATION_DURATION_KEY,
+                PenImportNotificationPolicy.DEFAULT_DURATION_MINUTES,
+            ),
+        ),
+    )
+    val importNotificationDurationMinutes: StateFlow<Int> =
+        _importNotificationDurationMinutes.asStateFlow()
+
+    fun importNotificationDurationMinutes(): Int = _importNotificationDurationMinutes.value
+
+    fun setImportNotificationDurationMinutes(minutes: Int) {
+        val normalized = PenImportNotificationPolicy.normalizeDurationMinutes(minutes)
+        _importNotificationDurationMinutes.value = normalized
+        prefs.edit().putInt(IMPORT_NOTIFICATION_DURATION_KEY, normalized).apply()
+        if (normalized == 0) PenImportNotifier.cancel(Applic.app)
     }
 
     /**
