@@ -2834,4 +2834,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pressure_cue_disabled_warning">Si le signal est désactivé, la retenue se fait en silence : les alarmes d\'hypo sont toujours retenues et se déclenchent toujours si la valeur ne remonte pas, vous n\'avez simplement aucun signal pendant l\'attente.</string>
     <string name="sensor_pressure_cue_settings_title">Le signal</string>
     <string name="sensor_pressure_cue_settings_description">Comment le signal sonne et se ressent pendant qu\'une alarme d\'hypo est retenue. Il ne joue que pour cette fonction, il s\'active et se désactive donc avec elle.</string>
+    <string name="nightscout_follow_interval_title">Rechercher de nouvelles valeurs</string>
+    <string name="nightscout_follow_interval_desc">À quelle fréquence le suiveur interroge le serveur. C\'est aussi l\'âge que peut avoir une valeur, et donc le retard possible d\'une alarme déclenchée sur une valeur suivie. Un suiveur n\'a pas de capteur à lui pour garder le téléphone éveillé, donc chaque interrogation est un réveil.</string>
+    <string name="nightscout_follow_interval_doze">En dessous de 9 minutes, Android peut malgré tout espacer les interrogations lorsque le téléphone est inactif. Exclure Juggluco de l\'optimisation de la batterie préserve l\'intervalle choisi.</string>
 </resources>

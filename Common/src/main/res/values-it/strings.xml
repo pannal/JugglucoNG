@@ -2818,4 +2818,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pressure_cue_disabled_warning">Con il segnale disattivato la trattenuta è silenziosa: gli allarmi di ipoglicemia vengono comunque trattenuti e suonano comunque se il valore non risale, semplicemente non ricevi alcun segnale durante l\'attesa.</string>
     <string name="sensor_pressure_cue_settings_title">Il segnale</string>
     <string name="sensor_pressure_cue_settings_description">Come suona e si percepisce il segnale mentre un allarme di ipoglicemia è trattenuto. Suona solo per questa funzione, quindi si attiva e si disattiva insieme a essa.</string>
+    <string name="nightscout_follow_interval_title">Cerca nuovi valori</string>
+    <string name="nightscout_follow_interval_desc">Ogni quanto il follower interroga il server. È anche quanto può essere vecchio un valore, e quindi quanto può ritardare un allarme su un valore seguito. Un follower non ha un sensore proprio che tenga sveglio il telefono, quindi ogni controllo è un risveglio.</string>
+    <string name="nightscout_follow_interval_doze">Sotto i 9 minuti Android può comunque distanziare i controlli mentre il telefono è inattivo. Escludere Juggluco dall\'ottimizzazione della batteria mantiene l\'intervallo scelto.</string>
 </resources>

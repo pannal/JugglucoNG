@@ -3028,4 +3028,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sensor_pressure_cue_disabled_warning">Marka digniinta fudud la damiyo, hakintu waa mid aamusan: digniinaha hoose weli waa la hakiyaa oo weli way dhacayaan haddii qiimuhu soo kaban waayo, kaliya calaamad ma heshid inta la sugayo.</string>
     <string name="sensor_pressure_cue_settings_title">Digniinta fudud</string>
     <string name="sensor_pressure_cue_settings_description">Sida digniinta fudud u dhawaaqdo oo loo dareemo inta digniinta hoose la hakinayo. Waxay u ciyaartaa astaantan oo keliya, sidaas darteed way la shidmaysaa oo la damaysaa.</string>
+    <string name="nightscout_follow_interval_title">Hubi qiimayaal cusub</string>
+    <string name="nightscout_follow_interval_desc">Inta jeer ee raacuhu weydiiyo server-ka. Waxay sidoo kale tahay sida uu qiime u duugoobi karo, sidaas darteedna sida uu digniin ku salaysan qiime la raacayo u soo daahi karto. Raacuhu ma laha dareeme u gaar ah oo taleefanka soo jeeda ka dhiga, sidaas darteed hubin kastaa waa toosin.</string>
+    <string name="nightscout_follow_interval_doze">Ka hooseeya 9 daqiiqo, Android weli wuu kala fogayn karaa hubinnada inta taleefanku shaqo la\'yahay. In Juggluco laga saaro wanaajinta baytariga waxay ilaalinaysaa waqtiga aad dooratay.</string>
 </resources>

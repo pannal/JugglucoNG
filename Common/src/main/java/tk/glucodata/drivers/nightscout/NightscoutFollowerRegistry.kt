@@ -20,6 +20,7 @@ object NightscoutFollowerRegistry {
     //at an entirely different server than the one this phone uploads to.
     private const val PREF_USE_V3 = "nightscout_follower_v3"
     private const val PREF_COMPLETE_HISTORY_PREFIX = "nightscout_follower_complete_history_v1_"
+    private const val PREF_POLL_MINUTES = "nightscout_follower_poll_minutes"
     const val SENSOR_PREFIX = "NSF-"
 
     data class Config(
@@ -82,6 +83,20 @@ object NightscoutFollowerRegistry {
             .putBoolean(PREF_USE_V3, useV3)
             .apply()
         ManagedSensorUiSignals.markDeviceListDirty()
+    }
+
+    /** How often the follower asks, in minutes. Sanitized on the way out and on the way in. */
+    fun loadPollMinutes(context: Context?): Int =
+        context?.let {
+            NightscoutFollowerPollPolicy.sanitizeMinutes(
+                prefs(it).getInt(PREF_POLL_MINUTES, NightscoutFollowerPollPolicy.DEFAULT_MINUTES)
+            )
+        } ?: NightscoutFollowerPollPolicy.DEFAULT_MINUTES
+
+    fun savePollMinutes(context: Context, minutes: Int) {
+        prefs(context).edit()
+            .putInt(PREF_POLL_MINUTES, NightscoutFollowerPollPolicy.sanitizeMinutes(minutes))
+            .apply()
     }
 
     fun persistedSensorIds(context: Context): List<String> =

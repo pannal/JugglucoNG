@@ -2904,4 +2904,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pressure_cue_disabled_warning">Коли підказку вимкнено, затримка відбувається беззвучно: сигнали низької глюкози так само затримуються і так само спрацьовують, якщо значення не відновлюється, ви просто не отримуєте сигналу, поки триває очікування.</string>
     <string name="sensor_pressure_cue_settings_title">Підказка</string>
     <string name="sensor_pressure_cue_settings_description">Як звучить і відчувається підказка, поки сигнал низької глюкози затримано. Вона лунає лише для цієї функції, тому вмикається й вимикається разом з нею.</string>
+    <string name="nightscout_follow_interval_title">Перевіряти нові значення</string>
+    <string name="nightscout_follow_interval_desc">Як часто підписник опитує сервер. Це водночас і те, наскільки старим може бути значення, а отже і наскільки пізно надійде тривога за відстежуваним значенням. Підписник не має власного сенсора, який тримав би телефон активним, тож кожна перевірка — це пробудження.</string>
+    <string name="nightscout_follow_interval_doze">Менше 9 хвилин Android усе одно може розсувати перевірки, поки телефон бездіяльний. Виключення Juggluco з оптимізації батареї зберігає вибраний інтервал.</string>
 </resources>

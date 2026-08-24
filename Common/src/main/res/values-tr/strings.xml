@@ -2856,4 +2856,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="sensor_pressure_cue_disabled_warning">Uyarı kapalıyken bekletme sessiz olur: düşük alarmları yine bekletilir ve değer toparlanmazsa yine çalar, yalnızca beklenirken size hiçbir uyarı verilmez.</string>
     <string name="sensor_pressure_cue_settings_title">Uyarı</string>
     <string name="sensor_pressure_cue_settings_description">Bir düşük alarmı bekletilirken uyarının nasıl duyulacağı ve hissedileceği. Yalnızca bu özellik için çalar, bu yüzden onunla birlikte açılıp kapanır.</string>
+    <string name="nightscout_follow_interval_title">Yeni değerleri kontrol et</string>
+    <string name="nightscout_follow_interval_desc">Takipçinin sunucuya ne sıklıkla sorduğu. Bu aynı zamanda bir değerin ne kadar eski olabileceği, dolayısıyla takip edilen bir değere dayanan alarmın ne kadar geç gelebileceğidir. Takipçinin telefonu uyanık tutan kendi sensörü yoktur, bu yüzden her kontrol bir uyandırmadır.</string>
+    <string name="nightscout_follow_interval_doze">9 dakikanın altında Android, telefon boştayken kontrolleri yine de aralayabilir. Juggluco\'yu pil optimizasyonundan çıkarmak seçilen aralığı korur.</string>
 </resources>
