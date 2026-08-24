@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
