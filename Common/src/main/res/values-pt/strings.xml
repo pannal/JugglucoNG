@@ -1996,6 +1996,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_connect_saved_fail">Nenhum material da conta ou salvo para este ID na nuvem</string>
     <string name="ottai_status_needs_ble_address">Precisa de endereço BLE</string>
     <string name="ottai_status_warmup_provisional">Aquecimento provisório • faltam %1$d min</string>
+    <string name="anytime_status_warming_up">Aquecimento</string>
+    <string name="anytime_status_warming_up_remaining">Aquecimento • faltam %1$d min</string>
     <string name="ottai_status_loading_history">A carregar histórico • %1$d%%</string>
     <string name="ottai_ble_scan_title">Sensores Ottai por perto</string>
     <string name="ottai_ble_scan_hint">Aproxime o telefone do sensor. Transmissores CGM estáveis aparecem aqui.</string>
@@ -2340,6 +2342,16 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_upload_iob_desc">O Nightscout passa a mostrar este valor em vez do cálculo próprio baseado no perfil. eIOB e COB também são enviados num campo separado. O token de acesso precisa de api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Valores do dispositivo que envia os dados (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Ainda existe outro sensor associado à conta Ottai. Desassocie-o na aplicação Ottai ou remova esse sensor aqui para libertar a associação e tente novamente.</string>
+    <string name="ottai_cloud_unbind_hint">Ação apenas na conta da nuvem. O JugglucoNG não se ligará ao sensor selecionado nem o parará, removerá ou modificará.</string>
+    <string name="ottai_cloud_unbind_title">Desassociar permanentemente este sensor?</string>
+    <string name="ottai_cloud_unbind_message">%1$s será removido permanentemente desta conta Ottai. A conta deixará de poder obter as suas credenciais e o sensor deixará de funcionar na aplicação Ottai oficial. As credenciais e o estado do sensor já guardados no JugglucoNG não serão alterados. Esta ação não pode ser anulada.</string>
+    <string name="ottai_cloud_unbind_confirm">Desassociar permanentemente</string>
+    <string name="ottai_cloud_unbind_success">Sensor desassociado permanentemente do Ottai. O sensor e as credenciais guardadas no JugglucoNG não foram alterados.</string>
+    <string name="ottai_cloud_unbind_failed">Não foi possível desassociar o sensor do Ottai.</string>
+    <string name="ottai_cloud_binding_checking">A verificar a associação à nuvem Ottai…</string>
+    <string name="ottai_cloud_binding_bound">Estado da nuvem: associado a esta conta Ottai</string>
+    <string name="ottai_cloud_binding_not_bound">Estado da nuvem: não associado a esta conta Ottai</string>
+    <string name="ottai_cloud_binding_error">Não foi possível verificar a associação à nuvem Ottai</string>
     <string name="ottai_cloud_offline_routes">Importe um ficheiro de credenciais para continuar sem a nuvem — a leitura do QR apenas preenche o código do sensor e o NFC apenas o ativa.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">SMS de emergência</string>
@@ -2832,4 +2844,18 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_interval_title">Procurar novos valores</string>
     <string name="nightscout_follow_interval_desc">Com que frequência o seguidor pergunta ao servidor. É também a idade que um valor pode ter e, portanto, o atraso possível de um alarme baseado num valor seguido. Um seguidor não tem sensor próprio para manter o telemóvel acordado, por isso cada verificação é um despertar.</string>
     <string name="nightscout_follow_interval_doze">Abaixo de 9 minutos, o Android pode ainda assim afastar as verificações enquanto o telemóvel está inativo. Excluir o Juggluco da otimização da bateria mantém o intervalo escolhido.</string>
+    <string name="journal_curve_unverified">Curva não verificada</string>
+    <string name="journal_curve_unverified_desc">Esta forma de atividade é uma estimativa ou uma curva personalizada e não está associada a uma fonte farmacodinâmica completa.</string>
+    <string name="journal_curve_source_backed">Curva de dose única baseada em fonte</string>
+    <string name="journal_curve_source_backed_desc">Derivada de um perfil farmacodinâmico publicado da taxa de perfusão de glicose. É uma média populacional, não uma previsão personalizada.</string>
+    <string name="journal_curve_steady_state">Perfil de estado estacionário baseado em fonte</string>
+    <string name="journal_curve_steady_state_desc">Medido após doses repetidas. É apresentado como referência e não pode ser usado como ação de uma dose única.</string>
+    <string name="journal_curve_reference_only">Perfil de referência baseado em fonte</string>
+    <string name="journal_curve_reference_only_desc">A observação publicada não contém a cauda completa de uma dose única, pelo que o cálculo está desativado.</string>
+    <string name="journal_curve_use_source">Usar fonte</string>
+    <string name="journal_body_weight_title">Peso corporal para curvas de insulina</string>
+    <string name="journal_body_weight_desc">Usado apenas para selecionar perfis oficiais de atividade por quilograma. As novas doses guardam localmente o peso utilizado.</string>
+    <string name="journal_body_weight_kg">Peso (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Não definido. As curvas indexadas pelo peso usam a dose de referência.</string>
 </resources>

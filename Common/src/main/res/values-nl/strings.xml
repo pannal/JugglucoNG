@@ -2038,6 +2038,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="ottai_connect_saved_fail">Geen account- of opgeslagen materialen voor deze cloud-ID</string>
     <string name="ottai_status_needs_ble_address">BLE-adres nodig</string>
     <string name="ottai_status_warmup_provisional">Voorlopige opwarming • nog %1$d min</string>
+    <string name="anytime_status_warming_up">Opwarmen</string>
+    <string name="anytime_status_warming_up_remaining">Opwarmen • nog %1$d min</string>
     <string name="ottai_status_loading_history">Geschiedenis laden • %1$d%%</string>
     <string name="ottai_ble_scan_title">Ottai-sensoren in de buurt</string>
     <string name="ottai_ble_scan_hint">Houd de telefoon dicht bij de sensor. Stabiele CGM-zenders verschijnen hier.</string>
@@ -2382,6 +2384,16 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="nightscout_upload_iob_desc">Nightscout toont dan deze waarde in plaats van de eigen berekening op basis van het profiel. eIOB en COB worden daarnaast in een apart veld verstuurd. Het toegangstoken heeft api:devicestatus:create nodig.</string>
     <string name="journal_iob_source_remote">Waarden van het uploadende apparaat (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Er is nog een andere sensor aan het Ottai-account gekoppeld. Ontkoppel deze in de Ottai-app of verwijder die sensor hier om de koppeling vrij te geven en probeer het opnieuw.</string>
+    <string name="ottai_cloud_unbind_hint">Alleen een actie voor het cloudaccount. JugglucoNG maakt geen verbinding met de geselecteerde sensor en stopt, verwijdert of wijzigt deze niet.</string>
+    <string name="ottai_cloud_unbind_title">Deze sensor permanent ontkoppelen?</string>
+    <string name="ottai_cloud_unbind_message">%1$s wordt permanent uit dit Ottai-account verwijderd. Het account kan de referenties daarna niet meer ophalen en de sensor werkt niet meer in de officiële Ottai-app. Reeds in JugglucoNG opgeslagen referenties en sensorstatus blijven ongewijzigd. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="ottai_cloud_unbind_confirm">Permanent ontkoppelen</string>
+    <string name="ottai_cloud_unbind_success">Sensor permanent ontkoppeld van Ottai. De sensor en opgeslagen referenties in JugglucoNG zijn niet gewijzigd.</string>
+    <string name="ottai_cloud_unbind_failed">De sensor kon niet van Ottai worden ontkoppeld.</string>
+    <string name="ottai_cloud_binding_checking">Ottai-cloudkoppeling controleren…</string>
+    <string name="ottai_cloud_binding_bound">Cloudstatus: gekoppeld aan dit Ottai-account</string>
+    <string name="ottai_cloud_binding_not_bound">Cloudstatus: niet gekoppeld aan dit Ottai-account</string>
+    <string name="ottai_cloud_binding_error">De Ottai-cloudkoppeling kon niet worden gecontroleerd</string>
     <string name="ottai_cloud_offline_routes">Importeer een bestand met aanmeldgegevens om zonder cloud verder te gaan — een QR-scan vult alleen de sensorcode in en NFC maakt de sensor alleen wakker.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Nood-sms</string>
@@ -2874,4 +2886,18 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="nightscout_follow_interval_title">Naar nieuwe waarden kijken</string>
     <string name="nightscout_follow_interval_desc">Hoe vaak de volger de server bevraagt. Dat is ook hoe oud een waarde kan zijn, en dus hoe laat een alarm op een gevolgde waarde kan komen. Een volger heeft geen eigen sensor die de telefoon wakker houdt, dus elke controle is een wekmoment.</string>
     <string name="nightscout_follow_interval_doze">Onder 9 minuten kan Android de controles alsnog verder uit elkaar leggen terwijl de telefoon inactief is. Juggluco uitsluiten van batterijoptimalisatie behoudt het gekozen interval.</string>
+    <string name="journal_curve_unverified">Niet-geverifieerde curve</string>
+    <string name="journal_curve_unverified_desc">Deze activiteitscurve is een schatting of aangepaste curve en is niet terug te voeren op een volledige farmacodynamische bron.</string>
+    <string name="journal_curve_source_backed">Brongebaseerde curve voor één dosis</string>
+    <string name="journal_curve_source_backed_desc">Afgeleid van een gepubliceerd farmacodynamisch glucose-infusiesnelheidsprofiel. Het is een populatiegemiddelde, geen persoonlijke voorspelling.</string>
+    <string name="journal_curve_steady_state">Brongebaseerd steady-stateprofiel</string>
+    <string name="journal_curve_steady_state_desc">Gemeten na herhaalde dosering. Het wordt als referentie getoond en kan niet als de werking van één dosis worden gebruikt.</string>
+    <string name="journal_curve_reference_only">Brongebaseerd referentieprofiel</string>
+    <string name="journal_curve_reference_only_desc">De gepubliceerde waarneming bevat geen volledige uitloop van één dosis, daarom is berekening uitgeschakeld.</string>
+    <string name="journal_curve_use_source">Bron gebruiken</string>
+    <string name="journal_body_weight_title">Lichaamsgewicht voor insulinecurven</string>
+    <string name="journal_body_weight_desc">Alleen gebruikt om officiële activiteitsprofielen per kilogram te selecteren. Nieuwe doses bewaren lokaal het gebruikte gewicht.</string>
+    <string name="journal_body_weight_kg">Gewicht (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Niet ingesteld. Gewichtsafhankelijke curven gebruiken hun referentiedosis.</string>
 </resources>

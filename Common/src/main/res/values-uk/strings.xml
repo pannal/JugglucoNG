@@ -2068,6 +2068,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_connect_saved_fail">Немає матеріалів в акаунті або збережених матеріалів для цього хмарного ID</string>
     <string name="ottai_status_needs_ble_address">Потрібна BLE-адреса</string>
     <string name="ottai_status_warmup_provisional">Попередній прогрів • залишилось %1$d хв</string>
+    <string name="anytime_status_warming_up">Прогрів</string>
+    <string name="anytime_status_warming_up_remaining">Прогрів • залишилось %1$d хв</string>
     <string name="ottai_status_loading_history">Завантаження історії • %1$d%%</string>
     <string name="ottai_ble_scan_title">Датчики Ottai поруч</string>
     <string name="ottai_ble_scan_hint">Піднесіть телефон ближче до датчика. Тут з’являться стабільні CGM-пристрої.</string>
@@ -2411,6 +2413,16 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_upload_iob_desc">Nightscout показуватиме це значення замість власного розрахунку за профілем. eIOB і COB додатково передаються в окремому полі. Токен доступу потребує api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Значення з пристрою, що надсилає дані (Nightscout)</string>
     <string name="ottai_cloud_already_binding">До облікового запису Ottai досі прив’язаний інший сенсор. Відв’яжіть його в застосунку Ottai або видаліть той сенсор тут, щоб звільнити прив’язку, а потім повторіть спробу.</string>
+    <string name="ottai_cloud_unbind_hint">Дія лише з хмарним обліковим записом. JugglucoNG не підключатиметься до вибраного сенсора, не зупинятиме, не видалятиме й не змінюватиме його.</string>
+    <string name="ottai_cloud_unbind_title">Назавжди відв’язати цей сенсор?</string>
+    <string name="ottai_cloud_unbind_message">%1$s буде назавжди видалено з цього облікового запису Ottai. Обліковий запис більше не зможе отримати його облікові дані, а сенсор більше не працюватиме в офіційному застосунку Ottai. Збережені в JugglucoNG облікові дані та стан сенсора не зміняться. Цю дію неможливо скасувати.</string>
+    <string name="ottai_cloud_unbind_confirm">Відв’язати назавжди</string>
+    <string name="ottai_cloud_unbind_success">Сенсор назавжди відв’язано від Ottai. Сенсор і збережені дані в JugglucoNG не змінено.</string>
+    <string name="ottai_cloud_unbind_failed">Не вдалося відв’язати сенсор від Ottai.</string>
+    <string name="ottai_cloud_binding_checking">Перевірка прив’язки в хмарі Ottai…</string>
+    <string name="ottai_cloud_binding_bound">Стан хмари: прив’язано до цього облікового запису Ottai</string>
+    <string name="ottai_cloud_binding_not_bound">Стан хмари: не прив’язано до цього облікового запису Ottai</string>
+    <string name="ottai_cloud_binding_error">Не вдалося перевірити прив’язку в хмарі Ottai</string>
     <string name="ottai_cloud_offline_routes">Імпортуйте файл облікових даних, щоб продовжити без хмари — сканування QR лише заповнює код сенсора, а NFC лише пробуджує його.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Екстрені SMS</string>
@@ -2907,4 +2919,18 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_interval_title">Перевіряти нові значення</string>
     <string name="nightscout_follow_interval_desc">Як часто підписник опитує сервер. Це водночас і те, наскільки старим може бути значення, а отже і наскільки пізно надійде тривога за відстежуваним значенням. Підписник не має власного сенсора, який тримав би телефон активним, тож кожна перевірка — це пробудження.</string>
     <string name="nightscout_follow_interval_doze">Менше 9 хвилин Android усе одно може розсувати перевірки, поки телефон бездіяльний. Виключення Juggluco з оптимізації батареї зберігає вибраний інтервал.</string>
+    <string name="journal_curve_unverified">Неперевірена крива</string>
+    <string name="journal_curve_unverified_desc">Ця форма активності є оцінкою або користувацькою кривою і не пов’язана з повним фармакодинамічним джерелом.</string>
+    <string name="journal_curve_source_backed">Крива однієї дози на основі джерела</string>
+    <string name="journal_curve_source_backed_desc">Отримана з опублікованого фармакодинамічного профілю швидкості інфузії глюкози. Це середнє для популяції, а не персональний прогноз.</string>
+    <string name="journal_curve_steady_state">Профіль рівноважного стану на основі джерела</string>
+    <string name="journal_curve_steady_state_desc">Виміряний після повторного введення. Показаний для довідки й не може використовуватися як дія однієї дози.</string>
+    <string name="journal_curve_reference_only">Довідковий профіль на основі джерела</string>
+    <string name="journal_curve_reference_only_desc">Опубліковане спостереження не містить повного хвоста однієї дози, тому розрахунок вимкнено.</string>
+    <string name="journal_curve_use_source">Використати джерело</string>
+    <string name="journal_body_weight_title">Маса тіла для кривих інсуліну</string>
+    <string name="journal_body_weight_desc">Використовується лише для вибору офіційних профілів активності дози на кілограм. Нові дози зберігають локальний знімок використаної маси.</string>
+    <string name="journal_body_weight_kg">Маса (кг)</string>
+    <string name="journal_body_weight_value">%1$.1f кг</string>
+    <string name="journal_body_weight_not_set">Не задано. Криві, залежні від маси, використовують еталонну дозу.</string>
 </resources>

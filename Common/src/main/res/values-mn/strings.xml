@@ -2013,6 +2013,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="ottai_connect_saved_fail">Энэ cloud ID-д аккаунт эсвэл хадгалсан материал алга</string>
     <string name="ottai_status_needs_ble_address">BLE хаяг хэрэгтэй</string>
     <string name="ottai_status_warmup_provisional">Түр халаалт • %1$d мин үлдлээ</string>
+    <string name="anytime_status_warming_up">Халаалт</string>
+    <string name="anytime_status_warming_up_remaining">Халаалт • %1$d мин үлдлээ</string>
     <string name="ottai_status_loading_history">Түүхийг ачаалж байна • %1$d%%</string>
     <string name="ottai_ble_scan_title">Ойролцоох Ottai мэдрэгчүүд</string>
     <string name="ottai_ble_scan_hint">Утсаа мэдрэгчид ойртуулна уу. Тогтвортой CGM дамжуулагчид энд гарна.</string>
@@ -2454,6 +2456,16 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="nightscout_upload_iob_desc">Nightscout нь профайлаас өөрөө тооцоолохын оронд энэ утгыг харуулна. eIOB болон COB-г тусдаа талбараар давхар илгээнэ. Хандалтын токенд api:devicestatus:create шаардлагатай.</string>
     <string name="journal_iob_source_remote">Өгөгдөл илгээж буй төхөөрөмжийн утгууд (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Ottai бүртгэлд өөр мэдрэгч холбогдсон хэвээр байна. Ottai апп-аас салгах эсвэл эндээс тухайн мэдрэгчийг устгаж холболтыг чөлөөлөөд дахин оролдоно уу.</string>
+    <string name="ottai_cloud_unbind_hint">Энэ үйлдэл зөвхөн үүлэн бүртгэлийг өөрчилнө. JugglucoNG сонгосон мэдрэгчтэй холбогдохгүй, зогсоохгүй, устгахгүй, өөрчлөхгүй.</string>
+    <string name="ottai_cloud_unbind_title">Энэ мэдрэгчийг бүрмөсөн салгах уу?</string>
+    <string name="ottai_cloud_unbind_message">%1$s энэ Ottai бүртгэлээс бүрмөсөн хасагдана. Бүртгэл цаашид түүний нэвтрэх мэдээллийг авч чадахгүй бөгөөд мэдрэгч албан ёсны Ottai апп-д ажиллахгүй. JugglucoNG-д хадгалсан нэвтрэх мэдээлэл болон мэдрэгчийн төлөв өөрчлөгдөхгүй. Энэ үйлдлийг буцаах боломжгүй.</string>
+    <string name="ottai_cloud_unbind_confirm">Бүрмөсөн салгах</string>
+    <string name="ottai_cloud_unbind_success">Мэдрэгчийг Ottai-аас бүрмөсөн салгалаа. JugglucoNG дахь мэдрэгч болон хадгалсан мэдээлэл өөрчлөгдөөгүй.</string>
+    <string name="ottai_cloud_unbind_failed">Мэдрэгчийг Ottai-аас салгаж чадсангүй.</string>
+    <string name="ottai_cloud_binding_checking">Ottai үүлэн холболтыг шалгаж байна…</string>
+    <string name="ottai_cloud_binding_bound">Үүлэн төлөв: энэ Ottai бүртгэлтэй холбогдсон</string>
+    <string name="ottai_cloud_binding_not_bound">Үүлэн төлөв: энэ Ottai бүртгэлтэй холбогдоогүй</string>
+    <string name="ottai_cloud_binding_error">Ottai үүлэн холболтыг шалгаж чадсангүй</string>
     <string name="ottai_cloud_offline_routes">Үүлэн үйлчилгээгүй үргэлжлүүлэхийн тулд нэвтрэх мэдээллийн файлыг импортлоно уу — QR уншуулах нь зөвхөн мэдрэгчийн кодыг бөглөж, NFC нь мэдрэгчийг зөвхөн сэрээнэ.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Яаралтай SMS</string>
@@ -2946,4 +2958,18 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="nightscout_follow_interval_title">Шинэ утга шалгах</string>
     <string name="nightscout_follow_interval_desc">Дагагч сервер рүү ямар давтамжтай хандахыг заана. Энэ нь мөн утга хэр хуучин байж болохыг, тиймээс дагасан утган дээр сэрэмжлүүлэг хэр хожуу ирэхийг тодорхойлно. Дагагчид утсыг сэрүүн байлгах өөрийн мэдрэгч байхгүй тул шалгалт бүр нь сэрээх үйлдэл юм.</string>
     <string name="nightscout_follow_interval_doze">9 минутаас бага бол утас сул зогсож байх үед Android шалгалтуудыг улам сунгаж болно. Juggluco-г батерейны оновчлолоос хасвал сонгосон интервал хэвээр үлдэнэ.</string>
+    <string name="journal_curve_unverified">Баталгаажаагүй муруй</string>
+    <string name="journal_curve_unverified_desc">Энэ үйлчлэлийн хэлбэр нь тооцоолол эсвэл хэрэглэгчийн муруй бөгөөд бүрэн фармакодинамикийн эх сурвалжтай холбогдоогүй.</string>
+    <string name="journal_curve_source_backed">Эх сурвалжтай нэг тунгийн муруй</string>
+    <string name="journal_curve_source_backed_desc">Нийтлэгдсэн фармакодинамикийн глюкоз сэлбэлтийн хурдны профайлаас гаргасан. Энэ нь хүн амын дундаж бөгөөд хувь хүний таамаглал биш.</string>
+    <string name="journal_curve_steady_state">Эх сурвалжтай тогтвортой төлөвийн профайл</string>
+    <string name="journal_curve_steady_state_desc">Давтан тунгийн дараа хэмжсэн. Зөвхөн лавлагаанд харуулах бөгөөд нэг тунгийн үйлчлэл болгон ашиглах боломжгүй.</string>
+    <string name="journal_curve_reference_only">Эх сурвалжтай лавлагааны профайл</string>
+    <string name="journal_curve_reference_only_desc">Нийтлэгдсэн ажиглалтад нэг тунгийн бүрэн төгсгөл байхгүй тул тооцооллыг идэвхгүй болгосон.</string>
+    <string name="journal_curve_use_source">Эх сурвалжийг ашиглах</string>
+    <string name="journal_body_weight_title">Инсулины муруйн биеийн жин</string>
+    <string name="journal_body_weight_desc">Зөвхөн килограмм тутмын албан ёсны үйлчлэлийн профайлыг сонгоход ашиглана. Шинэ тун бүр ашигласан жингийн дотоод хуулбарыг хадгална.</string>
+    <string name="journal_body_weight_kg">Жин (кг)</string>
+    <string name="journal_body_weight_value">%1$.1f кг</string>
+    <string name="journal_body_weight_not_set">Тохируулаагүй. Жинд суурилсан муруй лавлагааны тунг ашиглана.</string>
 </resources>

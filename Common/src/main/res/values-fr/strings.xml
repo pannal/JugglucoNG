@@ -2001,6 +2001,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_connect_saved_fail">Aucune donnée de compte ou enregistrée pour cet ID cloud</string>
     <string name="ottai_status_needs_ble_address">Adresse BLE requise</string>
     <string name="ottai_status_warmup_provisional">Préchauffage provisoire • %1$d min restantes</string>
+    <string name="anytime_status_warming_up">Préchauffage</string>
+    <string name="anytime_status_warming_up_remaining">Préchauffage • %1$d min restantes</string>
     <string name="ottai_status_loading_history">Chargement de l’historique • %1$d%%</string>
     <string name="ottai_ble_scan_title">Capteurs Ottai à proximité</string>
     <string name="ottai_ble_scan_hint">Rapprochez le téléphone du capteur. Les émetteurs CGM stables apparaissent ici.</string>
@@ -2345,6 +2347,16 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_upload_iob_desc">Nightscout affiche alors cette valeur au lieu de son propre calcul basé sur le profil. L’eIOB et les glucides actifs (COB) sont également envoyés dans un champ distinct. Le jeton d\'accès a besoin de api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Valeurs de l’appareil émetteur (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Un autre capteur est encore associé au compte Ottai. Dissociez-le dans l’application Ottai ou supprimez ce capteur ici pour libérer l’association, puis réessayez.</string>
+    <string name="ottai_cloud_unbind_hint">Action sur le compte cloud uniquement. JugglucoNG ne se connectera pas au capteur sélectionné et ne l’arrêtera, ne le supprimera ni ne le modifiera.</string>
+    <string name="ottai_cloud_unbind_title">Dissocier définitivement ce capteur ?</string>
+    <string name="ottai_cloud_unbind_message">%1$s sera définitivement supprimé de ce compte Ottai. Le compte ne pourra plus récupérer ses identifiants et le capteur ne fonctionnera plus dans l’application Ottai officielle. Les identifiants et l’état du capteur déjà enregistrés dans JugglucoNG ne seront pas modifiés. Cette action est irréversible.</string>
+    <string name="ottai_cloud_unbind_confirm">Dissocier définitivement</string>
+    <string name="ottai_cloud_unbind_success">Capteur définitivement dissocié d’Ottai. Le capteur et les identifiants enregistrés dans JugglucoNG n’ont pas été modifiés.</string>
+    <string name="ottai_cloud_unbind_failed">Impossible de dissocier le capteur d’Ottai.</string>
+    <string name="ottai_cloud_binding_checking">Vérification de l’association au cloud Ottai…</string>
+    <string name="ottai_cloud_binding_bound">État du cloud : associé à ce compte Ottai</string>
+    <string name="ottai_cloud_binding_not_bound">État du cloud : non associé à ce compte Ottai</string>
+    <string name="ottai_cloud_binding_error">Impossible de vérifier l’association au cloud Ottai</string>
     <string name="ottai_cloud_offline_routes">Importez un fichier d’identifiants pour continuer sans le cloud — le scan QR renseigne uniquement le code du capteur et le NFC ne fait que le réveiller.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">SMS d\'urgence</string>
@@ -2837,4 +2849,18 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_interval_title">Rechercher de nouvelles valeurs</string>
     <string name="nightscout_follow_interval_desc">À quelle fréquence le suiveur interroge le serveur. C\'est aussi l\'âge que peut avoir une valeur, et donc le retard possible d\'une alarme déclenchée sur une valeur suivie. Un suiveur n\'a pas de capteur à lui pour garder le téléphone éveillé, donc chaque interrogation est un réveil.</string>
     <string name="nightscout_follow_interval_doze">En dessous de 9 minutes, Android peut malgré tout espacer les interrogations lorsque le téléphone est inactif. Exclure Juggluco de l\'optimisation de la batterie préserve l\'intervalle choisi.</string>
+    <string name="journal_curve_unverified">Courbe non vérifiée</string>
+    <string name="journal_curve_unverified_desc">Cette courbe d’activité est une estimation ou une courbe personnalisée et ne provient pas d’une source pharmacodynamique complète.</string>
+    <string name="journal_curve_source_backed">Courbe de dose unique fondée sur une source</string>
+    <string name="journal_curve_source_backed_desc">Dérivée d’un profil pharmacodynamique publié du débit de perfusion de glucose. Il s’agit d’une moyenne de population, pas d’une prédiction personnalisée.</string>
+    <string name="journal_curve_steady_state">Profil à l’état d’équilibre fondé sur une source</string>
+    <string name="journal_curve_steady_state_desc">Mesuré après des doses répétées. Il est affiché à titre de référence et ne peut pas représenter l’action d’une seule dose.</string>
+    <string name="journal_curve_reference_only">Profil de référence fondé sur une source</string>
+    <string name="journal_curve_reference_only_desc">L’observation publiée ne contient pas la fin complète d’une dose unique, le calcul est donc désactivé.</string>
+    <string name="journal_curve_use_source">Utiliser la source</string>
+    <string name="journal_body_weight_title">Poids pour les courbes d’insuline</string>
+    <string name="journal_body_weight_desc">Utilisé uniquement pour sélectionner les profils d’activité officiels en dose par kilogramme. Les nouvelles doses conservent localement le poids utilisé.</string>
+    <string name="journal_body_weight_kg">Poids (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Non défini. Les courbes indexées sur le poids utilisent leur dose de référence.</string>
 </resources>

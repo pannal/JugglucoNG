@@ -39,6 +39,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v16 — contributedAt on the product cache (sent to Open Food Facts)
  *   v17 — saturated fat, salt and an OFF category on the product cache (Nutri-Score inputs)
  *   v18 — hypo episode classification marks (sensor-pressure vs real, user-togglable)
+ *   v19 — versioned insulin curve evidence and immutable per-dose curve snapshots
  */
 @Database(
     entities = [
@@ -53,7 +54,7 @@ import tk.glucodata.data.meal.MealProductEntity
         MealProductEntity::class,
         HypoEpisodeMark::class
     ],
-    version = 18,
+    version = 19,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -411,6 +412,44 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_insulin_presets ADD COLUMN curveProfileId TEXT")
+                db.execSQL(
+                    "ALTER TABLE journal_insulin_presets " +
+                        "ADD COLUMN curveModelVersion INTEGER NOT NULL DEFAULT 0"
+                )
+                db.execSQL(
+                    "ALTER TABLE journal_insulin_presets " +
+                        "ADD COLUMN curveEvidence TEXT NOT NULL DEFAULT 'unverified'"
+                )
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN insulinCurveJsonSnapshot TEXT")
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN insulinCurveProfileId TEXT")
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN insulinCurveModelVersion INTEGER")
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN insulinCurveEvidence TEXT")
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN insulinBodyWeightKg REAL")
+                db.execSQL(
+                    "ALTER TABLE journal_entries " +
+                        "ADD COLUMN insulinCurveWasApproximated INTEGER NOT NULL DEFAULT 0"
+                )
+                // Freeze the curve that every existing insulin entry uses today.
+                // Later preset upgrades must not rewrite historical or active doses.
+                db.execSQL(
+                    """
+                    UPDATE journal_entries
+                    SET insulinCurveJsonSnapshot = (
+                        SELECT curveJson
+                        FROM journal_insulin_presets
+                        WHERE journal_insulin_presets.id = journal_entries.insulinPresetId
+                    ),
+                    insulinCurveEvidence = 'unverified',
+                    insulinCurveWasApproximated = 1
+                    WHERE entryType = 'insulin' AND insulinPresetId IS NOT NULL
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -434,7 +473,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_14_15,
                     MIGRATION_15_16,
                     MIGRATION_16_17,
-                    MIGRATION_17_18
+                    MIGRATION_17_18,
+                    MIGRATION_18_19
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }

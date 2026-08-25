@@ -3,6 +3,7 @@ package tk.glucodata.data.journal
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 
 @Entity(
     tableName = "journal_entries",
@@ -47,5 +48,12 @@ data class JournalEntryEntity(
      * Correlates this fact (eaten, injected) with the meal it belongs to. The meal holds the
      * composition; the journal stays the log. Nullable, and never set by the meal itself.
      */
-    val mealId: Long? = null
+    val mealId: Long? = null,
+    val insulinCurveJsonSnapshot: String? = null,
+    val insulinCurveProfileId: String? = null,
+    val insulinCurveModelVersion: Int? = null,
+    val insulinCurveEvidence: String? = null,
+    val insulinBodyWeightKg: Float? = null,
+    @ColumnInfo(defaultValue = "0")
+    val insulinCurveWasApproximated: Boolean = false
 )

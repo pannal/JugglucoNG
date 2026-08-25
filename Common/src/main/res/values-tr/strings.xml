@@ -2023,6 +2023,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="ottai_connect_saved_fail">Bu bulut kimliği için hesapta veya kayıtlı materyal yok</string>
     <string name="ottai_status_needs_ble_address">BLE adresi gerekli</string>
     <string name="ottai_status_warmup_provisional">Geçici ısınma • %1$d dk kaldı</string>
+    <string name="anytime_status_warming_up">Isınma</string>
+    <string name="anytime_status_warming_up_remaining">Isınma • %1$d dk kaldı</string>
     <string name="ottai_status_loading_history">Geçmiş yükleniyor • %1$d%%</string>
     <string name="ottai_ble_scan_title">Yakındaki Ottai sensörleri</string>
     <string name="ottai_ble_scan_hint">Telefonu sensöre yaklaştırın. Kararlı CGM yayınları burada görünür.</string>
@@ -2367,6 +2369,16 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="nightscout_upload_iob_desc">Nightscout, profil üzerinden kendi hesapladığı değer yerine bu değeri gösterir. eIOB ve COB ayrıca ayrı bir alanda gönderilir. Erişim belirtecinin api:devicestatus:create izni gerekir.</string>
     <string name="journal_iob_source_remote">Verileri yükleyen cihazın değerleri (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Ottai hesabına hâlâ başka bir sensör bağlı. Bağlantıyı serbest bırakmak için sensörü Ottai uygulamasından ayırın veya buradan kaldırın, ardından yeniden deneyin.</string>
+    <string name="ottai_cloud_unbind_hint">Yalnızca bulut hesabı işlemi. JugglucoNG seçili sensöre bağlanmaz; sensörü durdurmaz, kaldırmaz veya değiştirmez.</string>
+    <string name="ottai_cloud_unbind_title">Bu sensörün bağlantısı kalıcı olarak kaldırılsın mı?</string>
+    <string name="ottai_cloud_unbind_message">%1$s bu Ottai hesabından kalıcı olarak kaldırılacak. Hesap artık sensörün kimlik bilgilerini alamayacak ve sensör resmi Ottai uygulamasında çalışmayacak. JugglucoNG’de önceden kaydedilmiş kimlik bilgileri ve sensör durumu değiştirilmeyecek. Bu işlem geri alınamaz.</string>
+    <string name="ottai_cloud_unbind_confirm">Kalıcı olarak kaldır</string>
+    <string name="ottai_cloud_unbind_success">Sensörün Ottai bağlantısı kalıcı olarak kaldırıldı. JugglucoNG’deki sensör ve kayıtlı bilgiler değiştirilmedi.</string>
+    <string name="ottai_cloud_unbind_failed">Sensörün Ottai bağlantısı kaldırılamadı.</string>
+    <string name="ottai_cloud_binding_checking">Ottai bulut bağlantısı denetleniyor…</string>
+    <string name="ottai_cloud_binding_bound">Bulut durumu: bu Ottai hesabına bağlı</string>
+    <string name="ottai_cloud_binding_not_bound">Bulut durumu: bu Ottai hesabına bağlı değil</string>
+    <string name="ottai_cloud_binding_error">Ottai bulut bağlantısı denetlenemedi</string>
     <string name="ottai_cloud_offline_routes">Bulut olmadan devam etmek için bir kimlik bilgileri dosyası içe aktarın — QR taraması yalnızca sensör kodunu doldurur, NFC ise yalnızca sensörü uyandırır.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Acil SMS</string>
@@ -2859,4 +2871,18 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="nightscout_follow_interval_title">Yeni değerleri kontrol et</string>
     <string name="nightscout_follow_interval_desc">Takipçinin sunucuya ne sıklıkla sorduğu. Bu aynı zamanda bir değerin ne kadar eski olabileceği, dolayısıyla takip edilen bir değere dayanan alarmın ne kadar geç gelebileceğidir. Takipçinin telefonu uyanık tutan kendi sensörü yoktur, bu yüzden her kontrol bir uyandırmadır.</string>
     <string name="nightscout_follow_interval_doze">9 dakikanın altında Android, telefon boştayken kontrolleri yine de aralayabilir. Juggluco\'yu pil optimizasyonundan çıkarmak seçilen aralığı korur.</string>
+    <string name="journal_curve_unverified">Doğrulanmamış eğri</string>
+    <string name="journal_curve_unverified_desc">Bu aktivite şekli bir tahmin veya özel eğridir ve eksiksiz bir farmakodinamik kaynağa dayanmamaktadır.</string>
+    <string name="journal_curve_source_backed">Kaynak destekli tek doz eğrisi</string>
+    <string name="journal_curve_source_backed_desc">Yayımlanmış bir farmakodinamik glikoz infüzyon hızı profilinden türetilmiştir. Kişiselleştirilmiş bir tahmin değil, popülasyon ortalamasıdır.</string>
+    <string name="journal_curve_steady_state">Kaynak destekli kararlı durum profili</string>
+    <string name="journal_curve_steady_state_desc">Tekrarlanan dozlardan sonra ölçülmüştür. Yalnızca referans için gösterilir ve tek dozun etkisi olarak kullanılamaz.</string>
+    <string name="journal_curve_reference_only">Kaynak destekli referans profili</string>
+    <string name="journal_curve_reference_only_desc">Yayımlanan gözlem tek dozun tam kuyruğunu içermediğinden hesaplama devre dışıdır.</string>
+    <string name="journal_curve_use_source">Kaynağı kullan</string>
+    <string name="journal_body_weight_title">İnsülin eğrileri için vücut ağırlığı</string>
+    <string name="journal_body_weight_desc">Yalnızca kilogram başına resmî aktivite profillerini seçmek için kullanılır. Yeni dozlar kullanılan ağırlığın yerel anlık görüntüsünü saklar.</string>
+    <string name="journal_body_weight_kg">Ağırlık (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Ayarlanmadı. Ağırlığa bağlı eğriler referans dozu kullanır.</string>
 </resources>

@@ -1995,6 +1995,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_connect_saved_fail">Inga konto- eller sparade material för detta moln-ID</string>
     <string name="ottai_status_needs_ble_address">BLE-adress behövs</string>
     <string name="ottai_status_warmup_provisional">Provisorisk uppvärmning • %1$d min kvar</string>
+    <string name="anytime_status_warming_up">Uppvärmning</string>
+    <string name="anytime_status_warming_up_remaining">Uppvärmning • %1$d min kvar</string>
     <string name="ottai_status_loading_history">Läser in historik • %1$d%%</string>
     <string name="ottai_ble_scan_title">Ottai-sensorer i närheten</string>
     <string name="ottai_ble_scan_hint">Håll telefonen nära sensorn. Stabila CGM-sändare visas här.</string>
@@ -2339,6 +2341,16 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_upload_iob_desc">Nightscout visar då detta värde i stället för sin egen profilbaserade beräkning. eIOB och COB skickas dessutom i ett separat fält. Åtkomsttoken behöver api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Värden från den uppladdande enheten (Nightscout)</string>
     <string name="ottai_cloud_already_binding">En annan sensor är fortfarande kopplad till Ottai-kontot. Koppla bort den i Ottai-appen eller ta bort sensorn här för att frigöra kopplingen och försök sedan igen.</string>
+    <string name="ottai_cloud_unbind_hint">Endast en åtgärd för molnkontot. JugglucoNG ansluter inte till, stoppar, tar bort eller ändrar den valda sensorn.</string>
+    <string name="ottai_cloud_unbind_title">Koppla bort sensorn permanent?</string>
+    <string name="ottai_cloud_unbind_message">%1$s tas bort permanent från detta Ottai-konto. Kontot kan därefter inte längre hämta dess autentiseringsuppgifter och sensorn fungerar inte längre i den officiella Ottai-appen. Autentiseringsuppgifter och sensorstatus som redan sparats i JugglucoNG ändras inte. Detta kan inte ångras.</string>
+    <string name="ottai_cloud_unbind_confirm">Koppla bort permanent</string>
+    <string name="ottai_cloud_unbind_success">Sensorn har kopplats bort permanent från Ottai. Sensorn och sparade uppgifter i JugglucoNG ändrades inte.</string>
+    <string name="ottai_cloud_unbind_failed">Det gick inte att koppla bort sensorn från Ottai.</string>
+    <string name="ottai_cloud_binding_checking">Kontrollerar Ottai-molnkopplingen…</string>
+    <string name="ottai_cloud_binding_bound">Molnstatus: kopplad till detta Ottai-konto</string>
+    <string name="ottai_cloud_binding_not_bound">Molnstatus: inte kopplad till detta Ottai-konto</string>
+    <string name="ottai_cloud_binding_error">Det gick inte att kontrollera Ottai-molnkopplingen</string>
     <string name="ottai_cloud_offline_routes">Importera en autentiseringsfil för att fortsätta utan molnet — en QR-skanning fyller bara i sensorkoden och NFC väcker bara sensorn.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Nöd-SMS</string>
@@ -2831,4 +2843,18 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_interval_title">Leta efter nya värden</string>
     <string name="nightscout_follow_interval_desc">Hur ofta följaren frågar servern. Det är också hur gammalt ett värde kan vara, och därmed hur sent ett larm på ett följt värde kan komma. En följare har ingen egen sensor som håller telefonen vaken, så varje kontroll är en väckning.</string>
     <string name="nightscout_follow_interval_doze">Under 9 minuter kan Android ändå glesa ut kontrollerna medan telefonen är inaktiv. Att undanta Juggluco från batterioptimering behåller det valda intervallet.</string>
+    <string name="journal_curve_unverified">Obekräftad kurva</string>
+    <string name="journal_curve_unverified_desc">Den här aktivitetsformen är en uppskattning eller en anpassad kurva och kan inte härledas till en fullständig farmakodynamisk källa.</string>
+    <string name="journal_curve_source_backed">Källbaserad kurva för engångsdos</string>
+    <string name="journal_curve_source_backed_desc">Härledd från en publicerad farmakodynamisk profil för glukosinfusionshastighet. Det är ett populationsgenomsnitt, inte en personlig prognos.</string>
+    <string name="journal_curve_steady_state">Källbaserad steady-state-profil</string>
+    <string name="journal_curve_steady_state_desc">Uppmätt efter upprepad dosering. Den visas som referens och kan inte användas som effekten av en enskild dos.</string>
+    <string name="journal_curve_reference_only">Källbaserad referensprofil</string>
+    <string name="journal_curve_reference_only_desc">Den publicerade observationen saknar hela svansen för en engångsdos, så beräkning är avstängd.</string>
+    <string name="journal_curve_use_source">Använd källa</string>
+    <string name="journal_body_weight_title">Kroppsvikt för insulinkurvor</string>
+    <string name="journal_body_weight_desc">Används endast för att välja officiella aktivitetsprofiler per kilogram. Nya doser sparar en lokal ögonblicksbild av den använda vikten.</string>
+    <string name="journal_body_weight_kg">Vikt (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Inte angiven. Viktindexerade kurvor använder referensdosen.</string>
 </resources>

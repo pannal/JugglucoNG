@@ -2120,6 +2120,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="ottai_connect_saved_fail">Keine Konto- oder gespeicherten Materialien für diese Cloud-ID</string>
     <string name="ottai_status_needs_ble_address">BLE-Adresse erforderlich</string>
     <string name="ottai_status_warmup_provisional">Vorläufiges Aufwärmen • noch %1$d Min.</string>
+    <string name="anytime_status_warming_up">Aufwärmen</string>
+    <string name="anytime_status_warming_up_remaining">Aufwärmen • noch %1$d Min.</string>
     <string name="ottai_status_loading_history">Verlauf wird geladen • %1$d%%</string>
     <string name="ottai_ble_scan_title">Ottai-Sensoren in der Nähe</string>
     <string name="ottai_ble_scan_hint">Telefon nahe an den Sensor halten. Stabile CGM-Sender erscheinen hier.</string>
@@ -2378,6 +2380,16 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="sensor_handover_multiple_text">Der Sensor ist abgelaufen, aber mehrere Nachfolge-Sensoren sind aktiv. Automatische Übergabe übersprungen; bitte manuell wechseln.</string>
     <string name="sensor_handover_successor_ready">Nachfolge-Sensor ist bereit; die automatische Übergabe übernimmt beim Ablauf</string>
     <string name="ottai_cloud_already_binding">Mit dem Ottai-Konto ist noch ein anderer Sensor verknüpft. Trennen Sie ihn in der Ottai-App oder entfernen Sie diesen Sensor hier, um die Verknüpfung freizugeben, und versuchen Sie es erneut.</string>
+    <string name="ottai_cloud_unbind_hint">Nur eine Aktion für das Cloud-Konto. JugglucoNG verbindet sich nicht mit dem ausgewählten Sensor und stoppt, entfernt oder verändert ihn nicht.</string>
+    <string name="ottai_cloud_unbind_title">Diesen Sensor dauerhaft entkoppeln?</string>
+    <string name="ottai_cloud_unbind_message">%1$s wird dauerhaft aus diesem Ottai-Konto entfernt. Das Konto kann seine Zugangsdaten danach nicht mehr abrufen, und der Sensor funktioniert nicht mehr in der offiziellen Ottai-App. In JugglucoNG gespeicherte Zugangsdaten und der Sensorstatus bleiben unverändert. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="ottai_cloud_unbind_confirm">Dauerhaft entkoppeln</string>
+    <string name="ottai_cloud_unbind_success">Sensor dauerhaft von Ottai entkoppelt. Sensor und gespeicherte Zugangsdaten in JugglucoNG wurden nicht verändert.</string>
+    <string name="ottai_cloud_unbind_failed">Der Sensor konnte nicht von Ottai entkoppelt werden.</string>
+    <string name="ottai_cloud_binding_checking">Ottai-Cloud-Bindung wird geprüft…</string>
+    <string name="ottai_cloud_binding_bound">Cloud-Status: mit diesem Ottai-Konto verbunden</string>
+    <string name="ottai_cloud_binding_not_bound">Cloud-Status: nicht mit diesem Ottai-Konto verbunden</string>
+    <string name="ottai_cloud_binding_error">Ottai-Cloud-Bindung konnte nicht geprüft werden</string>
     <string name="ottai_cloud_offline_routes">Importieren Sie eine Zugangsdaten-Datei, um ohne Cloud fortzufahren — ein QR-Scan trägt nur den Sensorcode ein und NFC weckt den Sensor lediglich auf.</string>
     <!-- Emergency SMS destination -->
     <string name="outbound_api_preset_sms">Notfall-SMS</string>
@@ -2870,4 +2882,18 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="nightscout_follow_interval_title">Neue Werte abrufen</string>
     <string name="nightscout_follow_interval_desc">Wie oft der Follower den Server fragt. Das ist zugleich, wie alt ein Wert sein kann, und damit auch, wie spät ein Alarm auf einen gefolgten Wert kommen kann. Ein Follower hat keinen eigenen Sensor, der das Telefon wach hält, also ist jede Abfrage ein Aufwecken.</string>
     <string name="nightscout_follow_interval_doze">Unter 9 Minuten kann Android die Abfragen im Ruhezustand trotzdem weiter auseinanderziehen. Juggluco von der Akku-Optimierung auszunehmen hält das eingestellte Intervall.</string>
+    <string name="journal_curve_unverified">Nicht verifizierte Kurve</string>
+    <string name="journal_curve_unverified_desc">Diese Aktivitätskurve ist eine Schätzung oder eine benutzerdefinierte Kurve und lässt sich nicht auf eine vollständige pharmakodynamische Quelle zurückführen.</string>
+    <string name="journal_curve_source_backed">Quellenbasierte Einzeldosiskurve</string>
+    <string name="journal_curve_source_backed_desc">Aus einem veröffentlichten pharmakodynamischen Glukoseinfusionsraten-Profil abgeleitet. Sie ist ein Populationsmittelwert, keine personalisierte Vorhersage.</string>
+    <string name="journal_curve_steady_state">Quellenbasiertes Steady-State-Profil</string>
+    <string name="journal_curve_steady_state_desc">Nach wiederholter Dosierung gemessen. Es dient als Referenz und kann nicht als Wirkung einer einzelnen Dosis verwendet werden.</string>
+    <string name="journal_curve_reference_only">Quellenbasiertes Referenzprofil</string>
+    <string name="journal_curve_reference_only_desc">Die veröffentlichte Beobachtung enthält keinen vollständigen Einzeldosis-Auslauf, daher ist die Berechnung deaktiviert.</string>
+    <string name="journal_curve_use_source">Quelle verwenden</string>
+    <string name="journal_body_weight_title">Körpergewicht für Insulinkurven</string>
+    <string name="journal_body_weight_desc">Wird nur zur Auswahl offizieller dosisbezogener Aktivitätsprofile pro Kilogramm verwendet. Neue Dosen speichern lokal das verwendete Gewicht.</string>
+    <string name="journal_body_weight_kg">Gewicht (kg)</string>
+    <string name="journal_body_weight_value">%1$.1f kg</string>
+    <string name="journal_body_weight_not_set">Nicht festgelegt. Gewichtsabhängige Kurven verwenden ihre Referenzdosis.</string>
 </resources>
