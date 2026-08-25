@@ -2881,6 +2881,9 @@
     <string name="nightscout_follow_interval_title">Sprawdzanie nowych wartości</string>
     <string name="nightscout_follow_interval_desc">Jak często obserwator odpytuje serwer. To zarazem wiek, jaki może mieć wartość, a więc i opóźnienie alarmu opartego na obserwowanej wartości. Obserwator nie ma własnego sensora, który utrzymywałby telefon wybudzony, więc każde sprawdzenie to wybudzenie.</string>
     <string name="nightscout_follow_interval_doze">Poniżej 9 minut Android i tak może rozsuwać sprawdzenia, gdy telefon jest bezczynny. Wyłączenie Juggluco z optymalizacji baterii zachowuje wybrany odstęp.</string>
+    <string name="journal_curve_activity">Względna aktywność</string>
+    <string name="journal_curve_activity_desc">Działanie obniżające glikemię względem szczytu tej krzywej (100%).</string>
+    <string name="journal_scientific_name">Nazwa naukowa</string>
     <string name="journal_curve_unverified">Niezweryfikowana krzywa</string>
     <string name="journal_curve_unverified_desc">Ten kształt aktywności jest oszacowaniem lub krzywą użytkownika i nie ma pełnego źródła farmakodynamicznego.</string>
     <string name="journal_curve_source_backed">Krzywa pojedynczej dawki oparta na źródle</string>

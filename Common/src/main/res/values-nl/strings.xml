@@ -2886,6 +2886,9 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="nightscout_follow_interval_title">Naar nieuwe waarden kijken</string>
     <string name="nightscout_follow_interval_desc">Hoe vaak de volger de server bevraagt. Dat is ook hoe oud een waarde kan zijn, en dus hoe laat een alarm op een gevolgde waarde kan komen. Een volger heeft geen eigen sensor die de telefoon wakker houdt, dus elke controle is een wekmoment.</string>
     <string name="nightscout_follow_interval_doze">Onder 9 minuten kan Android de controles alsnog verder uit elkaar leggen terwijl de telefoon inactief is. Juggluco uitsluiten van batterijoptimalisatie behoudt het gekozen interval.</string>
+    <string name="journal_curve_activity">Relatieve activiteit</string>
+    <string name="journal_curve_activity_desc">Glucoseverlagende activiteit ten opzichte van de piek van deze curve (100%).</string>
+    <string name="journal_scientific_name">Wetenschappelijke naam</string>
     <string name="journal_curve_unverified">Niet-geverifieerde curve</string>
     <string name="journal_curve_unverified_desc">Deze activiteitscurve is een schatting of aangepaste curve en is niet terug te voeren op een volledige farmacodynamische bron.</string>
     <string name="journal_curve_source_backed">Brongebaseerde curve voor één dosis</string>

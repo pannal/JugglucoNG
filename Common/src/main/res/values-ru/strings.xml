@@ -2890,6 +2890,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_interval_title">Проверять новые значения</string>
     <string name="nightscout_follow_interval_desc">Как часто подписчик опрашивает сервер. Это же определяет, насколько старым может быть значение, а значит и насколько поздно придёт тревога по отслеживаемому значению. У подписчика нет своего сенсора, который держал бы телефон активным, поэтому каждая проверка — это пробуждение.</string>
     <string name="nightscout_follow_interval_doze">Меньше 9 минут Android всё равно может разносить проверки, пока телефон простаивает. Исключение Juggluco из оптимизации батареи сохраняет выбранный интервал.</string>
+    <string name="journal_curve_activity">Относительная активность</string>
+    <string name="journal_curve_activity_desc">Глюкозоснижающая активность относительно пика этой кривой (100%).</string>
+    <string name="journal_scientific_name">Научное название</string>
     <string name="journal_curve_unverified">Непроверенная кривая</string>
     <string name="journal_curve_unverified_desc">Эта форма активности является оценкой или пользовательской кривой и не связана с полным фармакодинамическим источником.</string>
     <string name="journal_curve_source_backed">Кривая одной дозы на основе источника</string>
