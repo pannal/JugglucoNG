@@ -25,8 +25,8 @@ import tk.glucodata.NovoPen.PenImportPlan
 import tk.glucodata.NovoPen.PenJournalEntry
 import tk.glucodata.NovoPen.PenManualMerge
 import tk.glucodata.NovoPen.PenManualMergePlanner
-import tk.glucodata.NovoPen.PenSheetOffer
 import tk.glucodata.NovoPen.PenReconcilePlan
+import tk.glucodata.NovoPen.PenSheetOffer
 import tk.glucodata.NovoPen.PenSourceIds
 import tk.glucodata.NovoPen.PenUnattendedImportPolicy
 import tk.glucodata.NovoPen.opennov.OpContext
@@ -229,29 +229,30 @@ object InsulinPenManager {
         update(serial) { it.copy(lastScanAt = System.currentTimeMillis(), fullReadArmed = false) }
         scope.launch {
             val now = nowSeconds()
-            val scan = freshDoses(serial, chunks, now, known)
-            val offer = scan.fresh
-            if (scan.duplicates > 0) {
-                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, scan.duplicates))
-            } else if (offer.isEmpty()) {
+            val read = readScan(serial, chunks, now, known)
+            if (read.duplicates > 0) {
+                Applic.Toaster(Applic.app.getString(R.string.insulin_pen_duplicates_found, read.duplicates))
+            } else if (read.offer.isEmpty()) {
                 Applic.Toaster(Applic.app.getString(R.string.insulin_pen_no_new_doses))
             }
-            if (offer.isEmpty()) {
+            if (read.offer.isEmpty()) {
                 // Nothing to confirm, so no sheet: a dialog with an empty list and a disabled
                 // button is a dead end. A scan with nothing to offer still says how far the
                 // journal reaches, so the next tap does not walk the pen's whole log again —
-                // but only as far as it was seen to reach.
-                scan.provenCursor()?.let { advanceCursor(serial, it) }
+                // but only as far as it was seen to reach. A dose this scan never found in
+                // the journal stays ahead of the cursor, whatever kept it out, so the next
+                // scan looks at it again.
+                advanceCursorAsFarAsProven(serial, read)
                 return@launch
             }
             val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
             InsulinPenScanBus.offer(
                 PenScanResult(
                     serial = serial,
-                    doses = offer,
+                    doses = read.offer,
                     preselectFromSeconds = preselectFrom,
-                    merges = scan.mergeable,
-                    skippedPrimingDoses = scan.skippedPrimingDoses,
+                    merges = read.mergeable,
+                    skippedPrimingDoses = read.skippedPrimingDoses,
                 )
             )
         }
@@ -271,12 +272,13 @@ object InsulinPenManager {
         scope.launch {
             val context = Applic.app
             val now = nowSeconds()
-            val scan = freshDoses(serial, chunks, now, known)
+            val read = readScan(serial, chunks, now, known)
             val presetName = known?.insulinName?.takeIf { it.isNotBlank() }
-            when (val plan = PenUnattendedImportPolicy.plan(scan.fresh, hasPreset = presetName != null)) {
+            when (val plan = PenUnattendedImportPolicy.plan(read.offer, hasPreset = presetName != null)) {
                 PenUnattendedImportPolicy.Plan.NothingNew -> {
-                    // As the foreground scan: record how far the journal was seen to reach.
-                    scan.provenCursor()?.let { advanceCursor(serial, it) }
+                    // Same as a foreground scan with nothing to offer: record how far the
+                    // journal was seen to reach, or the next tap walks the whole log again.
+                    advanceCursorAsFarAsProven(serial, read)
                     PenImportNotifier.nothingNew(context, serial)
                 }
 
@@ -284,14 +286,15 @@ object InsulinPenManager {
                     // importDoses moves the cursor over the doses it is handed, nothing
                     // beyond — so the air shots left out here never mark a later real
                     // dose as done. That is the rule the review sheet already relies on.
-                    // Nobody is watching, so the proposals are carried out unasked: that is
-                    // the trade-off this mode is documented to make.
+                    // The merges the read worked out are carried out too: without them a
+                    // dose written down before injecting would land twice, which is exactly
+                    // what the sheet path avoids.
                     val outcome = importDoses(
                         serial,
                         plan.doses,
                         known?.insulinPresetId ?: 0L,
                         presetName!!,
-                        scan.mergeable,
+                        read.mergeable,
                     )
                     if (outcome.inserted == 0 && outcome.merged > 0) {
                         PenImportNotifier.mergedManual(context, serial, outcome.merged)
@@ -302,50 +305,58 @@ object InsulinPenManager {
 
                 is PenUnattendedImportPolicy.Plan.Review -> {
                     val preselectFrom = if (known == null) now - FIRST_SCAN_PRESELECT_SECONDS else 0L
-                    val offer = PenSheetOffer.offerable(plan.doses)
                     InsulinPenScanBus.offer(
                         PenScanResult(
                             serial = serial,
-                            doses = offer,
+                            doses = plan.doses,
                             preselectFromSeconds = preselectFrom,
-                            merges = scan.mergeable,
-                            skippedPrimingDoses = PenSheetOffer.skipped(plan.doses),
+                            merges = read.mergeable,
+                            skippedPrimingDoses = read.skippedPrimingDoses,
                         )
                     )
-                    PenImportNotifier.awaitingReview(context, serial, offer.size)
+                    PenImportNotifier.awaitingReview(context, serial, plan.doses.size)
                 }
             }
         }
     }
 
-    /** One scan, sorted out: what to offer, and what it saw on the way there. */
-    private class FreshScan(
-        /** Newest first: what may be offered, air shots and the already-written left out. */
-        val fresh: List<PenDose>,
-        val inWindow: List<PenDose>,
-        val present: Set<Long>,
-        val duplicates: Int,
-        /** Per dose counter, the hand-written entry it would take over if confirmed. */
-        val mergeable: Map<Long, PenManualMerge>,
-        /** Air shots this read found and left out, so a sheet can say so. */
-        val skippedPrimingDoses: Int,
-    ) {
-        /** How far the journal was seen to reach, for a scan that offers nothing. */
-        fun provenCursor(): Long? = PenImportCursor.provenUpTo(inWindow) { it.relativeSeconds in present }
+    /**
+     * A scan with nothing left to offer still says how far the journal was seen to reach,
+     * so the next tap does not walk the pen's whole log again.
+     */
+    private fun advanceCursorAsFarAsProven(serial: String, read: ScanRead) {
+        PenImportCursor.provenUpTo(read.inWindow) { it.relativeSeconds in read.present }
+            ?.let { advanceCursor(serial, it) }
     }
 
     /**
-     * What a scan has to offer, newest first: the chunks parsed and merged, the read
-     * remembered and reconciled against the journal's older copies, cut to the review
-     * window, minus what the journal already holds, and past the cursor. One function for
-     * both the review sheet and the unattended import, so the two cannot come to differ.
+     * What one read of a pen amounts to. Held together so the review sheet and the
+     * unattended import cannot come to differ about what counts as new: the cursor gate,
+     * the merge proposals and the air-shot filter are applied once, here.
      */
-    private suspend fun freshDoses(
+    private class ScanRead(
+        /** Everything inside the review window, whether or not the journal holds it. */
+        val inWindow: List<PenDose>,
+        /** Dose counters the journal already has under this pen's name. */
+        val present: Set<Long>,
+        /** Past the cursor and not in the journal; air shots included. */
+        val fresh: List<PenDose>,
+        /** What may actually be offered or written: [fresh] without the air shots. */
+        val offer: List<PenDose>,
+        /** Per dose counter, the hand-written entry it would be merged onto. */
+        val mergeable: Map<Long, PenManualMerge>,
+        /** Old-style copies this read reconciled onto the pen's own source ids. */
+        val duplicates: Int,
+    ) {
+        val skippedPrimingDoses: Int get() = PenSheetOffer.skipped(fresh)
+    }
+
+    private suspend fun readScan(
         serial: String,
         chunks: List<OpContext.Doses>,
         now: Long,
         known: InsulinPen?,
-    ): FreshScan {
+    ): ScanRead {
         val dropped = PenDropTally()
         val parsed = chunks.map { PenDoseParser.parse(it.referencetime, it.rawdoses, now, dropped) }
         val doses = PenDoseParser.merge(parsed)
@@ -363,21 +374,21 @@ object InsulinPenManager {
         // new, unless the reader asked to see the whole log again.
         val cursor = known?.lastImportedDoseRelativeSeconds ?: 0L
         val fullRead = known?.fullReadArmed ?: false
-        val ahead = inWindow
+        val fresh = inWindow
             .filterNot { it.relativeSeconds in present }
             .filter { PenImportCursor.isAhead(it, cursor, fullRead) }
-            .sortedByDescending(PenDose::timestampSeconds)
-        // A dose the reader wrote down before injecting is already in the journal, just not
-        // under the pen's name. What it would be merged onto is worked out here and carried
-        // out when the doses are imported, so a sheet can propose it first. A full read
-        // proposes nothing: it is the one scan that can carry weeks of doses.
+        // A dose the reader wrote down before injecting is already in the journal, just
+        // not under the pen's name. What that would merge onto is worked out here and
+        // carried out on confirmation, since the sheet is the one place the reader can
+        // say the pairing is wrong. A full read proposes nothing: it is the reader
+        // asking to see the whole log, and the one scan that can carry weeks of doses.
         val mergeable = if (fullRead) {
             emptyMap()
         } else {
-            planManualMerges(serial, ahead, known?.insulinPresetId, repository)
+            planManualMerges(serial, fresh, known?.insulinPresetId, repository)
         }
         // Air shots are never written, so they are not something to offer or to count.
-        val fresh = PenSheetOffer.offerable(ahead)
+        val offer = PenSheetOffer.offerable(fresh).sortedByDescending(PenDose::timestampSeconds)
         Log.i(
             LOG_ID,
             "Pen $serial: ${chunks.size} chunk(s), ${parsed.sumOf { it.size }} parsed, " +
@@ -385,18 +396,11 @@ object InsulinPenManager {
                 "cursor rel=$cursor${if (fullRead) " (full read)" else ""}, " +
                 "${inWindow.size} within ${REVIEW_WINDOW_SECONDS / 86_400} days, " +
                 "${inWindow.size - present.size} not in the journal, " +
-                "${PenSheetOffer.skipped(ahead)} air shot(s) skipped, " +
-                "${mergeable.size} to propose merging, ${fresh.size} to offer; " +
+                "${PenSheetOffer.skipped(fresh)} air shot(s) skipped, " +
+                "${mergeable.size} to propose merging, ${offer.size} to offer; " +
                 dropped.describe(),
         )
-        return FreshScan(
-            fresh = fresh,
-            inWindow = inWindow,
-            present = present,
-            duplicates = duplicates,
-            mergeable = mergeable,
-            skippedPrimingDoses = PenSheetOffer.skipped(ahead),
-        )
+        return ScanRead(inWindow, present, fresh, offer, mergeable, duplicates)
     }
 
     /**

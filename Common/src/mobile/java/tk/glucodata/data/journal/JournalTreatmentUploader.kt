@@ -383,6 +383,7 @@ object JournalTreatmentUploader {
                     uploadFailureCode = result.code
                     uploadFailureMessage = result.message
                     sendBackoff.recordFailure(entry.id, now)
+                    uploadFailureCode = result.code
                     uploadOk = false
                     break
                 }
