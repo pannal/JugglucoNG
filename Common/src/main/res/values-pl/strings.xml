@@ -2899,4 +2899,5 @@
     <string name="journal_body_weight_kg">Masa (kg)</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Nie ustawiono. Krzywe zależne od masy używają dawki referencyjnej.</string>
+    <string name="libre3_source_experimental_warning">Eksperymentalna kompilacja zabezpieczeń Libre 3. Zachowaj standardowy plik APK, aby móc wrócić.</string>
 </resources>

@@ -3107,4 +3107,5 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_body_weight_kg">Weight (kg)</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Not set. Weight-indexed curves use their reference dose.</string>
+    <string name="libre3_source_experimental_warning">Experimental Libre 3 security build. Keep the standard APK available for rollback.</string>
 </resources>

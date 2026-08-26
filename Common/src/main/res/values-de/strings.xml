@@ -2900,4 +2900,5 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="journal_body_weight_kg">Gewicht (kg)</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Nicht festgelegt. Gewichtsabhängige Kurven verwenden ihre Referenzdosis.</string>
+    <string name="libre3_source_experimental_warning">Experimenteller Libre-3-Sicherheitsbuild. Bewahren Sie die Standard-APK für eine Rückkehr auf.</string>
 </resources>

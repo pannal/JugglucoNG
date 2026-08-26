@@ -3060,4 +3060,5 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="journal_body_weight_kg">Miisaan (kg)</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Lama dejin. Qaloocyada miisaanka ku xiran waxay adeegsadaan qiyaasta tixraaca.</string>
+    <string name="libre3_source_experimental_warning">Nooca amniga Libre 3 ee tijaabada ah. Hayso APK-ga caadiga ah si aad ugu noqoto.</string>
 </resources>

@@ -2975,4 +2975,5 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="journal_body_weight_kg">Жин (кг)</string>
     <string name="journal_body_weight_value">%1$.1f кг</string>
     <string name="journal_body_weight_not_set">Тохируулаагүй. Жинд суурилсан муруй лавлагааны тунг ашиглана.</string>
+    <string name="libre3_source_experimental_warning">Libre 3-ын туршилтын хамгаалалтын хувилбар. Буцаахад зориулж стандарт APK-г хадгална уу.</string>
 </resources>

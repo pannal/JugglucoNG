@@ -2904,4 +2904,5 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="journal_body_weight_kg">Gewicht (kg)</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Niet ingesteld. Gewichtsafhankelijke curven gebruiken hun referentiedosis.</string>
+    <string name="libre3_source_experimental_warning">Experimentele Libre 3-beveiligingsbuild. Bewaar de standaard-APK om terug te kunnen gaan.</string>
 </resources>

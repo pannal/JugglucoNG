@@ -2932,4 +2932,5 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_body_weight_kg">Маса (кг)</string>
     <string name="journal_body_weight_value">%1$.1f кг</string>
     <string name="journal_body_weight_not_set">Не зададзена. Крывыя, залежныя ад масы, выкарыстоўваюць эталонную дозу.</string>
+    <string name="libre3_source_experimental_warning">Эксперыментальная зборка бяспекі Libre 3. Захавайце стандартны APK для вяртання.</string>
 </resources>

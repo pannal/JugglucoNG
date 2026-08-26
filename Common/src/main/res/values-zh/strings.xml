@@ -2877,4 +2877,5 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_body_weight_kg">体重（kg）</string>
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">未设置。按体重索引的曲线将使用参考剂量。</string>
+    <string name="libre3_source_experimental_warning">实验性 Libre 3 安全版本。请保留标准 APK，以便回退。</string>
 </resources>
