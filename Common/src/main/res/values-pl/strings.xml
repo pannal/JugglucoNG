@@ -2942,4 +2942,19 @@
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Nie ustawiono. Krzywe zależne od masy używają dawki referencyjnej.</string>
     <string name="libre3_source_experimental_warning">Eksperymentalna kompilacja zabezpieczeń Libre 3. Zachowaj standardowy plik APK, aby móc wrócić.</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (eksperymentalny)</string>
+    <string name="sibionics_adaptive_v2_desc">Niezależna ocena stanu czujnika z prawdopodobnym zakresem</string>
+    <string name="glucose_likely_range">Prawdopodobny zakres</string>
+    <string name="glucose_likely_range_value">prawdopodobny zakres %1$s–%2$s</string>
+    <string name="glucose_estimated">Szacowana glikemia</string>
+    <string name="glucose_uncertainty_elevated">Podwyższona niepewność czujnika</string>
+    <string name="glucose_possible_artifact">Możliwy przejściowy artefakt czujnika</string>
+    <string name="debug_v2_trace_title">Diagnostyka Adaptive V2</string>
+    <string name="debug_v2_trace_desc">Zapisuj szczegółowy wiersz dla każdego odczytu podczas rejestrowania. Przydatne tylko do zgłaszania problemów z czujnikiem.</string>
+    <string name="sibionics_uncertainty_ribbon">Pasmo niepewności</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Pokaż pasmo prawdopodobnego zakresu wokół linii glikemii</string>
+    <string name="freeze_displayed_values">Zachowuj wyświetlone wartości</string>
+    <string name="freeze_displayed_values_desc">Odczyt zachowuje wyświetloną wartość. Zmiany kalibracji dotyczą tylko ostatnich odczytów.</string>
+    <string name="freeze_displayed_values_on">Wyświetlone wartości są zachowywane</string>
+    <string name="freeze_displayed_values_off">Przeliczanie przy każdej zmianie</string>
 </resources>

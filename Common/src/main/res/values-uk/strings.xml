@@ -2980,4 +2980,19 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_body_weight_value">%1$.1f кг</string>
     <string name="journal_body_weight_not_set">Не задано. Криві, залежні від маси, використовують еталонну дозу.</string>
     <string name="libre3_source_experimental_warning">Експериментальна збірка безпеки Libre 3. Збережіть стандартний APK для повернення.</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (експериментально)</string>
+    <string name="sibionics_adaptive_v2_desc">Незалежна оцінка стану сенсора з імовірним діапазоном</string>
+    <string name="glucose_likely_range">Імовірний діапазон</string>
+    <string name="glucose_likely_range_value">імовірний діапазон %1$s–%2$s</string>
+    <string name="glucose_estimated">Оцінка глюкози</string>
+    <string name="glucose_uncertainty_elevated">Підвищена невизначеність сенсора</string>
+    <string name="glucose_possible_artifact">Можливий тимчасовий артефакт сенсора</string>
+    <string name="debug_v2_trace_title">Діагностика Adaptive V2</string>
+    <string name="debug_v2_trace_desc">Записувати докладний рядок для кожного вимірювання під час журналювання. Потрібно лише для звітів про проблеми з сенсором.</string>
+    <string name="sibionics_uncertainty_ribbon">Смуга невизначеності</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Показувати смугу ймовірного діапазону навколо лінії глюкози</string>
+    <string name="freeze_displayed_values">Зберігати показані значення</string>
+    <string name="freeze_displayed_values_desc">Вимірювання зберігає значення, яке було показано. Зміни калібрування впливають лише на свіжі вимірювання.</string>
+    <string name="freeze_displayed_values_on">Показані значення зберігаються</string>
+    <string name="freeze_displayed_values_off">Перерахунок за кожної зміни</string>
 </resources>

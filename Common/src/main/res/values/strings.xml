@@ -3150,4 +3150,19 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Not set. Weight-indexed curves use their reference dose.</string>
     <string name="libre3_source_experimental_warning">Experimental Libre 3 security build. Keep the standard APK available for rollback.</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (experimental)</string>
+    <string name="sibionics_adaptive_v2_desc">Independent sensor-state estimate with a likely range</string>
+    <string name="glucose_likely_range">Likely range</string>
+    <string name="glucose_likely_range_value">%1$s–%2$s likely range</string>
+    <string name="glucose_estimated">Estimated glucose</string>
+    <string name="glucose_uncertainty_elevated">Sensor uncertainty elevated</string>
+    <string name="glucose_possible_artifact">Possible transient sensor artifact</string>
+    <string name="debug_v2_trace_title">Adaptive V2 diagnostics</string>
+    <string name="debug_v2_trace_desc">Record a detailed row per reading while logging. Only useful for reporting sensor issues.</string>
+    <string name="sibionics_uncertainty_ribbon">Uncertainty ribbon</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Show the likely-range band around the glucose line</string>
+    <string name="freeze_displayed_values">Keep displayed values</string>
+    <string name="freeze_displayed_values_desc">A reading keeps the value it was shown as. Calibration changes affect recent readings only.</string>
+    <string name="freeze_displayed_values_on">Keeping displayed values</string>
+    <string name="freeze_displayed_values_off">Recalculating on every change</string>
 </resources>

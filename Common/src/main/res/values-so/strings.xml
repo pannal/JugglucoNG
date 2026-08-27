@@ -3103,4 +3103,19 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="journal_body_weight_value">%1$.1f kg</string>
     <string name="journal_body_weight_not_set">Lama dejin. Qaloocyada miisaanka ku xiran waxay adeegsadaan qiyaasta tixraaca.</string>
     <string name="libre3_source_experimental_warning">Nooca amniga Libre 3 ee tijaabada ah. Hayso APK-ga caadiga ah si aad ugu noqoto.</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (tijaabo)</string>
+    <string name="sibionics_adaptive_v2_desc">Qiyaas madaxbannaan oo xaaladda dareemaha leh kala duwanaansho suurtogal ah</string>
+    <string name="glucose_likely_range">Kala duwanaanshaha suurtogalka ah</string>
+    <string name="glucose_likely_range_value">kala duwanaansho suurtogal ah %1$s–%2$s</string>
+    <string name="glucose_estimated">Sonkorta la qiyaasay</string>
+    <string name="glucose_uncertainty_elevated">Hubanti la\'aanta dareemaha waa sare</string>
+    <string name="glucose_possible_artifact">Waxaa suurtogal ah cilad dareeme oo ku meel gaar ah</string>
+    <string name="debug_v2_trace_title">Baaritaanka Adaptive V2</string>
+    <string name="debug_v2_trace_desc">Duub saf faahfaahsan akhris kasta inta la duubayo. Waxay kaliya u faa\'iido leedahay soo sheegista dhibaatooyinka dareemaha.</string>
+    <string name="sibionics_uncertainty_ribbon">Xarigga hubanti-la\'aanta</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Muuji xariiqda kala duwanaanshaha suurtogalka ah ee ku wareegsan xarigga sonkorta</string>
+    <string name="freeze_displayed_values">Hay qiimaha la tusay</string>
+    <string name="freeze_displayed_values_desc">Akhriska wuxuu hayaa qiimihii la tusay. Isbeddellada calibration-ka waxay saameeyaan akhrisyada dhow oo keliya.</string>
+    <string name="freeze_displayed_values_on">Qiimaha la tusay waa la hayaa</string>
+    <string name="freeze_displayed_values_off">Dib ayaa loo xisaabinayaa isbeddel kasta</string>
 </resources>
