@@ -2558,4 +2558,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluecomplicationlabel">Courbe + valeur</string>
     <string name="glucosechartvaluearrowcomplicationlabel">Courbe + valeur + flèche</string>
     <string name="glucosechartfullcomplicationlabel">Courbe + valeur + flèche + heure</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone via TURN</string>
+    <string name="clone_source_local_ice_description">Clone via ICE local</string>
 </resources>
