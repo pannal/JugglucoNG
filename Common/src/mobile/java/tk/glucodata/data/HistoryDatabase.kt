@@ -265,12 +265,36 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
-
         private val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                addRetryColumnsIfMissing(db)
+            }
+        }
+
+        /** What the database actually holds, rather than what its version number implies. */
+        private fun hasColumn(db: SupportSQLiteDatabase, table: String, column: String): Boolean {
+            val cursor = db.query("PRAGMA table_info(`$table`)")
+            try {
+                val nameIndex = cursor.getColumnIndex("name")
+                if (nameIndex < 0) return false
+                while (cursor.moveToNext()) {
+                    if (column.equals(cursor.getString(nameIndex), ignoreCase = true)) {
+                        return true
+                    }
+                }
+            } finally {
+                cursor.close()
+            }
+            return false
+        }
+
+        private fun addRetryColumnsIfMissing(db: SupportSQLiteDatabase) {
+            if (!hasColumn(db, "journal_pending_deletes", "attempts")) {
                 db.execSQL(
                     "ALTER TABLE journal_pending_deletes ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0"
                 )
+            }
+            if (!hasColumn(db, "journal_pending_deletes", "lastAttemptAt")) {
                 db.execSQL(
                     "ALTER TABLE journal_pending_deletes ADD COLUMN lastAttemptAt INTEGER NOT NULL DEFAULT 0"
                 )
@@ -345,6 +369,9 @@ abstract class HistoryDatabase : RoomDatabase() {
          * depends on which build it happened to install, and Room finds a column missing
          * that its entities require.
          *
+         * Meal preview builds also assigned v13-v16 differently, so this repair restores the
+         * LibreView delivery column when an upgrade path skipped its usual v13 -> v14 step.
+         *
          * This step asks the database what it has rather than assuming a history, and adds
          * only what is absent. On a phone that took the ordinary path every statement here
          * is a no-op, and nothing is dropped or rewritten in either case.
@@ -360,6 +387,9 @@ abstract class HistoryDatabase : RoomDatabase() {
                     db.execSQL(
                         "ALTER TABLE journal_pending_deletes ADD COLUMN lastAttemptAt INTEGER NOT NULL DEFAULT 0"
                     )
+                }
+                if (!hasColumn(db, "journal_entries", "lvUploadedAt")) {
+                    db.execSQL("ALTER TABLE journal_entries ADD COLUMN lvUploadedAt INTEGER")
                 }
                 // The other side of the same collision: a phone that took the tombstone
                 // columns as its v13 reaches here by a different route. Both statements are
@@ -403,23 +433,6 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
-        /** What the database actually holds, rather than what its version number implies. */
-        private fun hasColumn(db: SupportSQLiteDatabase, table: String, column: String): Boolean {
-            val cursor = db.query("PRAGMA table_info(`$table`)")
-            try {
-                val nameIndex = cursor.getColumnIndex("name")
-                if (nameIndex < 0) return false
-                while (cursor.moveToNext()) {
-                    if (column.equals(cursor.getString(nameIndex), ignoreCase = true)) {
-                        return true
-                    }
-                }
-            } finally {
-                cursor.close()
-            }
-            return false
-        }
-
         /**
          * v13 -> v14: track LibreView delivery per journal row. Without its own column the
          * LibreView uploader would have to share nsUploadedAt with Nightscout, and either
@@ -436,10 +449,16 @@ abstract class HistoryDatabase : RoomDatabase() {
          * doubles as the learned product preset; what was eaten stays a journal entry, now with a
          * nullable mealId pointing back. The CREATE statements mirror the Room entities exactly —
          * Room validates them on open.
+         *
+         * The checks also preserve databases created by earlier builds of this PR, where v13 meant
+         * meals rather than retry accounting.
          */
         private val MIGRATION_14_15 = object : Migration(14, 15) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE journal_entries ADD COLUMN mealId INTEGER")
+                addRetryColumnsIfMissing(db)
+                if (!hasColumn(db, "journal_entries", "mealId")) {
+                    db.execSQL("ALTER TABLE journal_entries ADD COLUMN mealId INTEGER")
+                }
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_mealId ON journal_entries (mealId)")
                 db.execSQL(
                     """
@@ -614,12 +633,24 @@ abstract class HistoryDatabase : RoomDatabase() {
         /** v22 -> v23: preserve the independently editable number of pieces in a package. */
         private val MIGRATION_22_23 = object : Migration(22, 23) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieces REAL")
-                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieceLabel TEXT")
-                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieces REAL")
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieceLabel TEXT")
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
+                if (!hasColumn(db, "meal_items", "packagePieces")) {
+                    db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieces REAL")
+                }
+                if (!hasColumn(db, "meal_items", "packagePieceLabel")) {
+                    db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieceLabel TEXT")
+                }
+                if (!hasColumn(db, "meal_items", "packagePiecesUserEdited")) {
+                    db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
+                }
+                if (!hasColumn(db, "meal_products", "packagePieces")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieces REAL")
+                }
+                if (!hasColumn(db, "meal_products", "packagePieceLabel")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieceLabel TEXT")
+                }
+                if (!hasColumn(db, "meal_products", "packagePiecesUserEdited")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
+                }
             }
         }
 
