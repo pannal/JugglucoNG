@@ -533,16 +533,24 @@ abstract class HistoryDatabase : RoomDatabase() {
         /** v15 -> v16: remember when a cached product was sent to Open Food Facts. */
         private val MIGRATION_15_16 = object : Migration(15, 16) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN contributedAt INTEGER")
+                if (!hasColumn(db, "meal_products", "contributedAt")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN contributedAt INTEGER")
+                }
             }
         }
 
         /** v16 -> v17: the label values Open Food Facts needs for a Nutri-Score. */
         private val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN saturatedFatGrams REAL")
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN saltGrams REAL")
-                db.execSQL("ALTER TABLE meal_products ADD COLUMN offCategory TEXT")
+                if (!hasColumn(db, "meal_products", "saturatedFatGrams")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN saturatedFatGrams REAL")
+                }
+                if (!hasColumn(db, "meal_products", "saltGrams")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN saltGrams REAL")
+                }
+                if (!hasColumn(db, "meal_products", "offCategory")) {
+                    db.execSQL("ALTER TABLE meal_products ADD COLUMN offCategory TEXT")
+                }
             }
         }
 
