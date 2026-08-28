@@ -333,6 +333,15 @@ public class UnifiedScanActivity extends AppCompatActivity {
                 imageProxy.getImageInfo().getRotationDegrees()
         );
 
+        if (scanContext == SCAN_CONTEXT_MIRROR) {
+            String mirrorQr = MirrorQrFrameDecoder.decode(imageProxy);
+            if (mirrorQr != null && !mirrorQr.isEmpty()) {
+                imageProxy.close();
+                runOnUiThread(() -> deliverResult(PhotoScan.trimOuterScannerWhitespace(mirrorQr)));
+                return;
+            }
+        }
+
         barcodeScanner.process(inputImage)
                 .addOnSuccessListener(barcodes -> {
                     for (Barcode barcode : barcodes) {
