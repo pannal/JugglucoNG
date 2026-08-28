@@ -2752,4 +2752,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="glucosechartvaluecomplicationlabel">Garaaf + qiime</string>
     <string name="glucosechartvaluearrowcomplicationlabel">Garaaf + qiime + fallaadh</string>
     <string name="glucosechartfullcomplicationlabel">Garaaf + qiime + fallaadh + waqti</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone iyada oo loo marayo TURN</string>
+    <string name="clone_source_local_ice_description">Clone iyada oo loo marayo ICE maxalli ah</string>
 </resources>

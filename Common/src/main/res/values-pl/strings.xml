@@ -2590,4 +2590,7 @@
     <string name="glucosechartvaluecomplicationlabel">Wykres + wartość</string>
     <string name="glucosechartvaluearrowcomplicationlabel">Wykres + wartość + strzałka</string>
     <string name="glucosechartfullcomplicationlabel">Wykres + wartość + strzałka + czas</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone przez TURN</string>
+    <string name="clone_source_local_ice_description">Clone przez lokalne ICE</string>
 </resources>
