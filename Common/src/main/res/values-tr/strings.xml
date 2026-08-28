@@ -2946,4 +2946,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="freeze_displayed_values_desc">Bir ölçüm gösterildiği değeri korur. Kalibrasyon değişiklikleri yalnızca son ölçümleri etkiler.</string>
     <string name="freeze_displayed_values_on">Gösterilen değerler korunuyor</string>
     <string name="freeze_displayed_values_off">Her değişiklikte yeniden hesaplanıyor</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">TURN üzerinden Clone</string>
+    <string name="clone_source_local_ice_description">Yerel ICE üzerinden Clone</string>
 </resources>

@@ -2934,4 +2934,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="freeze_displayed_values_desc">读数保留当时显示的数值。校准更改仅影响最近的读数。</string>
     <string name="freeze_displayed_values_on">正在保留已显示的数值</string>
     <string name="freeze_displayed_values_off">每次更改后重新计算</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">通过 TURN 的 Clone</string>
+    <string name="clone_source_local_ice_description">通过本地 ICE 的 Clone</string>
 </resources>

@@ -2918,4 +2918,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="freeze_displayed_values_desc">Ett värde behåller det som visades. Kalibreringsändringar påverkar bara de senaste värdena.</string>
     <string name="freeze_displayed_values_on">Visade värden behålls</string>
     <string name="freeze_displayed_values_off">Räknas om vid varje ändring</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone via TURN</string>
+    <string name="clone_source_local_ice_description">Clone via lokal ICE</string>
 </resources>

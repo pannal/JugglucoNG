@@ -3117,4 +3117,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="freeze_displayed_values_desc">Akhriska wuxuu hayaa qiimihii la tusay. Isbeddellada calibration-ka waxay saameeyaan akhrisyada dhow oo keliya.</string>
     <string name="freeze_displayed_values_on">Qiimaha la tusay waa la hayaa</string>
     <string name="freeze_displayed_values_off">Dib ayaa loo xisaabinayaa isbeddel kasta</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone iyada oo loo marayo TURN</string>
+    <string name="clone_source_local_ice_description">Clone iyada oo loo marayo ICE maxalli ah</string>
 </resources>

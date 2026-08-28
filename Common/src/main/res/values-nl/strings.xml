@@ -2961,4 +2961,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="freeze_displayed_values_desc">Een meting behoudt de weergegeven waarde. Kalibratiewijzigingen gelden alleen voor recente metingen.</string>
     <string name="freeze_displayed_values_on">Weergegeven waarden worden behouden</string>
     <string name="freeze_displayed_values_off">Wordt bij elke wijziging herberekend</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone via TURN</string>
+    <string name="clone_source_local_ice_description">Clone via lokale ICE</string>
 </resources>

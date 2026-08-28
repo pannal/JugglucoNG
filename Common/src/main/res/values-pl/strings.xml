@@ -2956,4 +2956,7 @@
     <string name="freeze_displayed_values_desc">Odczyt zachowuje wyświetloną wartość. Zmiany kalibracji dotyczą tylko ostatnich odczytów.</string>
     <string name="freeze_displayed_values_on">Wyświetlone wartości są zachowywane</string>
     <string name="freeze_displayed_values_off">Przeliczanie przy każdej zmianie</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone przez TURN</string>
+    <string name="clone_source_local_ice_description">Clone przez lokalne ICE</string>
 </resources>

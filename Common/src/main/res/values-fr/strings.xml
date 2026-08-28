@@ -2924,4 +2924,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="freeze_displayed_values_desc">Une mesure conserve la valeur affichée. Les modifications d\'étalonnage n\'affectent que les mesures récentes.</string>
     <string name="freeze_displayed_values_on">Valeurs affichées conservées</string>
     <string name="freeze_displayed_values_off">Recalcul à chaque modification</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone via TURN</string>
+    <string name="clone_source_local_ice_description">Clone via ICE local</string>
 </resources>
