@@ -44,6 +44,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v21 — per-reading record of the value actually displayed, so calibration
  *         changes stop rewriting the sensor's own stored numbers
  *   v22 — repair step for databases that passed v13 under a different meaning
+ *   v23 — editable package piece counts for product and meal quantity resolution
  */
 @Database(
     entities = [
@@ -60,7 +61,7 @@ import tk.glucodata.data.meal.MealProductEntity
         MealProductEntity::class,
         HypoEpisodeMark::class
     ],
-    version = 22,
+    version = 23,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -610,6 +611,18 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v22 -> v23: preserve the independently editable number of pieces in a package. */
+        private val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieces REAL")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePieceLabel TEXT")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieces REAL")
+                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePieceLabel TEXT")
+                db.execSQL("ALTER TABLE meal_products ADD COLUMN packagePiecesUserEdited INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -637,7 +650,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_18_19,
                     MIGRATION_19_20,
                     MIGRATION_20_21,
-                    MIGRATION_21_22
+                    MIGRATION_21_22,
+                    MIGRATION_22_23
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }
