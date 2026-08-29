@@ -466,9 +466,11 @@ void ICEConnect::receiverThread(int argindex) {
                         LOGGERICE("side=%d receiverThread: already connecting\n",host.side);
                         waitsec=3*60;
                         continue;
-                    case -1: 
+                    case -1:
                         LOGGERICE("side=%d receiverThread: error retry\n",host.side);
-                        waitsec=5*60;
+                        // Connectivity callbacks can wake this sooner; the
+                        // polling fallback should still recover promptly.
+                        waitsec=30;
                         continue;
                     };
                      break;
@@ -763,10 +765,8 @@ static bool waitonDescription(juice_agent *agent,int allindex,std::string_view c
             sleep(20);
             }
         const auto lastfailedtime=getConnectTime(allindex);
-        if(lastfailedtime&&(time(nullptr)-lastfailedtime)>maxconnectionunused) {
-            backup->deactivateHost(allindex,true);
-            return false;
-            }
+        if(lastfailedtime&&(time(nullptr)-lastfailedtime)>maxconnectionunused)
+            setConnectTime(allindex,time(nullptr));
         }
 //    return false;
     }
@@ -804,10 +804,8 @@ static  bool putDescription(int allindex,juice_agent *agent,std::string_view com
                 }
 
         const auto lastfailedtime=getConnectTime(allindex);
-        if(lastfailedtime&&(time(nullptr)-lastfailedtime)>maxconnectionunused) {
-            backup->deactivateHost(allindex,true);
-            return false;
-            }
+        if(lastfailedtime&&(time(nullptr)-lastfailedtime)>maxconnectionunused)
+            setConnectTime(allindex,time(nullptr));
         }
     }
 
@@ -825,10 +823,8 @@ bool initAgent(juice_agent *agent,int allindex) {
     if(!firstfailed)
         setConnectTime(allindex,now);
     else  {
-        if((now-firstfailed)>maxconnectionunused) {
-            backup->deactivateHost(allindex,true);
-            return false;
-            }
+        if((now-firstfailed)>maxconnectionunused)
+            setConnectTime(allindex,now);
         }
     bool side=host.side;
     if(side!=givefirst) {
