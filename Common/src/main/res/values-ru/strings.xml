@@ -495,6 +495,7 @@
     <string name="enabled_status">Включен</string>
     <string name="disabled_status">Отключен</string>
     <string name="last_ble_status">Статус BLE</string>
+    <string name="last_ble_error">Последняя ошибка BLE</string>
     <string name="sensor_address">Адрес</string>
     <string name="sensor_index">Индекс датчика</string>
     <string name="sensor_started">Запущен</string>
