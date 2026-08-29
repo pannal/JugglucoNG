@@ -1250,7 +1250,10 @@ fun SensorCard(
     // A watch-owned sensor is operational even though this phone's local BLE
     // callback is deliberately paused. Rendering that as Disabled made a
     // healthy forwarded stream look like a sensor failure.
-    val isStreaming = isLocallyStreaming || isHandedOff
+    // Clone records deliberately have no local BLE transport. Their presence
+    // means the Clone connection is enabled; rendering the paused GATT shell as
+    // "Disabled" makes a healthy network stream look broken.
+    val isStreaming = sensor.isCloneSource || isLocallyStreaming || isHandedOff
     val refreshRevision by UiRefreshBus.revision.collectAsState(initial = 0L)
     val currentSnapshot = remember(refreshRevision, sensor.serial, sensor.viewMode) {
         CurrentDisplaySource.resolveCurrent(
@@ -1428,6 +1431,13 @@ fun SensorCard(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 val sensorStatusText = when {
+                                    sensor.isCloneSource -> stringResource(
+                                        when (tk.glucodata.CloneSensorRegistry.transportForSensor(sensor.serial)) {
+                                            tk.glucodata.CloneTransport.TURN -> R.string.clone_source_turn_description
+                                            tk.glucodata.CloneTransport.LOCAL_ICE -> R.string.clone_source_local_ice_description
+                                            tk.glucodata.CloneTransport.UNKNOWN, null -> R.string.clone_source_label
+                                        }
+                                    )
                                     sensor.detailedStatus.isNotEmpty() -> sensor.detailedStatus
                                     sensor.connectionStatus.isNotEmpty() -> sensor.connectionStatus
                                     else -> null
@@ -1597,7 +1607,7 @@ fun SensorCard(
                     }
 
                     val connectedStatus = stringResource(R.string.status_connected)
-                    if (sensor.connectionStatus.isNotEmpty() &&
+                    if (!sensor.isCloneSource && sensor.connectionStatus.isNotEmpty() &&
                         !sensor.connectionStatus.equals(connectedStatus, ignoreCase = true)
                     ) {
                         val errorEventAt = bleErrorEventTimeForDisplay(sensor.connectionStatusAtMs, now)
