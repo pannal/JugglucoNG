@@ -249,8 +249,7 @@ fun SensorCard(
     var showReconnectDialog by remember { mutableStateOf(false) }
     var showWipeDialog by remember { mutableStateOf(false) }
     var wipeDataChecked by remember { mutableStateOf(false) }
-    var keepDataChecked by remember { mutableStateOf(false) }
-    var terminationFailed by remember(sensor.serial) { mutableStateOf(false) }
+    var removeHistoryChecked by remember { mutableStateOf(false) }
 
     // Sibionics Calibration Bottom Sheet
     var showSibionicsCalSheet by remember { mutableStateOf(false) }
@@ -349,46 +348,40 @@ fun SensorCard(
             AlertDialog(
                 onDismissRequest = {
                     showTerminateDialog = false
-                    keepDataChecked = false
-                    terminationFailed = false
+                    removeHistoryChecked = false
                 },
                 title = { Text(stringResource(R.string.disconnect_sensor_title)) },
                 text = {
                     Column {
                         Text(stringResource(R.string.disconnect_sensor_desc))
-                        if (terminationFailed) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.disconnect_sensor_failed),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = keepDataChecked,
-                                onCheckedChange = { keepDataChecked = it }
+                                checked = removeHistoryChecked,
+                                onCheckedChange = { removeHistoryChecked = it }
                             )
-                            Text(stringResource(R.string.keep_data))
+                            Text(stringResource(R.string.remove_sensor_history))
                         }
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (viewModel.terminateSensor(sensor.serial, !keepDataChecked)) {
-                            showTerminateDialog = false
-                            keepDataChecked = false
-                            terminationFailed = false
-                        } else {
-                            terminationFailed = true
+                        val removed = viewModel.terminateSensor(sensor.serial, removeHistoryChecked)
+                        showTerminateDialog = false
+                        removeHistoryChecked = false
+                        if (!removed) {
+                            android.widget.Toast.makeText(
+                                context,
+                                context.getString(R.string.disconnect_sensor_failed),
+                                android.widget.Toast.LENGTH_LONG,
+                            ).show()
                         }
                     }) { Text(stringResource(R.string.disconnect)) }
                 },
                 dismissButton = {
                     TextButton(onClick = {
                         showTerminateDialog = false
-                        keepDataChecked = false
-                        terminationFailed = false
+                        removeHistoryChecked = false
                     }) { Text(stringResource(R.string.cancel)) }
                 }
             )
@@ -1347,7 +1340,7 @@ fun SensorCard(
                                     )
                                 } else {
                                     Text(
-                                        text = sensor.displayName.ifBlank { sensor.serial },
+                                        text = sensor.serial,
                                         style = serialTextStyle,
                                         maxLines = 1,
                                         softWrap = false,
@@ -1583,6 +1576,9 @@ fun SensorCard(
                         !sensor.connectionStatus.equals(connectedStatus, ignoreCase = true)
                     ) {
                         DataRow(stringResource(R.string.last_ble_status), sensor.connectionStatus)
+                    }
+                    if (sensor.sensorIndex >= 0) {
+                        DataRow(stringResource(R.string.sensor_index), sensor.sensorIndex.toString())
                     }
                     DataRow(stringResource(R.string.sensor_address), sensor.deviceAddress)
                     
