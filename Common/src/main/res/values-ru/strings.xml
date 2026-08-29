@@ -2602,4 +2602,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluecomplicationlabel">График + значение</string>
     <string name="glucosechartvaluearrowcomplicationlabel">График + значение + стрелка</string>
     <string name="glucosechartfullcomplicationlabel">График + значение + стрелка + время</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone через TURN</string>
+    <string name="clone_source_local_ice_description">Clone через локальный ICE</string>
 </resources>

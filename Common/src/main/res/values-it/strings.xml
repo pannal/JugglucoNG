@@ -2545,4 +2545,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluecomplicationlabel">Grafico + valore</string>
     <string name="glucosechartvaluearrowcomplicationlabel">Grafico + valore + freccia</string>
     <string name="glucosechartfullcomplicationlabel">Grafico + valore + freccia + ora</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone tramite TURN</string>
+    <string name="clone_source_local_ice_description">Clone tramite ICE locale</string>
 </resources>

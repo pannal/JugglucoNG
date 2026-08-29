@@ -2670,4 +2670,7 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="glucosechartvaluecomplicationlabel">График + утга</string>
     <string name="glucosechartvaluearrowcomplicationlabel">График + утга + сум</string>
     <string name="glucosechartfullcomplicationlabel">График + утга + сум + цаг</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">TURN-ээр дамжих Clone</string>
+    <string name="clone_source_local_ice_description">Дотоод ICE-ээр дамжих Clone</string>
 </resources>

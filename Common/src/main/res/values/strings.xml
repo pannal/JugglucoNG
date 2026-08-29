@@ -2780,4 +2780,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluecomplicationlabel">Chart + value</string>
     <string name="glucosechartvaluearrowcomplicationlabel">Chart + value + arrow</string>
     <string name="glucosechartfullcomplicationlabel">Chart + value + arrow + time</string>
+    <string name="clone_source_label">Clone</string>
+    <string name="clone_source_turn_description">Clone via TURN</string>
+    <string name="clone_source_local_ice_description">Clone via local ICE</string>
 </resources>
