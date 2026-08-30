@@ -11,6 +11,7 @@ import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
 import tk.glucodata.Applic
+import tk.glucodata.GlucoseReadingSource
 import tk.glucodata.HistorySyncAccess
 import tk.glucodata.Log
 import tk.glucodata.R
@@ -254,6 +255,7 @@ class NightscoutFollowerManager(
             sensorSerial = SerialNumber,
             readings = readings,
             logLabel = "Nightscout follower",
+            source = GlucoseReadingSource.NIGHTSCOUT,
         )
         if (tailMs > 0L) {
             lastImportedHistoryTailMs = tailMs
@@ -277,6 +279,7 @@ class NightscoutFollowerManager(
             reading = latest.copy(rate = rate),
             sensorGen = SENSOR_GEN,
             logLabel = "Nightscout follower",
+            source = GlucoseReadingSource.NIGHTSCOUT,
         )
     }
 
@@ -303,6 +306,7 @@ class NightscoutFollowerManager(
                         sensorSerial = SerialNumber,
                         readings = page,
                         logLabel = "Nightscout follower",
+                        source = GlucoseReadingSource.NIGHTSCOUT,
                     )
                     check(imported > 0) {
                         "Nightscout history page could not be stored"

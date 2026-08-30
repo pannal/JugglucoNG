@@ -30,6 +30,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
  *   v11 — journal food library and macro metadata for carb entries
  *   v12 — per-preset dose-calculation eligibility
  *   v13 — retry accounting on journal delete tombstones
+ *   v14 — per-reading glucose source provenance
  */
 @Database(
     entities = [
@@ -40,7 +41,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalInsulinPresetEntity::class,
         JournalPendingDeleteEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -251,6 +252,30 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE history_readings " +
+                        "ADD COLUMN source TEXT NOT NULL DEFAULT 'sensor'"
+                )
+                // These virtual sensor ids are stable and unambiguous, so older
+                // rows can retain their known origin. Existing Clone rows cannot
+                // be reconstructed per entry and deliberately remain "sensor".
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'nightscout' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'NSF-%'"
+                )
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'api' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'API-%'"
+                )
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'mq_follower' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'MQF-%'"
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -269,7 +294,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_9_10,
                     MIGRATION_10_11,
                     MIGRATION_11_12,
-                    MIGRATION_12_13
+                    MIGRATION_12_13,
+                    MIGRATION_13_14
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }

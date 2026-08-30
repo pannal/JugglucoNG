@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import kotlinx.coroutines.delay
 import tk.glucodata.R
+import tk.glucodata.GlucoseReadingSource
 import tk.glucodata.SensorIdentity
 import tk.glucodata.data.journal.JournalEntry
 import tk.glucodata.data.journal.JournalFood
@@ -269,8 +271,8 @@ fun ReadingRow(
             val timeStyle = MaterialTheme.typography.bodySmall
             val timeColor = if (isActive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
             val timeWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
-            val readingSensorId = point.sensorSerial?.takeIf { it.isNotBlank() } ?: sensorId
-            val cloneTransport = tk.glucodata.CloneSensorRegistry.transportForSensor(readingSensorId)
+            val cloneTransport = GlucoseReadingSource.cloneTransport(point.source)
+            val isNightscoutSource = point.source == GlucoseReadingSource.NIGHTSCOUT
             val isRawModeRR = viewMode == 1 || viewMode == 3
             val calibrationSensorId = sensorId?.takeIf { it.isNotBlank() }
             val hasCalibrationRR = !tk.glucodata.data.calibration.CalibrationManager.shouldOverwriteSensorValues() &&
@@ -339,6 +341,14 @@ fun ReadingRow(
                             showLabel = false,
                             tint = timeColor,
                             iconSize = 13.dp,
+                        )
+                    } else if (isNightscoutSource) {
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Icon(
+                            imageVector = Icons.Default.CloudDownload,
+                            contentDescription = stringResource(R.string.nightscout_follow_title),
+                            tint = timeColor,
+                            modifier = Modifier.size(13.dp),
                         )
                     }
                 }
