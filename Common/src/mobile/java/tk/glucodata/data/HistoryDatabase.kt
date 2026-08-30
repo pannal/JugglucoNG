@@ -45,6 +45,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *         changes stop rewriting the sensor's own stored numbers
  *   v22 — repair step for databases that passed v13 under a different meaning
  *   v23 — editable package piece counts for product and meal quantity resolution
+ *   v24 — per-reading glucose source provenance
  */
 @Database(
     entities = [
@@ -61,7 +62,7 @@ import tk.glucodata.data.meal.MealProductEntity
         MealProductEntity::class,
         HypoEpisodeMark::class
     ],
-    version = 23,
+    version = 24,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -440,7 +441,7 @@ abstract class HistoryDatabase : RoomDatabase() {
          * LibreView uploader would have to share nsUploadedAt with Nightscout, and either
          * destination succeeding would mark the entry sent to both.
          */
-        private val MIGRATION_13_14 = object : Migration(13, 14) {
+        private val MIGRATION_23_24 = object : Migration(23, 24) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE journal_entries ADD COLUMN lvUploadedAt INTEGER")
             }
@@ -656,6 +657,30 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE history_readings " +
+                        "ADD COLUMN source TEXT NOT NULL DEFAULT 'sensor'"
+                )
+                // These virtual sensor ids are stable and unambiguous, so older
+                // rows can retain their known origin. Existing Clone rows cannot
+                // be reconstructed per entry and deliberately remain "sensor".
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'nightscout' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'NSF-%'"
+                )
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'api' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'API-%'"
+                )
+                db.execSQL(
+                    "UPDATE history_readings SET source = 'mq_follower' " +
+                        "WHERE UPPER(sensorSerial) LIKE 'MQF-%'"
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -684,7 +709,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_19_20,
                     MIGRATION_20_21,
                     MIGRATION_21_22,
-                    MIGRATION_22_23
+                    MIGRATION_22_23,
+                    MIGRATION_23_24
                 )
                 .build().also { INSTANCE = it }
             }

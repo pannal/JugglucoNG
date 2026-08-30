@@ -1,6 +1,7 @@
 package tk.glucodata.ui
 
 import tk.glucodata.GlucoseUncertainty
+import tk.glucodata.GlucoseReadingSource
 
 /**
  * One point on the glucose timeline.
@@ -26,4 +27,5 @@ data class GlucosePoint(
     val sensorSerial: String? = null,
     val uncertainty: GlucoseUncertainty? = null,
     val sealedDisplayValue: Float? = null,
+    val source: String = GlucoseReadingSource.SENSOR,
 )
