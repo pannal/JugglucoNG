@@ -46,6 +46,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v22 — repair step for databases that passed v13 under a different meaning
  *   v23 — editable package piece counts for product and meal quantity resolution
  *   v24 — per-reading glucose source provenance
+ *   v25 — stable first-arrival ordering for equivalent replicated readings
  */
 @Database(
     entities = [
@@ -62,7 +63,7 @@ import tk.glucodata.data.meal.MealProductEntity
         MealProductEntity::class,
         HypoEpisodeMark::class
     ],
-    version = 24,
+    version = 25,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -682,6 +683,21 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_24_25 = object : Migration(24, 25) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE history_readings " +
+                        "ADD COLUMN firstStoredAt INTEGER NOT NULL DEFAULT 0"
+                )
+                // The table's autoincrement id is the only durable arrival order
+                // available for pre-migration rows. New rows use wall-clock time.
+                db.execSQL(
+                    "UPDATE history_readings SET firstStoredAt = id " +
+                        "WHERE firstStoredAt <= 0"
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -711,7 +727,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_20_21,
                     MIGRATION_21_22,
                     MIGRATION_22_23,
-                    MIGRATION_23_24
+                    MIGRATION_23_24,
+                    MIGRATION_24_25
                 )
                 .build().also { INSTANCE = it }
             }
