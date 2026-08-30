@@ -246,6 +246,7 @@ fun DashboardCombinedHeader(
     valueRangeColorsEnabled: Boolean = false,
     arrowForecastColorsEnabled: Boolean = false,
     showDelta: Boolean = false,
+    matchArrowToDisplayedDelta: Boolean = tk.glucodata.GlucoseDelta.DEFAULT_MATCH_ARROW_TO_DISPLAYED_DELTA,
     deltaIntervalMinutes: Int = tk.glucodata.GlucoseDelta.DEFAULT_INTERVAL_MINUTES,
     peerReadings: List<tk.glucodata.ui.viewmodel.DashboardViewModel.PeerCurrentReading> = emptyList(),
     onPeerReadingClick: (String) -> Unit = {},
@@ -286,8 +287,8 @@ fun DashboardCombinedHeader(
             tk.glucodata.logic.TrendEngine.TrendResult(tk.glucodata.logic.TrendEngine.TrendState.Unknown, 0f, 0f, 0f, 0f)
         }
     }
-    // When the hero states a Δ below its arrow, both describe that same movement. Without
-    // the number, the arrow keeps the steadier regression over the trend engine's window.
+    // The delta remains an independent readout unless the user asks the arrow to use the
+    // same interval. Without a usable delta, the steadier regression always remains.
     val heroDelta = if (showDelta) {
         remember(history, isMmol, deltaIntervalMinutes) {
             history.lastOrNull()?.let { newest ->
@@ -299,8 +300,12 @@ fun DashboardCombinedHeader(
         null
     }
     val heroDeltaText = heroDelta?.text
-    val trendResult = remember(regressedTrendResult, heroDelta) {
-        trendResultForDisplayedDelta(regressedTrendResult, heroDelta?.rateMgdlPerMinute)
+    val trendResult = remember(regressedTrendResult, heroDelta, matchArrowToDisplayedDelta) {
+        trendResultForDisplayedDelta(
+            regressedTrendResult,
+            heroDelta?.rateMgdlPerMinute,
+            useDisplayedDelta = matchArrowToDisplayedDelta,
+        )
     }
     val adaptiveMetrics = rememberAdaptiveWindowMetrics()
     val isLandscape = adaptiveMetrics.isLandscape

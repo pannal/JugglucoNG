@@ -364,6 +364,7 @@ fun DashboardScreen(
     val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
     val dashboardShowDelta by viewModel.dashboardShowDelta.collectAsState()
     val dashboardRowsShowDelta by viewModel.dashboardRowsShowDelta.collectAsState()
+    val matchArrowToDisplayedDelta by viewModel.matchArrowToDisplayedDelta.collectAsState()
     val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsState()
     val journalDoseCalculatorEnabled by viewModel.journalDoseCalculatorEnabled.collectAsState()
     val stateDoseHintEnabled by viewModel.stateDoseHintEnabled.collectAsState()
@@ -1438,6 +1439,7 @@ fun DashboardScreen(
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
                             showDelta = dashboardShowDelta,
+                            matchArrowToDisplayedDelta = matchArrowToDisplayedDelta,
                             deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             quietWindowUntilMs = quietWindowUntilMs,
@@ -1740,6 +1742,7 @@ fun DashboardScreen(
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
                             showDelta = dashboardShowDelta,
+                            matchArrowToDisplayedDelta = matchArrowToDisplayedDelta,
                             deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             quietWindowUntilMs = quietWindowUntilMs,
