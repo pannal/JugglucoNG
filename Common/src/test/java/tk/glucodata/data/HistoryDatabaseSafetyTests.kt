@@ -45,9 +45,9 @@ class HistoryDatabaseSafetyTests {
     }
 
     @Test
-    fun provenanceMigrationExtendsTheCurrentLocalSchema() {
+    fun provenanceMigrationsExtendTheCurrentLocalSchema() {
         val source = historyDatabaseSource()
-        assertTrue(source.contains("version = 24"))
+        assertTrue(source.contains("version = 25"))
         assertTrue(
             source.contains(
                 "private val MIGRATION_23_24 = object : Migration(23, 24)"
@@ -55,6 +55,14 @@ class HistoryDatabaseSafetyTests {
         )
         assertTrue(
             source.contains("ADD COLUMN source TEXT NOT NULL DEFAULT 'sensor'")
+        )
+        assertTrue(
+            source.contains(
+                "private val MIGRATION_24_25 = object : Migration(24, 25)"
+            )
+        )
+        assertTrue(
+            source.contains("ADD COLUMN firstStoredAt INTEGER NOT NULL DEFAULT 0")
         )
     }
 }
