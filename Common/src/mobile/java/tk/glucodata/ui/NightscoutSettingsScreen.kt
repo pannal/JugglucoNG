@@ -372,7 +372,7 @@ fun NightscoutSettingsScreen(navController: NavController) {
     // The lines above report the native entries uploader only, so they can read HTTP 200 while
     // the JVM-side treatment path has been rejected for days (issue #191).
     val treatmentSummary: String? = when {
-        !isActive || mode != NightscoutMode.UPLOAD || !sendTreatments -> null
+        !isActive || mode != NightscoutModePreference.Mode.UPLOAD || !sendTreatments -> null
         treatmentSync.failure == JournalSyncFailure.UPLOAD -> context.getString(
             R.string.nightscout_status_treatments_upload_failing,
             formatStatusMillis(treatmentSync.failingSince),
@@ -395,7 +395,7 @@ fun NightscoutSettingsScreen(navController: NavController) {
     // The lines above report the native entries uploader only; the devicestatus channel
     // (IOB) fails on its own, and a "no token" skip must not read like a server rejection.
     val deviceStatusSummary: String? = when {
-        !isActive || mode != NightscoutMode.UPLOAD || !uploadIob -> null
+        !isActive || mode != NightscoutModePreference.Mode.UPLOAD || !uploadIob -> null
         deviceStatusOutcome == NightPost.DEVICE_STATUS_NO_TOKEN ->
             context.getString(R.string.nightscout_status_iob_no_token)
         deviceStatusOutcome == NightPost.DEVICE_STATUS_REJECTED -> context.getString(
@@ -610,7 +610,7 @@ fun NightscoutSettingsScreen(navController: NavController) {
             }
 
             // Follow-only items
-            if (mode == NightscoutMode.FOLLOW) {
+            if (mode == NightscoutModePreference.Mode.FOLLOW) {
                 item("nightscout_follow_interval") {
                     // How often it asks is the whole of what a follower does, and every poll
                     // is a wake-up on a phone with no sensor of its own to pay for it.
