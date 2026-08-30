@@ -124,6 +124,9 @@ private data class SensorReadingAge(
     val unit: SensorReadingAgeUnit
 )
 
+internal fun localSensorCardTitle(sensorId: String, deviceDisplayName: String): String =
+    sensorId.ifBlank { deviceDisplayName }
+
 private fun sensorReadingAge(nowMillis: Long, readingMillis: Long): SensorReadingAge {
     val ageSeconds = ((nowMillis - readingMillis).coerceAtLeast(0L) / 1000L)
     return if (ageSeconds < 60L) {
@@ -1455,7 +1458,7 @@ fun SensorCard(
                                         )
                                     } else {
                                         Text(
-                                            text = sensor.displayName.ifBlank { sensor.serial },
+                                            text = localSensorCardTitle(sensor.serial, sensor.displayName),
                                             style = serialTextStyle,
                                             maxLines = 1,
                                             softWrap = false,
