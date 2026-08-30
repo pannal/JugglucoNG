@@ -31,6 +31,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
  *   v12 — per-preset dose-calculation eligibility
  *   v13 — retry accounting on journal delete tombstones
  *   v14 — per-reading glucose source provenance
+ *   v15 — stable first-arrival ordering for equivalent replicated readings
  */
 @Database(
     entities = [
@@ -41,7 +42,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalInsulinPresetEntity::class,
         JournalPendingDeleteEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -276,6 +277,21 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE history_readings " +
+                        "ADD COLUMN firstStoredAt INTEGER NOT NULL DEFAULT 0"
+                )
+                // The table's autoincrement id is the only durable arrival order
+                // available for pre-migration rows. New rows use wall-clock time.
+                db.execSQL(
+                    "UPDATE history_readings SET firstStoredAt = id " +
+                        "WHERE firstStoredAt <= 0"
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -295,7 +311,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_10_11,
                     MIGRATION_11_12,
                     MIGRATION_12_13,
-                    MIGRATION_13_14
+                    MIGRATION_13_14,
+                    MIGRATION_14_15
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }
