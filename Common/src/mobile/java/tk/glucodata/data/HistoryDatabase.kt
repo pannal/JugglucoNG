@@ -441,7 +441,7 @@ abstract class HistoryDatabase : RoomDatabase() {
          * LibreView uploader would have to share nsUploadedAt with Nightscout, and either
          * destination succeeding would mark the entry sent to both.
          */
-        private val MIGRATION_23_24 = object : Migration(23, 24) {
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE journal_entries ADD COLUMN lvUploadedAt INTEGER")
             }
@@ -657,7 +657,8 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
-        private val MIGRATION_13_14 = object : Migration(13, 14) {
+        /** v23 -> v24: retain the source that delivered each glucose reading. */
+        private val MIGRATION_23_24 = object : Migration(23, 24) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "ALTER TABLE history_readings " +

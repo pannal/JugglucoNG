@@ -43,4 +43,18 @@ class HistoryDatabaseSafetyTests {
                 .contains("if (!Specific.historyDatabaseCompatible(this))")
         )
     }
+
+    @Test
+    fun provenanceMigrationExtendsTheCurrentLocalSchema() {
+        val source = historyDatabaseSource()
+        assertTrue(source.contains("version = 24"))
+        assertTrue(
+            source.contains(
+                "private val MIGRATION_23_24 = object : Migration(23, 24)"
+            )
+        )
+        assertTrue(
+            source.contains("ADD COLUMN source TEXT NOT NULL DEFAULT 'sensor'")
+        )
+    }
 }
