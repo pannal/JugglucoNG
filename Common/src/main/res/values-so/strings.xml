@@ -1272,6 +1272,8 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="custom_low">Caadi ahaan Hoose</string>
     <string name="custom_sound_selected">Codka gaarka ah ayaa la doortay</string>
     <string name="default_snooze">Hakinta caadiga ah</string>
+    <string name="alarm_default_action">Ficilka caadiga ah</string>
+    <string name="alarm_default_action_desc">Waxay dejisaa badhanka weyn ee shaashadda buuxda iyo waxa dhacaya marka ogeysiiska la xaaqo</string>
     <string name="delete_custom_alert">Tirtir digniinta gaarka ah</string>
     <string name="duration_label">Muddada</string>
     <string name="end">Dhammaad</string>

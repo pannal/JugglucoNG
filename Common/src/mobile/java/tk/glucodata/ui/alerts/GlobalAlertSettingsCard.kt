@@ -271,5 +271,6 @@ internal fun AlertConfig.sameMasterDraft(other: AlertConfig): Boolean {
         retryCount == other.retryCount &&
         soundDelayEnabled == other.soundDelayEnabled &&
         soundDelaySeconds == other.soundDelaySeconds &&
+        defaultAction == other.defaultAction &&
         defaultSnoozeMinutes == other.defaultSnoozeMinutes
 }

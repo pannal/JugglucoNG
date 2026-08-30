@@ -735,6 +735,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="custom_low">Benutzerdefiniert niedrig</string>
     <string name="custom_sound_selected">Benutzerdefinierter Ton ausgewählt</string>
     <string name="default_snooze">Standard-Schlummern</string>
+    <string name="alarm_default_action">Standardaktion</string>
+    <string name="alarm_default_action_desc">Legt die große Vollbildtaste und die Aktion beim Wegwischen der Benachrichtigung fest</string>
     <string name="delete_custom_alert">Benutzerdefinierten Alarm löschen</string>
     <string name="duration_label">Dauer</string>
     <string name="sound_delay_title">Alarmton verzögern</string>

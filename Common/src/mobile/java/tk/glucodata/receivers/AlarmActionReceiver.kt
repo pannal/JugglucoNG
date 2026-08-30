@@ -6,6 +6,7 @@ import android.content.Intent
 import tk.glucodata.Notify
 import tk.glucodata.alerts.AlertRepository
 import tk.glucodata.alerts.AlertType
+import tk.glucodata.alerts.CustomAlertRepository
 import tk.glucodata.alerts.SnoozeManager
 import tk.glucodata.alerts.AlertStateTracker
 import tk.glucodata.Log
@@ -64,7 +65,8 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val snoozeMinutes = if (intent.hasExtra(EXTRA_SNOOZE_MINUTES)) {
                     intent.getIntExtra(EXTRA_SNOOZE_MINUTES, 15)
                 } else if (customAlertId != null) {
-                    15
+                    CustomAlertRepository.getAll().firstOrNull { it.id == customAlertId }
+                        ?.defaultSnoozeMinutes ?: 15
                 } else {
                     resolvedAlertType?.let { AlertRepository.loadConfig(it).defaultSnoozeMinutes } ?: 15
                 }

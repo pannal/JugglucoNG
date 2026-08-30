@@ -772,6 +772,8 @@
     <string name="custom_low">Пользовательский низкий</string>
     <string name="custom_sound_selected">Выбран пользовательский звук</string>
     <string name="default_snooze">Отложить по умолчанию</string>
+    <string name="alarm_default_action">Действие по умолчанию</string>
+    <string name="alarm_default_action_desc">Определяет большую кнопку полноэкранной тревоги и действие при смахивании уведомления</string>
     <string name="delete_custom_alert">Удалить пользовательское оповещение</string>
     <string name="duration_label">Длительность</string>
     <string name="end">Конец</string>

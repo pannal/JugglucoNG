@@ -107,6 +107,17 @@ enum class AlertNotificationDismissAction(val displayName: String) {
     SNOOZE("Snooze")
 }
 
+/** Which action occupies the large primary button on the full-screen alarm. */
+enum class AlertDefaultAction {
+    DISMISS,
+    SNOOZE;
+
+    companion object {
+        fun fromStored(value: String?): AlertDefaultAction =
+            entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: DISMISS
+    }
+}
+
 /**
  * Configuration for a single alert type.
  */
@@ -161,6 +172,9 @@ data class AlertConfig(
     val soundDelayEnabled: Boolean = false,
     val soundDelaySeconds: Int = 0,
     
+    // Full-screen action settings. Dismiss preserves the existing button hierarchy.
+    val defaultAction: AlertDefaultAction = AlertDefaultAction.DISMISS,
+
     // Snooze settings
     val defaultSnoozeMinutes: Int = 15,
     

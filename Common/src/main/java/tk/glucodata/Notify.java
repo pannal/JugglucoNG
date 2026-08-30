@@ -86,8 +86,8 @@ import tk.glucodata.alerts.AlertDisplayText;
 import tk.glucodata.alerts.AlertType;
 import tk.glucodata.alerts.SnoozeManager;
 import tk.glucodata.alerts.AlertConfig;
+import tk.glucodata.alerts.AlertDefaultAction;
 import tk.glucodata.alerts.AlertDefaults;
-import tk.glucodata.alerts.AlertNotificationDismissAction;
 import tk.glucodata.alerts.AlertRepository;
 import tk.glucodata.alerts.AlertStateTracker;
 import tk.glucodata.alerts.QuietWindow;
@@ -3031,11 +3031,12 @@ public class Notify {
                 }
                 var GluNotBuilder = mkbuilderintent(type, intent, false);
                 // Wearables and companion apps often map "dismiss" to the notification's
-                // delete intent. The explicit notification buttons keep their fixed
-                // behavior; this preference only controls generic swipe/close events.
+                // delete intent. Use the same per-alarm default as the full-screen primary
+                // button; the explicit notification buttons keep their fixed behavior.
                 Intent swipeDismissIntent = new Intent(Applic.app, tk.glucodata.receivers.AlarmActionReceiver.class);
-                AlertNotificationDismissAction deleteAction = AlertRepository.INSTANCE.loadNotificationDismissAction();
-                swipeDismissIntent.setAction(deleteAction == AlertNotificationDismissAction.SNOOZE
+                AlertDefaultAction deleteAction = AlertRepository.INSTANCE.resolveDefaultAction(alertTypeId,
+                        customAlertId);
+                swipeDismissIntent.setAction(deleteAction == AlertDefaultAction.SNOOZE
                         ? tk.glucodata.receivers.AlarmActionReceiver.ACTION_SNOOZE
                         : tk.glucodata.receivers.AlarmActionReceiver.ACTION_DISMISS);
                 swipeDismissIntent.putExtra("alert_type_id", alertTypeId);

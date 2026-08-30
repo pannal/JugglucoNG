@@ -521,6 +521,8 @@
     <string name="custom_low">Personalizzato basso</string>
     <string name="custom_sound_selected">Suono personalizzato selezionato</string>
     <string name="default_snooze">Snooze predefinito</string>
+    <string name="alarm_default_action">Azione predefinita</string>
+    <string name="alarm_default_action_desc">Imposta il pulsante grande a schermo intero e l\'azione quando si elimina la notifica con uno scorrimento</string>
     <string name="delete_custom_alert">Elimina avviso personalizzato</string>
     <string name="duration_label">Durata</string>
     <string name="end">Fine</string>
