@@ -1,5 +1,6 @@
 package tk.glucodata.data
 
+import tk.glucodata.GlucoseReadingSource
 import tk.glucodata.SensorIdentity
 import kotlin.math.abs
 
@@ -7,10 +8,17 @@ internal object HistoryDisplayMerge {
     private const val SENSOR_MINUTE_BUCKET_MS = 60_000L
     private const val OVERLAP_PADDING_MS = 5L * 60L * 1000L
     private const val COVERAGE_SEGMENT_GAP_MS = 15L * 60L * 1000L
+    private const val REPLICA_TIMESTAMP_TOLERANCE_MS = 30_000L
+    private const val REPLICA_VALUE_TOLERANCE_MGDL = 1f
 
     private data class LogicalSensorBucket(
         val sensorId: String,
         val bucket: Long
+    )
+
+    private data class StableDeliveryCollapse(
+        val readings: List<HistoryReading>,
+        val winners: Set<HistoryReading>,
     )
 
     private class PreferredMatchResolver(preferredSerial: String?) {
@@ -60,7 +68,11 @@ internal object HistoryDisplayMerge {
         // currently selected sensor's coverage, otherwise changing receivers
         // retroactively relabels the entire visible timeline.
         val stableDeliveries = collapseEquivalentDeliveries(coalesced, resolver)
-        val filtered = applyPreferredOverlapDominance(stableDeliveries, resolver)
+        val filtered = applyPreferredOverlapDominance(
+            stableDeliveries.readings,
+            resolver,
+            stableDeliveries.winners,
+        )
         val merged = ArrayList<HistoryReading>(filtered.size)
         var currentTimestamp = Long.MIN_VALUE
         var currentBest: HistoryReading? = null
@@ -164,42 +176,52 @@ internal object HistoryDisplayMerge {
     private fun collapseEquivalentDeliveries(
         readings: List<HistoryReading>,
         resolver: PreferredMatchResolver,
-    ): List<HistoryReading> {
-        if (readings.size < 2) return readings
+    ): StableDeliveryCollapse {
+        if (readings.size < 2) return StableDeliveryCollapse(readings, emptySet())
 
         val collapsed = ArrayList<HistoryReading>(readings.size)
-        var start = 0
-        while (start < readings.size) {
-            val timestamp = readings[start].timestamp
-            var end = start + 1
-            while (end < readings.size && readings[end].timestamp == timestamp) end++
-
-            val deliveries = ArrayList<HistoryReading>(end - start)
-            for (index in start until end) {
-                val candidate = readings[index]
-                val equivalentIndex = deliveries.indexOfFirst { sameDeliveredValue(it, candidate) }
-                if (equivalentIndex < 0) {
-                    deliveries.add(candidate)
-                } else {
-                    deliveries[equivalentIndex] = chooseFirstDelivery(
-                        deliveries[equivalentIndex],
-                        candidate,
-                        resolver,
-                    )
+        val winners = LinkedHashSet<HistoryReading>()
+        for (candidate in readings) {
+            var equivalentIndex = -1
+            for (index in collapsed.lastIndex downTo 0) {
+                val existing = collapsed[index]
+                if (candidate.timestamp - existing.timestamp > REPLICA_TIMESTAMP_TOLERANCE_MS) break
+                if (sameReplicatedDelivery(existing, candidate)) {
+                    equivalentIndex = index
+                    break
                 }
             }
-            collapsed.addAll(deliveries)
-            start = end
+            if (equivalentIndex < 0) {
+                collapsed.add(candidate)
+                continue
+            }
+            val existing = collapsed[equivalentIndex]
+            val winner = chooseFirstDelivery(existing, candidate, resolver)
+            collapsed[equivalentIndex] = winner
+            winners.remove(existing)
+            winners.remove(candidate)
+            winners.add(winner)
         }
-        return collapsed
+        return StableDeliveryCollapse(collapsed.sortedBy(HistoryReading::timestamp), winners)
     }
 
-    private fun sameDeliveredValue(left: HistoryReading, right: HistoryReading): Boolean {
+    private fun sameReplicatedDelivery(left: HistoryReading, right: HistoryReading): Boolean {
+        if (!isNightscoutClonePair(left.source, right.source)) return false
+        if (abs(left.timestamp - right.timestamp) > REPLICA_TIMESTAMP_TOLERANCE_MS) return false
         val leftValue = left.value.takeIf { it.isFinite() && it > 0f }
             ?: left.rawValue.takeIf { it.isFinite() && it > 0f }
         val rightValue = right.value.takeIf { it.isFinite() && it > 0f }
             ?: right.rawValue.takeIf { it.isFinite() && it > 0f }
-        return leftValue != null && rightValue != null && abs(leftValue - rightValue) <= 0.5f
+        return leftValue != null && rightValue != null &&
+            abs(leftValue - rightValue) <= REPLICA_VALUE_TOLERANCE_MGDL
+    }
+
+    private fun isNightscoutClonePair(leftSource: String, rightSource: String): Boolean {
+        val leftNightscout = leftSource == GlucoseReadingSource.NIGHTSCOUT
+        val rightNightscout = rightSource == GlucoseReadingSource.NIGHTSCOUT
+        val leftClone = GlucoseReadingSource.cloneTransport(leftSource) != null
+        val rightClone = GlucoseReadingSource.cloneTransport(rightSource) != null
+        return (leftNightscout && rightClone) || (rightNightscout && leftClone)
     }
 
     private fun chooseFirstDelivery(
@@ -220,7 +242,8 @@ internal object HistoryDisplayMerge {
 
     private fun applyPreferredOverlapDominance(
         readings: List<HistoryReading>,
-        resolver: PreferredMatchResolver
+        resolver: PreferredMatchResolver,
+        stableReplicaWinners: Set<HistoryReading> = emptySet(),
     ): List<HistoryReading> {
         val preferredReadings = readings
             .filter { resolver.matches(it.sensorSerial) }
@@ -233,7 +256,7 @@ internal object HistoryDisplayMerge {
         val filtered = ArrayList<HistoryReading>(readings.size)
         var segmentIndex = 0
         for (reading in readings) {
-            if (resolver.matches(reading.sensorSerial)) {
+            if (resolver.matches(reading.sensorSerial) || reading in stableReplicaWinners) {
                 filtered.add(reading)
                 continue
             }
