@@ -1072,7 +1072,7 @@ public class Natives {
         public static native void setnovopenttimeandtype(long time, int type, String serial);
 
         public static native String mirrorStatus(int allindex);
-        public static native int getCloneConnectionTransport(int allindex);
+        public static native int getCloneConnectionTransport(String connectionIdentity);
 
         public static native void setWearosdefaults(String jident, boolean galaxy);
 
