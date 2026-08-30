@@ -695,6 +695,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="custom_low">Aangepast laag</string>
     <string name="custom_sound_selected">Aangepast geluid geselecteerd</string>
     <string name="default_snooze">Standaard snooze</string>
+    <string name="alarm_default_action">Standaardactie</string>
+    <string name="alarm_default_action_desc">Bepaalt de grote knop op volledig scherm en wat er gebeurt als je de melding wegveegt</string>
     <string name="delete_custom_alert">Aangepaste waarschuwing verwijderen</string>
     <string name="duration_label">Duur</string>
     <string name="end">Einde</string>

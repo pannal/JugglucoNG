@@ -607,6 +607,8 @@
     <string name="custom_low">Anpassad lag</string>
     <string name="custom_sound_selected">Anpassat ljud valt</string>
     <string name="default_snooze">Standard-snooze</string>
+    <string name="alarm_default_action">Standardåtgärd</string>
+    <string name="alarm_default_action_desc">Styr den stora helskärmsknappen och vad som händer när aviseringen sveps bort</string>
     <string name="delete_custom_alert">Ta bort anpassad varning</string>
     <string name="duration_label">Varaktighet</string>
     <string name="end">Slut</string>

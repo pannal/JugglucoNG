@@ -43,6 +43,7 @@ object AlertRepository {
     private fun keyCustomSound(type: AlertType) = "alert_${type.id}_soundUri"
     private fun keyVibration(type: AlertType) = "alert_${type.id}_vibration"
     private fun keyFlash(type: AlertType) = "alert_${type.id}_flash"
+    private fun keyDefaultAction(type: AlertType) = "alert_${type.id}_defaultAction"
     private fun keySnooze(type: AlertType) = "alert_${type.id}_snooze"
     private fun keyAlarmDuration(type: AlertType) = "alert_${type.id}_alarmDur"
     // NEW: Time range and retry keys
@@ -205,6 +206,26 @@ object AlertRepository {
         }
     }
 
+    /**
+     * Migration fallback for installs that configured the former global
+     * notification-swipe action before actions became per-alarm.
+     */
+    fun loadLegacyDefaultAction(): AlertDefaultAction = when (loadNotificationDismissAction()) {
+        AlertNotificationDismissAction.DISMISS -> AlertDefaultAction.DISMISS
+        AlertNotificationDismissAction.SNOOZE -> AlertDefaultAction.SNOOZE
+    }
+
+    /** Resolve the action shared by an alarm's full-screen primary button and notification swipe. */
+    fun resolveDefaultAction(alertTypeId: Int, customAlertId: String?): AlertDefaultAction {
+        if (!customAlertId.isNullOrBlank()) {
+            CustomAlertRepository.getAll().firstOrNull { it.id == customAlertId }?.let {
+                return it.defaultAction
+            }
+        }
+        return AlertType.fromId(alertTypeId)?.let { loadConfig(it).defaultAction }
+            ?: loadLegacyDefaultAction()
+    }
+
     /** After a full-screen alarm is dismissed or snoozed, return to the app that was open (default) instead of opening JugglucoNG. */
     fun loadReturnToPreviousAppAfterAlarm(): Boolean {
         return prefs.getBoolean(KEY_RETURN_TO_PREVIOUS_APP_AFTER_ALARM, true)
@@ -316,6 +337,7 @@ object AlertRepository {
             vibrationEnabled = prefs.getBoolean(keyVibration(type), Natives.alarmhasvibration(type.id)),
             flashEnabled = prefs.getBoolean(keyFlash(type), Natives.alarmhasflash(type.id)),
             customSoundUri = prefs.getString(keyCustomSound(type), null),
+            defaultAction = readDefaultAction(type),
             defaultSnoozeMinutes = prefs.getInt(keySnooze(type), base.defaultSnoozeMinutes),
             alarmDurationSeconds = readAlarmDurationSeconds(type, base.alarmDurationSeconds),
             // NEW: Time range and retry
@@ -375,6 +397,7 @@ object AlertRepository {
             customSoundUri = prefs.getString(keyCustomSound(type), default.customSoundUri),
             vibrationEnabled = prefs.getBoolean(keyVibration(type), default.vibrationEnabled),
             flashEnabled = prefs.getBoolean(keyFlash(type), default.flashEnabled),
+            defaultAction = readDefaultAction(type),
             defaultSnoozeMinutes = prefs.getInt(keySnooze(type), default.defaultSnoozeMinutes),
             alarmDurationSeconds = readAlarmDurationSeconds(type, default.alarmDurationSeconds),
             // NEW: Time range and retry
@@ -446,6 +469,7 @@ object AlertRepository {
             }
             putBoolean(keyVibration(config.type), config.vibrationEnabled)
             putBoolean(keyFlash(config.type), config.flashEnabled)
+            putString(keyDefaultAction(config.type), config.defaultAction.name)
             putInt(keySnooze(config.type), config.defaultSnoozeMinutes)
             putInt(keyAlarmDuration(config.type), sanitizeAlertDurationSeconds(config.alarmDurationSeconds))
             putBoolean(keyTimeRangeEnabled(config.type), config.timeRangeEnabled)
@@ -474,6 +498,15 @@ object AlertRepository {
                     sanitizeExpiryWarningMinutes(config.expiryWarningMinutes).map { it.toString() }.toSet()
                 )
             }
+        }
+    }
+
+    private fun readDefaultAction(type: AlertType): AlertDefaultAction {
+        val key = keyDefaultAction(type)
+        return if (prefs.contains(key)) {
+            AlertDefaultAction.fromStored(prefs.getString(key, null))
+        } else {
+            loadLegacyDefaultAction()
         }
     }
     

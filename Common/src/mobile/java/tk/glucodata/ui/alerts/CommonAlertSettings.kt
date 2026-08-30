@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.glucodata.R
 import tk.glucodata.alerts.AlertConfig
+import tk.glucodata.alerts.AlertDefaultAction
 import tk.glucodata.alerts.AlertDeliveryMode
 import tk.glucodata.alerts.AlertType
 import tk.glucodata.alerts.MAX_ALERT_DURATION_SECONDS
@@ -38,6 +39,7 @@ import tk.glucodata.ui.util.ConnectedButtonGroup
  * - Override Do Not Disturb
  * - Active Time Range
  * - Retry Settings
+ * - Default full-screen action
  * - Default Snooze
  */
 @Composable
@@ -319,7 +321,32 @@ fun CommonAlertSettings(
             onIntervalChange = { onConfigChange(config.copy(retryIntervalMinutes = it)) },
             onCountChange = { onConfigChange(config.copy(retryCount = it)) }
         )
-        
+
+        // === Full-screen primary action ===
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = sectionHorizontalPadding)
+        ) {
+            Text(stringResource(R.string.alarm_default_action))
+            Text(
+                text = stringResource(R.string.alarm_default_action_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            val defaultActionLabels = mapOf(
+                AlertDefaultAction.SNOOZE to stringResource(R.string.snooze),
+                AlertDefaultAction.DISMISS to stringResource(R.string.notification_dismiss_action_dismiss)
+            )
+            ConnectedButtonGroup(
+                options = listOf(AlertDefaultAction.SNOOZE, AlertDefaultAction.DISMISS),
+                selectedOption = config.defaultAction,
+                onOptionSelected = { onConfigChange(config.copy(defaultAction = it)) },
+                labelText = { defaultActionLabels.getValue(it) },
+                label = { Text(defaultActionLabels.getValue(it)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         // === Snooze ===
         DurationSlider(
             label = stringResource(R.string.default_snooze),

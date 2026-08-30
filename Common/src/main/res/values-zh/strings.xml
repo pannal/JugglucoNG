@@ -619,6 +619,8 @@
     <string name="custom_low">自定义低值</string>
     <string name="custom_sound_selected">已选择自定义铃声</string>
     <string name="default_snooze">默认稍后提醒</string>
+    <string name="alarm_default_action">默认操作</string>
+    <string name="alarm_default_action_desc">设置全屏警报的大按钮以及滑动关闭通知时执行的操作</string>
     <string name="delete_custom_alert">删除自定义警报</string>
     <string name="duration_label">持续时间</string>
     <string name="end">结束</string>

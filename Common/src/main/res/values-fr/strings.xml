@@ -554,6 +554,8 @@
     <string name="custom_low">Personnalisee basse</string>
     <string name="custom_sound_selected">Son personnalise selectionne</string>
     <string name="default_snooze">Snooze par defaut</string>
+    <string name="alarm_default_action">Action par défaut</string>
+    <string name="alarm_default_action_desc">Définit le grand bouton en plein écran et l\'action lors du balayage de la notification</string>
     <string name="delete_custom_alert">Supprimer l\'alerte personnalisee</string>
     <string name="duration_label">Duree</string>
     <string name="end">Fin</string>

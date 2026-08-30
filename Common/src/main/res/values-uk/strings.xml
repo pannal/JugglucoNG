@@ -619,6 +619,8 @@
     <string name="custom_low">Користувацьке низьке</string>
     <string name="custom_sound_selected">Вибрано користувацький звук</string>
     <string name="default_snooze">Відкладання за замовчуванням</string>
+    <string name="alarm_default_action">Типова дія</string>
+    <string name="alarm_default_action_desc">Визначає велику кнопку повноекранної тривоги та дію під час змахування сповіщення</string>
     <string name="delete_custom_alert">Видалити користувацьке сповіщення</string>
     <string name="duration_label">Тривалість</string>
     <string name="end">Кінець</string>

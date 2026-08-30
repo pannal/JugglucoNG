@@ -53,6 +53,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +69,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import tk.glucodata.Natives
 import tk.glucodata.R
+import tk.glucodata.alerts.AlertDefaultAction
 import tk.glucodata.logic.TrendEngine
 import tk.glucodata.ui.components.TrendIndicator
 import tk.glucodata.ui.theme.AppTypography
@@ -98,6 +102,7 @@ fun AlarmScreen(
     severity: AlarmSeverity,
     trendResult: TrendEngine.TrendResult,
     timeText: String,
+    defaultAction: AlertDefaultAction,
     onSnooze: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -113,6 +118,7 @@ fun AlarmScreen(
             trend = trend,
             trendResult = trendResult,
             typographyChoice = typographyChoice,
+            defaultAction = defaultAction,
             onSnooze = onSnooze,
             onDismiss = onDismiss
         )
@@ -127,6 +133,7 @@ private fun PixelAlarmContent(
     trend: Trend,
     trendResult: TrendEngine.TrendResult,
     typographyChoice: AlarmTypographyChoice,
+    defaultAction: AlertDefaultAction,
     onSnooze: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -226,6 +233,7 @@ private fun PixelAlarmContent(
             ) {
                 ActionDock(
                     compact = compact,
+                    defaultAction = defaultAction,
                     onSnooze = onSnooze,
                     onDismiss = onDismiss,
                     modifier = Modifier.padding(bottom = if (compact) 16.dp else 24.dp)
@@ -394,10 +402,26 @@ private fun HeroBlock(
 @Composable
 private fun ActionDock(
     compact: Boolean,
+    defaultAction: AlertDefaultAction,
     onSnooze: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val actions = remember(defaultAction) { alarmActionLayout(defaultAction) }
+    val actionHandler: (AlertDefaultAction) -> () -> Unit = { action ->
+        when (action) {
+            AlertDefaultAction.SNOOZE -> onSnooze
+            AlertDefaultAction.DISMISS -> onDismiss
+        }
+    }
+    val snoozeLabel = stringResource(R.string.snooze)
+    val dismissLabel = stringResource(R.string.stop)
+    val actionLabel: (AlertDefaultAction) -> String = { action ->
+        when (action) {
+            AlertDefaultAction.SNOOZE -> snoozeLabel
+            AlertDefaultAction.DISMISS -> dismissLabel
+        }
+    }
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(36.dp),
@@ -407,7 +431,8 @@ private fun ActionDock(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .semantics { isTraversalGroup = true },
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
@@ -415,10 +440,11 @@ private fun ActionDock(
                 horizontalArrangement = Arrangement.End
             ) {
                 FilledTonalButton(
-                    onClick = onSnooze,
+                    onClick = actionHandler(actions.secondary),
                     modifier = Modifier
                         .fillMaxWidth(if (compact) 0.42f else 0.36f)
-                        .height(if (compact) 58.dp else 62.dp),
+                        .height(if (compact) 58.dp else 62.dp)
+                        .semantics { traversalIndex = 1f },
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(22.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
@@ -427,7 +453,7 @@ private fun ActionDock(
                     )
                 ) {
                     Text(
-                        text = stringResource(R.string.snooze),
+                        text = actionLabel(actions.secondary),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium
                         )
@@ -436,10 +462,11 @@ private fun ActionDock(
             }
 
             Button(
-                onClick = onDismiss,
+                onClick = actionHandler(actions.primary),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(if (compact) 82.dp else 90.dp),
+                    .height(if (compact) 82.dp else 90.dp)
+                    .semantics { traversalIndex = 0f },
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -447,7 +474,7 @@ private fun ActionDock(
                 )
             ) {
                 Text(
-                    text = stringResource(R.string.stop),
+                    text = actionLabel(actions.primary),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Medium,
                         letterSpacing = (-0.1).sp
@@ -456,6 +483,22 @@ private fun ActionDock(
             }
         }
     }
+}
+
+internal data class AlarmActionLayout(
+    val primary: AlertDefaultAction,
+    val secondary: AlertDefaultAction
+)
+
+internal fun alarmActionLayout(defaultAction: AlertDefaultAction): AlarmActionLayout = when (defaultAction) {
+    AlertDefaultAction.SNOOZE -> AlarmActionLayout(
+        primary = AlertDefaultAction.SNOOZE,
+        secondary = AlertDefaultAction.DISMISS
+    )
+    AlertDefaultAction.DISMISS -> AlarmActionLayout(
+        primary = AlertDefaultAction.DISMISS,
+        secondary = AlertDefaultAction.SNOOZE
+    )
 }
 
 @Composable

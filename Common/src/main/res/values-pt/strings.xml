@@ -507,6 +507,8 @@
     <string name="custom_low">Personalizado baixo</string>
     <string name="custom_sound_selected">Som personalizado selecionado</string>
     <string name="default_snooze">Soneca padrao</string>
+    <string name="alarm_default_action">Ação predefinida</string>
+    <string name="alarm_default_action_desc">Define o botão grande em tela cheia e o que acontece ao dispensar a notificação</string>
     <string name="delete_custom_alert">Excluir alerta personalizado</string>
     <string name="duration_label">Duracao</string>
     <string name="end">Fim</string>

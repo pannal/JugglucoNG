@@ -659,6 +659,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="custom_low">Ozel dusuk</string>
     <string name="custom_sound_selected">Ozel ses secildi</string>
     <string name="default_snooze">Varsayilan erteleme</string>
+    <string name="alarm_default_action">Varsayılan işlem</string>
+    <string name="alarm_default_action_desc">Tam ekran alarmındaki büyük düğmeyi ve bildirim kaydırıldığında yapılacak işlemi ayarlar</string>
     <string name="delete_custom_alert">Ozel uyarıyı sil</string>
     <string name="duration_label">Sure</string>
     <string name="end">Bitis</string>

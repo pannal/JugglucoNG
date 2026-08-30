@@ -1024,6 +1024,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="custom_low">Өөрийн бага утга</string>
     <string name="custom_sound_selected">Өөрийн дууг сонгосон</string>
     <string name="default_snooze">Үндсэн түр зогсолт (snooze)</string>
+    <string name="alarm_default_action">Өгөгдмөл үйлдэл</string>
+    <string name="alarm_default_action_desc">Бүтэн дэлгэцийн том товч болон мэдэгдлийг шудрахад хийх үйлдлийг тохируулна</string>
     <string name="delete_custom_alert">Өөрийн дохиог устгах</string>
     <string name="duration_label">Үргэлжлэх хугацаа</string>
     <string name="end">Төгсгөл</string>

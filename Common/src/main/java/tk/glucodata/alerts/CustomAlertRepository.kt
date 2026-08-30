@@ -18,9 +18,10 @@ object CustomAlertRepository {
         val list = mutableListOf<CustomAlertConfig>()
         try {
             val jsonArray = JSONArray(jsonString)
+            val migrationDefaultAction = AlertRepository.loadLegacyDefaultAction()
             for (i in 0 until jsonArray.length()) {
                 val obj = jsonArray.getJSONObject(i)
-                list.add(CustomAlertConfig.fromJson(obj))
+                list.add(CustomAlertConfig.fromJson(obj, migrationDefaultAction))
             }
         } catch (e: Exception) {
             e.printStackTrace()

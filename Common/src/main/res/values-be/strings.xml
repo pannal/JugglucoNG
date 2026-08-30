@@ -597,6 +597,8 @@
     <string name="custom_low">Карыстальніцкі нізкі</string>
     <string name="custom_sound_selected">Выбраны карыстальніцкі гук</string>
     <string name="default_snooze">Адкласці па змаўчанні</string>
+    <string name="alarm_default_action">Прадвызначанае дзеянне</string>
+    <string name="alarm_default_action_desc">Вызначае вялікую кнопку поўнаэкраннай трывогі і дзеянне пры змахванні апавяшчэння</string>
     <string name="delete_custom_alert">Выдаліць карыстальніцкае апавяшчэнне</string>
     <string name="duration_label">Працягласць</string>
     <string name="end">Канец</string>

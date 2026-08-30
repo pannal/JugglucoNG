@@ -182,13 +182,6 @@ fun AlertSettingsScreen(
     var expandedType by remember { mutableStateOf<AlertType?>(null) }
     // Track sound picker state (Generic: Current URI + AlertTypeId + Callback)
     var soundPickerRequest by remember { mutableStateOf<Triple<String?, Int, (String?) -> Unit>?>(null) }
-    var notificationDismissAction by remember {
-        mutableStateOf(AlertRepository.loadNotificationDismissAction())
-    }
-    fun persistNotificationDismissAction(action: AlertNotificationDismissAction) {
-        notificationDismissAction = action
-        AlertRepository.saveNotificationDismissAction(action)
-    }
     var returnToPreviousAppAfterAlarm by remember {
         mutableStateOf(AlertRepository.loadReturnToPreviousAppAfterAlarm())
     }
@@ -251,6 +244,7 @@ fun AlertSettingsScreen(
                                 retryCount = draft.retryCount,
                                 soundDelayEnabled = draft.soundDelayEnabled,
                                 soundDelaySeconds = draft.soundDelaySeconds,
+                                defaultAction = draft.defaultAction,
                                 defaultSnoozeMinutes = draft.defaultSnoozeMinutes
                             )
                             persistConfigIfChanged(updated)
@@ -274,7 +268,9 @@ fun AlertSettingsScreen(
                                 timeRangeEnabled = draft.timeRangeEnabled,
                                 startTimeMinutes = (draft.activeStartHour ?: 0) * 60 + (draft.activeStartMinute ?: 0),
                                 endTimeMinutes = (draft.activeEndHour ?: 0) * 60 + (draft.activeEndMinute ?: 0),
-                                soundUri = draft.customSoundUri
+                                soundUri = draft.customSoundUri,
+                                defaultAction = draft.defaultAction,
+                                defaultSnoozeMinutes = draft.defaultSnoozeMinutes
                             )
                         }
                         saveCustomAlerts(updatedCustomAlerts)
@@ -511,14 +507,6 @@ fun AlertSettingsScreen(
                 PreemptiveSnoozeCard()
             }
 
-            item(key = "notification-dismiss-action") {
-                Spacer(Modifier.height(8.dp))
-                NotificationDismissActionPreference(
-                    action = notificationDismissAction,
-                    onActionChange = { persistNotificationDismissAction(it) }
-                )
-            }
-
             item(key = "alarm-return-to-previous-app") {
                 Spacer(Modifier.height(8.dp))
                 ReturnToPreviousAppPreference(
@@ -748,7 +736,9 @@ fun CustomAlertCard(
                         activeStartHour = alert.startTimeMinutes / 60,
                         activeStartMinute = alert.startTimeMinutes % 60,
                         activeEndHour = alert.endTimeMinutes / 60,
-                        activeEndMinute = alert.endTimeMinutes % 60
+                        activeEndMinute = alert.endTimeMinutes % 60,
+                        defaultAction = alert.defaultAction,
+                        defaultSnoozeMinutes = alert.defaultSnoozeMinutes
                     )
                     // Delete Button
                     OutlinedButton(
@@ -786,6 +776,8 @@ fun CustomAlertCard(
                                 retryEnabled = newConfig.retryEnabled,
                                 retryIntervalMinutes = newConfig.retryIntervalMinutes,
                                 retryCount = newConfig.retryCount,
+                                defaultAction = newConfig.defaultAction,
+                                defaultSnoozeMinutes = newConfig.defaultSnoozeMinutes,
                                 timeRangeEnabled = newConfig.timeRangeEnabled,
                                 startTimeMinutes = (newConfig.activeStartHour ?: 0) * 60 + (newConfig.activeStartMinute ?: 0),
                                 endTimeMinutes = (newConfig.activeEndHour ?: 0) * 60 + (newConfig.activeEndMinute ?: 0)
@@ -1639,84 +1631,6 @@ private fun PreemptiveSnoozeCard() {
         PreemptiveSnoozeDialog(
             onDismiss = { showDialog = false }
         )
-    }
-}
-
-@Composable
-private fun NotificationDismissActionPreference(
-    action: AlertNotificationDismissAction,
-    onActionChange: (AlertNotificationDismissAction) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f)
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.NotificationsOff,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.notification_dismiss_action_title),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = stringResource(R.string.notification_dismiss_action_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            val actionLabels = AlertNotificationDismissAction.entries.associateWith { it.localizedName() }
-            ConnectedButtonGroup(
-                options = AlertNotificationDismissAction.entries,
-                selectedOption = action,
-                onOptionSelected = onActionChange,
-                labelText = { actionLabels[it] ?: it.name },
-                label = {
-                    Text(
-                        text = actionLabels[it] ?: it.name,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-                },
-                icon = { option ->
-                    if (option == action) Icons.Default.Check else null
-                },
-                modifier = Modifier.fillMaxWidth(),
-                itemHeight = 40.dp,
-                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.74f),
-                selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                unselectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.56f),
-                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 

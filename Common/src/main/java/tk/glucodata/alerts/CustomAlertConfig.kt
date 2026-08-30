@@ -42,6 +42,9 @@ data class CustomAlertConfig(
     val retryEnabled: Boolean = false,
     val retryIntervalMinutes: Int = 0,
     val retryCount: Int = 0,
+
+    val defaultAction: AlertDefaultAction = AlertDefaultAction.DISMISS,
+    val defaultSnoozeMinutes: Int = 15,
     
     val snoozedUntil: Long = 0L,
     val soundUri: String? = null,
@@ -95,6 +98,9 @@ data class CustomAlertConfig(
             put("retryEnabled", retryEnabled)
             put("retryInterval", retryIntervalMinutes) // Keep JSON key simple or match property? preserving legacy 'retryInterval' key if any, but mapping to new prop
             put("retryCount", retryCount)
+
+            put("defaultAction", defaultAction.name)
+            put("defaultSnoozeMinutes", defaultSnoozeMinutes)
             
             put("snoozedUntil", snoozedUntil)
             put("soundUri", soundUri)
@@ -115,7 +121,10 @@ data class CustomAlertConfig(
             return ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY
         }
 
-        fun fromJson(json: JSONObject): CustomAlertConfig {
+        fun fromJson(
+            json: JSONObject,
+            missingDefaultAction: AlertDefaultAction = AlertDefaultAction.DISMISS
+        ): CustomAlertConfig {
             return CustomAlertConfig(
                 id = json.optString("id", UUID.randomUUID().toString()),
                 name = json.optString("name", ""),
@@ -143,6 +152,13 @@ data class CustomAlertConfig(
                 retryEnabled = json.optBoolean("retryEnabled", false),
                 retryIntervalMinutes = json.optInt("retryInterval", 0),
                 retryCount = json.optInt("retryCount", 0),
+
+                defaultAction = if (json.has("defaultAction")) {
+                    AlertDefaultAction.fromStored(json.optString("defaultAction", ""))
+                } else {
+                    missingDefaultAction
+                },
+                defaultSnoozeMinutes = json.optInt("defaultSnoozeMinutes", 15).coerceIn(5, 60),
                 
                 snoozedUntil = json.optLong("snoozedUntil", 0L),
                 soundUri = if (json.isNull("soundUri")) null else json.getString("soundUri")
