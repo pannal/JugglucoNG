@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import tk.glucodata.data.journal.JournalDao
+import tk.glucodata.data.journal.CloneJournalTombstoneEntity
 import tk.glucodata.data.journal.JournalEntryEntity
 import tk.glucodata.data.journal.JournalFoodEntity
 import tk.glucodata.data.journal.JournalInsulinPresetEntity
@@ -32,6 +33,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
  *   v13 — retry accounting on journal delete tombstones
  *   v14 — per-reading glucose source provenance
  *   v15 — stable first-arrival ordering for equivalent replicated readings
+ *   v16 — journal content origin plus durable Clone deletion tombstones
  */
 @Database(
     entities = [
@@ -40,9 +42,10 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalEntryEntity::class,
         JournalFoodEntity::class,
         JournalInsulinPresetEntity::class,
-        JournalPendingDeleteEntity::class
+        JournalPendingDeleteEntity::class,
+        CloneJournalTombstoneEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -292,6 +295,24 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN originSource TEXT")
+                db.execSQL(
+                    "UPDATE journal_entries SET originSource = source " +
+                        "WHERE source IN ('manual', 'health_connect', 'meter', 'pen')"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS clone_journal_tombstones (
+                        entryId INTEGER PRIMARY KEY NOT NULL,
+                        deletedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -312,7 +333,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_11_12,
                     MIGRATION_12_13,
                     MIGRATION_13_14,
-                    MIGRATION_14_15
+                    MIGRATION_14_15,
+                    MIGRATION_15_16
                 )
                 .fallbackToDestructiveMigration()  // Fallback if migration chain is broken
                 .build().also { INSTANCE = it }
