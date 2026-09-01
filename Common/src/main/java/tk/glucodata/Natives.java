@@ -1608,6 +1608,9 @@ public class Natives {
 
         public static native void setTurnServer(int pos, String host, int port, String username, String password);
 
+        public static native void setCloneICEConfig(String rendezvousHost, int rendezvousPort,
+                                                     boolean useTurnForStun);
+
         public static native int TurnServerNR();
 
         // s/^[ ]*extern.*JNIEXPORT[ ]*\([a-zA-Z]*\)[ ]*JNICALL[ ]*fromjava(\([^)]*\))
