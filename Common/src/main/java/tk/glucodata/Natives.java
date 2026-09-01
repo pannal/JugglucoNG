@@ -1099,6 +1099,9 @@ public class Natives {
 
         public static native String mirrorStatus(int allindex);
         public static native int getCloneConnectionTransport(String connectionIdentity);
+        public static native String getCloneRendezvousHost(int allindex);
+        public static native int getCloneRendezvousPort(int allindex);
+        public static native int getCloneRendezvousCertificateVerification(int allindex);
 
         public static native void setWearosdefaults(String jident, boolean galaxy);
 

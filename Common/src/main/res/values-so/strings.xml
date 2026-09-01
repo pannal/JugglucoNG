@@ -3152,6 +3152,13 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="freeze_displayed_values_on">Qiimaha la tusay waa la hayaa</string>
     <string name="freeze_displayed_values_off">Dib ayaa loo xisaabinayaa isbeddel kasta</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">Local ICE</string>
+    <string name="clone_transport_turn_ice">TURN ICE</string>
+    <string name="clone_transport_unknown">Connection unknown</string>
+    <string name="mirror_route">Route</string>
+    <string name="mirror_stun_server">STUN server</string>
+    <string name="mirror_certificate_verification">Certificate verification</string>
+    <string name="mirror_app_turn_server">App-provided TURN</string>
     <string name="clone_source_turn_description">Clone iyada oo loo marayo TURN</string>
     <string name="clone_source_local_ice_description">Clone iyada oo loo marayo ICE maxalli ah</string>
     <string name="sensor_vendor_abbott">Abbott</string>
