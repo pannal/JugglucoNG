@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import tk.glucodata.data.journal.JournalDao
+import tk.glucodata.data.journal.CloneJournalTombstoneEntity
 import tk.glucodata.data.journal.JournalEntryEntity
 import tk.glucodata.data.journal.JournalFoodEntity
 import tk.glucodata.data.journal.JournalInsulinPresetEntity
@@ -47,6 +48,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v23 — editable package piece counts for product and meal quantity resolution
  *   v24 — per-reading glucose source provenance
  *   v25 — stable first-arrival ordering for equivalent replicated readings
+ *   v26 — journal content origin plus durable Clone deletion tombstones
  */
 @Database(
     entities = [
@@ -61,9 +63,10 @@ import tk.glucodata.data.meal.MealProductEntity
         MealEntity::class,
         MealItemEntity::class,
         MealProductEntity::class,
-        HypoEpisodeMark::class
+        HypoEpisodeMark::class,
+        CloneJournalTombstoneEntity::class,
     ],
-    version = 25,
+    version = 26,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -698,6 +701,24 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_25_26 = object : Migration(25, 26) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN originSource TEXT")
+                db.execSQL(
+                    "UPDATE journal_entries SET originSource = source " +
+                        "WHERE source IN ('manual', 'health_connect', 'meter', 'pen')"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS clone_journal_tombstones (
+                        entryId INTEGER PRIMARY KEY NOT NULL,
+                        deletedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -728,7 +749,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_21_22,
                     MIGRATION_22_23,
                     MIGRATION_23_24,
-                    MIGRATION_24_25
+                    MIGRATION_24_25,
+                    MIGRATION_25_26
                 )
                 .build().also { INSTANCE = it }
             }
