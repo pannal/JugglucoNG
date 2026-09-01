@@ -54,10 +54,18 @@ class JournalRepository {
         val nsRemoteId = input.nsRemoteId?.takeIf { it.isNotBlank() }
         val existing = input.id?.let { dao.getEntryById(it) }
             ?: sourceRecordId?.let { dao.getEntryBySourceRecordId(it) }
-            ?: nsRemoteId?.let { dao.getEntryByNightscoutRemoteId(it) }
-        val matchedByRemoteId = existing != null &&
-            existing.sourceRecordId != sourceRecordId &&
-            existing.nsRemoteId == nsRemoteId
+            ?: nsRemoteId?.let {
+                dao.getEntryByNightscoutRemoteIdAndType(it, input.type.storageValue)
+            }
+        val remoteIdentityMatch = existing?.takeIf {
+            it.sourceRecordId != sourceRecordId &&
+                isSameNightscoutJournalKind(
+                    existingNsRemoteId = it.nsRemoteId,
+                    incomingNsRemoteId = nsRemoteId,
+                    existingEntryType = it.entryType,
+                    incomingEntryType = input.type.storageValue,
+                )
+        }
         val now = System.currentTimeMillis()
         val isInsulin = input.type == JournalEntryType.INSULIN
         val preserveCurveSnapshot = isInsulin &&
@@ -92,8 +100,8 @@ class JournalRepository {
             // order. When their shared Nightscout ID found the row, retain the
             // first observed provenance and storage identity instead of
             // oscillating between sources or creating a duplicate.
-            source = if (matchedByRemoteId) existing!!.source else input.source.storageValue,
-            sourceRecordId = if (matchedByRemoteId) existing!!.sourceRecordId else sourceRecordId,
+            source = remoteIdentityMatch?.source ?: input.source.storageValue,
+            sourceRecordId = remoteIdentityMatch?.sourceRecordId ?: sourceRecordId,
             createdAt = existing?.createdAt ?: now,
             updatedAt = now,
             foodId = input.foodId,
@@ -571,6 +579,15 @@ internal fun matchExistingBuiltInPreset(
     }
     return legacySortOrder?.let(bySortOrder::get)
 }
+
+internal fun isSameNightscoutJournalKind(
+    existingNsRemoteId: String?,
+    incomingNsRemoteId: String?,
+    existingEntryType: String,
+    incomingEntryType: String,
+): Boolean = incomingNsRemoteId != null &&
+    existingNsRemoteId == incomingNsRemoteId &&
+    existingEntryType == incomingEntryType
 
 private fun JournalEntryEntity.nightscoutDeleteRemoteId(): String? {
     nsRemoteId?.takeIf { it.isNotBlank() }?.let { return it }
