@@ -2610,6 +2610,13 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="glucosechartvaluearrowcomplicationlabel">Diagramm + Wert + Pfeil</string>
     <string name="glucosechartfullcomplicationlabel">Diagramm + Wert + Pfeil + Zeit</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">Lokales ICE</string>
+    <string name="clone_transport_turn_ice">TURN-ICE</string>
+    <string name="clone_transport_unknown">Verbindung unbekannt</string>
+    <string name="mirror_route">Route</string>
+    <string name="mirror_stun_server">STUN-Server</string>
+    <string name="mirror_certificate_verification">Zertifikatsprüfung</string>
+    <string name="mirror_app_turn_server">Von der App bereitgestelltes TURN</string>
     <string name="clone_source_turn_description">Clone über TURN</string>
     <string name="clone_source_local_ice_description">Clone über lokales ICE</string>
 </resources>

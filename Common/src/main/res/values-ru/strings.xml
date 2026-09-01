@@ -2618,6 +2618,13 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluearrowcomplicationlabel">График + значение + стрелка</string>
     <string name="glucosechartfullcomplicationlabel">График + значение + стрелка + время</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">Локальный ICE</string>
+    <string name="clone_transport_turn_ice">TURN ICE</string>
+    <string name="clone_transport_unknown">Подключение неизвестно</string>
+    <string name="mirror_route">Маршрут</string>
+    <string name="mirror_stun_server">Сервер STUN</string>
+    <string name="mirror_certificate_verification">Проверка сертификата</string>
+    <string name="mirror_app_turn_server">TURN от приложения</string>
     <string name="clone_source_turn_description">Clone через TURN</string>
     <string name="clone_source_local_ice_description">Clone через локальный ICE</string>
 </resources>

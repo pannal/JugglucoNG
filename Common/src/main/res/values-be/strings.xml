@@ -2642,6 +2642,13 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluearrowcomplicationlabel">Графік + значэнне + стрэлка</string>
     <string name="glucosechartfullcomplicationlabel">Графік + значэнне + стрэлка + час</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">Лакальны ICE</string>
+    <string name="clone_transport_turn_ice">TURN ICE</string>
+    <string name="clone_transport_unknown">Падключэнне невядомае</string>
+    <string name="mirror_route">Маршрут</string>
+    <string name="mirror_stun_server">Сервер STUN</string>
+    <string name="mirror_certificate_verification">Праверка сертыфіката</string>
+    <string name="mirror_app_turn_server">TURN ад праграмы</string>
     <string name="clone_source_turn_description">Clone праз TURN</string>
     <string name="clone_source_local_ice_description">Clone праз лакальны ICE</string>
 </resources>

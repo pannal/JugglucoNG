@@ -2686,6 +2686,13 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="glucosechartvaluearrowcomplicationlabel">График + утга + сум</string>
     <string name="glucosechartfullcomplicationlabel">График + утга + сум + цаг</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">Local ICE</string>
+    <string name="clone_transport_turn_ice">TURN ICE</string>
+    <string name="clone_transport_unknown">Connection unknown</string>
+    <string name="mirror_route">Route</string>
+    <string name="mirror_stun_server">STUN server</string>
+    <string name="mirror_certificate_verification">Certificate verification</string>
+    <string name="mirror_app_turn_server">App-provided TURN</string>
     <string name="clone_source_turn_description">TURN-ээр дамжих Clone</string>
     <string name="clone_source_local_ice_description">Дотоод ICE-ээр дамжих Clone</string>
 </resources>

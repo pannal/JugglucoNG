@@ -2587,6 +2587,13 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucosechartvaluearrowcomplicationlabel">图表 + 数值 + 箭头</string>
     <string name="glucosechartfullcomplicationlabel">图表 + 数值 + 箭头 + 时间</string>
     <string name="clone_source_label">Clone</string>
+    <string name="clone_transport_local_ice">本地 ICE</string>
+    <string name="clone_transport_turn_ice">TURN ICE</string>
+    <string name="clone_transport_unknown">连接未知</string>
+    <string name="mirror_route">路由</string>
+    <string name="mirror_stun_server">STUN 服务器</string>
+    <string name="mirror_certificate_verification">证书验证</string>
+    <string name="mirror_app_turn_server">应用提供的 TURN</string>
     <string name="clone_source_turn_description">通过 TURN 的 Clone</string>
     <string name="clone_source_local_ice_description">通过本地 ICE 的 Clone</string>
 </resources>
