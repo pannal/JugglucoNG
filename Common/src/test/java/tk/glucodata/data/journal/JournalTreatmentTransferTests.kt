@@ -125,4 +125,26 @@ class JournalTreatmentTransferTests {
         assertEquals(4.0, json.optDouble("insulin"), 0.001)
         assertEquals("kept", json.optString("notes"))
     }
+
+    @Test
+    fun cloneTransferKeepsExplicitNightscoutIdentityForCrossSourceDeduplication() {
+        val document = JSONObject()
+            .put("identifier", "journal:42")
+            .put("nsRemoteId", "remote-treatment-id")
+            .put("date", 1_786_794_604_000L)
+            .put("eventType", "Correction Bolus")
+            .put("insulin", 2.5)
+
+        val parsed = JournalTreatmentTransfer.parseTreatment(
+            treatment = document,
+            source = JournalEntrySource.CLONE_TURN,
+            sourcePrefix = "clone:test-origin",
+            insulinPresets = emptyList(),
+            stringResource = { "Insulin" },
+        )
+
+        val entry = parsed!!.inputs.single()
+        assertEquals("clone:test-origin:journal:42:insulin", entry.sourceRecordId)
+        assertEquals("remote-treatment-id", entry.nsRemoteId)
+    }
 }
