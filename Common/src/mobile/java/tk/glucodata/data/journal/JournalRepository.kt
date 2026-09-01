@@ -50,99 +50,109 @@ class JournalRepository {
     }
 
     suspend fun upsertEntry(input: JournalEntryInput): Long {
-        val sourceRecordId = input.sourceRecordId?.takeIf { it.isNotBlank() }
-        val nsRemoteId = input.nsRemoteId?.takeIf { it.isNotBlank() }
-        val existing = input.id?.let { dao.getEntryById(it) }
-            ?: sourceRecordId?.let { dao.getEntryBySourceRecordId(it) }
-            ?: nsRemoteId?.let {
-                dao.getEntryByNightscoutRemoteIdAndType(it, input.type.storageValue)
+        val (id, entity, existing) = database.withTransaction {
+            val sourceRecordId = input.sourceRecordId?.takeIf { it.isNotBlank() }
+            val nsRemoteId = input.nsRemoteId?.takeIf { it.isNotBlank() }
+            val existing = input.id?.let { dao.getEntryById(it) }
+                ?: sourceRecordId?.let { dao.getEntryBySourceRecordId(it) }
+                ?: nsRemoteId?.let {
+                    dao.getEntryByNightscoutRemoteIdAndType(it, input.type.storageValue)
+                }
+            val remoteIdentityMatch = existing?.takeIf {
+                it.sourceRecordId != sourceRecordId &&
+                    isSameNightscoutJournalKind(
+                        existingNsRemoteId = it.nsRemoteId,
+                        incomingNsRemoteId = nsRemoteId,
+                        existingEntryType = it.entryType,
+                        incomingEntryType = input.type.storageValue,
+                    )
             }
-        val remoteIdentityMatch = existing?.takeIf {
-            it.sourceRecordId != sourceRecordId &&
-                isSameNightscoutJournalKind(
-                    existingNsRemoteId = it.nsRemoteId,
-                    incomingNsRemoteId = nsRemoteId,
-                    existingEntryType = it.entryType,
-                    incomingEntryType = input.type.storageValue,
+            val cloneIdentityMatch = existing?.takeIf {
+                isSameCloneJournalRecord(
+                    existingSource = it.source,
+                    incomingSource = input.source,
+                    existingSourceRecordId = it.sourceRecordId,
+                    incomingSourceRecordId = sourceRecordId,
                 )
-        }
-        val now = System.currentTimeMillis()
-        val isInsulin = input.type == JournalEntryType.INSULIN
-        val preserveCurveSnapshot = isInsulin &&
-            existing?.entryType == JournalEntryType.INSULIN.storageValue &&
-            existing.amount == input.amount &&
-            existing.insulinPresetId == input.insulinPresetId &&
-            !existing.insulinCurveJsonSnapshot.isNullOrBlank()
-        val resolvedCurve = if (isInsulin && !preserveCurveSnapshot) {
-            val amount = input.amount?.takeIf { it.isFinite() && it > 0f }
-            val preset = input.insulinPresetId?.let { dao.getInsulinPresetById(it) }?.toModel()
-            if (amount != null && preset != null) {
-                preset.resolveCurveForDose(amount, JournalHumanProfile.bodyWeightKg(Applic.app))
+            }
+            val preservedIdentity = remoteIdentityMatch ?: cloneIdentityMatch
+            val now = System.currentTimeMillis()
+            val isInsulin = input.type == JournalEntryType.INSULIN
+            val preserveCurveSnapshot = isInsulin &&
+                existing?.entryType == JournalEntryType.INSULIN.storageValue &&
+                existing.amount == input.amount &&
+                existing.insulinPresetId == input.insulinPresetId &&
+                !existing.insulinCurveJsonSnapshot.isNullOrBlank()
+            val resolvedCurve = if (isInsulin && !preserveCurveSnapshot) {
+                val amount = input.amount?.takeIf { it.isFinite() && it > 0f }
+                val preset = input.insulinPresetId?.let { dao.getInsulinPresetById(it) }?.toModel()
+                if (amount != null && preset != null) {
+                    preset.resolveCurveForDose(amount, JournalHumanProfile.bodyWeightKg(Applic.app))
+                } else {
+                    null
+                }
             } else {
                 null
             }
-        } else {
-            null
+            val entity = JournalEntryEntity(
+                id = existing?.id ?: (input.id ?: 0L),
+                timestamp = input.timestamp,
+                sensorSerial = input.sensorSerial?.takeIf { it.isNotBlank() },
+                entryType = input.type.storageValue,
+                title = input.title.trim(),
+                note = input.note?.trim()?.takeIf { it.isNotBlank() },
+                amount = input.amount,
+                glucoseValueMgDl = input.glucoseValueMgDl,
+                durationMinutes = input.durationMinutes,
+                intensity = input.intensity?.storageValue,
+                insulinPresetId = input.insulinPresetId,
+                // Clone and Nightscout can deliver the same treatment in either
+                // order. Preserve the first observed route and storage identity
+                // instead of changing icons or creating a duplicate later.
+                source = preservedIdentity?.source ?: input.source.storageValue,
+                sourceRecordId = preservedIdentity?.sourceRecordId ?: sourceRecordId,
+                createdAt = existing?.createdAt ?: now,
+                updatedAt = now,
+                foodId = input.foodId,
+                proteinGrams = input.proteinGrams?.coerceAtLeast(0f),
+                fatGrams = input.fatGrams?.coerceAtLeast(0f),
+                nsUploadedAt = existing?.nsUploadedAt,
+                nsRemoteId = nsRemoteId ?: existing?.nsRemoteId,
+                insulinCurveJsonSnapshot = when {
+                    !isInsulin -> null
+                    preserveCurveSnapshot -> existing?.insulinCurveJsonSnapshot
+                    else -> resolvedCurve?.points?.let(::serializeJournalCurve)
+                },
+                insulinCurveProfileId = when {
+                    !isInsulin -> null
+                    preserveCurveSnapshot -> existing?.insulinCurveProfileId
+                    else -> resolvedCurve?.profileId
+                },
+                insulinCurveModelVersion = when {
+                    !isInsulin -> null
+                    preserveCurveSnapshot -> existing?.insulinCurveModelVersion
+                    else -> resolvedCurve?.modelVersion
+                },
+                insulinCurveEvidence = when {
+                    !isInsulin -> null
+                    preserveCurveSnapshot -> existing?.insulinCurveEvidence
+                    else -> resolvedCurve?.evidence?.storageValue
+                },
+                insulinBodyWeightKg = when {
+                    !isInsulin -> null
+                    preserveCurveSnapshot -> existing?.insulinBodyWeightKg
+                    else -> resolvedCurve?.usedBodyWeightKg
+                },
+                insulinCurveWasApproximated = when {
+                    !isInsulin -> false
+                    preserveCurveSnapshot -> existing?.insulinCurveWasApproximated ?: true
+                    else -> resolvedCurve?.approximated ?: true
+                },
+                // An edit from the plain journal editor does not know about meals; keep the link.
+                mealId = input.mealId ?: existing?.mealId
+            )
+            Triple(dao.upsertEntry(entity), entity, existing)
         }
-        val entity = JournalEntryEntity(
-            id = existing?.id ?: (input.id ?: 0L),
-            timestamp = input.timestamp,
-            sensorSerial = input.sensorSerial?.takeIf { it.isNotBlank() },
-            entryType = input.type.storageValue,
-            title = input.title.trim(),
-            note = input.note?.trim()?.takeIf { it.isNotBlank() },
-            amount = input.amount,
-            glucoseValueMgDl = input.glucoseValueMgDl,
-            durationMinutes = input.durationMinutes,
-            intensity = input.intensity?.storageValue,
-            insulinPresetId = input.insulinPresetId,
-            // Clone and Nightscout can deliver the same treatment in either
-            // order. When their shared Nightscout ID found the row, retain the
-            // first observed provenance and storage identity instead of
-            // oscillating between sources or creating a duplicate.
-            source = remoteIdentityMatch?.source ?: input.source.storageValue,
-            sourceRecordId = remoteIdentityMatch?.sourceRecordId ?: sourceRecordId,
-            createdAt = existing?.createdAt ?: now,
-            updatedAt = now,
-            foodId = input.foodId,
-            proteinGrams = input.proteinGrams?.coerceAtLeast(0f),
-            fatGrams = input.fatGrams?.coerceAtLeast(0f),
-            nsUploadedAt = existing?.nsUploadedAt,
-            nsRemoteId = nsRemoteId ?: existing?.nsRemoteId,
-            insulinCurveJsonSnapshot = when {
-                !isInsulin -> null
-                preserveCurveSnapshot -> existing?.insulinCurveJsonSnapshot
-                else -> resolvedCurve?.points?.let(::serializeJournalCurve)
-            },
-            insulinCurveProfileId = when {
-                !isInsulin -> null
-                preserveCurveSnapshot -> existing?.insulinCurveProfileId
-                else -> resolvedCurve?.profileId
-            },
-            insulinCurveModelVersion = when {
-                !isInsulin -> null
-                preserveCurveSnapshot -> existing?.insulinCurveModelVersion
-                else -> resolvedCurve?.modelVersion
-            },
-            insulinCurveEvidence = when {
-                !isInsulin -> null
-                preserveCurveSnapshot -> existing?.insulinCurveEvidence
-                else -> resolvedCurve?.evidence?.storageValue
-            },
-            insulinBodyWeightKg = when {
-                !isInsulin -> null
-                preserveCurveSnapshot -> existing?.insulinBodyWeightKg
-                else -> resolvedCurve?.usedBodyWeightKg
-            },
-            insulinCurveWasApproximated = when {
-                !isInsulin -> false
-                preserveCurveSnapshot -> existing?.insulinCurveWasApproximated ?: true
-                else -> resolvedCurve?.approximated ?: true
-            },
-            // An edit from the plain journal editor does not know about meals; keep the link.
-            mealId = input.mealId ?: existing?.mealId
-        )
-        val id = dao.upsertEntry(entity)
         if (affectsIob(entity.entryType) || affectsIob(existing?.entryType)) {
             tk.glucodata.OutboundApiJournalSnapshot.journalChanged()
         }
@@ -588,6 +598,23 @@ internal fun isSameNightscoutJournalKind(
 ): Boolean = incomingNsRemoteId != null &&
     existingNsRemoteId == incomingNsRemoteId &&
     existingEntryType == incomingEntryType
+
+internal fun isSameCloneJournalRecord(
+    existingSource: String,
+    incomingSource: JournalEntrySource,
+    existingSourceRecordId: String?,
+    incomingSourceRecordId: String?,
+): Boolean = existingSourceRecordId != null &&
+    existingSourceRecordId == incomingSourceRecordId &&
+    isCloneJournalSource(JournalEntrySource.fromStorage(existingSource)) &&
+    isCloneJournalSource(incomingSource)
+
+private fun isCloneJournalSource(source: JournalEntrySource): Boolean = when (source) {
+    JournalEntrySource.CLONE,
+    JournalEntrySource.CLONE_LOCAL_ICE,
+    JournalEntrySource.CLONE_TURN -> true
+    else -> false
+}
 
 private fun JournalEntryEntity.nightscoutDeleteRemoteId(): String? {
     nsRemoteId?.takeIf { it.isNotBlank() }?.let { return it }
