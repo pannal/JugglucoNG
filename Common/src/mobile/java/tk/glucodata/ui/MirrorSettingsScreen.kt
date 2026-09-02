@@ -453,6 +453,7 @@ fun MirrorSettingsScreen(navController: NavController) {
 
     // Edit sheet state
     var editSheetPos by remember { mutableStateOf<Int?>(null) }
+    var historyRecoveryMirror by remember { mutableStateOf<MirrorItemData?>(null) }
     var cloneTransitionDesired by remember {
         mutableStateOf(CloneHostTransitionRunner.desiredEnabled())
     }
@@ -890,6 +891,7 @@ fun MirrorSettingsScreen(navController: NavController) {
                             }
                         },
                         onShowQR = { mirror.index },
+                        onSendHistory = { historyRecoveryMirror = mirror },
                         onDelete = delete@{
                             if (CloneHostTransitionRunner.isRunning()) return@delete
                             val enabledAfterDelete = cloneConnections.any {
@@ -925,6 +927,15 @@ fun MirrorSettingsScreen(navController: NavController) {
             onDismiss = { editSheetPos = null; triggerRefresh++ }
         )
     }
+
+    historyRecoveryMirror?.let { mirror ->
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        CloneHistoryRecoverySheet(
+            mirror = mirror,
+            sheetState = sheetState,
+            onDismiss = { historyRecoveryMirror = null },
+        )
+    }
 }
 
 // ── Connection Card (expandable) ─────────────────────────────────────────────
@@ -936,6 +947,7 @@ fun MirrorConnectionCard(
     onEdit: () -> Unit,
     onToggle: () -> Unit,
     onShowQR: () -> Unit,
+    onSendHistory: () -> Unit,
     onDelete: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1017,6 +1029,17 @@ fun MirrorConnectionCard(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    }
+                    if (mirror.canSendHistory) {
+                        Button(
+                            onClick = onSendHistory,
+                            enabled = controlsEnabled,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        ) {
+                            Text(stringResource(R.string.clone_history_send))
+                        }
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
@@ -1538,6 +1561,8 @@ data class MirrorItemData(
     val turnEndpoint: String?,
     val useTurnForStun: Boolean,
     val verifyRendezvousCertificate: Boolean?,
+    val iceLabel: String?,
+    val canSendHistory: Boolean,
 )
 
 fun getMirrorsList(): List<MirrorItemData> {
@@ -1553,6 +1578,19 @@ fun getMirrorsList(): List<MirrorItemData> {
         val isIce = !iceIdentity.isNullOrBlank()
         val names = if (isIce) emptyArray() else Natives.getbackupIPs(i) ?: emptyArray()
         val verification = if (isIce) Natives.getCloneRendezvousCertificateVerification(i) else -1
+        val sendsData = Natives.getbackuphostnums(i) ||
+            Natives.getbackuphoststream(i) || Natives.getbackuphostscans(i)
+        val receivesData = (Natives.getbackuphostreceive(i) and 2) != 0
+        val canSendHistory = CloneHistoryRecoveryConnection(
+            index = i,
+            isIce = isIce,
+            isWearOs = Natives.isWearOS(i),
+            sendsData = sendsData,
+            receivesData = receivesData,
+            isDeactivated = Natives.getHostDeactivated(i),
+            isPending = Natives.isBackupHostPending(i),
+            hasPassword = !Natives.getbackuppassword(i).isNullOrBlank(),
+        ).canSendHistory()
         mirrors.add(
             MirrorItemData(
                 i,
@@ -1583,6 +1621,8 @@ fun getMirrorsList(): List<MirrorItemData> {
                 if (isIce) turnEndpoint else null,
                 isIce && iceConfig.useTurnForStun,
                 verification.takeIf { it >= 0 }?.let { it != 0 },
+                iceIdentity,
+                canSendHistory,
             )
         )
     }
