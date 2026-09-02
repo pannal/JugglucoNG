@@ -49,6 +49,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v24 — per-reading glucose source provenance
  *   v25 — stable first-arrival ordering for equivalent replicated readings
  *   v26 — journal content origin plus durable Clone deletion tombstones
+ *   v27 — durable journal recovery identity independent of local database row ids
  */
 @Database(
     entities = [
@@ -66,7 +67,7 @@ import tk.glucodata.data.meal.MealProductEntity
         HypoEpisodeMark::class,
         CloneJournalTombstoneEntity::class,
     ],
-    version = 26,
+    version = 27,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -719,6 +720,22 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v26 -> v27: identify journal rows safely across backup restore and row-id reuse. */
+        private val MIGRATION_26_27 = object : Migration(26, 27) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN recoveryId TEXT")
+                db.execSQL(
+                    "UPDATE journal_entries SET recoveryId = lower(hex(randomblob(16))) " +
+                        "WHERE recoveryId IS NULL"
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_journal_entries_recoveryId " +
+                        "ON journal_entries (recoveryId)"
+                )
+                db.execSQL("ALTER TABLE clone_journal_tombstones ADD COLUMN recoveryId TEXT")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -750,7 +767,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_22_23,
                     MIGRATION_23_24,
                     MIGRATION_24_25,
-                    MIGRATION_25_26
+                    MIGRATION_25_26,
+                    MIGRATION_26_27
                 )
                 .build().also { INSTANCE = it }
             }
