@@ -22,6 +22,7 @@
 #pragma once
 #include <condition_variable>
 #include <memory>
+#include <utility>
 #include "datbackup.hpp"
 #include "logs.hpp"
 #include <sys/socket.h>
@@ -33,6 +34,7 @@
 #include "net/Connect.hpp"
 #include "ICE_data.hpp"
 #include "ICEConfig.hpp"
+#include "LocalICESignal.hpp"
 #define LOGGERICE(...) LOGGER("ICE: " __VA_ARGS__)
 #define LOGARICE(...) LOGAR("ICE: " __VA_ARGS__)
 extern bool initAgent(juice_agent *agent,int allindex);
@@ -80,6 +82,10 @@ std::mutex rendezvousGenerationMutex;
 std::string rendezvousGeneration;
 std::atomic<int> generationWatchCapability{0};
 std::atomic_bool preserveNextRendezvousGeneration{false};
+std::atomic_bool remoteDescriptionSet{false};
+std::atomic_bool remoteDescriptionWasLocal{false};
+std::mutex localSignalMutex;
+std::shared_ptr<LocalICESignalSession> localSignal;
 ICE_data   icedata[2]{{allindex,side},{allindex,!side}};
 std::atomic<juice_agent*> agent;
 std::atomic<uint64_t> agentGeneration{0};
@@ -89,11 +95,13 @@ int sdplen;
 std::string rendezvousHost;
 uint16_t rendezvousPort;
 bool verifyRendezvousCertificate;
+bool useLocalDiscovery;
 
 ICEConnect(int allindex,const passhost_t &host);
 ~ICEConnect() {
         finish=true;
         endConnectionHere();
+        cancelLocalSignal();
         }
 void endConnectionHere() {
        LOGGERICE("%d: endConnectionHere\n",side);
@@ -157,6 +165,22 @@ std::string currentRendezvousGeneration();
 void preserveRendezvousGenerationForPeerRestart() {
         preserveNextRendezvousGeneration.store(true,std::memory_order_release);
         }
+std::shared_ptr<LocalICESignalSession> currentLocalSignal() {
+        std::lock_guard<std::mutex> lock(localSignalMutex);
+        return localSignal;
+        }
+void replaceLocalSignal(std::shared_ptr<LocalICESignalSession> replacement) {
+        std::shared_ptr<LocalICESignalSession> previous;
+        {
+        std::lock_guard<std::mutex> lock(localSignalMutex);
+        previous=std::exchange(localSignal,std::move(replacement));
+        }
+        if(previous)
+            previous->stop();
+        }
+void cancelLocalSignal() {
+        replaceLocalSignal(nullptr);
+        }
 virtual int setindex(int in) override{
         LOGGER("setindex(%d)\n",in);
         icedata[1].allindex=in;
@@ -202,6 +226,7 @@ void releaseReceiverThread() {
         destruct _{[this]{initrunning.clear();}};
         cancelRendezvous();
         cancelGenerationWatch();
+        cancelLocalSignal();
         auto wasagent=agent.exchange(nullptr);
         advanceAgentGeneration();
         if(wasagent) {
@@ -221,6 +246,8 @@ void releaseReceiverThread() {
         selectedCloneTransport.store(clone_transport_unknown);
         isConnected=false;
         endConnect=false;
+        remoteDescriptionSet=false;
+        remoteDescriptionWasLocal=false;
         beginRendezvous();
         if(!prepareRendezvousGeneration()) {
                 phase=FailedInitAgent;
@@ -274,6 +301,7 @@ void sayEndConnection(){
         }
 void endConnection() override{
         sayEndConnection();
+        cancelLocalSignal();
 //        auto wasagent=agent; agent=nullptr;
         if(initrunning.test_and_set()) {
                 LOGGERICE("%d: ICEConnect::endConnection allindex=%d agent=%p, but initrunning\n",side,allindex,agent.load());
