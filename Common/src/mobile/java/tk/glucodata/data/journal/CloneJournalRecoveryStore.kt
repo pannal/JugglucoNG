@@ -201,6 +201,8 @@ internal class CloneJournalRecoveryStore(
                 updatedAt = incoming.updatedAt,
                 nsUploadedAt = existing?.nsUploadedAt,
                 nsRemoteId = incoming.nsRemoteId ?: existing?.nsRemoteId,
+                lvUploadedAt = existing?.lvUploadedAt,
+                mealId = existing?.mealId,
             )
             dao.upsertEntry(entity)
             imported++
