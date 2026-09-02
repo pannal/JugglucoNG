@@ -136,6 +136,8 @@
  <string name="name">Magaca:</string>
  <string name="carbperunit">Carbohydrates/cutub:</string>
  <string name="database">Database</string>
+ <string name="history_database_incompatible_title">Kaydka taariikhda lama jaanqaadi karo</string>
+ <string name="history_database_incompatible_message">Noocan ma furi karo kaydka taariikhda ee jira sababtoo ah noociisa ama qaabkiisa lama jaanqaadi karo. Xogtaada lama tirtirin. Ku rakib noocii sameeyay kaydka xogta ama nooc ka cusub oo la jaanqaadi kara, dabadeed dib u bilow abka.</string>
  <string name="search">Raadi</string>
  <string name="trace">Raad raac</string>
  <string name="unknown">Lama garanayo</string>
@@ -1497,6 +1499,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_status_retry_in">Isku day in aad isku daydo in la qorsheeyay %1$d daqiiqo</string>
     <string name="nightscout_status_response_ok">Jawaabtii u dambaysay: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Jawaabtii u dambaysay: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Jawaabtii u dambaysay: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Jawaabtii u dambaysay: URL aan sax ahayn Nightscoout</string>
     <string name="nightscout_follow_title">Nightscoout raaca</string>
     <string name="nightscout_follow_status_idle">Nightscoout raaca</string>
@@ -1527,6 +1530,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_url_label">Nightscout URL</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Isticmaal Nightscout v3 API</string>
+    <string name="nightscout_use_v3_api_desc">Soo rarista gulukoosku waxay u baahan tahay api:entries:create iyo api:entries:update.</string>
     <string name="nightscout_follow_desc">Ka samee dareemaha akhriska-kaliya ee URL-kan Nightscout.</string>
     <string name="nightscout_follow_url_required">Geli URL Nightscout marka hore</string>
     <string name="nightscout_mode_upload">Soo rar</string>
@@ -2755,4 +2759,17 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="clone_source_label">Clone</string>
     <string name="clone_source_turn_description">Clone iyada oo loo marayo TURN</string>
     <string name="clone_source_local_ice_description">Clone iyada oo loo marayo ICE maxalli ah</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (tijaabo)</string>
+    <string name="sibionics_adaptive_v2_desc">Qiyaas madaxbannaan oo xaaladda dareemaha leh kala duwanaansho suurtogal ah</string>
+    <string name="glucose_likely_range">Kala duwanaanshaha suurtogalka ah</string>
+    <string name="glucose_likely_range_value">kala duwanaansho suurtogal ah %1$s–%2$s</string>
+    <string name="glucose_estimated">Sonkorta la qiyaasay</string>
+    <string name="glucose_uncertainty_elevated">Hubanti la\'aanta dareemaha waa sare</string>
+    <string name="glucose_possible_artifact">Waxaa suurtogal ah cilad dareeme oo ku meel gaar ah</string>
+    <string name="sibionics_uncertainty_ribbon">Xarigga hubanti-la\'aanta</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Muuji xariiqda kala duwanaanshaha suurtogalka ah ee ku wareegsan xarigga sonkorta</string>
+    <string name="freeze_displayed_values">Hay qiimaha la tusay</string>
+    <string name="freeze_displayed_values_desc">Akhriska wuxuu hayaa qiimihii la tusay. Isbeddellada calibration-ka waxay saameeyaan akhrisyada dhow oo keliya.</string>
+    <string name="freeze_displayed_values_on">Qiimaha la tusay waa la hayaa</string>
+    <string name="freeze_displayed_values_off">Dib ayaa loo xisaabinayaa isbeddel kasta</string>
 </resources>

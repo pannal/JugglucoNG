@@ -30,6 +30,13 @@
 
 -keep class androidx.wear.watchface.complications.rendering.ComplicationDrawable
 
+# AGP 9 enables R8 full mode. ML Kit 17.3.0/18.3.1 discovers its registrars through manifest
+# metadata, but its consumer rules do not preserve the complete runtime component graph under
+# full-mode optimization. The release build then keeps MlKitInitProvider and BarcodeRegistrar
+# while BarcodeScanning.getClient() receives a null barcode factory and crashes. Keep ML Kit's
+# dynamically registered components until the upstream artifacts provide full-mode-safe rules.
+-keep class com.google.mlkit.** { *; }
+
 # Keep AiDex vendor bridge classes/fields/methods used by libblecomm-lib JNI.
 -keep class com.microtechmd.blecomm.** { *; }
 
@@ -63,6 +70,22 @@
     public final void forceFullSyncForSensor(java.lang.String);
     public final void mergeFullSyncForSensor(java.lang.String);
     public final void markSensorReset(java.lang.String);
+}
+
+# Keep GlucoseUncertaintyStore names and reflected members stable.
+# GlucoseUncertaintyAccess in src/main resolves this mobile-only class by name, and the same
+# failure mode as HistoryRepository above applies: without these rules the lookup throws only
+# in minified builds, the bridge silently stores nothing, and every chart renders without its
+# uncertainty ribbon with no error anywhere. The members also carry @Keep at their declaration;
+# keep both in sync when adding one.
+-keepnames class tk.glucodata.data.GlucoseUncertaintyStore
+-keepclassmembers class tk.glucodata.data.GlucoseUncertaintyStore {
+    public static final tk.glucodata.data.GlucoseUncertaintyStore INSTANCE;
+    public static void storeBatch(java.lang.String,long[],float[],float[],float,float[],float[]);
+    public static void storeReading(java.lang.String,long,float,float,float,float,float);
+    public static void clearForSensor(java.lang.String);
+    public static void deleteForSensorAfter(java.lang.String,long);
+    public static void pruneOlderThan(long);
 }
 
 # Keep the hidden-framework connection-parameter callback.
