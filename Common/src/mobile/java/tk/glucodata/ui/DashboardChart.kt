@@ -992,6 +992,11 @@ fun InteractiveGlucoseChart(
         val logical = SensorIdentity.resolveAppSensorId(primarySerial) ?: primarySerial
         SensorColors.getColor(logical.orEmpty())
     }
+    // A colour the user picked for a sensor replaces the range colouring of its own trace.
+    // Automatic (hash-assigned) colours deliberately do not, or every trace would lose the
+    // low/high banding by default.
+    val primaryPickedColor = tk.glucodata.SensorVisuals.colorOverrideArgb(primarySerial)
+        ?.let { Color(it) }
     val interactionData = remember(safeData, renderData, graphSmoothingMinutes) {
         if (graphSmoothingMinutes > 0) renderData else safeData
     }
@@ -2259,10 +2264,45 @@ fun InteractiveGlucoseChart(
                 chartHeightPx,
                 chartBandPalette,
                 primaryLineTintFraction,
-                primaryIdentityColor
+                primaryIdentityColor,
+                appChartRangeColors,
+                isDark,
+                primaryPickedColor,
+                peerNeutralBase,
+                glucosePaletteRevision
             ) {
                 if (chartHeightPx <= 0f) {
                     Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                } else if (primaryPickedColor != null) {
+                    // A picked colour is applied the way a peer trace is: the identity colour
+                    // toned toward the neutral token, re-tinted at each band so a low still
+                    // reads as a low. Blended less than a peer because this is the main trace.
+                    val base = androidx.compose.ui.graphics.lerp(
+                        primaryPickedColor,
+                        peerNeutralBase,
+                        tk.glucodata.SensorVisuals.PRIMARY_TEXT_BLEND,
+                    )
+                    val stops = GlucoseChartBands.verticalStops(
+                        veryHigh = androidx.compose.ui.graphics.lerp(
+                            base, Color(GlucoseRangeColors.veryHigh(isDark)), 0.58f,
+                        ),
+                        high = androidx.compose.ui.graphics.lerp(base, highOutOfRangeTintBase, 0.48f),
+                        inRange = base,
+                        low = androidx.compose.ui.graphics.lerp(base, lowOutOfRangeTintBase, 0.48f),
+                        veryLow = androidx.compose.ui.graphics.lerp(
+                            base, Color(GlucoseRangeColors.veryLow(isDark)), 0.58f,
+                        ),
+                        yVeryHigh = limitYVeryHigh,
+                        yHigh = limitYHigh,
+                        yLow = limitYLow,
+                        yVeryLow = limitYVeryLow,
+                        chartHeightPx = chartHeightPx,
+                    )
+                    Brush.verticalGradient(
+                        *stops.toTypedArray(),
+                        startY = 0f,
+                        endY = chartHeightPx,
+                    )
                 } else {
                     fun identityTinted(color: Color): Color =
                         if (primaryLineTintFraction > 0f) {

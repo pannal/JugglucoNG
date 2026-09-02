@@ -300,6 +300,19 @@ class SensorViewModel : ViewModel() {
         }
     }
 
+    /** Pins this sensor's colour everywhere it is drawn, or null to go back to automatic. */
+    fun setSensorColor(serial: String, colorArgb: Int?) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                SensorVisuals.setColorOverride(serial, colorArgb)
+                refreshSensorsWithDeviceSync()
+                UiRefreshBus.requestDataRefresh()
+            } catch (e: Exception) {
+                android.util.Log.e("SensorVM", "Failed to set sensor color: ${e.message}")
+            }
+        }
+    }
+
     fun toggleDisplaySelection(serial: String) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {

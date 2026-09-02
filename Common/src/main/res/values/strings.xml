@@ -3230,4 +3230,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_type_anytime">Anytime</string>
     <string name="sensor_type_ottai">Ottai CGM</string>
     <string name="sensor_type_nightscout">Nightscout</string>
+    <string name="sensor_pause_streaming">Pause sensor</string>
+    <string name="sensor_resume_streaming">Resume sensor</string>
+    <string name="sensor_color_title">Sensor colour</string>
 </resources>
