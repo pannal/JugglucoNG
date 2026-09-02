@@ -3025,4 +3025,7 @@
     <string name="sensor_pause_streaming">Wstrzymaj czujnik</string>
     <string name="sensor_resume_streaming">Wznów czujnik</string>
     <string name="sensor_color_title">Kolor czujnika</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ Węglowodany: %1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ Insulina: %1$s j.</string>
 </resources>

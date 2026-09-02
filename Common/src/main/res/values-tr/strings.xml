@@ -3015,4 +3015,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="sensor_pause_streaming">Sensörü duraklat</string>
     <string name="sensor_resume_streaming">Sensörü sürdür</string>
     <string name="sensor_color_title">Sensör rengi</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ Karbonhidrat: %1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ İnsülin: %1$s Ü</string>
 </resources>

@@ -3186,4 +3186,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sensor_pause_streaming">Jooji dareemaha</string>
     <string name="sensor_resume_streaming">Sii wad dareemaha</string>
     <string name="sensor_color_title">Midabka dareemaha</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ Kaarbohaydrayt: %1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ Insuliin: %1$s U</string>
 </resources>

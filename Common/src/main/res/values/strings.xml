@@ -3233,4 +3233,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pause_streaming">Pause sensor</string>
     <string name="sensor_resume_streaming">Resume sensor</string>
     <string name="sensor_color_title">Sensor colour</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ Carbs: %1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ Insulin: %1$s U</string>
 </resources>

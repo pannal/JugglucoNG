@@ -2987,4 +2987,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pause_streaming">Pausa sensor</string>
     <string name="sensor_resume_streaming">Återuppta sensor</string>
     <string name="sensor_color_title">Sensorfärg</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ Kolhydrater: %1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ Insulin: %1$s E</string>
 </resources>

@@ -3003,4 +3003,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pause_streaming">暂停传感器</string>
     <string name="sensor_resume_streaming">恢复传感器</string>
     <string name="sensor_color_title">传感器颜色</string>
+    <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
+    <string name="dashboard_forecast_recommendation_carbs">≏ 碳水：%1$s g</string>
+    <string name="dashboard_forecast_recommendation_insulin">≏ 胰岛素：%1$s U</string>
 </resources>
