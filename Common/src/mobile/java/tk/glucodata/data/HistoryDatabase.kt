@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import tk.glucodata.data.journal.JournalDao
 import tk.glucodata.data.journal.CloneJournalTombstoneEntity
+import tk.glucodata.data.journal.CloneJournalRecoveryTombstoneEntity
 import tk.glucodata.data.journal.JournalEntryEntity
 import tk.glucodata.data.journal.JournalFoodEntity
 import tk.glucodata.data.journal.JournalInsulinPresetEntity
@@ -50,6 +51,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v25 — stable first-arrival ordering for equivalent replicated readings
  *   v26 — journal content origin plus durable Clone deletion tombstones
  *   v27 — durable journal recovery identity independent of local database row ids
+ *   v28 — durable cross-device journal recovery tombstones
  */
 @Database(
     entities = [
@@ -66,8 +68,9 @@ import tk.glucodata.data.meal.MealProductEntity
         MealProductEntity::class,
         HypoEpisodeMark::class,
         CloneJournalTombstoneEntity::class,
+        CloneJournalRecoveryTombstoneEntity::class,
     ],
-    version = 27,
+    version = 28,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -736,6 +739,27 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v27 -> v28: retain recovered journal deletions by cross-device identity. */
+        private val MIGRATION_27_28 = object : Migration(27, 28) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS clone_journal_recovery_tombstones (
+                        stableBaseId TEXT NOT NULL,
+                        recoveryId TEXT,
+                        deletedAt INTEGER NOT NULL,
+                        PRIMARY KEY(stableBaseId)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                        "index_clone_journal_recovery_tombstones_recoveryId " +
+                        "ON clone_journal_recovery_tombstones (recoveryId)"
+                )
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -768,7 +792,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_23_24,
                     MIGRATION_24_25,
                     MIGRATION_25_26,
-                    MIGRATION_26_27
+                    MIGRATION_26_27,
+                    MIGRATION_27_28
                 )
                 .build().also { INSTANCE = it }
             }
