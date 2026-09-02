@@ -119,6 +119,9 @@ object AnytimeConstants {
     /** CT5 encrypted QR/KR query. Body: {0x3F, 0x55, 0xAA, sum}. */
     const val TX_CT5_QUERY_SSN: Byte = 0x3F
 
+    /** CT5 end-cycle/unbind request. Body: {0x58, 0x55, 0xAA, sum}. */
+    const val TX_CT5_END_CYCLE: Byte = 0x58
+
     // ---- Sensor → phone notification opcodes (RX) ----
 
     const val RX_VERSION: Byte = 0x01
@@ -144,6 +147,9 @@ object AnytimeConstants {
 
     /** Unbind ack. */
     const val RX_UNBIND_ACK: Byte = 0x0A
+
+    /** CT5 end-cycle/unbind ack used by the shipped Anytime app. */
+    const val RX_CT5_END_CYCLE_ACK: Byte = TX_CT5_END_CYCLE
 
     /** K/R upload ack. */
     const val RX_INPUT_KR_ACK: Byte = 0x0B
@@ -498,4 +504,10 @@ object AnytimeConstants {
      *  repair survives a process restart instead of being replayed from zero. */
     const val PREF_CT5_GAP_FROM_PREFIX = "anytime_ct5_gap_from_"
     const val PREF_CT5_GAP_STOP_BEFORE_PREFIX = "anytime_ct5_gap_stop_"
+
+    /** Auto-repair ids the transmitter repeatedly proved it cannot currently serve. */
+    const val PREF_CT5_SKIPPED_HISTORY_IDS_PREFIX = "anytime_ct5_skipped_history_ids_"
+    const val PREF_CT5_GAP_FAILURE_FROM_PREFIX = "anytime_ct5_gap_failure_from_"
+    const val PREF_CT5_GAP_FAILURE_STOP_PREFIX = "anytime_ct5_gap_failure_stop_"
+    const val PREF_CT5_GAP_FAILURE_COUNT_PREFIX = "anytime_ct5_gap_failure_count_"
 }
