@@ -173,8 +173,10 @@ static bool applyRemoteDescription(int allindex, juice_agent_t *agent,
         return false;
         }
     con->remoteDescriptionWasLocal=fromLocalNetwork;
-    if(fromLocalNetwork)
+    if(fromLocalNetwork) {
         con->cancelRendezvous();
+        con->cancelGenerationWatch();
+        }
     return true;
     }
 
@@ -370,7 +372,8 @@ static void watchPeerGeneration(
              .cancelled=cancellation,
              .verifyCertificate=con->verifyRendezvousCertificate});
         if(!con->isCurrentAgent(agent,agentGeneration)||
-           con->endConnect.load()||con->isConnected.load())
+           con->endConnect.load()||con->isConnected.load()||
+           (cancellation&&cancellation->load(std::memory_order_acquire)))
             return;
         if(code==400) {
             con->generationWatchCapability.store(-1,std::memory_order_release);
