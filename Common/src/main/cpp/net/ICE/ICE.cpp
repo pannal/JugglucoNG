@@ -898,7 +898,8 @@ void startReceiverThread(int allindex) {
         }
     }
 
-void wakeICEReceiversForNetworkChange(bool resetConnections) {
+void wakeICEReceiversForNetworkChange(bool resetConnections,
+                                      bool resetLanSignaledConnections) {
     if (!backup)
         return;
     const int hostCount = backup->gethostnr();
@@ -909,8 +910,13 @@ void wakeICEReceiversForNetworkChange(bool resetConnections) {
         ICEConnect *connection = static_cast<ICEConnect *>(connections[allindex]);
         if (!connection)
             continue;
-        if (resetConnections)
+        if (resetConnections ||
+            (resetLanSignaledConnections &&
+             connection->remoteDescriptionWasLocal.load())) {
+            LOGGERICE("allindex=%d: rebuild LAN-signaled generation after network handover\n",
+                      allindex);
             connection->endConnectionHere();
+        }
         {
             std::lock_guard<std::mutex> lock(connection->receiveThreadMutex);
             connection->wakeReceiver = true;
