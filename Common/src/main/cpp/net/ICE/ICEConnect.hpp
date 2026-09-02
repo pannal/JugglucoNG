@@ -81,7 +81,6 @@ std::shared_ptr<std::atomic_bool> generationWatchCancellation{
 std::mutex rendezvousGenerationMutex;
 std::string rendezvousGeneration;
 std::atomic<int> generationWatchCapability{0};
-std::atomic_bool preserveNextRendezvousGeneration{false};
 std::atomic_bool remoteDescriptionSet{false};
 std::atomic_bool remoteDescriptionWasLocal{false};
 std::mutex localSignalMutex;
@@ -163,9 +162,6 @@ void cancelGenerationWatch() {
         }
 bool prepareRendezvousGeneration();
 std::string currentRendezvousGeneration();
-void preserveRendezvousGenerationForPeerRestart() {
-        preserveNextRendezvousGeneration.store(true,std::memory_order_release);
-        }
 std::shared_ptr<LocalICESignalSession> currentLocalSignal() {
         std::lock_guard<std::mutex> lock(localSignalMutex);
         return localSignal;
