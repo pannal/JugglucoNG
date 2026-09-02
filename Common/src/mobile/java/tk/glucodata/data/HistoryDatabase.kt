@@ -39,6 +39,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
  *   v17 — per-reading glucose source provenance
  *   v18 — stable first-arrival ordering for equivalent replicated readings
  *   v19 — journal content origin plus durable Clone deletion tombstones
+ *   v20 — durable journal recovery identity independent of local database row ids
  */
 @Database(
     entities = [
@@ -52,7 +53,7 @@ import tk.glucodata.data.journal.JournalPendingDeleteEntity
         JournalPendingDeleteEntity::class,
         CloneJournalTombstoneEntity::class,
     ],
-    version = 19,
+    version = 20,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -471,6 +472,22 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v19 -> v20: identify journal rows safely across backup restore and row-id reuse. */
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE journal_entries ADD COLUMN recoveryId TEXT")
+                db.execSQL(
+                    "UPDATE journal_entries SET recoveryId = lower(hex(randomblob(16))) " +
+                        "WHERE recoveryId IS NULL"
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_journal_entries_recoveryId " +
+                        "ON journal_entries (recoveryId)"
+                )
+                db.execSQL("ALTER TABLE clone_journal_tombstones ADD COLUMN recoveryId TEXT")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -495,7 +512,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_15_16,
                     MIGRATION_16_17,
                     MIGRATION_17_18,
-                    MIGRATION_18_19
+                    MIGRATION_18_19,
+                    MIGRATION_19_20
                 )
                 .build().also { INSTANCE = it }
             }
