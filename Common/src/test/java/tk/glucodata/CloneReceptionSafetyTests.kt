@@ -247,6 +247,7 @@ class CloneReceptionSafetyTests {
         assertTrue(ice.contains("makerandom(random.data(),random.size())"))
         assertTrue(connection.contains("generationWatchCancellation"))
         assertFalse(connection.contains("preserveNextRendezvousGeneration"))
+        assertFalse(ice.contains("preserveRendezvousGeneration"))
         assertTrue(connection.contains("cancelGenerationWatch();"))
         assertFalse(ice.contains("rendezvousGeneration.data()"))
     }
