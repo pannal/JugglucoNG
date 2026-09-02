@@ -135,6 +135,8 @@
  <string name="name">İsim:</string>
  <string name="carbperunit">Karbonhidrat/Birim:</string>
  <string name="database">Veri Tabanı</string>
+ <string name="history_database_incompatible_title">Uyumsuz geçmiş veritabanı</string>
+ <string name="history_database_incompatible_message">Bu derleme, sürümü veya şeması uyumsuz olduğu için mevcut geçmiş veritabanını açamıyor. Verileriniz silinmedi. Veritabanını oluşturan derlemeyi veya daha yeni uyumlu bir derlemeyi yükleyin, ardından uygulamayı yeniden başlatın.</string>
  <string name="search">Ara</string>
  <string name="trace">İzle</string>
  <string name="unknown">Bilinmeyen</string>
@@ -1260,6 +1262,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="nightscout_url_label">Gece İzci URL\'si</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Nightscout v3 API\'sini kullanın</string>
+    <string name="nightscout_use_v3_api_desc">Glikoz yüklemeleri api:entries:create ve api:entries:update gerektirir.</string>
     <string name="nightscout_follow_desc">Bu Nightscout URL\'sinden salt okunur sanal sensör oluşturur.</string>
     <string name="nightscout_follow_url_required">Önce bir Nightscout URL\'si girin</string>
     <string name="nightscout_test_testing">Test ediliyor...</string>
@@ -1452,6 +1455,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="nightscout_status_retry_in">%1$d dk sonra yeniden denenecek</string>
     <string name="nightscout_status_response_ok">Son yanıt: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Son yanıt: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Son yanıt: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Nightscout takipçisi</string>
     <string name="nightscout_follow_status_idle">Nightscout takipçisi boşta</string>
@@ -2608,4 +2612,17 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="mirror_app_turn_server">Uygulama tarafından sağlanan TURN</string>
     <string name="clone_source_turn_description">TURN üzerinden Clone</string>
     <string name="clone_source_local_ice_description">Yerel ICE üzerinden Clone</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (deneysel)</string>
+    <string name="sibionics_adaptive_v2_desc">Olası aralık veren bağımsız sensör durumu tahmini</string>
+    <string name="glucose_likely_range">Olası aralık</string>
+    <string name="glucose_likely_range_value">olası aralık %1$s–%2$s</string>
+    <string name="glucose_estimated">Tahmini glukoz</string>
+    <string name="glucose_uncertainty_elevated">Sensör belirsizliği yüksek</string>
+    <string name="glucose_possible_artifact">Olası geçici sensör hatası</string>
+    <string name="sibionics_uncertainty_ribbon">Belirsizlik bandı</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Glukoz çizgisi çevresinde olası aralık bandını göster</string>
+    <string name="freeze_displayed_values">Gösterilen değerleri koru</string>
+    <string name="freeze_displayed_values_desc">Bir ölçüm gösterildiği değeri korur. Kalibrasyon değişiklikleri yalnızca son ölçümleri etkiler.</string>
+    <string name="freeze_displayed_values_on">Gösterilen değerler korunuyor</string>
+    <string name="freeze_displayed_values_off">Her değişiklikte yeniden hesaplanıyor</string>
 </resources>

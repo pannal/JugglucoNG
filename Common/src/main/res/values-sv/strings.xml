@@ -131,6 +131,8 @@
   <string name="name">Namn:</string>
   <string name="carbperunit">Kolhydrater/enhet:</string>
   <string name="database">Databas</string>
+  <string name="history_database_incompatible_title">Inkompatibel historikdatabas</string>
+  <string name="history_database_incompatible_message">Den här versionen kan inte öppna den befintliga historikdatabasen eftersom dess version eller schema inte är kompatibelt. Dina data har inte raderats. Installera versionen som skapade databasen, eller en nyare kompatibel version, och starta sedan om appen.</string>
   <string name="search">Sök</string>
   <string name="trace">Spåra</string>
   <string name="unknown">Okänd</string>
@@ -1232,6 +1234,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_url_label">Nightscout URL</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Använd Nightscout v3 API</string>
+    <string name="nightscout_use_v3_api_desc">Glukosuppladdningar behöver api:entries:create och api:entries:update.</string>
     <string name="nightscout_follow_desc">Skapa en skrivskyddad virtuell sensor från denna Nightscout-URL.</string>
     <string name="nightscout_follow_url_required">Ange en Nightscout-URL först</string>
     <string name="nightscout_test_testing">Testar...</string>
@@ -1424,6 +1427,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_status_retry_in">Nytt försök om %1$d min</string>
     <string name="nightscout_status_response_ok">Senaste svar: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Senaste svar: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Senaste svar: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Nightscout-följare</string>
     <string name="nightscout_follow_status_idle">Nightscout-följare inaktiv</string>
@@ -2580,4 +2584,17 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="mirror_app_turn_server">TURN från appen</string>
     <string name="clone_source_turn_description">Clone via TURN</string>
     <string name="clone_source_local_ice_description">Clone via lokal ICE</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (experimentell)</string>
+    <string name="sibionics_adaptive_v2_desc">Oberoende skattning av sensortillstånd med sannolikt intervall</string>
+    <string name="glucose_likely_range">Sannolikt intervall</string>
+    <string name="glucose_likely_range_value">sannolikt intervall %1$s–%2$s</string>
+    <string name="glucose_estimated">Uppskattat glukos</string>
+    <string name="glucose_uncertainty_elevated">Förhöjd sensorosäkerhet</string>
+    <string name="glucose_possible_artifact">Möjlig tillfällig sensorartefakt</string>
+    <string name="sibionics_uncertainty_ribbon">Osäkerhetsband</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Visa bandet för sannolikt intervall runt glukoskurvan</string>
+    <string name="freeze_displayed_values">Behåll visade värden</string>
+    <string name="freeze_displayed_values_desc">Ett värde behåller det som visades. Kalibreringsändringar påverkar bara de senaste värdena.</string>
+    <string name="freeze_displayed_values_on">Visade värden behålls</string>
+    <string name="freeze_displayed_values_off">Räknas om vid varje ändring</string>
 </resources>

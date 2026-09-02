@@ -137,6 +137,8 @@
  <string name="name">Naam:</string>
  <string name="carbperunit">Koolhydraten/eenheid:</string>
  <string name="database">Database</string>
+ <string name="history_database_incompatible_title">Incompatibele geschiedenisdatabase</string>
+ <string name="history_database_incompatible_message">Deze build kan de bestaande geschiedenisdatabase niet openen omdat de versie of het schema niet compatibel is. Uw gegevens zijn niet verwijderd. Installeer de build die de database heeft gemaakt, of een nieuwere compatibele build, en start de app daarna opnieuw.</string>
  <string name="search">Zoeken</string>
  <string name="trace">Trace</string>
  <string name="unknown">Onbekend</string>
@@ -1275,6 +1277,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="nightscout_url_label">Nightscout-URL</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Gebruik de Nightscout v3-API</string>
+    <string name="nightscout_use_v3_api_desc">Glucose-uploads hebben api:entries:create en api:entries:update nodig.</string>
     <string name="nightscout_follow_desc">Maak een alleen-lezen virtuele sensor van deze Nightscout-URL.</string>
     <string name="nightscout_follow_url_required">Voer eerst een Nightscout-URL in</string>
     <string name="nightscout_test_testing">Testen...</string>
@@ -1467,6 +1470,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="nightscout_status_retry_in">Nieuwe poging over %1$d min</string>
     <string name="nightscout_status_response_ok">Laatste reactie: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Laatste reactie: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Laatste reactie: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Nightscout-volger</string>
     <string name="nightscout_follow_status_idle">Nightscout-volger inactief</string>
@@ -2623,4 +2627,17 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="mirror_app_turn_server">Door de app geleverde TURN</string>
     <string name="clone_source_turn_description">Clone via TURN</string>
     <string name="clone_source_local_ice_description">Clone via lokale ICE</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (experimenteel)</string>
+    <string name="sibionics_adaptive_v2_desc">Onafhankelijke sensortoestandsschatting met waarschijnlijk bereik</string>
+    <string name="glucose_likely_range">Waarschijnlijk bereik</string>
+    <string name="glucose_likely_range_value">waarschijnlijk bereik %1$s–%2$s</string>
+    <string name="glucose_estimated">Geschatte glucose</string>
+    <string name="glucose_uncertainty_elevated">Verhoogde sensoronzekerheid</string>
+    <string name="glucose_possible_artifact">Mogelijk tijdelijk sensorartefact</string>
+    <string name="sibionics_uncertainty_ribbon">Onzekerheidsband</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Toon de band met het waarschijnlijke bereik rond de glucoselijn</string>
+    <string name="freeze_displayed_values">Weergegeven waarden behouden</string>
+    <string name="freeze_displayed_values_desc">Een meting behoudt de weergegeven waarde. Kalibratiewijzigingen gelden alleen voor recente metingen.</string>
+    <string name="freeze_displayed_values_on">Weergegeven waarden worden behouden</string>
+    <string name="freeze_displayed_values_off">Wordt bij elke wijziging herberekend</string>
 </resources>

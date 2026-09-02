@@ -135,6 +135,8 @@
  <string name="name">Імя:</string>
  <string name="carbperunit">Вугляводы/адзінка:</string>
  <string name="database">База дадзеных</string>
+ <string name="history_database_incompatible_title">Несумяшчальная база даных гісторыі</string>
+ <string name="history_database_incompatible_message">Гэта зборка не можа адкрыць існуючую базу даных гісторыі, таму што яе версія або схема несумяшчальная. Вашы даныя не былі выдалены. Усталюйце зборку, якая стварыла базу даных, або навейшую сумяшчальную зборку, затым перазапусціце праграму.</string>
  <string name="search">Пошук</string>
  <string name="trace">След</string>
  <string name="unknown">Невядомы</string>
@@ -1231,6 +1233,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_url_label">URL начнога разведчыка</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Выкарыстоўвайце Nightscout v3 API</string>
+    <string name="nightscout_use_v3_api_desc">Для загрузкі глюкозы патрэбныя api:entries:create і api:entries:update.</string>
     <string name="nightscout_follow_desc">Стварыць віртуальны датчык толькі для чытання з гэтага URL Nightscout.</string>
     <string name="nightscout_follow_url_required">Спачатку ўвядзіце URL Nightscout</string>
     <string name="nightscout_test_testing">Праверка...</string>
@@ -1423,6 +1426,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_status_retry_in">Паўтор праз %1$d хв</string>
     <string name="nightscout_status_response_ok">Апошні адказ: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Апошні адказ: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Апошні адказ: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Крыніца Nightscout</string>
     <string name="nightscout_follow_status_idle">Крыніца Nightscout чакае</string>
@@ -2651,4 +2655,17 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="mirror_app_turn_server">TURN ад праграмы</string>
     <string name="clone_source_turn_description">Clone праз TURN</string>
     <string name="clone_source_local_ice_description">Clone праз лакальны ICE</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (эксперыментальна)</string>
+    <string name="sibionics_adaptive_v2_desc">Незалежная ацэнка стану датчыка з верагодным дыяпазонам</string>
+    <string name="glucose_likely_range">Верагодны дыяпазон</string>
+    <string name="glucose_likely_range_value">верагодны дыяпазон %1$s–%2$s</string>
+    <string name="glucose_estimated">Ацэненая глюкоза</string>
+    <string name="glucose_uncertainty_elevated">Павышаная нявызначанасць датчыка</string>
+    <string name="glucose_possible_artifact">Магчымы часовы артэфакт датчыка</string>
+    <string name="sibionics_uncertainty_ribbon">Стужка нявызначанасці</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Паказваць паласу верагоднага дыяпазону вакол лініі глюкозы</string>
+    <string name="freeze_displayed_values">Захоўваць паказаныя значэнні</string>
+    <string name="freeze_displayed_values_desc">Паказанне захоўвае значэнне, з якім яно было паказана. Змены каліброўкі закранаюць толькі свежыя паказанні.</string>
+    <string name="freeze_displayed_values_on">Паказаныя значэнні захоўваюцца</string>
+    <string name="freeze_displayed_values_off">Пералік пры кожнай змене</string>
 </resources>

@@ -135,6 +135,8 @@
  <string name="name">Nazwa:</string>
  <string name="carbperunit">Węglowodany/jedn.:</string>
  <string name="database">Baza danych</string>
+ <string name="history_database_incompatible_title">Niezgodna baza danych historii</string>
+ <string name="history_database_incompatible_message">Ta kompilacja nie może otworzyć istniejącej bazy danych historii, ponieważ jej wersja lub schemat są niezgodne. Dane nie zostały usunięte. Zainstaluj kompilację, która utworzyła bazę danych, albo nowszą zgodną kompilację, a następnie uruchom aplikację ponownie.</string>
  <string name="search">Szukaj</string>
  <string name="trace">Ślad</string>
  <string name="unknown">Nieznany</string>
@@ -1267,6 +1269,7 @@
     <string name="nightscout_url_label">Adres URL Nightscouta</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Skorzystaj z API Nightscout v3</string>
+    <string name="nightscout_use_v3_api_desc">Przesyłanie glukozy wymaga api:entries:create i api:entries:update.</string>
     <string name="nightscout_follow_desc">Utwórz wirtualny czujnik tylko do odczytu z tego adresu URL Nightscout.</string>
     <string name="nightscout_follow_url_required">Najpierw wpisz adres URL Nightscout</string>
     <string name="nightscout_test_testing">Testowanie...</string>
@@ -1459,6 +1462,7 @@
     <string name="nightscout_status_retry_in">Ponowna próba za %1$d min</string>
     <string name="nightscout_status_response_ok">Ostatnia odpowiedź: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Ostatnia odpowiedź: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Ostatnia odpowiedź: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Obserwator Nightscout</string>
     <string name="nightscout_follow_status_idle">Obserwator Nightscout bezczynny</string>
@@ -2618,4 +2622,17 @@
     <string name="mirror_app_turn_server">TURN zapewniany przez aplikację</string>
     <string name="clone_source_turn_description">Clone przez TURN</string>
     <string name="clone_source_local_ice_description">Clone przez lokalne ICE</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (eksperymentalny)</string>
+    <string name="sibionics_adaptive_v2_desc">Niezależna ocena stanu czujnika z prawdopodobnym zakresem</string>
+    <string name="glucose_likely_range">Prawdopodobny zakres</string>
+    <string name="glucose_likely_range_value">prawdopodobny zakres %1$s–%2$s</string>
+    <string name="glucose_estimated">Szacowana glikemia</string>
+    <string name="glucose_uncertainty_elevated">Podwyższona niepewność czujnika</string>
+    <string name="glucose_possible_artifact">Możliwy przejściowy artefakt czujnika</string>
+    <string name="sibionics_uncertainty_ribbon">Pasmo niepewności</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Pokaż pasmo prawdopodobnego zakresu wokół linii glikemii</string>
+    <string name="freeze_displayed_values">Zachowuj wyświetlone wartości</string>
+    <string name="freeze_displayed_values_desc">Odczyt zachowuje wyświetloną wartość. Zmiany kalibracji dotyczą tylko ostatnich odczytów.</string>
+    <string name="freeze_displayed_values_on">Wyświetlone wartości są zachowywane</string>
+    <string name="freeze_displayed_values_off">Przeliczanie przy każdej zmianie</string>
 </resources>

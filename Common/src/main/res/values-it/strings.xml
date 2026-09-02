@@ -136,6 +136,8 @@
  <string name="name">Nome:</string>
  <string name="carbperunit">Carboidrati/unità:</string>
  <string name="database">Database</string>
+ <string name="history_database_incompatible_title">Database della cronologia incompatibile</string>
+ <string name="history_database_incompatible_message">Questa build non può aprire il database della cronologia esistente perché la versione o lo schema non sono compatibili. I dati non sono stati eliminati. Installa la build che ha creato il database, oppure una build compatibile più recente, quindi riavvia l’app.</string>
  <string name="search">Cerca</string>
  <string name="trace">Traccia</string>
  <string name="unknown">Sconosciuto</string>
@@ -1222,6 +1224,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_url_label">URL dell\'esploratore notturno</string>
     <string name="nightscout_url_placeholder">https://my-nightscout.herokuapp.com</string>
     <string name="nightscout_use_v3_api">Utilizza l\'API Nightscout v3</string>
+    <string name="nightscout_use_v3_api_desc">I caricamenti della glicemia richiedono api:entries:create e api:entries:update.</string>
     <string name="nightscout_follow_desc">Crea un sensore virtuale di sola lettura da questo URL Nightscout.</string>
     <string name="nightscout_follow_url_required">Inserisci prima un URL Nightscout</string>
     <string name="nightscout_test_testing">Test...</string>
@@ -1414,6 +1417,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_status_retry_in">Nuovo tentativo tra %1$d min</string>
     <string name="nightscout_status_response_ok">Ultima risposta: HTTP %1$d</string>
     <string name="nightscout_status_response_error">Ultima risposta: HTTP %1$d</string>
+    <string name="nightscout_status_response_error_detail">Ultima risposta: HTTP %1$d, %2$s</string>
     <string name="nightscout_status_response_invalid_url">Last response: invalid Nightscout URL</string>
     <string name="nightscout_follow_title">Follower Nightscout</string>
     <string name="nightscout_follow_status_idle">Follower Nightscout inattivo</string>
@@ -2570,4 +2574,17 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="mirror_app_turn_server">TURN fornito dall’app</string>
     <string name="clone_source_turn_description">Clone tramite TURN</string>
     <string name="clone_source_local_ice_description">Clone tramite ICE locale</string>
+    <string name="sibionics_adaptive_v2">Adaptive V2 (sperimentale)</string>
+    <string name="sibionics_adaptive_v2_desc">Stima indipendente dello stato del sensore con intervallo probabile</string>
+    <string name="glucose_likely_range">Intervallo probabile</string>
+    <string name="glucose_likely_range_value">intervallo probabile %1$s–%2$s</string>
+    <string name="glucose_estimated">Glicemia stimata</string>
+    <string name="glucose_uncertainty_elevated">Incertezza del sensore elevata</string>
+    <string name="glucose_possible_artifact">Possibile artefatto transitorio del sensore</string>
+    <string name="sibionics_uncertainty_ribbon">Banda di incertezza</string>
+    <string name="sibionics_uncertainty_ribbon_desc">Mostra la fascia dell\'intervallo probabile attorno alla linea della glicemia</string>
+    <string name="freeze_displayed_values">Mantieni i valori visualizzati</string>
+    <string name="freeze_displayed_values_desc">Una lettura mantiene il valore mostrato. Le modifiche alla calibrazione riguardano solo le letture recenti.</string>
+    <string name="freeze_displayed_values_on">Valori visualizzati mantenuti</string>
+    <string name="freeze_displayed_values_off">Ricalcolo a ogni modifica</string>
 </resources>

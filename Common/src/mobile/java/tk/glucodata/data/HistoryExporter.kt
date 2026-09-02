@@ -122,7 +122,8 @@ object HistoryExporter {
                                 rawDisplayValue = point.rawValue,
                                 timestamp = point.timestamp,
                                 sensorId = point.sensorSerial,
-                                viewMode = viewModeOf(point.sensorSerial)
+                                viewMode = viewModeOf(point.sensorSerial),
+                                sealedDisplayValue = point.sealedDisplayValue
                             )
                             val calibratedStr = calibrated
                                 ?.let { tk.glucodata.ui.util.GlucoseFormatter.formatCsv(it, unit) }
@@ -291,7 +292,8 @@ object HistoryExporter {
                 rawDisplayValue = point.rawValue,
                 timestamp = point.timestamp,
                 sensorId = point.sensorSerial,
-                viewMode = viewModeOf(point.sensorSerial)
+                viewMode = viewModeOf(point.sensorSerial),
+                sealedDisplayValue = point.sealedDisplayValue
             )
             val calibratedTag = calibrated?.let { " (Calibrated: ${GlucoseFormatter.format(it, isMmol)})" }.orEmpty()
 
