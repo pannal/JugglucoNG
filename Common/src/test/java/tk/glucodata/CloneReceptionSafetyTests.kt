@@ -227,7 +227,7 @@ class CloneReceptionSafetyTests {
     }
 
     @Test
-    fun peerGenerationWatchIsBoundedBackwardCompatibleAndNegotiationScoped() {
+    fun peerGenerationWatchPublishesOffersAndSurvivesConnectionSuccess() {
         val ice = source("Common/src/main/cpp/net/ICE/ICE.cpp")
             .replace(Regex("\\s+"), " ")
         val connection = source("Common/src/main/cpp/net/ICE/ICEConnect.hpp")
@@ -241,11 +241,13 @@ class CloneReceptionSafetyTests {
             ice.indexOf("static void startPeerGenerationWatch"),
             ice.indexOf("static void getAddressesThread"),
         )
-        assertTrue(startWatch.contains("if(side==givefirst) return;"))
+        assertTrue(startWatch.contains("if(side==givefirst) { std::thread(publishRendezvousGeneration"))
+        assertTrue(startWatch.contains("else { std::thread(watchPeerGeneration"))
         assertTrue(ice.contains("peer generation changed\");"))
-        assertTrue(ice.contains("con->cancelGenerationWatch(); con->setConnected();"))
+        assertFalse(ice.contains("con->cancelGenerationWatch(); con->setConnected();"))
         assertTrue(ice.contains("makerandom(random.data(),random.size())"))
         assertTrue(connection.contains("generationWatchCancellation"))
+        assertTrue(connection.contains("generationWatchCapability.store(0"))
         assertFalse(connection.contains("preserveNextRendezvousGeneration"))
         assertFalse(ice.contains("preserveRendezvousGeneration"))
         assertTrue(connection.contains("cancelGenerationWatch();"))
@@ -253,7 +255,7 @@ class CloneReceptionSafetyTests {
     }
 
     @Test
-    fun localSignalingWinnerCancelsRemoteGenerationWatchAndLateResponses() {
+    fun localSignalingWinnerKeepsPeerGenerationWatchAndRejectsLateResponses() {
         val ice = source("Common/src/main/cpp/net/ICE/ICE.cpp")
             .replace(Regex("\\s+"), " ")
         val applyDescription = ice.substring(
@@ -269,7 +271,9 @@ class CloneReceptionSafetyTests {
             generationWatch.indexOf("if(code==400)"),
         )
 
-        assertTrue(applyDescription.contains("if(fromLocalNetwork) { con->cancelRendezvous(); con->cancelGenerationWatch(); }"))
+        assertTrue(applyDescription.contains("if(fromLocalNetwork) { con->cancelRendezvous(); }"))
+        assertFalse(applyDescription.contains("con->cancelGenerationWatch();"))
+        assertFalse(generationWatch.contains("con->isConnected.load()"))
         assertTrue(afterGenerationRequest.contains("cancellation&&cancellation->load(std::memory_order_acquire)"))
     }
 
