@@ -2996,7 +2996,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="freeze_displayed_values_on">Valores exibidos mantidos</string>
     <string name="freeze_displayed_values_off">Recalculado a cada alteração</string>
     <string name="clone_source_label">Clone</string>
-    <string name="clone_transport_local_ice">ICE local</string>
+    <string name="clone_transport_local_ice">ICE direto</string>
     <string name="clone_transport_turn_ice">ICE TURN</string>
     <string name="clone_transport_reconnecting">Reconectando…</string>
     <string name="mirror_route">Rota</string>
@@ -3004,7 +3004,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="mirror_certificate_verification">Verificação do certificado</string>
     <string name="mirror_app_turn_server">TURN fornecido pelo aplicativo</string>
     <string name="clone_source_turn_description">Clone por TURN</string>
-    <string name="clone_source_local_ice_description">Clone por ICE local</string>
+    <string name="clone_source_local_ice_description">Clone por ICE direto</string>
     <string name="sensor_vendor_abbott">Abbott</string>
     <string name="sensor_vendor_sibionics">Sibionics</string>
     <string name="sensor_vendor_dexcom">Dexcom</string>
