@@ -52,6 +52,7 @@ import tk.glucodata.data.meal.MealProductEntity
  *   v26 — journal content origin plus durable Clone deletion tombstones
  *   v27 — durable journal recovery identity independent of local database row ids
  *   v28 — durable cross-device journal recovery tombstones
+ *   v29 — transactional history recovery import receipts
  */
 @Database(
     entities = [
@@ -69,8 +70,9 @@ import tk.glucodata.data.meal.MealProductEntity
         HypoEpisodeMark::class,
         CloneJournalTombstoneEntity::class,
         CloneJournalRecoveryTombstoneEntity::class,
+        CloneRecoveryImportEntity::class,
     ],
-    version = 28,
+    version = 29,
     exportSchema = false
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -760,6 +762,13 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        /** v28 -> v29: prevent replacement replay after a process dies just after commit. */
+        private val MIGRATION_28_29 = object : Migration(28, 29) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS clone_recovery_imports (jobId TEXT NOT NULL, sha256 TEXT NOT NULL, PRIMARY KEY(jobId))")
+            }
+        }
+
         fun getInstance(context: Context): HistoryDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -793,7 +802,8 @@ abstract class HistoryDatabase : RoomDatabase() {
                     MIGRATION_24_25,
                     MIGRATION_25_26,
                     MIGRATION_26_27,
-                    MIGRATION_27_28
+                    MIGRATION_27_28,
+                    MIGRATION_28_29
                 )
                 .build().also { INSTANCE = it }
             }

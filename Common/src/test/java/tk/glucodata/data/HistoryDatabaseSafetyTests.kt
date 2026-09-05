@@ -47,7 +47,7 @@ class HistoryDatabaseSafetyTests {
     @Test
     fun provenanceAndCloneMigrationsExtendTheCurrentLocalSchema() {
         val source = historyDatabaseSource()
-        assertTrue(source.contains("version = 28"))
+        assertTrue(source.contains("version = 29"))
         assertTrue(
             source.contains(
                 "private val MIGRATION_23_24 = object : Migration(23, 24)"
@@ -77,7 +77,7 @@ class HistoryDatabaseSafetyTests {
     fun journalRecoveryIdentityMigrationIsRegisteredAndNonDestructive() {
         val source = historyDatabaseSource()
 
-        assertTrue(source.contains("version = 28"))
+        assertTrue(source.contains("version = 29"))
         assertTrue(source.contains("Migration(26, 27)"))
         assertTrue(source.contains("ALTER TABLE journal_entries ADD COLUMN recoveryId TEXT"))
         assertTrue(source.contains("lower(hex(randomblob(16)))"))
