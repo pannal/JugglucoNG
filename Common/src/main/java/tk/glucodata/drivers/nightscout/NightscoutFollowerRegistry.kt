@@ -139,11 +139,16 @@ object NightscoutFollowerRegistry {
         sensorId: String = loadConfig(context).sensorId,
     ): NightscoutFollowerManager? {
         val existing = findRunningFollower(sensorId)
-        if (existing != null) return existing
+        if (existing != null) {
+            existing.updateApiVersion(loadConfig(context).useV3)
+            return existing
+        }
 
         var added = false
         val follower = synchronized(SensorBluetooth.gattcallbacks) {
-            findRunningFollowerLocked(sensorId) ?: run {
+            findRunningFollowerLocked(sensorId)?.also {
+                it.updateApiVersion(loadConfig(context).useV3)
+            } ?: run {
                 val restored = createRestoredCallback(context, sensorId, 0L) as? NightscoutFollowerManager
                     ?: return@synchronized null
                 SensorBluetooth.gattcallbacks.add(restored)

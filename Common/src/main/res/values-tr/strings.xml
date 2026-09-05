@@ -235,7 +235,7 @@
  <string name="finish">Sonlandır</string>
  <string name="finishsensormessage">Akış için bu sensör kullanımı bırakılsın mı?
 </string>
- 
+
  <string name="email">E-Posta:</string>
  <string name="getaccountid">Hesap Kimliği Al</string>
 
@@ -383,7 +383,7 @@
     <string name="autoqrmessage">
 Bu telefondan ev ağınızdaki başka bir telefona veri gönderebilirsiniz.
 Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer telefonda Sol Menü → Fotoğraf ile taradığınızda bağlantı kurulacak ve bu telefondan tüm verileri alacaktır.</string>
-    
+
     <string name="googlescan">Google Tarama</string>
 
  <string name="watch">saat</string>
@@ -460,7 +460,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="amounts">Miktarlar</string>
     <string name="scans">Taramalar</string>
     <string name="stream">Akış</string>
-    
+
     <string name="exchanges">Gönder/Al</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -2030,6 +2030,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Mesaj şablonu</string>
     <string name="outbound_api_template_desc">Eklemek için aşağıdaki bir tokene dokunun.</string>
+    <string name="outbound_api_insulin_tokens">İnsülin türleri</string>
+    <string name="outbound_api_insulin_tokens_desc">Etkin her insülin türünün son dozu, saati, üzerinden geçen dakika, kalan ünite ve bugünkü toplam için kendi belirteçleri vardır.</string>
     <string name="outbound_api_min_interval">Minimum aralık (dakika)</string>
     <string name="outbound_api_min_interval_desc">0 kabul edilen her canlı ölçümü gönderir.</string>
     <string name="outbound_api_trigger">Tetikleyici</string>
@@ -3067,4 +3069,20 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Karbonhidrat: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ İnsülin: %1$s Ü</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

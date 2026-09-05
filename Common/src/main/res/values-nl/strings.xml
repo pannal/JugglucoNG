@@ -487,7 +487,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="amounts">Hoeveelheden</string>
     <string name="scans">Scans</string>
     <string name="stream">Stream</string>
-    
+
     <string name="exchanges">Verzenden/Ontvangen</string>
     <string name="duration_days">dagen</string>
     <string name="sensor_state">Status</string>
@@ -500,7 +500,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="select_sibionics_type">Kies een Sibionics-sensor</string>
     <string name="or_divider">"  of  "</string>
     <string name="no_sensors_connected">Geen sensoren verbonden</string>
-    
+
     <string name="enter_sensor_codes">Sensorcodes invoeren</string>
     <string name="enter_sensor_label_desc">Voer de codes in die op het sensorlabel staan</string>
     <string name="batch_code_label">Batchcode (10)</string>
@@ -508,12 +508,12 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="serial_number_label">Serienummer</string>
     <string name="serial_number_supporting">Tweede code (10-20 tekens), bijv. %1$s</string>
     <string name="confirm">Bevestigen</string>
-    
+
     <string name="enter_transmitter_code">Zendercode invoeren</string>
     <string name="enter_transmitter_desc">Voer de zender-ID in van het label</string>
     <string name="transmitter_id_label">Zender-ID</string>
     <string name="transmitter_id_supporting">8-12 tekens van zenderlabel</string>
-    
+
     <string name="scan_sensor_title">Scan QR-code</string>
     <string name="scan_sensor_instruction">Scan de QR-code op je generieke Sibionics-sensordoos.</string>
     <string name="scan_sensor_instruction_sibionics2">Scan de verbindingscode op de Sibionics 2-zender, of kies de zender hieronder via Bluetooth.</string>
@@ -523,7 +523,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="enter_code_manually">Code handmatig invoeren</string>
     <string name="choose_sibionics_variant">Kies het model dat op de verpakking staat.</string>
     <string name="continue_action">Doorgaan</string>
-    
+
     <string name="sensor_init_failed">Sensorinitialisatie mislukt</string>
     <string name="sensor_lost_restart">Fout: Sensor verloren. Start installatie opnieuw.</string>
     <string name="invalid_device_name">"Ongeldige apparaatnaam: "</string>
@@ -534,7 +534,7 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="sibionics_code_not_for_type">Deze code hoort niet bij %1$s. Ga terug en kies het juiste sensortype.</string>
     <string name="sibionics_serial_wrong_type">Dit serienummer past niet bij %1$s. Ga terug en kies het juiste sensortype.</string>
     <string name="no_qr_found">Geen QR-code gevonden in afbeelding</string>
-    
+
     <string name="go">Ga</string>
     <string name="filter_by_date">Filter op datum</string>
     <string name="select_export_format">Selecteer exportformaat</string>
@@ -549,13 +549,13 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="import_history_sub">Herstel glucosemetingen uit een JugglucoNG-export of CSV-bestand</string>
     <string name="import_no_glucose">Dit bestand bevat geen glucosegegevens</string>
     <string name="import_unsupported_file">Niet-ondersteund bestand. Kies een JugglucoNG-export of een CSV-bestand met glucosegeschiedenis.</string>
-    
+
     <string name="clear_history_title">Geschiedenis wissen?</string>
     <string name="clear_history_confirmation">Hiermee worden alle glucosemetingen uit de database verwijderd. Dit kan niet ongedaan worden gemaakt.</string>
     <string name="delete_reading_title">Meting verwijderen?</string>
     <string name="delete_reading_confirmation">Verwijder deze glucosemeting uit de lokale geschiedenis. Deze actie kan niet ongedaan worden gemaakt.</string>
     <string name="clear_button">Wissen</string>
-    
+
     <string name="clear_app_data_title">App-gegevens wissen?</string>
     <string name="clear_app_data_intro">Dit verwijdert:</string>
     <string name="all_glucose_readings">• Alle glucosemetingen</string>
@@ -565,13 +565,13 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="settings_preserved">Instellingen blijven behouden.</string>
     <string name="cannot_be_undone_warning">Dit kan niet ongedaan worden gemaakt.</string>
     <string name="clear_data_button">Gegevens wissen</string>
-    
+
     <string name="factory_reset_title">⚠️ Fabrieksinstellingen herstellen?</string>
     <string name="factory_reset_intro">Dit VERWIJDERT ALLES:</string>
     <string name="factory_reset_outcome">De app keert terug naar de eerste staat.</string>
     <string name="cannot_be_undone_critical">DIT KAN NIET ONGEDAAN WORDEN GEMAAKT!</string>
     <string name="reset_everything_button">ALLES RESETTEN</string>
-    
+
     <string name="alert_sound">Melding geluid</string>
     <string name="vibrate_only">Trillen</string>
     <string name="sound_vibrate">Geluid &amp; Trillen</string>
@@ -2045,6 +2045,8 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Berichtsjabloon</string>
     <string name="outbound_api_template_desc">Tik hieronder op een token om het in te voegen.</string>
+    <string name="outbound_api_insulin_tokens">Insulinesoorten</string>
+    <string name="outbound_api_insulin_tokens_desc">Elke actieve insulinesoort heeft tokens voor de laatste dosis, het tijdstip, de minuten sindsdien, de resterende eenheden en het totaal van vandaag.</string>
     <string name="outbound_api_min_interval">Minimaal interval (minuten)</string>
     <string name="outbound_api_min_interval_desc">0 stuurt elke geaccepteerde live meting.</string>
     <string name="outbound_api_trigger">Trigger</string>
@@ -3082,4 +3084,20 @@ Als je op OK drukt, wordt er een verbinding gemaakt op deze telefoon en wordt er
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Koolhydraten: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insuline: %1$s E</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

@@ -402,7 +402,7 @@
     <string name="amounts">Объемы</string>
     <string name="scans">Сканы</string>
     <string name="stream">Поток</string>
-    
+
     <string name="exchanges">Отправить/Получить</string>
 
     <!-- Missing UI Translations -->
@@ -415,7 +415,7 @@
     <string name="advanced_title">Дополнительно</string>
     <string name="debug_logs">Журналы отладки</string>
     <string name="nightscout_config">Конфигурация Nightscout</string>
-    
+
     <!-- LibreView Settings -->
     <string name="libreview_config">LibreView</string>
     <string name="libreview_desc">Синхронизация с Abbott LibreView</string>
@@ -482,19 +482,19 @@
     <string name="reconnect_sensor_title">Переподключить датчик?</string>
     <string name="reconnect_sensor_desc">Это сбросит соединение и попытается подключиться снова.</string>
     <string name="reconnect">Переподключить</string>
-    
+
     <string name="forget_sensor_title">Забыть датчик?</string>
     <string name="forget_sensor_desc">Это удалит датчик из списка. Он может появиться снова при сканировании.</string>
     <string name="forget">Забыть</string>
-    
+
     <string name="reset_sensor_title">Сброс датчика?</string>
     <string name="reset_sensor_desc">Это сбросит датчик Sibionics 2. Продолжить?</string>
     <string name="reset_sensor">Сброс датчика</string>
-    
+
     <string name="reset_all_title">Сбросить все?</string>
     <string name="reset_all_desc">Очистить старые данные, калибровки и сбросить датчик?</string>
     <string name="reset_all">Сбросить все</string>
-    
+
     <string name="enabled_status">Включен</string>
     <string name="disabled_status">Отключен</string>
     <string name="last_ble_status">Статус BLE</string>
@@ -507,7 +507,7 @@
     <string name="auto_reset_title">Автосброс</string>
     <string name="auto_reset_days">%1$d дней</string>
     <string name="auto_reset_never">Никогда</string>
-    
+
     <string name="googlescan">Сканирование Google</string>
     <string name="xdripbroadcast">Libre (patched App)</string>
 
@@ -703,12 +703,12 @@
     <string name="juggluco_native">Нативный Juggluco</string>
     <string name="window_label">окно</string>
     <string name="auto_restart_algorithm">Автоперезапуск алгоритма</string>
-    
+
     <string name="status_bluetooth_off">Bluetooth выкл.</string>
     <string name="status_connection_failed">Ошибка подключения</string>
     <string name="status_connected">Подключено</string>
     <string name="status_disconnected">Отключено</string>
-    
+
     <string name="select_sensor_type">Выберите тип сенсора</string>
     <string name="choose_theme">Выберите тему</string>
     <string name="sibionics_sensor_picker_desc">Скан QR</string>
@@ -2046,6 +2046,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Шаблон сообщения</string>
     <string name="outbound_api_template_desc">Нажмите токен ниже, чтобы вставить его.</string>
+    <string name="outbound_api_insulin_tokens">Типы инсулина</string>
+    <string name="outbound_api_insulin_tokens_desc">У каждого активного типа инсулина есть токены для последней дозы, её времени, минут с момента ввода, остатка единиц и суммы за сегодня.</string>
     <string name="outbound_api_min_interval">Минимальный интервал (минуты)</string>
     <string name="outbound_api_min_interval_desc">0 отправляет каждое принятое текущее показание.</string>
     <string name="outbound_api_trigger">Триггер</string>
@@ -3086,4 +3088,20 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Углеводы: %1$s г</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Инсулин: %1$s ЕД</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

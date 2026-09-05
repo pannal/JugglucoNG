@@ -35,7 +35,7 @@ class NightscoutFollowerManager(
     serial: String,
     private val url: String,
     private val secret: String,
-    private val useV3: Boolean = false,
+    @Volatile private var useV3: Boolean = false,
     dataptr: Long,
 ) : SuperGattCallback(serial, dataptr, SENSOR_GEN), ManagedBluetoothSensorDriver {
 
@@ -98,6 +98,15 @@ class NightscoutFollowerManager(
 
     override fun matchesManagedSensorId(sensorId: String?): Boolean =
         NightscoutFollowerRegistry.matchesSensorId(SerialNumber, sensorId)
+
+    /** Apply the persisted follower API choice to an already-running virtual sensor. */
+    internal fun updateApiVersion(useV3: Boolean) {
+        if (this.useV3 == useV3) return
+        this.useV3 = useV3
+        // A cached token belongs to the previous authentication mode/credentials. The next
+        // immediate refresh must negotiate from the newly selected mode instead.
+        NightscoutFollowerV3.clearToken()
+    }
 
     override fun mygetDeviceName(): String = localizedString(R.string.nightscout_follow_title, "Nightscout follower")
 
@@ -359,6 +368,11 @@ class NightscoutFollowerManager(
             val readings = fetched.latestReadings
             importRemoteTreatments()
             refreshRemoteDeviceStatus()
+            // Any completed refresh ends the previous failure episode, even when the server
+            // legitimately has no readings yet. The next failure should get the prompt first
+            // retry and a fresh diagnostic instead of inheriting stale backoff state.
+            consecutiveFailures = 0
+            refreshErrorLog.reset()
             if (readings.isEmpty()) {
                 setStatus(Phase.IDLE, localizedString(R.string.nightscout_follow_status_no_readings, "No Nightscout readings yet"))
                 scheduleRefresh(pollIntervalMillis())
@@ -609,6 +623,7 @@ class NightscoutFollowerManager(
         return fetchJournalJson(
             endpoint = NightscoutFollowerJournalEndpoints.treatments(
                 NightscoutFollowerRegistry.normalizeUrl(url),
+                useV3 = useV3,
             ),
             label = "treatments",
         )
@@ -618,6 +633,7 @@ class NightscoutFollowerManager(
         return fetchJournalJson(
             endpoint = NightscoutFollowerJournalEndpoints.fingersticks(
                 NightscoutFollowerRegistry.normalizeUrl(url),
+                useV3 = useV3,
             ),
             label = "finger-stick entries",
         )

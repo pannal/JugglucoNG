@@ -229,7 +229,7 @@
 
 <string name="finish">Clôturer</string>
 <string name="finishsensormessage">Arrêter d\'utiliser ce capteur pour le flux ?</string>
- 
+
 <string name="email">E-Mail:</string>
 <string name="getaccountid">Récupérer l\'ID du compte</string>
 
@@ -370,7 +370,7 @@
     <string name="amounts">Montants</string>
     <string name="scans">Scans</string>
     <string name="stream">Flux</string>
-    
+
     <string name="exchanges">Envoyer/Recevoir</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -2008,6 +2008,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Modèle de message</string>
     <string name="outbound_api_template_desc">Touchez un jeton ci-dessous pour l’insérer.</string>
+    <string name="outbound_api_insulin_tokens">Types d’insuline</string>
+    <string name="outbound_api_insulin_tokens_desc">Chaque type d’insuline actif dispose de jetons pour sa dernière dose, son heure, les minutes écoulées, les unités restantes et le total du jour.</string>
     <string name="outbound_api_min_interval">Intervalle minimal (minutes)</string>
     <string name="outbound_api_min_interval_desc">0 envoie chaque valeur en direct acceptée.</string>
     <string name="outbound_api_trigger">Déclencheur</string>
@@ -3045,4 +3047,20 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Glucides : %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insuline : %1$s U</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

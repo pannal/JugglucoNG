@@ -408,7 +408,7 @@
     <string name="amounts">Mängder</string>
     <string name="scans">Skanningar</string>
     <string name="stream">Ström</string>
-    
+
     <string name="exchanges">Skicka/Ta emot</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -2002,6 +2002,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Meddelandemall</string>
     <string name="outbound_api_template_desc">Tryck på en token nedan för att infoga den.</string>
+    <string name="outbound_api_insulin_tokens">Insulintyper</string>
+    <string name="outbound_api_insulin_tokens_desc">Varje aktiv insulintyp har taggar för sin senaste dos, dess tid, minuter sedan, återstående enheter och dagens summa.</string>
     <string name="outbound_api_min_interval">Minsta intervall (minuter)</string>
     <string name="outbound_api_min_interval_desc">0 skickar varje accepterat livevärde.</string>
     <string name="outbound_api_trigger">Utlösare</string>
@@ -3039,4 +3041,20 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Kolhydrater: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insulin: %1$s E</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

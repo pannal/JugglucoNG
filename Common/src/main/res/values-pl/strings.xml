@@ -234,7 +234,7 @@
 
  <string name="finish">Rozłącz</string>
  <string name="finishsensormessage">Przestać używać tego sensora do przesyłania strumieniowego?</string>
- 
+
  <string name="email">E-Mail:</string>
  <string name="getaccountid">Uzyskaj identyfikator konta Libreview</string>
 
@@ -386,10 +386,10 @@
     <string name="overwrite">Nadpisać?</string>
     <string name="autoqr">Auto QR</string>
     <string name="autoqrmessage">Prześlij dane z tego telefonu do innego telefonu w sieci domowej. Naciśnięcie przycisku OK spowoduje wygenerowanie połączenia na tym telefonie i wyświetlenie kodu QR, który można zeskanować za pomocą innego urządzenia z systemem Android. Zeskanowanie kodu QR za pomocą lewego menu→Zdjęcie na drugim telefonie spowoduje wygenerowanie połączenia, dzięki któremu telefon będzie odbierał wszystkie dane z tego telefonu.</string>
-    
+
     <string name="googlescan">Skanowanie Google</string>
     <string name="usedweight">UWAGA: waga (%.1f) większa niż 0</string>
- 
+
  <string name="verylowglucose">" Poziom bardzo NISKI!"</string>
  <string name="veryhighglucose">" Poziom bardzo WYSOKI!"</string>
 
@@ -483,7 +483,7 @@
     <string name="amounts">Ilości</string>
     <string name="scans">Skany</string>
     <string name="stream">Strumień</string>
-    
+
     <string name="exchanges">Wyślij/Odbierz</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -2037,6 +2037,8 @@
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Szablon wiadomości</string>
     <string name="outbound_api_template_desc">Dotknij tokenu poniżej, aby go wstawić.</string>
+    <string name="outbound_api_insulin_tokens">Rodzaje insuliny</string>
+    <string name="outbound_api_insulin_tokens_desc">Każdy aktywny rodzaj insuliny ma tokeny dla ostatniej dawki, jej godziny, minut od podania, pozostałych jednostek i dzisiejszej sumy.</string>
     <string name="outbound_api_min_interval">Minimalny interwał (minuty)</string>
     <string name="outbound_api_min_interval_desc">0 wysyła każdy zaakceptowany bieżący odczyt.</string>
     <string name="outbound_api_trigger">Wyzwalacz</string>
@@ -3077,4 +3079,20 @@
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Węglowodany: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insulina: %1$s j.</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

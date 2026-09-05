@@ -233,7 +233,7 @@
 
  <string name="finish">终止</string>
  <string name="finishsensormessage">停止使用此传感器进行蓝牙传输？</string>
- 
+
  <string name="email">电子邮件：</string>
  <string name="getaccountid">获取帐户 ID</string>
 
@@ -415,7 +415,7 @@
     <string name="amounts">数量</string>
     <string name="scans">扫描</string>
     <string name="stream">流</string>
-    
+
     <string name="exchanges">发送/接收</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -2018,6 +2018,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">消息模板</string>
     <string name="outbound_api_template_desc">点按下方令牌即可插入。</string>
+    <string name="outbound_api_insulin_tokens">胰岛素类型</string>
+    <string name="outbound_api_insulin_tokens_desc">每种启用的胰岛素类型都有对应的标记：上次剂量、时间、距今分钟数、剩余单位和今日总量。</string>
     <string name="outbound_api_min_interval">最小间隔（分钟）</string>
     <string name="outbound_api_min_interval_desc">0 会发送每个已接受的实时读数。</string>
     <string name="outbound_api_trigger">触发条件</string>
@@ -3055,4 +3057,20 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ 碳水：%1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ 胰岛素：%1$s U</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

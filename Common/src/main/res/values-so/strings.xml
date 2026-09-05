@@ -241,7 +241,7 @@
 
  <string name="finish">Xiriirka ka jar</string>
  <string name="finishsensormessage">Jooji isticmaalka dareemahan baahinta?</string>
- 
+
  <string name="email">Iimayl:</string>
  <string name="getaccountid">Hel aqoonsiga Koontada</string>
 
@@ -401,7 +401,7 @@
     <string name="autoqr">Si toos ah QR</string>
     <string name="autoqrmessage">U soo dir xogta taleefankan talefan kale ee shabakada gurigaaga.
 Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo bandhigi doontaa koodka QR kaas oo lagu sawiri karo qalab kale oo Android ah. Sawirka QR code ee leh menu bidix → Sawirka taleefanka kale wuxuu dhalin doonaa xiriir, kaas oo uu ka heli doono dhammaan xogta taleefankan.</string>
-    
+
     <string name="googlescan">Sawirka Google</string>
     <string name="usedweight">DIGNIIN: Miisaanka (%.1f) maaha 0</string>
 
@@ -575,7 +575,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="scans">Iskaanada</string>
     <string name="stream">Gudbin</string>
     <string name="exchanges">Xog-isweydaarsiga</string>
-    
+
     <!-- Main UI Strings -->
     <string name="dashboard">Dashboard-ka</string>
     <string name="stats">Tirakoobka</string>
@@ -588,7 +588,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="add_sensor">Kudar Sensor</string>
     <string name="sensors_title">Dareemayaasha</string>
     <string name="add_sensor_title">Kudar Sensor</string>
-    
+
     <!-- Sensor Screen Strings -->
     <string name="calibration_algorithm">Calibration Algorithm</string>
     <string name="restart_autocal_title">Dib u bilow toosinta tooska ah?</string>
@@ -605,24 +605,24 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="trend_rising">Isbeddelka ayaa kor u kacaya boqolkiiba %1$s.</string>
     <string name="trend_falling">Isbeddelku wuxuu hoos u dhacayaa boqolkiiba %1$s.</string>
     <string name="trend_unchanged">Isbeddelku weli waxba kama beddelin.</string>
-    
+
     <!-- Duration Strings (ViewModel) -->
     <string name="in_use">%1$s oo la isticmaalo</string>
     <string name="remaining">%1$s haray</string>
     <string name="expired">dhacay</string>
     <string name="days_short">%1$dd</string>
     <string name="hours_short">%1$dh</string>
-    
+
     <!-- Settings Strings -->
     <string name="theme_title">Dulucda</string>
     <string name="theme_system">Nidaamka Default</string>
     <string name="theme_light">Iftiin</string>
     <string name="theme_dark">Madow</string>
-    
+
     <string name="advanced_title">Sareeye</string>
     <string name="debug_logs">Diiwaanka qaladka</string>
     <string name="nightscout_config">Nightscout Config</string>
-    
+
     <!-- LibreView Settings -->
     <string name="libreview_config">LibreView</string>
     <string name="libreview_desc">Ku xidh Abbott LibreView</string>
@@ -640,10 +640,10 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="libreview_get_account_id">Hel aqoonsiga Koontada</string>
     <string name="libreview_status">Xaalada</string>
     <string name="libreview_russia">Gobolka Ruushka</string>
-    
+
     <string name="low_label">Hoose</string>
     <string name="high_label">Sare</string>
-    
+
     <!-- Sensor Management Strings -->
     <string name="disconnect_sensor_title">Isku xirka Sensor?</string>
     <string name="disconnect_sensor_desc">Tani waxay si joogto ah u joojin doontaa fadhiga dareemayaasha.</string>
@@ -662,21 +662,21 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="reconnect_sensor_title">Dib u xidhid Sensor?</string>
     <string name="reconnect_sensor_desc">Tani waxay dib u dajin doontaa isku xidhka waxayna isku dayi doontaa in dib loo xidho.</string>
     <string name="reconnect">Dib u xidhidh</string>
-    
+
     <string name="forget_sensor_title">Ma ilowdaa Dareemka?</string>
     <string name="forget_sensor_desc">Tani waxay ka saari doontaa dareenka liiska. Waxaa laga yaabaa inay dib u soo baxdo haddii mar kale la sawiro.</string>
-    
+
     <string name="reset_sensor_title">Dareemka dib u deji?</string>
     <string name="reset_sensor_desc">Tani waxay dib u dajin doontaa dareenka Sibionics 2. Sii wad?</string>
     <string name="reset_sensor">Dib u dabee dareen</string>
-    
+
     <string name="reset_all_title">Dib u deji dhammaan?</string>
     <string name="reset_all_desc">Nadiifi dhammaan xogtii hore, habaynta, oo dib u deji shideeyaha?</string>
     <string name="reset_all">Dib u habeyn dhammaan</string>
-    
+
     <string name="unified_reset_desc">Tani waxay dib u bilaabi doontaa dareemayaasha oo dib u dajin doona algorithm-kalibration-ka.</string>
     <string name="keep_auto_calibration">Hayso xogta is-habaynta</string>
-    
+
     <string name="enabled_status">Hawl gal</string>
     <string name="disabled_status">Dansan</string>
     <string name="last_ble_status">Heerka BLE ee u dambeeyay</string>
@@ -690,12 +690,12 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="auto_reset_title">Dib u dejin toos ah</string>
     <string name="auto_reset_days">%1$d maalmood</string>
     <string name="auto_reset_never">Marna</string>
-    
+
     <!-- Sensor Onboarding Strings -->
     <string name="no_sensor_title">Ma jiro Sensor ku xidhan</string>
     <string name="no_sensor_description">Ku xidh kormeeraha gulukoosta ee joogtada ah si aad u bilowdo la socodka heerarka gulukoostaada.</string>
 
-    
+
     <!-- Sibionics Setup Wizard -->
     <string name="sibionics_setup_title">Dejinta Sibionics</string>
     <string name="scan_sensor_qr">Sawirka Sensor code QR</string>
@@ -705,7 +705,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
 
     <string name="connecting">Isku xidhka...</string>
     <string name="setup_complete">Dejinta oo Dhamaystiran</string>
-    
+
     <!-- Libre Setup Wizard -->
     <string name="libre_setup_title">Habaynta Libre</string>
     <string name="libre_nfc_instruction">Ku hay taleefankaaga meel u dhow dareenka si aad u sawirto</string>
@@ -732,7 +732,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="libreview_account_missing_desc">Geli waraaqaha aqoonsiga oo codso aqoonsiga Koontada ee dareemayaasha Libre 3</string>
     <string name="libre_setup_account_id_obtained">Aqoonsiga xisaabta ee la helay</string>
     <string name="libre_setup_account_id_timeout">Waqtigu dhamaaday Hubi aqoonsiga oo isku day mar kale.</string>
-    
+
     <!-- Dexcom Setup Wizard -->
     <string name="dexcom_setup_title">Dexcom Dejinta</string>
     <string name="dexcom_scan_instruction">Sawir shaxanka xogta ee dareenkaaga Dexcom</string>
@@ -829,7 +829,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="patient_id_label">Aqoonsiga bukaanka</string>
     <string name="patient_dob_label">Taariikhda dhalashada</string>
     <string name="patient_clinician_label">Kooxda daryeelka</string>
-    
+
     <string name="danger_zone">Aagga Khatarta</string>
     <string name="clear_history">Nadiifi Taariikhda</string>
     <string name="clear_history_desc_long">Ka saar dhammaan akhrinta gulukooska. Lama soo celin karo</string>
@@ -842,7 +842,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="factory_reset_confirm">Dib u habayn warshadeed?</string>
     <string name="clean_history_confirm">Taariikhda tirtiri?</string>
     <string name="clean_data_confirm">Masaar xogta Appka?</string>
-    
+
     <string name="turbo_title">Turbo (mudnaanta sare)</string>
     <string name="turbo_desc">Codsadaa mudnaanta isku xirka sare</string>
     <string name="autoconnect_title">AutoConnect</string>
@@ -872,7 +872,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="preview_window_never">Marna</string>
     <string name="debug_logs_desc">Eeg trace.log iyo logcat</string>
 
-    
+
     <string name="unit_mg">mg/dL</string>
     <string name="unit_mmol">mmol/L</string>
     <string name="alert_mode">Habka Feejignaanta</string>
@@ -902,7 +902,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="select_sensor">Dooro Nooca Sensor</string>
     <string name="or_divider">"ama"</string>
     <string name="no_sensors_connected">Ma jiro dareemayaal ku xiran</string>
-    
+
     <string name="enter_sensor_codes">Geli codes Sensor</string>
     <string name="enter_sensor_label_desc">Geli koodka ku daabacan calaamadda dareemayaasha</string>
     <string name="batch_code_label">Koodhka Dufcaddii (10)</string>
@@ -910,12 +910,12 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="serial_number_label">Lambarka Taxanaha ah</string>
     <string name="serial_number_supporting">Koodhka labaad (10-20 chars), tusaale. %1$s</string>
     <string name="confirm">Xaqiiji</string>
-    
+
     <string name="enter_transmitter_code">Geli Koodhka Gudbinta</string>
     <string name="enter_transmitter_desc">Ka geli aqoonsiga gudbiyaha ee summada</string>
     <string name="transmitter_id_label">Aqoonsiga gudbiyaha</string>
     <string name="transmitter_id_supporting">8-12 xaraf oo ka soo jeeda calaamadda gudbiyaha</string>
-    
+
     <string name="scan_sensor_title">Sawir code-ka QR</string>
     <string name="scan_sensor_instruction">Ka sawir koodka QR ee sanduuqa dareenka guud ee Sibionics.</string>
     <string name="scan_sensor_instruction_sibionics2">Sawir koodhka isku xirka ee ku yaal gudbiyaha Sibionics 2, ama hoos kaga dooro gudbiyaha Bluetooth-ka.</string>
@@ -923,10 +923,10 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="select_gallery_button">Ka dooro Gallery</string>
     <string name="skip_fake_sensor">Ka bood (Isticmaal sensor been abuur ah)</string>
     <string name="enter_code_manually">Gacanta u geli Koodhka</string>
-    
+
     <string name="choose_sibionics_variant">Dooro nooca ku qoran baakadka.</string>
     <string name="continue_action">Sii wad</string>
-    
+
     <string name="sensor_init_failed">Dareemida bilawga waa fashilantay</string>
     <string name="sensor_lost_restart">Khalad: Dareemuhu waa lumay Fadlan dib u bilow habaynta</string>
     <string name="invalid_device_name">"Magaca aaladda aan sax ahayn:"</string>
@@ -937,7 +937,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sibionics_code_not_for_type">Koodkan kuma eka %1$s. Dib u noqo oo dooro nooca dareemaha ku habboon.</string>
     <string name="sibionics_serial_wrong_type">Lambarkan taxanaha lama mid aha %1$s. Dib u noqo oo dooro nooca dareemaha ku habboon.</string>
     <string name="no_qr_found">Ma jiro summada QR ee sawirka laga helay</string>
-    
+
     <!-- ComposeHost Strings -->
     <string name="go">Tag</string>
     <string name="filter_by_date">Ku sifee taariikhda</string>
@@ -951,13 +951,13 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="export_history_sub">Ku keydi akhrinta gulukooska CSV ama faylka qoraalka</string>
     <string name="import_history_title">Soo dejinta Taariikhda</string>
     <string name="import_history_sub">Soo celi akhrinta gulukooska dhoofinta JugglucoNG ama faylka CSV</string>
-    
+
     <string name="clear_history_title">Taariikhda tirtiri?</string>
     <string name="clear_history_confirmation">Tani waxay ka saari doontaa dhammaan akhrinta gulukooska ee kaydka xogta. Tallaabadan lama noqon karo.</string>
     <string name="delete_reading_title">Ma tirtirtaa Akhriska?</string>
     <string name="delete_reading_confirmation">Ka saar akhriska gulukoosta taariikhda deegaanka. Tallaabadan lama noqon karo.</string>
     <string name="clear_button">Cad</string>
-    
+
     <string name="clear_app_data_title">Masaar xogta Appka?</string>
     <string name="clear_app_data_intro">Tani waxay meesha ka saari doontaa:</string>
     <string name="all_glucose_readings">• Dhammaan akhrinta gulukooska</string>
@@ -967,13 +967,13 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="settings_preserved">Dejinta waa la ilaalin doonaa</string>
     <string name="cannot_be_undone_warning">Tallaabadan lama noqon karo.</string>
     <string name="clear_data_button">Nadiifi Xogta</string>
-    
+
     <string name="factory_reset_title">⚠️ Dib u habayn warshadeed?</string>
     <string name="factory_reset_intro">Tani waxay meesha ka saaraysaa wax walba:</string>
     <string name="factory_reset_outcome">Abka waxa uu ku noqon doona gobolka ugu horeeya</string>
     <string name="cannot_be_undone_critical">Tan lama soo celin karo!</string>
     <string name="reset_everything_button">Dib u habeyn wax walba</string>
-    
+
     <string name="alert_sound">Digniin Dhawaaq</string>
     <string name="about_text">GPL-3.0 • Fargeeto Juggluco</string>
     <string name="refreshing">Dib u cusbooneysiin...</string>
@@ -982,7 +982,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="juggluco_native">Juggluco u dhashay</string>
     <string name="window_label">daaqada</string>
     <string name="auto_restart_algorithm">Algorithm dib u bilow otomaatig ah</string>
-    
+
     <string name="status_bluetooth_off">Bluetooth dansan</string>
     <string name="status_connection_failed">Xidhiidhku wuu fashilmay</string>
     <string name="status_connected">Ku xidhan</string>
@@ -990,7 +990,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="status_waiting_for_data">Ku xidhan, sugitaanka xogta...</string>
     <string name="status_raw_values_received">Ku xidhan, qiyam cayriin ayaa la helay</string>
     <string name="status_invalid_glucose_from_sensor">Gulukoos aan sax ahayn oo ka timaadda dareemayaasha</string>
-    
+
     <string name="select_sensor_type">Dooro nooca dareenka</string>
     <string name="choose_theme">Dooro mawduuc</string>
     <string name="sibionics_sensor_picker_desc">Sawirka QR</string>
@@ -1164,7 +1164,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="aidex_not_recognized">%1$s • looma aqoonsan AiDex</string>
     <string name="aidex_selectable_unrecognized">%1$s • Qalabka AiDex-qoyska la dooran karo</string>
     <string name="aidex_detected_via_ff30">%1$s • lagu dooran karo ogaanshaha FF30</string>
-    
+
     <!-- Statistics Screen Strings -->
     <string name="statistics_title">Tirakoobka</string>
     <string name="statistics_subtitle">Falanqaynta gulukoostaada</string>
@@ -1197,14 +1197,14 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="range">Range</string>
     <string name="start_tracking">Bilow la socoshada gulukoostaada si aad u aragto tirakoob</string>
     <string name="loading_data">Soodejinaya...</string>
-    
+
     <!-- Variability Labels -->
     <string name="variability_excellent">Aad u fiican</string>
     <string name="variability_very_good">Aad u Wanaagsan</string>
     <string name="variability_good">Wacan</string>
     <string name="variability_moderate">Dhexdhexaad</string>
     <string name="variability_high">Sare</string>
-    
+
     <!-- Insight Messages -->
     <string name="insight_excellent_control">Xakameyn heer sare ah!</string>
     <string name="insight_excellent_control_desc">Waxaad ku bixinaysaa %1$d%% inta u dhaxaysa - oo ka sarreeya 70%% bartilmaameedka!</string>
@@ -1220,7 +1220,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="insight_great_a1c_desc">Qiyaasta A1C (GMI): %1$.1f%% - waa inta la beegsanayo!</string>
     <string name="insight_a1c_estimate">Qiyaasta A1C</string>
     <string name="insight_a1c_estimate_desc">GMI: %1$.1f%%. Waxoogaa ka sarreeya 7%% bartilmaameedka.</string>
-    
+
     <!-- GVI and PSG (xDrip-style metrics) -->
     <string name="gvi_title">Tusaha Kala-duwanaanta Gulukoosta</string>
     <string name="gvi_description">Wuxuu cabbiraa xasilloonida gulukooska iyo qaababka kala duwanaanshiyaha</string>
@@ -1235,7 +1235,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="psg_elevated">Saldhig Sare</string>
     <string name="psg_low">Saldhig Hoose</string>
     <string name="psg_unstable">Qaabka Aan Degenayn</string>
-    
+
     <!-- Time Range Labels -->
     <string name="range_1d">1D</string>
     <string name="range_3d">3D</string>
@@ -1243,19 +1243,19 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="range_14d">14D</string>
     <string name="range_30d">30D</string>
     <string name="range_90d">90D</string>
-    
+
     <string name="range_all">DHAMMAAN</string>
     <!-- Time Labels -->
     <string name="time_12am">12 subaxnimo</string>
     <string name="time_6am">6 subaxnimo</string>
     <string name="time_12pm">12 duhurnimo</string>
     <string name="time_6pm">6 galabnimo</string>
-    
+
     <!-- Detail Modal -->
     <string name="view_details">Daawo Faahfaahinta</string>
     <string name="percentage_format">%1$d%%</string>
     <string name="value_with_unit">%1$s %2$s</string>
-    
+
     <!-- Additional Statistics Strings -->
     <string name="low">Hoose</string>
     <string name="high">Sare</string>
@@ -1272,7 +1272,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="tir">TIR</string>
     <string name="total_readings">Wadarta Akhriska</string>
     <string name="cv">CV</string>
-    
+
     <!-- Stats Screen Redesign -->
     <string name="lowest">Ugu hooseeya</string>
     <string name="highest">Ugu sarreeya</string>
@@ -2322,6 +2322,8 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="outbound_api_headers_placeholder">Oggolaanshaha: Calaamadda xanbaarsan</string>
     <string name="outbound_api_message_template">Qaabka fariinta</string>
     <string name="outbound_api_template_desc">Taabo calaamada hoose si aad u geliso</string>
+    <string name="outbound_api_insulin_tokens">Noocyada insuliinta</string>
+    <string name="outbound_api_insulin_tokens_desc">Nooc kasta oo insuliin ah oo firfircoon wuxuu leeyahay calaamado qiyaasta ugu dambeysay, waqtigeeda, daqiiqadaha laga soo bilaabo, cutubyada haray iyo wadarta maanta.</string>
     <string name="outbound_api_min_interval">Muddada ugu yar (daqiiqado)</string>
     <string name="outbound_api_min_interval_desc">0 waxay dirtaa akhriska tooska ah ee la aqbalo.</string>
     <string name="outbound_api_trigger">Kicin</string>
@@ -3238,4 +3240,20 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Kaarbohaydrayt: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insuliin: %1$s U</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>
