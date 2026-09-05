@@ -163,6 +163,7 @@ import tk.glucodata.data.prediction.StateDoseHintEvaluation
 import tk.glucodata.data.prediction.PredictiveSimulationSettings
 import tk.glucodata.data.prediction.buildGlucosePrediction
 import tk.glucodata.ui.journal.JournalDoseProfile
+import tk.glucodata.ui.journal.rememberJournalEntryAction
 import tk.glucodata.ui.journal.JournalEntrySheet
 import tk.glucodata.ui.journal.JournalExpandableFab
 import tk.glucodata.ui.journal.rememberJournalCob
@@ -287,6 +288,7 @@ fun DashboardScreen(
     onNavigateToReadiness: () -> Unit = {},
     onNavigateToAppUpdates: () -> Unit = {},
     onNewMeal: (() -> Unit)? = null,
+    onOpenMeal: ((Long) -> Unit)? = null,
     currentMealLabel: String? = null,
     onOpenCurrentMeal: (() -> Unit)? = null,
     onNavigateToPredictionModelProfile: () -> Unit = {},
@@ -657,6 +659,13 @@ fun DashboardScreen(
             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         }
     }
+
+    val openJournalEntry = rememberJournalEntryAction(onOpenMeal) { entry ->
+        lastJournalType = entry.type
+        clearJournalAction()
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
+
     fun showJournalAction(suggestion: ChartTimelineTapSuggestion) {
         if (journalActionTimestamp != null && !suggestion.forceMenu) {
             clearJournalAction(withHaptic = true)
@@ -894,6 +903,7 @@ fun DashboardScreen(
             ),
             initialType = request.type,
             existingEntry = request.existingEntry,
+            onOpenMeal = onOpenMeal,
             onDismiss = { journalEditorRequest = null },
             onSave = { input ->
                 viewModel.saveJournalEntry(input)
@@ -1518,9 +1528,8 @@ fun DashboardScreen(
                                 journalPresetsById = journalPresetsById,
                                 journalChipExpanded = false,
                                 onJournalEntryClick = { entry ->
-                                    lastJournalType = entry.type
                                     clearJournalAction()
-                                    journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                    openJournalEntry(entry)
                                 },
                                 showLeadingAction = journalEnabled,
                                 leadingActionEmphasis = if (index == 0) 1f else 0.38f,
@@ -1650,8 +1659,7 @@ fun DashboardScreen(
                                     onJournalMarkerClick = { entryId ->
                                         journalEntriesById[entryId]?.let { entry ->
                                             clearJournalAction()
-                                            lastJournalType = entry.type
-                                            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                            openJournalEntry(entry)
                                         }
                                     },
                                     onViewportSnapshotChanged = { dashboardChartViewport = it }
@@ -1889,8 +1897,7 @@ fun DashboardScreen(
                                     onJournalMarkerClick = { entryId ->
                                         journalEntriesById[entryId]?.let { entry ->
                                             clearJournalAction()
-                                            lastJournalType = entry.type
-                                            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                            openJournalEntry(entry)
                                         }
                                     },
                                     onViewportSnapshotChanged = { dashboardChartViewport = it }
@@ -1974,9 +1981,8 @@ fun DashboardScreen(
                                 journalPresetsById = journalPresetsById,
                                 journalChipExpanded = false,
                                 onJournalEntryClick = { entry ->
-                                    lastJournalType = entry.type
                                     clearJournalAction()
-                                    journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                    openJournalEntry(entry)
                                 },
                                 showLeadingAction = journalEnabled,
                                 leadingActionEmphasis = if (index == 0) 1f else 0.38f,

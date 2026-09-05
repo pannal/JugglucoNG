@@ -76,6 +76,7 @@ import tk.glucodata.SensorIdentity
 import tk.glucodata.data.journal.JournalEntry
 import tk.glucodata.data.journal.JournalEntryType
 import tk.glucodata.ui.journal.JournalDoseProfile
+import tk.glucodata.ui.journal.rememberJournalEntryAction
 import tk.glucodata.ui.journal.JournalEntrySheet
 import tk.glucodata.ui.journal.JournalFoodLibraryScreen
 import tk.glucodata.ui.journal.JournalInsulinLibraryScreen
@@ -125,6 +126,7 @@ private fun DashboardRoute(
         onNavigateToReadiness = { navController.navigate("settings/cgm-readiness") },
         onNavigateToAppUpdates = { navController.navigate("settings/app-updates") },
         onNewMeal = newMealAction,
+        onOpenMeal = { id -> navController.navigate("journal/meals/$id") { launchSingleTop = true } },
         currentMealLabel = currentMeal?.label,
         onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
         onNavigateToPredictionModelProfile = {
@@ -136,6 +138,7 @@ private fun DashboardRoute(
 
 @Composable
 private fun HistoryRoute(
+    navController: androidx.navigation.NavController,
     dashboardViewModel: DashboardViewModel,
     title: String,
     browseMode: TimelineBrowseMode,
@@ -188,6 +191,13 @@ private fun HistoryRoute(
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
     var journalEditorRequest by remember { mutableStateOf<JournalEditorRequest?>(null) }
     var lastJournalType by rememberSaveable { mutableStateOf(JournalEntryType.INSULIN) }
+    val openMeal: (Long) -> Unit = { id ->
+        navController.navigate("journal/meals/$id") { launchSingleTop = true }
+    }
+    val openJournalEntry = rememberJournalEntryAction(openMeal) { entry ->
+        lastJournalType = entry.type
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
 
     // Journal entries are time-bound user events (insulin, food, fingersticks);
     // they must stay visible across sensor swaps. The History route deliberately
@@ -234,10 +244,7 @@ private fun HistoryRoute(
         onDeleteReading = { point ->
             dashboardViewModel.deleteHistoryReading(point, sensorName)
         },
-        onJournalEntryClick = { entry ->
-            lastJournalType = entry.type
-            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
-        },
+        onJournalEntryClick = openJournalEntry,
         onAddJournalEntry = { timestamp, suggestedType, suggestedDisplayGlucose ->
             val type = suggestedType ?: lastJournalType
             val suggestedGlucoseMgDl = suggestedDisplayGlucose?.let {
@@ -279,6 +286,7 @@ private fun HistoryRoute(
             ),
             initialType = request.type,
             existingEntry = request.existingEntry,
+            onOpenMeal = openMeal,
             onDismiss = { journalEditorRequest = null },
             onSave = { input ->
                 dashboardViewModel.saveJournalEntry(input)
@@ -350,6 +358,14 @@ private fun JournalRoute(
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
     var journalEditorRequest by remember { mutableStateOf<JournalEditorRequest?>(null) }
     var lastJournalType by rememberSaveable { mutableStateOf(JournalEntryType.INSULIN) }
+    val openMeal: (Long) -> Unit = { id ->
+        navController.navigate("journal/meals/$id") { launchSingleTop = true }
+    }
+    val openJournalEntry = rememberJournalEntryAction(openMeal) { entry ->
+        lastJournalType = entry.type
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
+
     val newMealAction = tk.glucodata.ui.meal.rememberNewMealAction(navController)
     val currentMeal = tk.glucodata.ui.meal.rememberCurrentMeal()
 
@@ -404,10 +420,7 @@ private fun JournalRoute(
                 )
             )
         },
-        onJournalEntryClick = { entry ->
-            lastJournalType = entry.type
-            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
-        },
+        onJournalEntryClick = openJournalEntry,
         onAddJournalEntry = { timestamp, suggestedType, suggestedDisplayGlucose, suggestedAmountFraction ->
             openJournalEditor(timestamp, suggestedType, suggestedDisplayGlucose, suggestedAmountFraction)
         },
@@ -430,6 +443,7 @@ private fun JournalRoute(
         JournalEditorSheetHost(
             dashboardViewModel = dashboardViewModel,
             request = request,
+            onOpenMeal = openMeal,
             onDismiss = { journalEditorRequest = null },
             onSaved = { type -> lastJournalType = type }
         )
@@ -444,6 +458,7 @@ private fun JournalRoute(
 internal fun JournalEditorSheetHost(
     dashboardViewModel: DashboardViewModel,
     request: JournalEditorRequest,
+    onOpenMeal: (Long) -> Unit,
     onDismiss: () -> Unit,
     onSaved: (JournalEntryType) -> Unit = {}
 ) {
@@ -481,6 +496,7 @@ internal fun JournalEditorSheetHost(
         initialType = request.type,
         existingEntry = request.existingEntry,
         prefill = request.prefill,
+        onOpenMeal = onOpenMeal,
         onDismiss = onDismiss,
         onSave = { input ->
             dashboardViewModel.saveJournalEntry(input)
@@ -889,6 +905,7 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                     }
                     composable("history") {
                         HistoryRoute(
+                            navController = navController,
                             dashboardViewModel = dashboardViewModel,
                             title = stringResource(R.string.historyname),
                             browseMode = TimelineBrowseMode.HISTORY,
@@ -1057,6 +1074,7 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                 }
                 composable("history") {
                     HistoryRoute(
+                        navController = navController,
                         dashboardViewModel = dashboardViewModel,
                         title = stringResource(R.string.historyname),
                         browseMode = TimelineBrowseMode.HISTORY,
