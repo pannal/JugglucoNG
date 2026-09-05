@@ -47,9 +47,8 @@ public class JournalIobAccess {
     }
 
     // [classicIob, eiob, cob] in units/grams, NaN marking "no data of that
-    // kind"; null when unavailable. Public: the PRE_HIGH IOB-coverage check
-    // and the sensor-pressure hold in tk.glucodata.alerts both read the
-    // classic IOB through this bridge.
+    // kind"; null when unavailable. Public: compression-low hold and
+    // PRE_HIGH IOB coverage in tk.glucodata.alerts both read classic IOB.
     public static float[] snapshot(long atMillis) {
         try {
             if (!snapshotResolved) {
