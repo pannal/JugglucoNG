@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.glucodata.Applic
+import tk.glucodata.BleErrorEvent
+import tk.glucodata.BleErrorHistory
 import tk.glucodata.MultiSensorSelection
 import tk.glucodata.SensorBluetooth
 import tk.glucodata.SensorIdentity
@@ -29,6 +31,7 @@ import tk.glucodata.drivers.ManagedSensorUiFamily
 import tk.glucodata.drivers.ManagedSensorUiSignals
 import tk.glucodata.drivers.ManagedSensorUiSnapshot
 import tk.glucodata.drivers.ManagedSensorViewModeStore
+import tk.glucodata.drivers.anytime.AnytimeDriver
 import tk.glucodata.drivers.mq.MQBootstrapClient
 import tk.glucodata.drivers.mq.MQDriver
 import tk.glucodata.drivers.mq.MQRegistry
@@ -49,6 +52,7 @@ data class SensorInfo(
     val displayName: String,
     val deviceAddress: String,
     val connectionStatus: String,
+    val connectionStatusAtMs: Long = 0L,
     val starttime: String,
     val streaming: Boolean,
     val rssi: Int,
@@ -291,6 +295,19 @@ class SensorViewModel : ViewModel() {
         }
     }
 
+    /** Pins this sensor's colour everywhere it is drawn, or null to go back to automatic. */
+    fun setSensorColor(serial: String, colorArgb: Int?) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                SensorVisuals.setColorOverride(serial, colorArgb)
+                refreshSensorsWithDeviceSync()
+                UiRefreshBus.requestDataRefresh()
+            } catch (e: Exception) {
+                android.util.Log.e("SensorVM", "Failed to set sensor color: ${e.message}")
+            }
+        }
+    }
+
     fun toggleDisplaySelection(serial: String) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
@@ -460,6 +477,7 @@ class SensorViewModel : ViewModel() {
             // Legacy sensors not in activeSensors() are finished — exclude them from the UI.
             // AiDex sensors (X- prefix) are managed via SharedPreferences, not activeSensors().
             val activeSet = activeSensors?.toHashSet() ?: HashSet()
+            val persistedBleErrors = BleErrorHistory.events()
 
             val sensorList = gatts.mapNotNull { gatt ->
                 try {
@@ -491,8 +509,29 @@ class SensorViewModel : ViewModel() {
                         val isSi = Natives.isSibionics(gatt.dataptr)
                         val nativeSensorKind =
                             runCatching { Natives.getLibreVersion(gatt.dataptr) }.getOrDefault(-1)
-                        val sensorVendor = SensorVendor.fromNativeKind(nativeSensorKind)
-                        val sensorType = SensorTypeName.fromNativeKind(nativeSensorKind, isSi2)
+                        // Native decides Libre 2 by elimination -- anything not flagged
+                        // Sibionics, Dexcom, Accu-Chek or five-minute is Libre 2 -- and it
+                        // carries no flag at all for Ottai, Anytime, MQ or iCan. On the
+                        // device holding the sensor the driver registry corrects that; on a
+                        // device that only mirrors it there is no driver to ask, so the
+                        // catch-all would badge every mirrored managed sensor Abbott. Claim
+                        // nothing rather than claim wrongly.
+                        // Never paired to this phone: no address was ever resolved for it and
+                        // no GATT was ever connected. A real Libre 2 in use has both.
+                        val mirrored = gatt.mActiveDeviceAddress == null &&
+                            !gatt.hasLocallyConnectedGatt()
+                        val unknownVendor = mirrored &&
+                            nativeSensorKind == tk.glucodata.SensorSourceResolver.SENSOR_KIND_LIBRE2
+                        val sensorVendor = if (unknownVendor) {
+                            SensorVendor.UNKNOWN
+                        } else {
+                            SensorVendor.fromNativeKind(nativeSensorKind)
+                        }
+                        val sensorType = if (unknownVendor) {
+                            SensorTypeName.UNKNOWN
+                        } else {
+                            SensorTypeName.fromNativeKind(nativeSensorKind, isSi2)
+                        }
                         // Managed and legacy Sibionics 2 both default to 22 days, while preserving
                         // an explicit earlier reset target selected with the sensor-card stepper.
                         if (isSi2 && autoResetDays !in 1..22 && autoResetDays != 300) {
@@ -524,7 +563,7 @@ class SensorViewModel : ViewModel() {
                         // when the link recovers, so any of those strings can stick
                         // around while readings flow. A reading newer than the event
                         // proves recovery: the recorded status is then history and
-                        // only shown in the "Last BLE status" detail row.
+                        // only shown in the timestamped "Last BLE error" detail row.
                         val bleStatusOutdated = SensorBluetooth.connectionStatusOutdated(gatt)
 
                         fun mapBleStatus(status: String): String = when {
@@ -564,6 +603,25 @@ class SensorViewModel : ViewModel() {
                         val sensorSerial = SensorIdentity.resolveAppSensorId(gatt.SerialNumber)
                             ?: gatt.SerialNumber
                             ?: "Unknown"
+                        val isGattFailure = bleStatus.startsWith("Status=") &&
+                            bleStatus.removePrefix("Status=").toIntOrNull()?.let { it != 0 } != false
+                        val liveError = when {
+                            isGattFailure ||
+                                (bleStatusOutdated && bleStatus.isNotEmpty() &&
+                                    !bleStatus.startsWith("Status=")) -> BleErrorEvent(
+                                sensorId = sensorSerial,
+                                status = bleStatus,
+                                atMs = SensorBluetooth.connectionStatusChangedAt(gatt),
+                            )
+                            else -> null
+                        }
+                        // A newly constructed callback has no memory of the previous process.
+                        // Once readings are flowing again, restore its latest retained failure so
+                        // the one-hour card window survives an app or APK restart.
+                        val displayedError = liveError
+                            ?: persistedBleErrors.firstOrNull {
+                                SensorIdentity.matches(it.sensorId, sensorSerial)
+                            }.takeIf { isActivelyReceiving }
                         val currentViewMode = nativeViewMode
                         val isActiveSensor = activeSensorSerial != null && SensorIdentity.matches(sensorSerial, activeSensorSerial)
     
@@ -571,11 +629,8 @@ class SensorViewModel : ViewModel() {
                             serial = sensorSerial,
                             displayName = try { gatt.mygetDeviceName() } catch (_: Throwable) { sensorSerial },
                             deviceAddress = gatt.mActiveDeviceAddress ?: "Unknown",
-                            connectionStatus = when {
-                                bleStatus.startsWith("Status=") -> mapBleStatus(bleStatus)
-                                bleStatusOutdated && bleStatus.isNotEmpty() -> mapBleStatus(bleStatus)
-                                else -> ""
-                            },
+                            connectionStatus = displayedError?.status?.let(::mapBleStatus).orEmpty(),
+                            connectionStatusAtMs = displayedError?.atMs ?: 0L,
                             starttime = if (startMs > 0) tk.glucodata.bluediag.datestr(startMs) else "",
                             streaming = warmupStatus == null && isActivelyReceiving,
                             rssi = gatt.readrssi,
@@ -986,6 +1041,19 @@ class SensorViewModel : ViewModel() {
                 android.util.Log.e("SensorVM", "Battery refresh failed to queue for $serial", it)
             }
             .getOrDefault(false)
+    }
+
+    fun requestAnytimeHistory(serial: String): Boolean {
+        val driver = findGatt(serial) as? AnytimeDriver ?: return false
+        return runCatching { driver.requestHistoryBackfill() }
+            .onFailure {
+                android.util.Log.e("SensorVM", "Anytime history request failed for $serial", it)
+            }
+            .getOrDefault(false)
+            .also {
+                UiRefreshBus.requestStatusRefresh()
+                refreshSensors()
+            }
     }
 
     fun clearCalibration(serial: String) {
