@@ -876,7 +876,8 @@ fun DashboardCombinedHeader(
                     .fillMaxSize()
                     .onSizeChanged { sensorContentWidthPx = it.width }
             ) {
-                val lifecycleText = if (sensorHoursRemaining <= 24) "$sensorHoursRemaining" + "h" else daysRemaining
+                val showRemainingHours = sensorHoursRemaining in 0L..24L
+                val lifecycleText = if (showRemainingHours) "$sensorHoursRemaining" + "h" else daysRemaining
                 val lifecycleStyle = MaterialTheme.typography.labelLarge
                 val lifecycleTextMeasurer = rememberTextMeasurer()
                 val lifecycleTextWidthPx = remember(lifecycleText, lifecycleStyle) {
@@ -1006,7 +1007,7 @@ fun DashboardCombinedHeader(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = if (!showingStatus &&
-                                    (sensorHoursRemaining <= 24 || showLifecycleCalendar)
+                                    (showRemainingHours || showLifecycleCalendar)
                                 ) {
                                     Modifier.weight(1f, fill = false)
                                 } else {
@@ -1015,11 +1016,11 @@ fun DashboardCombinedHeader(
                             )
 
                              if (!showingStatus &&
-                                 (sensorHoursRemaining <= 24 || showLifecycleCalendar)
+                                 (showRemainingHours || showLifecycleCalendar)
                              ) {
                                  Spacer(modifier = Modifier.width(8.dp))
 
-                                 if (sensorHoursRemaining <= 24) {
+                                 if (showRemainingHours) {
                                       // Urgent: Hourglass with Dynamic Speed
                                       val duration = (500 + (1500 * (sensorHoursRemaining / 24f))).toInt().coerceAtLeast(500)
                                       AnimatedHourglassIcon(

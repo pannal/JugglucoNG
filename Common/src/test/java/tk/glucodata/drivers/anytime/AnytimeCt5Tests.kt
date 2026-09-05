@@ -597,17 +597,212 @@ class AnytimeCt5Tests {
 
     @Test
     fun endCycleUsesTheOfficialCt5UnbindOpcode() {
-        val frame = AnytimeFrames.Builders.ct5EndCycle()
+        val frame = AnytimeFrames.Builders.ct5EndCycle("1234")
 
-        // The shipped app's actual CT5 unbind call path uses unBindRequest(),
-        // not the unused temp-id overload in ProtocolToolsHolder.
+        // Current CT5 sends the authenticated four-byte id, not the generic
+        // 0x58/0x55/0xAA frame used by older non-CT5 call paths.
         assertEquals(
-            listOf(0x58, 0x55, 0xAA, 0x57),
+            listOf(0x0A, 0x31, 0x32, 0x33, 0x34, 0xD4),
             frame.map { it.toInt() and 0xFF },
         )
         assertEquals(AnytimeConstants.TX_CT5_END_CYCLE, frame[0])
         assertTrue(AnytimeFrames.verifySum(frame))
     }
+
+    @Test
+    fun unbindEscalationFramesAreTheVendorsOwn() {
+        // Tried in order after the authenticated frame; both are SDK frames for
+        // families whose commands this firmware already answers.
+        assertEquals(
+            listOf(0x0A, 0x55, 0xAA, 0x09),
+            AnytimeFrames.Builders.unbindSummed().map { it.toInt() and 0xFF },
+        )
+        assertEquals(
+            listOf(0x58, 0x55, 0xAA, 0x57),
+            AnytimeFrames.Builders.unbindGeneric().map { it.toInt() and 0xFF },
+        )
+        assertTrue(AnytimeFrames.verifySum(AnytimeFrames.Builders.unbindGeneric()))
+    }
+
+    @Test
+    fun endCycleReRegistrationRestatesTheSameIdAndCalibration() {
+        // The re-registration exists to close a gap between generating the id and
+        // the transmitter receiving it, so it must carry the id verbatim and must
+        // not disturb the calibration already stored on the transmitter.
+        val frame = AnytimeFrames.Builders.ct5SetParameters(k = 6f, r = 1.5f, cipherKey = key, tempId = "9787")
+        val plain = AnytimeFrames.ct5Encode(frame.copyOfRange(1, frame.size - 1), key)
+
+        assertEquals(AnytimeConstants.TX_CT5_SET_PARAMETERS, frame[0])
+        assertEquals(14, frame.size)
+        assertTrue(AnytimeFrames.verifySum(frame))
+        assertEquals(
+            listOf(0x39, 0x37, 0x38, 0x37),
+            plain.copyOfRange(8, 12).map { it.toInt() and 0xFF },
+        )
+        assertEquals(6, plain[0].toInt() and 0xFF)
+        assertEquals(1, plain[2].toInt() and 0xFF)
+    }
+
+    @Test
+    fun bindStateQueryIsTheSharedCt2_5ResetFrame() {
+        // ProtocolTools.reset_request routes CT5 to resetRequest_CT2_5.
+        assertEquals(
+            listOf(0x11, 0x55, 0xAA, 0x10),
+            AnytimeFrames.Builders.ct5BindStateQuery().map { it.toInt() and 0xFF },
+        )
+    }
+
+    @Test
+    fun bindStateReadsTheUnboundFlagAndItsReason() {
+        // byte 2 == 0 is "unbound"; byte 12 == 0x22 makes byte 8 the reason.
+        val unbound = ct5BindStateFrame(boundByte = 0x00, tipByte = 0x22, reasonByte = 0x01)
+
+        val state = AnytimeFrames.parseCt5BindState(unbound)
+
+        assertEquals(false, state?.isBound)
+        assertEquals(1, state?.unbindReason)
+    }
+
+    @Test
+    fun bindStateReportsBoundWhenTheTransmitterKeptTheSession() {
+        val bound = ct5BindStateFrame(boundByte = 0x01, tipByte = 0x00, reasonByte = 0x00)
+
+        val state = AnytimeFrames.parseCt5BindState(bound)
+
+        assertEquals(true, state?.isBound)
+        assertEquals(-1, state?.unbindReason)
+    }
+
+    @Test
+    fun bindStateWithoutTheTipByteDoesNotInventAReason() {
+        val unbound = ct5BindStateFrame(boundByte = 0x00, tipByte = 0x00, reasonByte = 0x01)
+
+        val state = AnytimeFrames.parseCt5BindState(unbound)
+
+        assertEquals(false, state?.isBound)
+        assertEquals(-1, state?.unbindReason)
+    }
+
+    @Test
+    fun bindStateRejectsShortOrCorruptAnswers() {
+        val valid = ct5BindStateFrame(boundByte = 0x00, tipByte = 0x22, reasonByte = 0x00)
+
+        // The vendor's TransmitterReset throws below 14 bytes rather than guessing,
+        // and an unbind we cannot verify must not be reported as successful.
+        assertNull(AnytimeFrames.parseCt5BindState(valid.copyOf(13)))
+
+        val badSum = valid.copyOf()
+        badSum[badSum.lastIndex] = (badSum[badSum.lastIndex] + 1).toByte()
+        assertNull(AnytimeFrames.parseCt5BindState(badSum))
+
+        val wrongOpcode = valid.copyOf()
+        wrongOpcode[0] = 0x0A
+        assertNull(AnytimeFrames.parseCt5BindState(wrongOpcode))
+    }
+
+    /** 14-byte 0x11 answer shaped like the vendor's `TransmitterReset` input. */
+    private fun ct5BindStateFrame(boundByte: Int, tipByte: Int, reasonByte: Int): ByteArray {
+        val frame = ByteArray(14)
+        frame[0] = AnytimeConstants.RX_RESET
+        frame[1] = 0x55
+        frame[2] = boundByte.toByte()
+        frame[8] = reasonByte.toByte()
+        frame[12] = tipByte.toByte()
+        frame[13] = AnytimeFrames.sum(frame, 0, 12)
+        return frame
+    }
+
+    // ---- Timeline anchoring ---------------------------------------------
+
+    @Test
+    fun anAdvancingSensorAnchorsExactlyAsBefore() {
+        // The ordinary case must be untouched: ids advance every cadence, and the anchor
+        // is evaluated before lastGlucoseId moves, so each new id re-anchors.
+        for (id in 1..20) {
+            assertTrue(
+                "id=$id must anchor",
+                shouldReanchorTimeline(liveId = id, previousMaxId = id - 1, haveTimelineStart = true),
+            )
+        }
+    }
+
+    @Test
+    fun aSensorFrozenOnOneIdStopsWalkingTheStart() {
+        // A CT5 past INFO_COMPLETE_END repeats its final id every three minutes forever.
+        assertFalse(shouldReanchorTimeline(liveId = 8175, previousMaxId = 8175, haveTimelineStart = true))
+        // Including across an app restart, since lastGlucoseId is persisted.
+        assertFalse(shouldReanchorTimeline(liveId = 8175, previousMaxId = 8175, haveTimelineStart = true))
+    }
+
+    @Test
+    fun aReactivatedSensorStillAnchorsFromItsOwnFirstId() {
+        // clearStaleRuntimeStateBeforeLiveRecord resets the cursor to -1 on a rollback,
+        // so a fresh sensor is not held hostage by the dead one's ids.
+        assertTrue(shouldReanchorTimeline(liveId = 0, previousMaxId = -1, haveTimelineStart = false))
+        assertTrue(shouldReanchorTimeline(liveId = 3, previousMaxId = -1, haveTimelineStart = true))
+    }
+
+    @Test
+    fun anUnanchoredSessionAnchorsFromWhateverArrivesFirst() {
+        // With no start yet there is nothing to protect, so even a repeat must anchor;
+        // otherwise a restart with no stored start would never establish one.
+        assertTrue(shouldReanchorTimeline(liveId = 8175, previousMaxId = 8175, haveTimelineStart = false))
+    }
+
+    @Test
+    fun anOutOfOrderOlderIdDoesNotDragTheStartBackwards() {
+        assertFalse(shouldReanchorTimeline(liveId = 8100, previousMaxId = 8175, haveTimelineStart = true))
+    }
+
+    // ---- Electrode voltages (the six bytes the parser used to drop) ------
+
+    @Test
+    fun voltageChunkYieldsElectrodePotentialsAndBattery() {
+        // Real terminal frame, 2026-09-04 01:20 trace, session cipher 72.
+        val frame = hex("35 EF 1F 1D 1D 1C CF DB 1A 1D 1D 1C 86 86 80 C7 1F 0F 34")
+
+        val rec = AnytimeFrames.parseCt5CurrentRecord(frame, 72)
+
+        assertNotNull(rec)
+        rec!!
+        assertEquals(8175, rec.glucoseId)
+        // BE/WE/RE are potentiostat setpoints and held these exact values across
+        // 1479 frames and 17 days; a change in them is a front-end fault, not drift.
+        assertEquals(1032, rec.beVoltageMv)
+        assertEquals(1032, rec.weVoltageMv)
+        assertEquals(996, rec.reVoltageMv)
+        assertEquals(660, rec.ceVoltageMv)
+        assertEquals(1591, rec.batteryRaw)
+    }
+
+    @Test
+    fun voltagesSurviveIntoTheAlgorithmResult() {
+        val frame = hex("35 EF 1F 1D 1D 1C CF DB 1A 1D 1D 1C 86 86 80 C7 1F 0F 34")
+        val rec = requireNotNull(AnytimeFrames.parseCt5CurrentRecord(frame, 72))
+
+        val result = AnytimeAlgorithm.fromComputedRecord(rec)
+
+        assertEquals(660, result.ceVoltageMv)
+        assertEquals(1591, result.bVoltageMv)
+        assertEquals(1032, result.weVoltageMv)
+    }
+
+    @Test
+    fun aChunkWithoutVoltagesReportsThemAbsentRatherThanZero() {
+        // 15-byte frame: the raw chunk carries no voltages, and zero would read as
+        // a real measurement of 0 mV — a lost potentiostat — rather than "not sent".
+        val plain = chunk(ibNa = 0f, iwNa = 6.5f, temperatureC = 33f, trend = 4, glucoseMgdl = 90)
+        val frame = livePushFrame(4242, plain)
+
+        val rec = requireNotNull(AnytimeFrames.parseCt5CurrentRecord(frame, key))
+
+        assertEquals(Int.MIN_VALUE, rec.ceVoltageMv)
+        assertEquals(Int.MIN_VALUE, rec.batteryRaw)
+        assertEquals(6.5f, rec.iwNa, 0.01f)
+    }
+
+    private fun hex(spaced: String): ByteArray =
+        spaced.split(" ").map { it.toInt(16).toByte() }.toByteArray()
 
     // ---- Cipher fallback (unchanged behaviour) --------------------------
 

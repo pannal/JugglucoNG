@@ -233,7 +233,7 @@
 
  <string name="finish">终止</string>
  <string name="finishsensormessage">停止使用此传感器进行蓝牙传输？</string>
- 
+
  <string name="email">电子邮件：</string>
  <string name="getaccountid">获取帐户 ID</string>
 
@@ -415,7 +415,7 @@
     <string name="amounts">数量</string>
     <string name="scans">扫描</string>
     <string name="stream">流</string>
-    
+
     <string name="exchanges">发送/接收</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -632,6 +632,14 @@
     <string name="icanhealth_sensor_picker_desc">蓝牙设置</string>
     <string name="mq_sensor_picker_desc">蓝牙配对</string>
     <string name="anytime_sensor_picker_desc">蓝牙配对</string>
+    <string name="anytime_sensor">Anytime / Yuwell 4 / 4H / 5</string>
+    <string name="anytime_sensor_desc">通过蓝牙配对 Anytime 或 Yuwell CT3 CGM 发射器</string>
+    <string name="anytime_setup_title">Anytime / Yuwell 设置</string>
+    <string name="anytime_searching_sensors">正在搜索 Anytime / Yuwell 发射器…</string>
+    <string name="anytime_no_sensors_hint">请将发射器放在附近，并确保已开机。</string>
+    <string name="anytime_detected_label">%1$s · Anytime CT3 系列</string>
+    <string name="anytime_selectable_unrecognized">%1$s · 因已开启“查看所有设备”而显示</string>
+    <string name="anytime_connecting_to">正在配对 %1$s…</string>
     <string name="sibionics_sensor">Sibionics</string>
     <string name="sibionics_sensor_desc">扫描二维码</string>
     <string name="libre_sensor">Libre 2/3</string>
@@ -2018,6 +2026,8 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">消息模板</string>
     <string name="outbound_api_template_desc">点按下方令牌即可插入。</string>
+    <string name="outbound_api_insulin_tokens">胰岛素类型</string>
+    <string name="outbound_api_insulin_tokens_desc">每种启用的胰岛素类型都有对应的标记：上次剂量、时间、距今分钟数、剩余单位和今日总量。</string>
     <string name="outbound_api_min_interval">最小间隔（分钟）</string>
     <string name="outbound_api_min_interval_desc">0 会发送每个已接受的实时读数。</string>
     <string name="outbound_api_trigger">触发条件</string>
@@ -3052,7 +3062,30 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sensor_pause_streaming">暂停传感器</string>
     <string name="sensor_resume_streaming">恢复传感器</string>
     <string name="sensor_color_title">传感器颜色</string>
+    <string name="anytime_credentials_backup">备份 CT5 凭据</string>
+    <string name="anytime_credentials_backup_warning">此文件可在重新安装应用或移除传感器后恢复发射器会话。请安全保存。</string>
+    <string name="anytime_history_fetch_warning">要获取截至当前实时读数的完整发射器历史记录吗？这可能需要几分钟并增加蓝牙流量。实时读数仍会继续接收。</string>
+    <string name="anytime_restart_action">重启</string>
+    <string name="anytime_restart_title">重启传感器？</string>
+    <string name="anytime_restart_warning">结束当前发射器会话并开始新的配对周期？现有葡萄糖历史记录将保留在应用中。</string>
+    <string name="anytime_history_action">历史</string>
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ 碳水：%1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ 胰岛素：%1$s U</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

@@ -230,7 +230,7 @@
  <string name="finishsensormessage">Diesen Sensor nicht mehr zum Streamen verwenden?</string>
 <string name="email">E-Mail:</string>
   <string name="getaccountid">Konto-ID erhalten</string>
- 
+
   <string name="emailaddresstooshort">E-Mail-Adresse zu kurz </string>
   <string name="emailaddresstoolong">E-Mail-Adresse zu lang </string>
   <string name="password8">Passwort sollte mindestens 8 Zeichen lang sein </string>
@@ -707,6 +707,14 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="icanhealth_sensor_picker_desc">Bluetooth-Setup</string>
     <string name="mq_sensor_picker_desc">Bluetooth-Kopplung</string>
     <string name="anytime_sensor_picker_desc">Bluetooth-Kopplung</string>
+    <string name="anytime_sensor">Anytime / Yuwell 4 / 4H / 5</string>
+    <string name="anytime_sensor_desc">Einen Anytime- oder Yuwell-CT3-CGM-Transmitter über Bluetooth koppeln</string>
+    <string name="anytime_setup_title">Anytime-/Yuwell-Einrichtung</string>
+    <string name="anytime_searching_sensors">Suche nach Anytime-/Yuwell-Transmittern…</string>
+    <string name="anytime_no_sensors_hint">Halte den Transmitter in der Nähe und stelle sicher, dass er eingeschaltet ist.</string>
+    <string name="anytime_detected_label">%1$s · Anytime-CT3-Familie</string>
+    <string name="anytime_selectable_unrecognized">%1$s · angezeigt, weil \"Alle Geräte anzeigen\" aktiv ist</string>
+    <string name="anytime_connecting_to">%1$s wird gekoppelt…</string>
     <string name="sibionics_sensor">Sibionics</string>
     <string name="sibionics_sensor_desc">QR-Code scannen</string>
     <string name="libre_sensor">Libre 2/3</string>
@@ -2129,6 +2137,8 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Nachrichtenvorlage</string>
     <string name="outbound_api_template_desc">Tippe unten auf ein Token, um es einzufügen.</string>
+    <string name="outbound_api_insulin_tokens">Insulinarten</string>
+    <string name="outbound_api_insulin_tokens_desc">Jede aktive Insulinart hat Tokens für die letzte Dosis, deren Uhrzeit, die Minuten seitdem, die verbleibenden Einheiten und die heutige Summe.</string>
     <string name="outbound_api_min_interval">Mindestintervall (Minuten)</string>
     <string name="outbound_api_min_interval_desc">0 sendet jeden akzeptierten Live-Wert.</string>
     <string name="outbound_api_trigger">Auslöser</string>
@@ -3075,7 +3085,30 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="sensor_pause_streaming">Sensor pausieren</string>
     <string name="sensor_resume_streaming">Sensor fortsetzen</string>
     <string name="sensor_color_title">Sensorfarbe</string>
+    <string name="anytime_credentials_backup">CT5-Zugangsdaten sichern</string>
+    <string name="anytime_credentials_backup_warning">Mit dieser Datei kann die Sendersitzung nach einer Neuinstallation der App oder dem Entfernen des Sensors wiederhergestellt werden. Bewahre sie sicher auf.</string>
+    <string name="anytime_history_fetch_warning">Den vollständigen Senderverlauf bis zum aktuellen Live-Wert abrufen? Dies kann mehrere Minuten dauern und erhöht den Bluetooth-Datenverkehr. Live-Werte werden weiterhin empfangen.</string>
+    <string name="anytime_restart_action">Neustart</string>
+    <string name="anytime_restart_title">Sensor neu starten?</string>
+    <string name="anytime_restart_warning">Die aktuelle Transmittersitzung beenden und einen neuen Kopplungsvorgang starten? Der vorhandene Glukoseverlauf bleibt in der App.</string>
+    <string name="anytime_history_action">Verlauf</string>
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Kohlenhydrate: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Insulin: %1$s E</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

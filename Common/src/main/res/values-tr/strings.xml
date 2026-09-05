@@ -235,7 +235,7 @@
  <string name="finish">Sonlandır</string>
  <string name="finishsensormessage">Akış için bu sensör kullanımı bırakılsın mı?
 </string>
- 
+
  <string name="email">E-Posta:</string>
  <string name="getaccountid">Hesap Kimliği Al</string>
 
@@ -383,7 +383,7 @@
     <string name="autoqrmessage">
 Bu telefondan ev ağınızdaki başka bir telefona veri gönderebilirsiniz.
 Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer telefonda Sol Menü → Fotoğraf ile taradığınızda bağlantı kurulacak ve bu telefondan tüm verileri alacaktır.</string>
-    
+
     <string name="googlescan">Google Tarama</string>
 
  <string name="watch">saat</string>
@@ -460,7 +460,7 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="amounts">Miktarlar</string>
     <string name="scans">Taramalar</string>
     <string name="stream">Akış</string>
-    
+
     <string name="exchanges">Gönder/Al</string>
     <string name="duration_days">days</string>
     <string name="sensor_state">Status</string>
@@ -672,6 +672,14 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="icanhealth_sensor_picker_desc">Bluetooth kurulumu</string>
     <string name="mq_sensor_picker_desc">Bluetooth eşleştirme</string>
     <string name="anytime_sensor_picker_desc">Bluetooth eşleştirme</string>
+    <string name="anytime_sensor">Anytime / Yuwell 4 / 4H / 5</string>
+    <string name="anytime_sensor_desc">Anytime veya Yuwell CT3 CGM vericisini Bluetooth ile eşleştirin</string>
+    <string name="anytime_setup_title">Anytime / Yuwell Kurulumu</string>
+    <string name="anytime_searching_sensors">Anytime / Yuwell vericileri aranıyor…</string>
+    <string name="anytime_no_sensors_hint">Vericiyi yakında tutun ve açık olduğundan emin olun.</string>
+    <string name="anytime_detected_label">%1$s · Anytime CT3 ailesi</string>
+    <string name="anytime_selectable_unrecognized">%1$s · \"Tüm cihazları gör\" açık olduğu için gösteriliyor</string>
+    <string name="anytime_connecting_to">%1$s eşleştiriliyor…</string>
     <string name="sibionics_sensor">Sibionics</string>
     <string name="sibionics_sensor_desc">QR Kodu tara</string>
     <string name="libre_sensor">Libre 2/3</string>
@@ -2030,6 +2038,8 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Mesaj şablonu</string>
     <string name="outbound_api_template_desc">Eklemek için aşağıdaki bir tokene dokunun.</string>
+    <string name="outbound_api_insulin_tokens">İnsülin türleri</string>
+    <string name="outbound_api_insulin_tokens_desc">Etkin her insülin türünün son dozu, saati, üzerinden geçen dakika, kalan ünite ve bugünkü toplam için kendi belirteçleri vardır.</string>
     <string name="outbound_api_min_interval">Minimum aralık (dakika)</string>
     <string name="outbound_api_min_interval_desc">0 kabul edilen her canlı ölçümü gönderir.</string>
     <string name="outbound_api_trigger">Tetikleyici</string>
@@ -3064,7 +3074,30 @@ Tamam\'a basmak bağlantı için QR kod görüntüleyecektir. QR kodu diğer tel
     <string name="sensor_pause_streaming">Sensörü duraklat</string>
     <string name="sensor_resume_streaming">Sensörü sürdür</string>
     <string name="sensor_color_title">Sensör rengi</string>
+    <string name="anytime_credentials_backup">CT5 kimlik bilgilerini yedekle</string>
+    <string name="anytime_credentials_backup_warning">Bu dosya, uygulama yeniden yüklendikten veya sensör kaldırıldıktan sonra verici oturumunu geri yükleyebilir. Güvenli bir yerde saklayın.</string>
+    <string name="anytime_history_fetch_warning">Mevcut canlı okumaya kadar tüm verici geçmişi alınsın mı? Bu işlem birkaç dakika sürebilir ve Bluetooth trafiğini artırır. Canlı okumalar devam eder.</string>
+    <string name="anytime_restart_action">Yeniden başlat</string>
+    <string name="anytime_restart_title">Sensör yeniden başlatılsın mı?</string>
+    <string name="anytime_restart_warning">Geçerli verici oturumu sonlandırılıp yeni bir eşleştirme döngüsü başlatılsın mı? Mevcut glikoz geçmişi uygulamada kalır.</string>
+    <string name="anytime_history_action">Geçmiş</string>
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Karbonhidrat: %1$s g</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ İnsülin: %1$s Ü</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>

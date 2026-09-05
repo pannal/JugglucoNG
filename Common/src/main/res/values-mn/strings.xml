@@ -2023,6 +2023,8 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="outbound_api_headers_placeholder">Authorization: Bearer token</string>
     <string name="outbound_api_message_template">Message template</string>
     <string name="outbound_api_template_desc">Tap a token below to insert it.</string>
+    <string name="outbound_api_insulin_tokens">Инсулины төрлүүд</string>
+    <string name="outbound_api_insulin_tokens_desc">Идэвхтэй инсулины төрөл бүр сүүлийн тун, түүний цаг, түүнээс хойших минут, үлдсэн нэгж, өнөөдрийн нийлбэрийн токентой.</string>
     <string name="outbound_api_min_interval">Minimum interval (minutes)</string>
     <string name="outbound_api_min_interval_desc">0 sends every accepted live reading.</string>
     <string name="outbound_api_trigger">Trigger</string>
@@ -3150,7 +3152,30 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="sensor_pause_streaming">Мэдрэгчийг түр зогсоох</string>
     <string name="sensor_resume_streaming">Мэдрэгчийг үргэлжлүүлэх</string>
     <string name="sensor_color_title">Мэдрэгчийн өнгө</string>
+    <string name="anytime_credentials_backup">CT5 нэвтрэх мэдээллийг нөөцлөх</string>
+    <string name="anytime_credentials_backup_warning">Энэ файл нь аппыг дахин суулгасны эсвэл мэдрэгчийг устгасны дараа дамжуулагчийн сессийг сэргээх боломжтой. Аюулгүй газар хадгална уу.</string>
+    <string name="anytime_history_fetch_warning">Одоогийн шууд уншилт хүртэл дамжуулагчийн бүтэн түүхийг татах уу? Энэ нь хэдэн минут үргэлжилж, Bluetooth урсгалыг нэмэгдүүлж болно. Шууд уншилтууд үргэлжилнэ.</string>
+    <string name="anytime_restart_action">Эхлүүлэх</string>
+    <string name="anytime_restart_title">Мэдрэгчийг дахин эхлүүлэх үү?</string>
+    <string name="anytime_restart_warning">Дамжуулагчийн одоогийн холболтыг дуусгаж, шинэ хослуулах мөчлөг эхлүүлэх үү? Одоогийн глюкозын түүх апп-д үлдэнэ.</string>
+    <string name="anytime_history_action">Түүх</string>
     <string name="dashboard_forecast_recommendation_short">≏ %1$s</string>
     <string name="dashboard_forecast_recommendation_carbs">≏ Нүүрс ус: %1$s г</string>
     <string name="dashboard_forecast_recommendation_insulin">≏ Инсулин: %1$s U</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </resources>
