@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -242,19 +243,12 @@ fun JournalExpandableFab(
     val menuProgress = menuReveal.value
     val rowTravelPx = with(density) { 18.dp.toPx() }
     val itemLiftPx = with(density) { 18.dp.toPx() }
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
+    Box(modifier = modifier) {
         if (expanded || menuProgress > 0.01f) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.graphicsLayer {
-                    alpha = menuProgress.coerceIn(0f, 1f)
-                    translationY = 8.dp.toPx() * (1f - menuProgress)
-                }
+            JournalFabMenuPopup(
+                menuProgress = menuProgress,
+                onDismissRequest = { onExpandedChange(false) },
+                modifier = Modifier.align(Alignment.TopEnd)
             ) {
                 // Top to bottom: the entry types, with the meal rows slotted in right above Insulin
                 // (Insulin stays closest to the button).
