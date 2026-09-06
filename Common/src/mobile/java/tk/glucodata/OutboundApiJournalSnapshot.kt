@@ -100,6 +100,7 @@ object OutboundApiJournalSnapshot {
                     val now = System.currentTimeMillis()
                     val values = runCatching { buildBroadcastIob(now) }.getOrNull()
                     broadcastIobCache = BroadcastIobCache(now, values)
+                    GluciferSender.requestUpdate()
                     JournalIobAccess.pushWatchserver(now)
                     if (values != null) JugglucoSend.rebroadcastIob()
                     Notify.showoldglucose()
