@@ -3742,7 +3742,7 @@ fun InteractiveGlucoseChart(
                     }
                 }
 
-            if (activeInsulinSummary != null || activeCarbsGrams != null) {
+            if (activeInsulinSummary != null || activeCarbsGrams != null || stateDoseHint != null) {
                 val summary = activeInsulinSummary
                 val unitsLabel = { units: Float ->
                     if (units % 1f < 0.05f) {
@@ -3807,7 +3807,7 @@ fun InteractiveGlucoseChart(
                         } else {
                             stringResource(R.string.dashboard_dose_hint_carbs, doseHintAmount)
                         }
-                        StateDoseHintKind.INSULIN -> if (isActiveInsulinExpanded) {
+                        StateDoseHintKind.INSULIN -> if (summary == null || isActiveInsulinExpanded) {
                             stringResource(R.string.dashboard_dose_hint_insulin, doseHintAmount)
                         } else {
                             stringResource(
