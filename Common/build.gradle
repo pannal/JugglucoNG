@@ -168,7 +168,7 @@ android {
             minifyEnabled = false
             shrinkResources = false
             versionNameSuffix = '-L3-SOURCE-EXPERIMENTAL'
-            resValue "string", "app_name", "JugglucoNG L3 Source Experimental"
+            resValue "string", "app_name", "Glucifer L3 Source Experimental"
             buildConfigField 'boolean', 'EXPERIMENTAL_LIBRE3_SOURCE', 'true'
             externalNativeBuild.cmake {
                 arguments "-DEXPERIMENTAL_LIBRE3_SOURCE=TRUE"
