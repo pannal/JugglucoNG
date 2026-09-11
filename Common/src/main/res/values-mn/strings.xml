@@ -725,7 +725,7 @@ OK дарснаар энэ утсан дээр холболт үүсч, өөр A
     <string name="graph_smoothing_7_minutes">7 минут</string>
     <string name="data_smoothing_window_title">Жигдлэх цонх</string>
     <string name="data_smoothing_graph_only_title">Зөвхөн графикийг жигдлэх</string>
-    <string name="data_smoothing_graph_only_desc">Одоогийн глюкоз, виджетүүд, анхааруулга болон дамжуулалтыг жигдлэхгүй үлдээх</string>
+    <string name="data_smoothing_graph_only_desc">Одоогийн глюкоз, виджетүүд болон анхааруулгыг жигдлэхгүй. Хэсгүүдэд хуваах тохиргоог идэвхжүүлээгүй үед дамжуулах өгөгдлийг мөн жигдлэхгүй. Энэ тохиргоо дамжуулах өгөгдлийн жигдлэлтийг идэвхжүүлнэ.</string>
     <string name="data_smoothing_collapse_title">Хэсгүүдэд хуваах</string>
     <string name="data_smoothing_collapse_desc">Интервал бүрт нэг жигдэрсэн цэгийг үлдээж, хоорондох цэгүүдийг шүүх</string>
     <string name="data_smoothing_collapse_desc_match">Keep one smoothed point every %1$d minutes</string>

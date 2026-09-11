@@ -443,7 +443,7 @@
     <string name="graph_smoothing_7_minutes">7 хвілін</string>
     <string name="data_smoothing_window_title">Інтэрвал згладжвання</string>
     <string name="data_smoothing_graph_only_title">Згладжваць толькі графік</string>
-    <string name="data_smoothing_graph_only_desc">Пакідае бягучую глюкозу, віджэты, апавяшчэнні і выхады абмену без згладжвання</string>
+    <string name="data_smoothing_graph_only_desc">Пакідае бягучую глюкозу, віджэты і апавяшчэнні без згладжвання. Выхады абмену таксама застаюцца без згладжвання, пакуль не ўключана функцыя «Згортваць у інтэрвалы», якая ўключае згладжванне выхадаў абмену.</string>
     <string name="data_smoothing_exchange_only_title">Згладжваць толькі выхады абмену</string>
     <string name="data_smoothing_exchange_only_desc">Ужывае згладжванне і фільтр інтэрвалаў толькі да трансляцый і выходных API-даных; графік, бягучая глюкоза, віджэты і апавяшчэнні застаюцца без змен</string>
     <string name="data_smoothing_collapse_title">Згортваць у інтэрвалы</string>

@@ -587,7 +587,7 @@ Durch Drücken von „OK“ wird eine Verbindung auf diesem Telefon hergestellt 
     <string name="graph_smoothing_7_minutes">7 Minuten</string>
     <string name="data_smoothing_window_title">Glättungsfenster</string>
     <string name="data_smoothing_graph_only_title">Nur Diagramm glätten</string>
-    <string name="data_smoothing_graph_only_desc">Aktuellen Glukosewert, Widgets, Warnungen und Datenausgaben ungeglättet lassen</string>
+    <string name="data_smoothing_graph_only_desc">Aktuellen Glukosewert, Widgets und Warnungen ungeglättet lassen. Auch Datenausgaben bleiben ungeglättet, außer wenn In Blöcke verdichten aktiviert ist. Diese Option aktiviert die Glättung der Datenausgaben.</string>
     <string name="data_smoothing_exchange_only_title">Nur Datenausgaben glätten</string>
     <string name="data_smoothing_exchange_only_desc">Wendet Glättung und Blockfilter nur auf Broadcasts und Outbound-API-Payloads an; Diagramm, aktueller Glukosewert, Widgets und Warnungen bleiben unverändert</string>
     <string name="data_smoothing_collapse_title">In Blöcke verdichten</string>
