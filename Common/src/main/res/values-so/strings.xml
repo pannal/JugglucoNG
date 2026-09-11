@@ -859,7 +859,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="graph_smoothing_7_minutes">7 daqiiqo</string>
     <string name="data_smoothing_window_title">Daaqad jilicsan</string>
     <string name="data_smoothing_graph_only_title">Garaaf kaliya oo jilicsan</string>
-    <string name="data_smoothing_graph_only_desc">Gulukoosta hadda jirta ka dhig, widgets, digniinaha iyo wax soo saarka beddelka mid aan dabacsanayn</string>
+    <string name="data_smoothing_graph_only_desc">Gulukoosta hadda jirta, widgets-ka iyo digniinaha ha ahaadaan kuwo aan la simin. Xogta la dhoofinayo sidoo kale lama simo ilaa U kala jajabo qaybo kala duwan la shido, taas oo shidaysa simidda xogta la dhoofinayo.</string>
     <string name="data_smoothing_exchange_only_title">Waxsoosaarka isweydaarsiga fudud oo kaliya</string>
     <string name="data_smoothing_exchange_only_desc">Codso silcin iyo shaandhaynta jajabka kaliya baahinta iyo culayska API ee dibadda ka baxaya; jaantuska, gulukoosta hadda, widgets iyo ogeysiisyadu isma beddelaan</string>
     <string name="data_smoothing_collapse_title">U kala jajabo qaybo kala duwan</string>

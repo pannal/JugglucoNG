@@ -501,7 +501,7 @@
     <string name="graph_smoothing_7_minutes">7 minuter</string>
     <string name="data_smoothing_window_title">Utjämningsfönster</string>
     <string name="data_smoothing_graph_only_title">Jämna bara ut diagrammet</string>
-    <string name="data_smoothing_graph_only_desc">Lämnar aktuellt glukos, widgetar, varningar och datautgångar utan utjämning</string>
+    <string name="data_smoothing_graph_only_desc">Lämnar aktuellt glukos, widgetar och varningar utan utjämning. Datautgångar förblir också utan utjämning, om inte Gruppera i intervall är aktiverat, vilket aktiverar utjämning av datautgångarna.</string>
     <string name="data_smoothing_exchange_only_title">Jämna bara ut datautgångar</string>
     <string name="data_smoothing_exchange_only_desc">Tillämpar utjämning och intervallfilter bara på utsändningar och utgående API-payloads; diagram, aktuellt glukos, widgetar och varningar lämnas oförändrade</string>
     <string name="data_smoothing_collapse_title">Gruppera i intervall</string>
