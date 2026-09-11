@@ -105,7 +105,7 @@ import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -199,9 +199,9 @@ fun StatsScreen(
     viewModel: StatsViewModel = rememberStatsViewModel(),
     onOpenHypoEpisodes: (() -> Unit)? = null
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val isSwitchingRange by viewModel.isSwitchingRange.collectAsState()
-    val excludedEpisodes by viewModel.excludedEpisodesInRange.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isSwitchingRange by viewModel.isSwitchingRange.collectAsStateWithLifecycle()
+    val excludedEpisodes by viewModel.excludedEpisodesInRange.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val reportPrefs = remember(context) {
@@ -239,8 +239,8 @@ fun StatsScreen(
     val selectedReportStyle = StatsReportExporter.PdfVisualStyle.fromPref(reportStylePref)
     val view = LocalView.current
     LaunchedEffect(context) { StatsLayoutStore.ensureLoaded(context) }
-    val layout by StatsLayoutStore.state.collectAsState()
-    val editingLayout by StatsArrangeMode.editing.collectAsState()
+    val layout by StatsLayoutStore.state.collectAsStateWithLifecycle()
+    val editingLayout by StatsArrangeMode.editing.collectAsStateWithLifecycle()
     // Every ordinary way out of a mode, not just the button: system back, and simply
     // leaving the screen.
     BackHandler(enabled = editingLayout) { StatsArrangeMode.close() }
