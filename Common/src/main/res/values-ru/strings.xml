@@ -14,7 +14,7 @@
 	<string name="amountshort">@string/amountsname</string>
     <string name="amountsname">Значения</string>
 	<string name="android13">Android</string>
-    <string name="app_name">JugglucoNG</string>
+    <string name="app_name">Glucifer</string>
     <string name="background">Зад. фон</string>
     <string name="backgroundshort">Позади</string>
     <string name="blueormirror">Датчик через Bluetooth должен быть включен или он должен быть настроен как клон</string>
@@ -135,7 +135,7 @@
     <string name="list">Все записи</string>
     <string name="localonly">Только локально</string>
     <string name="longinsulin">Инсулин длительного действия</string>
-    <string name="loss_description">Juggluco потерял контакт с датчиком</string>
+    <string name="loss_description">Glucifer потерял контакт с датчиком</string>
     <string name="lossdata">Сброс к значениям по умолчанию может привести к потере данных.</string>
     <string name="lossofsignalalarm">Тревога о потере сигнала</string>
     <string name="lowglucose">"Низкий уровень глюкозы!"</string>
@@ -244,7 +244,7 @@
     <string name="sensorpermissionmessage">Вы можете установить его в настройках устройства, приложениях, разрешениях</string>
     <string name="sensorviabluetooth">Датчик по Bluetooth</string>
     <string name="sensorviabluetoothon">"Для сигналов тревоги на устройствах, не являющихся зеркальными, должен быть включен параметр "Датчик по Bluetooth"</string>
-    <string name="senthosts">Juggluco отправляет до 6 хостов</string>
+    <string name="senthosts">Glucifer отправляет до 6 хостов</string>
     <string name="separate">Отдельный</string>
     <string name="settings">Настройки</string>
     <string name="setunitfirst">Сначала установите единицу измерения</string>
@@ -403,7 +403,7 @@
     <string name="amounts">Объемы</string>
     <string name="scans">Сканы</string>
     <string name="stream">Поток</string>
-    
+
     <string name="exchanges">Отправить/Получить</string>
 
     <!-- Missing UI Translations -->
@@ -416,7 +416,7 @@
     <string name="advanced_title">Дополнительно</string>
     <string name="debug_logs">Журналы отладки</string>
     <string name="nightscout_config">Конфигурация Nightscout</string>
-    
+
     <!-- LibreView Settings -->
     <string name="libreview_config">LibreView</string>
     <string name="libreview_desc">Синхронизация с Abbott LibreView</string>
@@ -483,19 +483,19 @@
     <string name="reconnect_sensor_title">Переподключить датчик?</string>
     <string name="reconnect_sensor_desc">Это сбросит соединение и попытается подключиться снова.</string>
     <string name="reconnect">Переподключить</string>
-    
+
     <string name="forget_sensor_title">Забыть датчик?</string>
     <string name="forget_sensor_desc">Это удалит датчик из списка. Он может появиться снова при сканировании.</string>
     <string name="forget">Забыть</string>
-    
+
     <string name="reset_sensor_title">Сброс датчика?</string>
     <string name="reset_sensor_desc">Это сбросит датчик Sibionics 2. Продолжить?</string>
     <string name="reset_sensor">Сброс датчика</string>
-    
+
     <string name="reset_all_title">Сбросить все?</string>
     <string name="reset_all_desc">Очистить старые данные, калибровки и сбросить датчик?</string>
     <string name="reset_all">Сбросить все</string>
-    
+
     <string name="enabled_status">Включен</string>
     <string name="disabled_status">Отключен</string>
     <string name="last_ble_status">Статус BLE</string>
@@ -508,13 +508,13 @@
     <string name="auto_reset_title">Автосброс</string>
     <string name="auto_reset_days">%1$d дней</string>
     <string name="auto_reset_never">Никогда</string>
-    
+
     <string name="googlescan">Сканирование Google</string>
     <string name="xdripbroadcast">Libre (patched App)</string>
 
     <!-- Newly Extracted Strings -->
     <string name="import_history">Импорт истории</string>
-    <string name="import_history_desc">Импорт данных глюкозы из экспорта JugglucoNG или CSV-файла</string>
+    <string name="import_history_desc">Импорт данных глюкозы из экспорта Glucifer или CSV-файла</string>
     <string name="get_started_desc">Начните с добавления вашего сенсора</string>
     <string name="select_sensor">Выберите тип сенсора</string>
     <string name="select_sibionics_type">Выберите сенсор Sibionics</string>
@@ -561,7 +561,7 @@
     <string name="export_history_title">Экспорт истории</string>
     <string name="export_history_sub">Сохранить показания в CSV или текст</string>
     <string name="import_history_title">Импорт истории</string>
-    <string name="import_history_sub">Восстановить показания глюкозы из экспорта JugglucoNG или CSV-файла</string>
+    <string name="import_history_sub">Восстановить показания глюкозы из экспорта Glucifer или CSV-файла</string>
     <string name="clear_history_title">Очистить историю?</string>
     <string name="clear_history_confirmation">Это удалит все показания глюкозы из базы данных. Это действие необратимо.</string>
     <string name="delete_reading_title">Удалить показание?</string>
@@ -598,7 +598,7 @@
     <string name="graph_smoothing_7_minutes">7 минут</string>
     <string name="data_smoothing_window_title">Окно сглаживания</string>
     <string name="data_smoothing_graph_only_title">Сглаживать только график</string>
-    <string name="data_smoothing_graph_only_desc">Оставляет текущую глюкозу, виджеты, уведомления и выходы обмена без сглаживания — если только не включено «Сжимать в интервалы»: для него нужна сглаженная точка, поэтому он снова включает сглаживание для выходов обмена</string>
+    <string name="data_smoothing_graph_only_desc">Оставляет текущую глюкозу, виджеты и уведомления без сглаживания. Выходы обмена тоже остаются без сглаживания, пока не включено «Сжимать в интервалы»: эта настройка включает сглаживание выходов обмена.</string>
     <string name="data_smoothing_exchange_only_title">Сглаживать только выходы обмена</string>
     <string name="data_smoothing_exchange_only_desc">Применяет сглаживание и фильтр интервалов только к трансляциям и исходящим API-пакетам; график, текущая глюкоза, виджеты и уведомления остаются без изменений</string>
     <string name="data_smoothing_collapse_title">Сжимать в интервалы</string>
@@ -657,7 +657,7 @@
     <string name="scheduled_backup_acknowledge">Подтвердить и использовать последнюю копию как базовую</string>
     <string name="backup_integrity_channel">Предупреждения о целостности копий</string>
     <string name="backup_integrity_channel_desc">Критические предупреждения, если автоматическая копия может содержать значительно меньше данных</string>
-    <string name="backup_integrity_notification_title">Проверьте резервную копию JugglucoNG</string>
+    <string name="backup_integrity_notification_title">Проверьте резервную копию Glucifer</string>
     <string name="backup_integrity_notification_text">Последняя копия неожиданно уменьшилась. Старые копии сохранены. Откройте настройки резервного копирования для проверки.</string>
     <string name="export_everything">Всё</string>
     <string name="export_history_data_desc">История глюкозы, записи журнала и профили инсулина</string>
@@ -673,7 +673,7 @@
     <string name="import_data">Импорт истории</string>
     <string name="import_data_desc">Загрузить бэкап или файл Libreview</string>
     <string name="import_data_settings">Импорт данных/настроек</string>
-    <string name="import_data_settings_desc">Восстановить CSV истории или экспорт JugglucoNG</string>
+    <string name="import_data_settings_desc">Восстановить CSV истории или экспорт Glucifer</string>
     <string name="settings_import_confirm_title">Импортировать настройки?</string>
     <string name="settings_import_confirm_message">Это заменит настройки приложения, учетные данные, ключи устройств и конфигурацию mirror, затем перезапустит приложение.</string>
     <string name="settings_import_successful">Настройки импортированы. Перезапуск...</string>
@@ -706,12 +706,12 @@
     <string name="juggluco_native">Нативный Juggluco</string>
     <string name="window_label">окно</string>
     <string name="auto_restart_algorithm">Автоперезапуск алгоритма</string>
-    
+
     <string name="status_bluetooth_off">Bluetooth выкл.</string>
     <string name="status_connection_failed">Ошибка подключения</string>
     <string name="status_connected">Подключено</string>
     <string name="status_disconnected">Отключено</string>
-    
+
     <string name="select_sensor_type">Выберите тип сенсора</string>
     <string name="choose_theme">Выберите тему</string>
     <string name="sibionics_sensor_picker_desc">Скан QR</string>
@@ -757,7 +757,7 @@
     <string name="libre_setup_libreview_note_title">Libre 3 + LibreView</string>
     <string name="libre_setup_advanced_options_desc">Настройте экспериментальное поведение сканирования Libre 3 перед сопряжением.</string>
     <string name="libre3_nfc_command_title">Команда NFC для Libre 3</string>
-    <string name="libre3_nfc_command_desc">Выберите, какую команду Juggluco отправляет при NFC-сканировании Libre 3</string>
+    <string name="libre3_nfc_command_desc">Выберите, какую команду Glucifer отправляет при NFC-сканировании Libre 3</string>
     <string name="libre3_nfc_command_auto">Авто</string>
     <string name="libre3_nfc_command_auto_desc">Использовать стандартное поведение Juggluco при сканировании Libre 3</string>
     <string name="libre3_nfc_command_activate">A0 Активировать</string>
@@ -1107,7 +1107,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="glucose_with_unit">Глюкоза (%1$s)</string>
     <string name="import_failed_with_error">Не удалось импортировать: %1$s.</string>
     <string name="import_no_glucose">В файле нет данных глюкозы</string>
-    <string name="import_unsupported_file">Неподдерживаемый файл. Выберите экспорт JugglucoNG или CSV-файл истории глюкозы.</string>
+    <string name="import_unsupported_file">Неподдерживаемый файл. Выберите экспорт Glucifer или CSV-файл истории глюкозы.</string>
     <string name="import_summary">Импортировано: %1$d, пропущено: %2$d, заменено: %3$d.</string>
     <string name="imported_readings_count">Импортированные показания %1$d</string>
     <string name="mirror_error_with_code">Ошибка зеркала (%1$d)</string>
@@ -1433,7 +1433,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="report_iqr_short">IQR</string>
     <string name="report_not_enough_daily_trend">Недостаточно ежедневных данных для отображения тренда.</string>
     <string name="report_no_readings_day">Чтений на этот день нет.</string>
-    <string name="report_page1_title">Клинический отчет JugglucoNG CGM</string>
+    <string name="report_page1_title">Клинический отчет Glucifer CGM</string>
     <string name="report_page1_subtitle">Диапазон %1$s · Показания %2$d · Окно от %3$s до %4$s</string>
     <string name="report_estimated_a1c">Предполагаемый A1C</string>
     <string name="report_below_target">Ниже целевого показателя</string>
@@ -1463,7 +1463,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="report_no_generated_insights_message">Никаких дополнительных предупреждений о шаблонах для этого периода времени создано не было.</string>
     <string name="report_agp_consensus_title">Справочник по консенсусу AGP</string>
     <string name="report_agp_consensus_body">Целевые показатели, упомянутые в этом отчете, соответствуют стилю международного консенсуса AGP: TIR 70–180 мг/дл (3,9–10,0 ммоль/л), TBR &lt;70 и &lt;54 мг/дл, TAR &gt;180 и &gt;250 мг/дл, с целевым значением CV &lt;=36%%.</string>
-    <string name="report_page3_title">Приложение I JugglucoNG – AGP и ежедневные таблицы</string>
+    <string name="report_page3_title">Приложение I Glucifer – AGP и ежедневные таблицы</string>
     <string name="report_page3_subtitle">Почасовые процентили и результаты на уровне дня</string>
     <string name="report_hourly_agp_table">Таблица почасового профиля AGP</string>
     <string name="report_hour">Час</string>
@@ -1506,7 +1506,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="wear_transport_gms_unavailable">Сервисы Google Play недоступны; транспорт Wear отключен.</string>
     <string name="wear_transport_reinit_desc">Принудительно перезапустить поиск часов и синхронизацию сети.</string>
     <string name="wear_watch_app_missing">Приложение для часов отсутствует</string>
-    <string name="wear_watch_app_missing_hint">Установите Juggluco на эти часы, затем нажмите обновить.</string>
+    <string name="wear_watch_app_missing_hint">Установите Glucifer на эти часы, затем нажмите обновить.</string>
     <string name="wear_auto_sensor_switch">Автоматически переключать датчик</string>
     <string name="wear_auto_sensor_switch_on_desc">Телефон и часы сами передают датчик друг другу, поэтому его читает то устройство, которое в зоне действия.</string>
     <string name="wear_auto_sensor_switch_off_desc">Датчик читает только выбранное вами устройство.</string>
@@ -1538,7 +1538,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="nightscout_follow_status_idle">Источник Nightscout простаивает</string>
     <string name="nightscout_follow_status_following">Получение из Nightscout</string>
     <string name="nightscout_follow_use_v3_api">Использовать API v3 для слежения</string>
-    <string name="nightscout_follow_use_v3_api_desc">Читает из /api/v3 вместо /api/v1. Токену доступа нужны api:entries:read, api:treatments:read и api:devicestatus:read. Изменённые роли действуют только со следующего обмена токенов: перезапустите приложение, если 403 сохраняется.</string>
+    <string name="nightscout_follow_use_v3_api_desc">Читает из /api/v3 вместо /api/v1. Токену доступа нужны api:entries:read, api:treatments:read и api:devicestatus:read. Изменённые роли действуют только со следующего обмена токенов: используйте «Обновить токен», если 403 сохраняется.</string>
     <string name="nightscout_follow_status_syncing">Обновление Nightscout</string>
     <string name="nightscout_follow_status_paused">Источник Nightscout приостановлен</string>
     <string name="nightscout_follow_status_config_needed">Введите URL Nightscout</string>
@@ -1582,7 +1582,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="insight_unstable_days">Частые нестабильные дни</string>
     <string name="insight_unstable_days_desc">В этом окне %1$d дней имели менее 50%% времени в диапазоне.</string>
     <string name="mq_fetch_calibration_on_add">Восстанавливать сессию производителя при добавлении</string>
-    <string name="mq_fetch_calibration_on_add_desc">Если доступен QR-код или сохраненные учетные данные Glutec, Juggluco попробует восстановить состояние сессии MQ во время настройки.</string>
+    <string name="mq_fetch_calibration_on_add_desc">Если доступен QR-код или сохраненные учетные данные Glutec, Glucifer попробует восстановить состояние сессии MQ во время настройки.</string>
     <string name="mq_bootstrap_button">Восстановить сессию производителя</string>
     <string name="mq_bootstrap_dialog_title">Восстановить сессию производителя</string>
     <string name="mq_bootstrap_dialog_desc">Восстановите состояние сессии производителя через Glutec. При необходимости введите QR-код датчика здесь; аккаунт, синхронизация и API настраиваются в разделе MQ / Glutec.</string>
@@ -1615,9 +1615,9 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="mq_account_session_valid">Сессия действительна</string>
     <string name="mq_account_session_invalid">Сессия недействительна</string>
     <string name="mq_manual_calibration_title">Ручная калибровка</string>
-    <string name="mq_manual_calibration_desc">Локально в Juggluco. Введите значение глюкозы из пальца в %1$s. Нужен свежий живой пакет MQ.</string>
+    <string name="mq_manual_calibration_desc">Локально в Glucifer. Введите значение глюкозы из пальца в %1$s. Нужен свежий живой пакет MQ.</string>
     <string name="mq_follower_title">Наблюдатель Glutec</string>
-    <string name="mq_follower_desc">Следите за другим аккаунтом Glutec через облако производителя. При включении в Juggluco создается датчик-наблюдатель только для чтения.</string>
+    <string name="mq_follower_desc">Следите за другим аккаунтом Glutec через облако производителя. При включении в Glucifer создается датчик-наблюдатель только для чтения.</string>
     <string name="mq_follower_account_label">Аккаунт для наблюдения</string>
     <string name="mq_follower_account_desc">Введите номер телефона или аккаунт Glutec, за которым нужно следить.</string>
     <string name="mq_follower_enabled_summary">Наблюдение включено</string>
@@ -2168,11 +2168,11 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="ottai_login_fail">Вход не выполнен - проверьте телефон/код</string>
     <string name="ottai_connect_saved_fail">Нет материалов в аккаунте или сохраненных материалов для этого облачного ID</string>
     <string name="ottai_cloud_already_binding">К аккаунту Ottai всё ещё привязан другой датчик. Отвяжите его в приложении Ottai или удалите тот датчик здесь, чтобы освободить привязку, затем повторите.</string>
-    <string name="ottai_cloud_unbind_hint">Действие только с облачным аккаунтом. JugglucoNG не будет подключаться к выбранному сенсору, останавливать, удалять или изменять его.</string>
+    <string name="ottai_cloud_unbind_hint">Действие только с облачным аккаунтом. Glucifer не будет подключаться к выбранному сенсору, останавливать, удалять или изменять его.</string>
     <string name="ottai_cloud_unbind_title">Навсегда отвязать этот сенсор?</string>
-    <string name="ottai_cloud_unbind_message">%1$s будет навсегда удалён из этого аккаунта Ottai. Аккаунт больше не сможет получить его учётные данные, а сенсор больше не будет работать в официальном приложении Ottai. Сохранённые в JugglucoNG учётные данные и состояние сенсора не изменятся. Это действие нельзя отменить.</string>
+    <string name="ottai_cloud_unbind_message">%1$s будет навсегда удалён из этого аккаунта Ottai. Аккаунт больше не сможет получить его учётные данные, а сенсор больше не будет работать в официальном приложении Ottai. Сохранённые в Glucifer учётные данные и состояние сенсора не изменятся. Это действие нельзя отменить.</string>
     <string name="ottai_cloud_unbind_confirm">Отвязать навсегда</string>
-    <string name="ottai_cloud_unbind_success">Сенсор навсегда отвязан от Ottai. Сенсор и сохранённые данные в JugglucoNG не изменены.</string>
+    <string name="ottai_cloud_unbind_success">Сенсор навсегда отвязан от Ottai. Сенсор и сохранённые данные в Glucifer не изменены.</string>
     <string name="ottai_cloud_unbind_failed">Не удалось отвязать сенсор от Ottai.</string>
     <string name="ottai_cloud_binding_checking">Проверка привязки в облаке Ottai…</string>
     <string name="ottai_cloud_binding_bound">Статус облака: привязан к этому аккаунту Ottai</string>
@@ -2579,7 +2579,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sms_max_per_hour">Максимум сообщений в час</string>
     <string name="sms_max_per_day">Максимум сообщений в сутки</string>
     <string name="sms_sent_today">Отправлено за последние 24 часа: %1$d</string>
-    <string name="sms_permission_desc">Чтобы это направление работало, приложению JugglucoNG нужно разрешение на отправку SMS.</string>
+    <string name="sms_permission_desc">Чтобы это направление работало, приложению Glucifer нужно разрешение на отправку SMS.</string>
     <string name="sms_permission_grant">Разрешить</string>
     <string name="sms_no_telephony">Это устройство не может отправлять SMS.</string>
     <string name="sms_preview_title">Предпросмотр</string>
@@ -2597,7 +2597,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="sms_event_no_data">Нет данных сенсора %1$d мин</string>
     <string name="sms_event_all_clear">Отбой</string>
     <string name="sms_event_relay">Обновление (нет передачи данных)</string>
-    <string name="sms_event_test">Тестовое сообщение от JugglucoNG</string>
+    <string name="sms_event_test">Тестовое сообщение от Glucifer</string>
     <string name="sms_body_no_reading">Показаний пока нет</string>
 
     <!-- In-app updates (GitHub releases) -->
@@ -2637,13 +2637,13 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="app_updates_verifying_title">Проверка загрузки</string>
     <string name="app_updates_verifying_body">Проверяем подпись и версию перед установкой.</string>
     <string name="app_updates_ready_title">%1$s готова к установке</string>
-    <string name="app_updates_ready_body">Android попросит подтверждение. JugglucoNG закроется и откроется снова; связь с сенсорами восстановится сама.</string>
+    <string name="app_updates_ready_body">Android попросит подтверждение. Glucifer закроется и откроется снова; связь с сенсорами восстановится сама.</string>
     <string name="app_updates_up_to_date_title">У вас последняя версия</string>
     <string name="app_updates_last_checked">Последняя проверка: %1$s</string>
     <string name="app_updates_never_checked">никогда</string>
     <string name="app_updates_error_title">Не удалось проверить обновления</string>
-    <string name="app_updates_permission_title">Разрешите установку из JugglucoNG</string>
-    <string name="app_updates_permission_body">Android требует разового разрешения, чтобы JugglucoNG мог установить собственное обновление.</string>
+    <string name="app_updates_permission_title">Разрешите установку из Glucifer</string>
+    <string name="app_updates_permission_body">Android требует разового разрешения, чтобы Glucifer мог установить собственное обновление.</string>
     <string name="app_updates_permission_action">Открыть настройки</string>
     <string name="app_updates_unsupported_store_title">Обновления идут из магазина</string>
     <string name="app_updates_unsupported_store_body">Эта копия установлена через %1$s, который сам управляет обновлениями.</string>
@@ -2654,11 +2654,11 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="app_updates_error_parse">Источник обновлений вернул неожиданный ответ.</string>
     <string name="app_updates_error_no_artifact">В последнем выпуске нет файла для этой сборки.</string>
     <string name="app_updates_error_checksum">Загруженный файл не совпал с контрольной суммой и был удалён.</string>
-    <string name="app_updates_error_signature">Загруженный APK подписан другим ключом и был удалён. Устанавливайте JugglucoNG только с официальной страницы выпусков.</string>
+    <string name="app_updates_error_signature">Загруженный APK подписан другим ключом и был удалён. Устанавливайте Glucifer только с официальной страницы выпусков.</string>
     <string name="app_updates_error_package">Загруженный APK относится к другому приложению.</string>
     <string name="app_updates_error_downgrade">Этот выпуск не новее установленной версии.</string>
     <string name="app_updates_error_storage">Недостаточно свободного места для загрузки.</string>
-    <string name="app_updates_error_install_permission">JugglucoNG пока не разрешено устанавливать приложения.</string>
+    <string name="app_updates_error_install_permission">Glucifer пока не разрешено устанавливать приложения.</string>
     <string name="app_updates_error_install_failed">Установка не завершилась.</string>
     <string name="app_updates_error_cancelled">Установка отменена.</string>
     <string name="app_updates_source_title">Источник обновлений</string>
@@ -2839,7 +2839,7 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="anytime_history_action">История</string>
     <string name="nightscout_follow_interval_title">Проверять новые значения</string>
     <string name="nightscout_follow_interval_desc">Как часто подписчик опрашивает сервер. Это же определяет, насколько старым может быть значение, а значит и насколько поздно придёт тревога по отслеживаемому значению. У подписчика нет своего сенсора, который держал бы телефон активным, поэтому каждая проверка — это пробуждение.</string>
-    <string name="nightscout_follow_interval_doze">Меньше 9 минут Android всё равно может разносить проверки, пока телефон простаивает. Исключение Juggluco из оптимизации батареи сохраняет выбранный интервал.</string>
+    <string name="nightscout_follow_interval_doze">Меньше 9 минут Android всё равно может разносить проверки, пока телефон простаивает. Исключение Glucifer из оптимизации батареи сохраняет выбранный интервал.</string>
 
     <!-- Web server TLS certificate -->
     <string name="webserver_https_subtitle">Шифрование HTTPS</string>
@@ -2920,4 +2920,302 @@ Pressing OK will generate a connection on this phone and display a QR code that 
     <string name="clone_network_summary">Серверы и локальный поиск</string>
     <string name="clone_connections_empty">Подключённых устройств пока нет.</string>
     <string name="clone_background_desc">Повышает расход батареи</string>
+    <string name="meal_title">Приёмы пищи</string>
+    <string name="meal_open_link">Открыть приём пищи: %1$s</string>
+    <string name="meal_new">Новый приём пищи</string>
+    <string name="meal_current_prefix">Текущий приём пищи: %1$s</string>
+    <string name="meal_default_label">Приём пищи</string>
+    <string name="meal_suggested_breakfast">Завтрак</string>
+    <string name="meal_suggested_lunch">Обед</string>
+    <string name="meal_suggested_dinner">Ужин</string>
+    <string name="meal_suggested_snack">Перекус</string>
+    <string name="meal_empty">Пока нет приёмов пищи. Создайте во время готовки, отсканируйте продукты и записывайте съеденное, когда едите.</string>
+    <string name="meal_open_section">Открытые</string>
+    <string name="meal_archived_section">Завершённые</string>
+    <string name="meal_items_count">%1$d позиций</string>
+    <string name="meal_carbs_short">%1$s г углеводов</string>
+    <string name="meal_label_title">Название</string>
+    <string name="meal_rename">Переименовать</string>
+    <string name="meal_archive">Отметить завершённым</string>
+    <string name="meal_unarchive">Открыть снова</string>
+    <string name="meal_delete">Удалить приём пищи</string>
+    <string name="meal_delete_confirm">Удалить этот приём пищи и его позиции? Записи дневника останутся.</string>
+    <string name="meal_delete_only">Удалить только приём пищи</string>
+    <string name="meal_delete_all">Удалить всё</string>
+    <string name="meal_delete_all_count">Удалить всё (+%1$d записей дневника)</string>
+    <string name="meal_delete_confirm_entries">Удалить этот приём пищи и его позиции? «Удалить всё» удалит и %1$d записей дневника, сделанных для него; «Удалить только приём пищи» оставит их.</string>
+    <string name="meal_scan_product">Сканировать штрихкод</string>
+    <string name="meal_scan_again">Сканировать снова</string>
+    <string name="meal_add_manual">Добавить вручную</string>
+    <string name="meal_enter_barcode">Ввести штрихкод</string>
+    <string name="meal_barcode_hint">Цифры EAN / UPC</string>
+    <string name="meal_lookup">Найти</string>
+    <string name="meal_lookup_running">Поиск %1$s…</string>
+    <string name="meal_lookup_not_found">Продукт для %1$s не найден. Введите значения вручную.</string>
+    <string name="meal_lookup_offline">Онлайн-поиск выключен, а %1$s нет в кэше. Введите значения вручную.</string>
+    <string name="meal_lookup_failed">Поиск не удался (%1$s). Повторите или введите значения вручную.</string>
+    <string name="meal_source_off">Open Food Facts</string>
+    <string name="meal_source_manual">Вручную</string>
+    <string name="meal_composition">Состав</string>
+    <string name="meal_composition_empty">На столе пока ничего нет. Отсканируйте продукт или добавьте вручную.</string>
+    <string name="meal_item_unresolved">Количество не указано</string>
+    <string name="meal_totals">Вся еда</string>
+    <string name="meal_servings_label">Порции</string>
+    <string name="meal_servings_hint">Сколько порций получилось?</string>
+    <string name="meal_cooked_weight_label">Вес в готовом виде (г)</string>
+    <string name="meal_cooked_weight_hint">Необязательно: взвесьте кастрюлю один раз, чтобы вводить тарелки в граммах.</string>
+    <string name="meal_per_serving">На порцию</string>
+    <string name="meal_unresolved_items">%1$d позиций без количества</string>
+    <string name="meal_eaten">Съедено</string>
+    <string name="meal_eat_amount_label">Сколько?</string>
+    <string name="meal_eat_hint">напр. 1 порция, 1/3, 250 г</string>
+    <string name="meal_eat_next_step">Далее: запись в дневнике с текущим временем и рекомендацией дозы на сейчас.</string>
+    <string name="meal_eat_continue">Перейти в дневник</string>
+    <string name="meal_eat_note_format">%1$s из %2$s</string>
+    <string name="meal_entries_section">Записано для этого приёма пищи</string>
+    <string name="meal_entries_empty">Пока ничего не записано. Сканирование — не еда: записывайте, когда едите.</string>
+    <string name="meal_quantity_label">Количество</string>
+    <string name="meal_quantity_hint">напр. 70 г, 1 чашка, 1/3, 2 порции, 2 батончика</string>
+    <string name="meal_quantity_unparsed">Не удалось распознать количество</string>
+    <string name="meal_quantity_ambiguous">Просто число — какая единица?</string>
+    <string name="meal_need_density">Нужна плотность (г на мл), чтобы пересчитать объём в вес</string>
+    <string name="meal_need_net_quantity">Нужен размер упаковки для доли упаковки</string>
+    <string name="meal_need_serving_size">Нужен размер порции (г или мл)</string>
+    <string name="meal_need_piece_weight">Нужен вес одной штуки (г)</string>
+    <string name="meal_need_servings_per_batch">Сначала укажите число порций</string>
+    <string name="meal_need_batch_weight">Сначала укажите вес в готовом виде</string>
+    <string name="meal_answer_density">Плотность (г/мл)</string>
+    <string name="meal_answer_net_quantity">Размер упаковки</string>
+    <string name="meal_answer_serving_size">Размер порции</string>
+    <string name="meal_answer_piece_weight">Одна штука (г)</string>
+    <string name="meal_answer_remembered">Запомнено для этого продукта.</string>
+    <string name="meal_carbs">Углеводы</string>
+    <string name="meal_protein">Белки</string>
+    <string name="meal_fat">Жиры</string>
+    <string name="meal_fiber">Клетчатка</string>
+    <string name="meal_kcal">ккал</string>
+    <string name="meal_basis_per_100g">на 100 г</string>
+    <string name="meal_basis_per_100ml">на 100 мл</string>
+    <string name="meal_basis_per_serving">на порцию</string>
+    <string name="meal_basis_per_batch">вся кастрюля</string>
+    <string name="meal_plausibility_macros">Макронутриенты в сумме больше 100 г — проверьте значения</string>
+    <string name="meal_plausibility_energy">Энергия не соответствует макронутриентам — проверьте значения</string>
+    <string name="meal_plausibility_invalid">Недопустимые значения</string>
+    <string name="meal_add_to_meal">Добавить</string>
+    <string name="meal_update_item">Обновить</string>
+    <string name="meal_remove_item">Убрать</string>
+    <string name="meal_edit_values">Изменить значения</string>
+    <string name="meal_done_editing">Готово</string>
+    <string name="meal_add_unresolved_hint">Можно добавить сейчас, а недостающее значение дополнить позже.</string>
+    <string name="meal_product_name">Название продукта</string>
+    <string name="meal_product_brand">Марка (необязательно)</string>
+    <string name="meal_product_basis">Значения указаны</string>
+    <string name="meal_product_values_hint">С этикетки: на 100 г / 100 мл или на порцию.</string>
+    <string name="meal_product_net_quantity">Содержимое упаковки (г или мл)</string>
+    <string name="meal_product_package_pieces">Содержимое упаковки (штуки, например 6 сосисок)</string>
+    <string name="meal_product_serving">Размер порции (г или мл)</string>
+    <string name="meal_serving_word">порция</string>
+    <string name="meal_piece_word">штука</string>
+    <string name="meal_package_word">упаковка</string>
+    <string name="meal_online_lookup_title">Искать отсканированные продукты онлайн</string>
+    <string name="meal_online_lookup_desc">В Open Food Facts передаётся только штрихкод; ответы кэшируются на устройстве</string>
+    <string name="meal_settings_entry">Приёмы пищи и сканер продуктов</string>
+    <string name="meal_settings_entry_desc">Сканируйте штрихкоды, собирайте еду, записывайте съеденное</string>
+    <string name="meal_recent_title">Недавние продукты</string>
+    <string name="meal_recent_search">Поиск по названию, марке или штрихкоду</string>
+    <string name="meal_recent_empty">Пока ничего не отсканировано и не добавлено.</string>
+    <string name="meal_ocr_title">Прочитать этикетку</string>
+    <string name="meal_ocr_intro">Сфотографируйте таблицу пищевой ценности; добавьте лицевую сторону для названия и объёма упаковки и любую другую нужную сторону. Всё распознаётся на этом телефоне.</string>
+    <string name="meal_ocr_intro_barcode">Продукта для %1$s пока нет. Сфотографируйте таблицу пищевой ценности; добавьте лицевую сторону для названия и объёма упаковки и любую другую сторону. Значения сохранятся под этим штрихкодом.</string>
+    <string name="meal_ocr_take_photo">Сделать фото</string>
+    <string name="meal_ocr_from_gallery">Из галереи</string>
+    <string name="meal_ocr_reading">чтение…</string>
+    <string name="meal_ocr_failed">не распознано</string>
+    <string name="meal_ocr_lines">%1$d строк</string>
+    <string name="meal_ocr_name_candidates">Название (выберите или измените на следующем шаге)</string>
+    <string name="meal_ocr_no_table">Таблица пищевой ценности не распознана — попробуйте более чёткое фото таблицы или введите значения вручную на следующем шаге.</string>
+    <string name="meal_ocr_confirm_hint">Следующий шаг: проверьте каждое значение перед использованием.</string>
+    <string name="meal_ocr_use_values">Использовать эти значения</string>
+    <string name="meal_ocr_kind_front">Лицевая сторона</string>
+    <string name="meal_ocr_kind_nutrition">Таблица пищевой ценности</string>
+    <string name="meal_ocr_kind_ingredients">Состав</string>
+    <string name="meal_ocr_kind_other">Другая сторона</string>
+    <string name="meal_ocr_button">Сфотографировать этикетку</string>
+    <string name="meal_ocr_attach_barcode_title">Привязать штрихкод?</string>
+    <string name="meal_ocr_attach_barcode_text">Отсканируйте штрихкод продукта сейчас, и эти значения сохранятся под ним на следующий раз.</string>
+    <string name="meal_ocr_attach_barcode_scan">Сканировать штрихкод</string>
+    <string name="meal_ocr_attach_barcode_skip">Не сейчас</string>
+    <string name="meal_source_ocr">Фото этикетки</string>
+    <string name="meal_contribute_title">Отправлять новые продукты в Open Food Facts</string>
+    <string name="meal_contribute_desc">После подтверждения значений с этикетки они загружаются под вашей учётной записью OFF (открытые данные, ODbL). По умолчанию выключено.</string>
+    <string name="meal_contribute_user">Имя пользователя OFF</string>
+    <string name="meal_contribute_password">Пароль OFF</string>
+    <string name="meal_contribute_photos_title">Также загружать фото этикеток</string>
+    <string name="meal_contribute_photos_desc">Фото становятся частью открытой базы (CC BY-SA)</string>
+    <string name="meal_contribute_sent">Отправлено в Open Food Facts</string>
+    <string name="meal_contribute_failed">Не удалось отправить в Open Food Facts: %1$s</string>
+    <string name="meal_contribute_send">Отправить в Open Food Facts</string>
+    <string name="meal_contribute_send_again">Отправить в Open Food Facts ещё раз</string>
+    <string name="meal_contribute_sent_on">Отправлено в Open Food Facts %1$s</string>
+    <string name="meal_send_photos_intro">Добавьте или переснимите фото этикетки для отправки: лицевая сторона, таблица пищевой ценности, состав, другие стороны.</string>
+    <string name="meal_send_use_photos">Использовать фото</string>
+    <string name="meal_send_photos_status">Сохранено фото для этого продукта: %1$d</string>
+    <string name="meal_send_no_photos">Фото не сохранены; значения уйдут без фото, если вы их не добавите.</string>
+    <string name="meal_send_add_photos">Добавить фото</string>
+    <string name="meal_send_now">Отправить сейчас</string>
+    <string name="meal_ocr_next_photo">Следующее фото: %1$s</string>
+    <string name="meal_ocr_hint_front">название, марка и объём упаковки</string>
+    <string name="meal_ocr_hint_nutrition">таблица со столбцом на 100 г / 100 мл</string>
+    <string name="meal_ocr_hint_ingredients">список ингредиентов</string>
+    <string name="meal_ocr_hint_other">любая другая сторона с полезной информацией</string>
+    <string name="meal_send_fields_title">Данные, которые будут отправлены</string>
+    <string name="meal_send_sending">Отправка…</string>
+    <string name="meal_send_result_ok">Отправлено. Фото: отправлено %1$d, не удалось %2$d.</string>
+    <string name="meal_send_result_failed">Не удалось: %1$s</string>
+    <string name="meal_contribute_log_title">Журнал отправок</string>
+    <string name="meal_contribute_log_empty">Отправок пока нет.</string>
+    <string name="meal_contribute_last">Последняя отправка %1$s: %2$s</string>
+    <string name="meal_saturated_fat">Насыщенные жиры</string>
+    <string name="meal_salt">Соль</string>
+    <string name="meal_sugars">Сахара</string>
+    <string name="meal_off_category">Категория (Open Food Facts)</string>
+    <string name="meal_off_category_hint">напр. Шоколадные батончики, Сухие завтраки</string>
+    <string name="meal_send_nutriscore_missing">Для Nutri-Score в Open Food Facts не хватает: %1$s</string>
+    <string name="meal_crop_title">Обрезать фото</string>
+    <string name="meal_crop_hint">Потяните углы, чтобы оставить только этикетку — это помогает распознаванию текста и даёт Open Food Facts более чистое изображение. Позже коснитесь миниатюры, чтобы обрезать снова.</string>
+    <string name="meal_crop_apply">Обрезать</string>
+    <string name="meal_crop_skip">Оставить как есть</string>
+    <string name="meal_product_barcode">Штрихкод (необязательно)</string>
+    <string name="meal_product_barcode_hint">Со штрихкодом продукт сохранится для следующего сканирования и его можно отправить в Open Food Facts.</string>
+    <string name="alert_sensor_pressure">Давление на сенсор</string>
+    <string name="sensor_pressure_channel_description">Мягкая подсказка, когда сигнал низкой глюкозы ненадолго задержан как вероятное давление на сенсор</string>
+    <string name="sensor_pressure_cue_message">Возможное давление на сенсор — смените положение или освободите его. Сигнал низкой глюкозы ненадолго задержан и сработает, если значение не восстановится.</string>
+    <string name="sensor_pressure_hold_title">Задержка при давлении на сенсор</string>
+    <string name="sensor_pressure_hold_resolved_text">Сигнал низкой глюкозы был задержан на %1$d min и разрешился без лечения — вероятно, давление на сенсор.</string>
+    <string name="sensor_pressure_hold_escalated_text">Задержанный сигнал низкой глюкозы сработал через %1$d min — значение не восстановилось.</string>
+    <string name="sensor_pressure_hold_self_disabled_text">Задержка при давлении на сенсор отключила себя после %1$d эпизодов с эскалацией. Эвристика, которая постоянно эскалирует, у вас не работает — включите её снова в настройках оповещений, если хотите продолжить попытки.</string>
+    <string name="sensor_pressure_hold_summary_text">Последние 14 дней: задержано %1$d, признано давлением %2$d, эскалировано %3$d.</string>
+    <string name="sensor_pressure_hold_section_title">Задержка при давлении на сенсор</string>
+    <string name="experimental_badge">Экспериментально</string>
+    <string name="sensor_pressure_hold_optin_title">Обрабатывать выбранные сигналы при подозрении на давление</string>
+    <string name="sensor_pressure_hold_optin_description">Если лежать или опираться на сенсор, ткань сдавливается и может имитировать резкое падение с последующим быстрым отскоком. Выбранные сигналы прогноза и быстрого изменения ждут подтверждения движения. Низкий и Очень низкий используют полный детектор, максимальное время и жёсткий нижний порог. Невнесённая доза или спасательные углеводы всё равно могут сделать настоящую гипогликемию похожей на давление. Включайте функцию только при надёжном журнале и если принимаете этот риск.</string>
+    <string name="sensor_pressure_hold_self_disabled_notice">Отключилась сама после %1$d задержек с эскалацией. Включите снова, чтобы попробовать ещё раз с чистой статистикой.</string>
+    <string name="sensor_pressure_hold_max_hold_label">Максимальное время задержки</string>
+    <string name="sensor_pressure_hold_max_hold_description">Сигнал всегда срабатывает через столько минут, что бы ни говорил рисунок кривой.</string>
+    <string name="sensor_pressure_hold_warning_long_hold">Свыше %1$d min вы меняете реальный запас безопасности на тишину — каждая задержанная минута может быть минутой настоящей гипогликемии.</string>
+    <string name="sensor_pressure_hold_floor_label">Жёсткий нижний порог</string>
+    <string name="sensor_pressure_hold_floor_description">На этом значении или ниже сигнал срабатывает немедленно — без задержки, без оценки.</string>
+    <string name="sensor_pressure_hold_floor_very_low">Следовать порогу «Очень низко»</string>
+    <string name="sensor_pressure_hold_floor_custom">Своё значение</string>
+    <string name="sensor_pressure_hold_floor_off">Без нижнего порога</string>
+    <string name="sensor_pressure_hold_floor_off_warning">Без нижнего порога задержка может длиться всё отведённое время даже в зоне тяжёлой гипогликемии. Это убирает самую надёжную защиту.</string>
+    <string name="sensor_pressure_hold_self_disable_label">Отключаться самой после</string>
+    <string name="sensor_pressure_hold_self_disable_description">После стольких задержек с эскалацией функция отключается автоматически — эвристика, которая раз за разом ошибается, должна остановить себя сама, а не ждать присмотра.</string>
+    <string name="sensor_pressure_hold_never">Никогда</string>
+    <string name="sensor_pressure_hold_never_warning">Функция будет и дальше задерживать сигналы, как бы часто она ни ошибалась. Проверяйте записи сами.</string>
+    <string name="sensor_pressure_hold_advanced">Пороги обнаружения…</string>
+    <string name="sensor_pressure_hold_advanced_hide">Скрыть пороги обнаружения</string>
+    <string name="sensor_pressure_hold_advanced_description">Что делает падение подозрением на давление. Значения по умолчанию — осторожные обоснованные предположения; подстройте их под собственные эпизоды и судите о результате по записям задержек. Значения в mg/dL, потому что расчёт идёт в единицах сенсора.</string>
+    <string name="tuning_suspect_rate_label">Подозрительная скорость падения</string>
+    <string name="tuning_suspect_rate_description">Падение должно идти в среднем не медленнее этого, чтобы считаться нефизиологическим. Ниже = больше задержек, в том числе при настоящих быстрых гипогликемиях.</string>
+    <string name="tuning_min_depth_label">Минимальная глубина падения</string>
+    <string name="tuning_min_depth_description">Суммарное падение, прежде чем снижение можно задержать. Более мелкие провалы считаются шумом.</string>
+    <string name="tuning_flat_window_label">Окно покоя</string>
+    <string name="tuning_flat_window_description">Сколько минут перед падением проверяются на спокойную, стабильную кривую. Падения от давления обрываются из покоя; настоящие гипогликемии обычно заявляют о себе заранее.</string>
+    <string name="tuning_flat_span_label">Покрытие окна покоя</string>
+    <string name="tuning_flat_span_description">Как минимум столько минут окна покоя должны реально содержать показания — одна точка после пробела в данных не доказывает покой.</string>
+    <string name="tuning_flat_min_rate_label">Предел наклона в покое</string>
+    <string name="tuning_flat_min_rate_description">Кривая перед падением считается спокойной, пока снижается не быстрее этого. Уже снижающаяся кривая делает любой обрыв правдоподобной физиологией.</string>
+    <string name="tuning_flat_dip_label">Допуск провала в покое</string>
+    <string name="tuning_flat_dip_description">Показание настолько ниже начальной точки падения внутри окна покоя означает недавнюю нестабильность (например, только что купированную гипогликемию) — тогда без задержки.</string>
+    <string name="tuning_unexplained_factor_label">Коэффициент запаса по инсулину</string>
+    <string name="tuning_unexplained_factor_description">Падение должно быть глубже того, что мог бы вызвать активный инсулин (IOB × чувствительность), умноженного на этот коэффициент. Выше = строже, меньше задержек.</string>
+    <string name="tuning_unexplained_factor_warning">Ниже ×1,0 могут задерживаться даже падения, полностью объяснимые вашим инсулином. Это противоречит самой идее этого фильтра.</string>
+    <string name="tuning_max_gap_label">Предел пробела в данных</string>
+    <string name="tuning_max_gap_description">Дыра в записи шире этого в любом месте рисунка отменяет задержку — предполагаемая кривая не то же, что наблюдаемая.</string>
+    <string name="tuning_recovery_window_label">Окно отскока</string>
+    <string name="tuning_recovery_window_description">Для классификации задним числом в журнале эпизодов: значение должно вернуться к исходному уровню в пределах этого окна, иначе гипогликемия считается настоящей.</string>
+    <string name="tuning_recovery_band_label">Полоса отскока</string>
+    <string name="tuning_recovery_band_description">Для журнала эпизодов: восстановлением считается возврат в эти пределы от уровня до падения.</string>
+    <string name="tuning_carb_grams_label">Предел игнорируемых углеводов</string>
+    <string name="tuning_carb_grams_description">Углеводы в журнале меньше этого количества не считаются объяснением восстановления.</string>
+    <string name="hypo_episode_log_title">Эпизоды гипогликемии</string>
+    <string name="hypo_episode_log_empty">Нет эпизодов ниже диапазона за последние 30 дней.</string>
+    <string name="hypo_episode_log_explainer">Все эпизоды ниже диапазона за последние 30 дней. Отметьте эпизод как давление на сенсор, чтобы исключить его из статистики — исходные показания остаются нетронутыми, а обратное переключение возвращает цифры. Подсказки идут от детектора давления и от задержанных сигналов; ничего не исключается, пока вы не подтвердите.</string>
+    <string name="hypo_episode_log_range">%1$s–%2$s · %3$d min · надир %4$s</string>
+    <string name="hypo_episode_log_pressure_toggle">Давление</string>
+    <string name="hypo_episode_log_suggested">Похоже на давление на сенсор</string>
+    <string name="hypo_episode_log_excluded_note">Исключён из статистики</string>
+    <string name="stats_excluded_episodes_label">Эпизодов исключено как давление на сенсор: %1$d</string>
+    <string name="stats_open_hypo_log">Эпизоды гипогликемии</string>
+    <string name="tuning_carb_lookback_label">Учёт углеводов назад</string>
+    <string name="tuning_carb_lookback_description">Углеводы, внесённые не более чем за это время до падения, всё ещё считаются объяснением восстановления — поесть прямо перед тем, как падение зафиксируется, — так выглядит купированная настоящая гипогликемия.</string>
+    <string name="sensor_pressure_hold_optin_summary">Когда резкое падение или отскок похоже на давление на сенсор, выбранные сигналы ненадолго ждут. Если движение продолжается, срабатывает обычный сигнал. Функция полностью доверяет вашему журналу.</string>
+    <string name="sensor_pressure_early_warning_wait">Только когда детектор обнаруживает резкое необъяснимое падение, выбранные сигналы прогноза, быстрого изменения, Высокий и Очень высокий ждут до %1$d мин. Восстановление отменяет сигнал падения, а разворот отменяет сигнал роста. Низкий и Очень низкий используют детектор и жёсткий нижний порог ниже.</string>
+    <string name="sensor_pressure_covered_alarms_title">Обрабатываемые сигналы</string>
+    <string name="sensor_pressure_covered_alarms_description">Выберите сигналы, которые можно задерживать. По умолчанию выбраны Низкий, оба прогноза и оба сигнала быстрого изменения. Снимите отметку, чтобы сигнал работал без изменений.</string>
+    <string name="sensor_pressure_covered_alarms_none_warning">Ни один сигнал не выбран, поэтому функция не может задерживать или подтверждать сигналы.</string>
+    <string name="sensor_pressure_very_low_floor_notice">Очень низкий по-прежнему срабатывает сразу, пока жёсткий нижний порог следует его порогу. Чтобы разрешить задержку, осознанно выберите более низкий собственный порог или отключите его.</string>
+    <string name="sensor_pressure_hold_optin_more">Как это работает и в чём риск</string>
+    <string name="sensor_pressure_hold_optin_less">Скрыть</string>
+    <string name="hypo_episode_log_pressure_toggle_long">Отметить как давление на сенсор</string>
+    <string name="hypo_episode_log_counted_note">Учитывается в статистике</string>
+    <string name="hypo_episode_log_chart_caption">Затенено: эпизод. По 30 min контекста с каждой стороны. Линии: ваши пороги низкого и очень низкого.</string>
+    <string name="hypo_episode_log_no_trace">Для этого эпизода нет записанных показаний.</string>
+    <string name="sensor_pressure_hold_expand">Показать настройки</string>
+    <string name="sensor_pressure_hold_collapse">Скрыть настройки</string>
+    <string name="sensor_pressure_cue_disabled_warning">При выключенной подсказке задержка происходит беззвучно: сигналы низкой глюкозы по-прежнему задерживаются и по-прежнему срабатывают, если значение не восстанавливается, вы просто не получаете сигнала, пока идёт ожидание.</string>
+    <string name="sensor_pressure_cue_settings_title">Подсказка</string>
+    <string name="sensor_pressure_cue_settings_description">Как звучит и ощущается подсказка, пока сигнал низкой глюкозы задержан. Она воспроизводится только для этой функции, поэтому включается и выключается вместе с ней.</string>
+    <string name="libre3_activation_legacy_fallback">Не удалось проверить активацию Libre 3 с открытым исходным кодом; используется проверенный метод.</string>
+    <string name="libre3_source_experimental_warning">Экспериментальная сборка безопасности Libre 3. Сохраните стандартный APK для отката.</string>
+    <string name="journal_cob_value">COB %1$s</string>
+    <string name="glucifer_delivery_failed">Ошибка отправки в Glucifer HA; ожидается повторная попытка</string>
+    <string name="glucifer_not_acknowledged">Glucifer HA не подтвердил данные; ожидается повторная попытка</string>
+    <string name="glucifer_qr_confirm">Использовать приёмник по адресу %1$s?</string>
+    <string name="glucifer_qr_invalid">Этот QR-код не содержит адрес приёмника Home Assistant.</string>
+    <string name="glucifer_warmup">Прогрев сенсора</string>
+    <string name="glucifer_journal">Синхронизировать дневник</string>
+    <string name="glucifer_journal_help">Отправляет записи инсулина и углеводов при создании, изменении или удалении. Выключение очищает дневник в Home Assistant после следующего успешного подключения.</string>
+    <string name="glucifer_journal_days">Срок хранения дневника</string>
+    <string name="glucifer_journal_notes">Включать заметки и записи заметок</string>
+    <string name="glucifer_journal_failed">Получение дневника не подтверждено</string>
+    <string name="glucifer_days">%1$d дн.</string>
+    <string name="glucifer_history">Дозагрузка истории глюкозы (до 7 дней)</string>
+    <string name="glucifer_history_failed">Получение истории не подтверждено</string>
+    <string name="glucifer_title" translatable="false">Glucifer HA</string>
+    <string name="glucifer_description">Отправлять выбранные данные в Home Assistant</string>
+    <string name="glucifer_glucose_required">Глюкоза и время измерения отправляются всегда. Ниже выберите каждое дополнительное поле и оповещение.</string>
+    <string name="glucifer_delta">Изменение глюкозы (5 мин)</string>
+    <string name="glucifer_rate">Скорость изменения</string>
+    <string name="glucifer_raw">Исходная глюкоза</string>
+    <string name="glucifer_auto">Автоматически откалиброванная глюкоза</string>
+    <string name="glucifer_done">Готово</string>
+    <string name="glucifer_saved_help">Изменения сохраняются автоматически. Включите это назначение, отправьте тестовое сообщение и нажмите Готово.</string>
+    <string name="glucifer_live_bypass">Текущие события обходят фоновый интервал</string>
+    <string name="glucifer_hours">%1$d ч</string>
+    <string name="glucifer_min_interval">Минимальный интервал между фоновыми запросами</string>
+    <string name="glucifer_fallback_interval">Проверять пропущенные обновления через</string>
+    <string name="glucifer_fallback_help">После этого времени без успешной отправки текущих данных проверять изменения. Неизменённые данные не отправляются.</string>
+    <string name="glucifer_background_spacing_help">Ограничивает скорость отправки фоновых данных в очереди. Не запускает периодические обновления. События в реальном времени имеют приоритет.</string>
+    <string name="glucifer_all_spacing_help">Задаёт паузу между текущими обновлениями и фоновыми запросами. Ожидающие обновления отправляются после паузы.</string>
+    <string name="glucifer_all_spacing_title">Пауза между всеми запросами</string>
+    <string name="glucifer_live_bypass_help">Вкл.: новые показания, изменения дневника и тревоги отправляются быстро, не чаще раза в секунду. Выкл.: к ним также применяется пауза ниже.</string>
+    <string name="glucifer_minutes">%1$d мин</string>
+    <string name="glucifer_seconds">%1$d с</string>
+    <string name="glucifer_phone_battery">Уровень заряда телефона</string>
+    <string name="glucifer_sensor_id">Идентификатор сенсора</string>
+    <string name="glucifer_sensor_generation">Поколение сенсора</string>
+    <string name="notification_chart_pause_screen_off">Приостанавливать график при выключенном экране</string>
+    <string name="notification_chart_pause_screen_off_summary">График перерисовывается при включении экрана. Он может ненадолго исчезнуть.</string>
+    <string name="alarm_default_action">Действие по умолчанию</string>
+    <string name="alarm_default_action_desc">Определяет большую кнопку полноэкранной тревоги и действие при смахивании уведомления</string>
+    <string name="alarm_return_to_previous_app_title">Возвращаться в предыдущее приложение после сигнала</string>
+    <string name="alarm_return_to_previous_app_summary">После полноэкранного сигнала возвращаться в приложение, которым вы пользовались, вместо открытия Glucifer</string>
+    <string name="notification_dismiss_action_title">Отложить при смахивании</string>
+    <string name="notification_dismiss_action_summary">Смахнутое уведомление оповещения откладывается, а не закрывается</string>
+    <string name="acknowledged_high_coverage_title">Подтверждённые сигналы роста заменяют «Высокий»</string>
+    <string name="acknowledged_high_coverage_summary">После отклонения или отсрочки сигнала «Быстрый рост», «Прогноз высокого» или «Высокий» остальные из них молчат в течение указанного выше времени. «Очень высокий» срабатывает всегда.</string>
+    <string name="match_arrow_to_displayed_delta_title">Сопоставлять стрелки с дельтой</string>
+    <string name="match_arrow_to_displayed_delta_desc">Когда показана дельта, использовать тот же интервал для стрелок на панели и в уведомлении</string>
 </resources>

@@ -67,6 +67,7 @@ data class JournalEntry(
     val sourceRecordId: String?,
     val createdAt: Long,
     val updatedAt: Long,
+    val mealId: Long? = null,
     val insulinCurveJsonSnapshot: String? = null,
     val insulinCurveProfileId: String? = null,
     val insulinCurveModelVersion: Int? = null,
@@ -96,6 +97,7 @@ data class JournalEntryInput(
     val sourceRecordId: String? = null,
     val recoveryId: String? = null,
     val nsRemoteId: String? = null,
+    val mealId: Long? = null,
     /** Authoritative source supplied by an importer, distinct from its transport. */
     val originSource: JournalEntrySource? = null,
 )
@@ -216,7 +218,8 @@ data class JournalChartMarker(
     val durationMinutes: Int? = null,
     val curvePoints: List<JournalCurvePoint> = emptyList(),
     val activeStartMillis: Long? = null,
-    val activeEndMillis: Long? = null
+    val activeEndMillis: Long? = null,
+    val mealId: Long? = null
 )
 
 data class JournalActiveInsulinSummary(

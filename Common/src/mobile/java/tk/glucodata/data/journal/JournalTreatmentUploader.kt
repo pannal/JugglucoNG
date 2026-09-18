@@ -34,8 +34,6 @@ object JournalTreatmentUploader {
     private const val PREF_SEND_LONG_INSULIN = "nightscout_send_long_insulin"
     private const val TREATMENT_FETCH_COUNT = 240
     private const val ERROR_INVALID_URL = -2
-    private const val SEND_BACKOFF_FIRST_MILLIS = 60_000L
-    private const val SEND_BACKOFF_MAX_MILLIS = 30L * 60_000L
     private const val RECEIVE_ERROR_LOG_INTERVAL_MILLIS = 5L * 60 * 1000
 
     /**
@@ -46,6 +44,8 @@ object JournalTreatmentUploader {
     internal const val MAX_DELETE_ATTEMPTS = 20
 
     internal enum class TombstoneAction { CLEAR, RETRY, GIVE_UP }
+    private const val SEND_BACKOFF_FIRST_MILLIS = 60_000L
+    private const val SEND_BACKOFF_MAX_MILLIS = 30L * 60_000L
 
     private data class UploadResult(
         val code: Int,
@@ -54,11 +54,70 @@ object JournalTreatmentUploader {
         val message: String = ""
     )
 
+    /** True only when the server actually removed the document for us. */
+    internal fun isDeleteAccepted(code: Int): Boolean =
+        code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_NO_CONTENT
+
     /**
-     * The server's own words when it has any. A refusal says which permission is missing
-     * ("Missing permission api:treatments:update" on a role that may create but not change,
-     * "...:read" on an upload-only token), and that sentence is the whole difference between
-     * an actionable failure and a bare status code.
+     * What to do with a tombstone after a delete answered [code]. 404/410 count as done:
+     * the document we wanted gone is gone, and the old code kept retrying those forever.
+     */
+    internal fun tombstoneAction(code: Int, attemptsSoFar: Int): TombstoneAction = when (code) {
+        HttpURLConnection.HTTP_OK,
+        HttpURLConnection.HTTP_NO_CONTENT,
+        HttpURLConnection.HTTP_NOT_FOUND,
+        HttpURLConnection.HTTP_GONE -> TombstoneAction.CLEAR
+        else -> if (attemptsSoFar + 1 >= MAX_DELETE_ATTEMPTS) {
+            TombstoneAction.GIVE_UP
+        } else {
+            TombstoneAction.RETRY
+        }
+    }
+
+    /**
+     * Keeps an unchanged, repeating failure to one line per interval. The sync retries far
+     * faster than a stuck server recovers, and the identical line every few seconds is what
+     * made the trace unreadable while a Nightscout receive failure was being diagnosed.
+     */
+    internal class RepeatedErrorLog(private val intervalMillis: Long) {
+        private var lastMessage: String? = null
+        private var lastLoggedAt = 0L
+        private var suppressed = 0
+
+        /**
+         * @return how many repeats were swallowed since the last line, or -1 to stay silent.
+         *         A changed message always speaks, so a new failure is never hidden behind an
+         *         old one's interval.
+         */
+        fun suppressedSince(message: String, nowMillis: Long): Int {
+            val elapsed = nowMillis - lastLoggedAt
+            val due = message != lastMessage || lastLoggedAt == 0L ||
+                elapsed >= intervalMillis || elapsed < 0
+            if (!due) {
+                suppressed++
+                return -1
+            }
+            val repeats = if (message == lastMessage) suppressed else 0
+            lastMessage = message
+            lastLoggedAt = nowMillis
+            suppressed = 0
+            return repeats
+        }
+
+        /** A success ends the episode, so the next failure reports immediately. */
+        fun reset() {
+            lastMessage = null
+            lastLoggedAt = 0L
+            suppressed = 0
+        }
+    }
+
+    private val receiveErrorLog = RepeatedErrorLog(RECEIVE_ERROR_LOG_INTERVAL_MILLIS)
+
+    /**
+     * The server's own words when it has any. A refused read says which permission is missing
+     * ("Missing permission api:treatments:read", typical of an upload-only token), and that
+     * sentence is the whole difference between an actionable failure and a bare status code.
      */
     internal fun serverMessage(body: String): String {
         val trimmed = body.trim()
@@ -71,6 +130,10 @@ object JournalTreatmentUploader {
 
     private fun JSONObject.optNonBlank(key: String): String? =
         optString(key).trim().takeIf { it.isNotEmpty() }
+
+    /** Path only: the host is already known and repeating it just crowds the line. */
+    internal fun endpointPath(endpoint: String): String =
+        runCatching { URL(endpoint).path }.getOrNull()?.takeIf { it.isNotBlank() } ?: endpoint
 
     /** "code" alone, or "code: what the server said" when it said anything. */
     internal fun failureText(code: Int, message: String): String =
@@ -150,69 +213,6 @@ object JournalTreatmentUploader {
     }
 
     private val sendBackoff = SendBackoff(SEND_BACKOFF_FIRST_MILLIS, SEND_BACKOFF_MAX_MILLIS)
-    /** True only when the server actually removed the document for us. */
-    internal fun isDeleteAccepted(code: Int): Boolean =
-        code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_NO_CONTENT
-
-    /**
-     * What to do with a tombstone after a delete answered [code]. 404/410 count as done:
-     * the document we wanted gone is gone, and the old code kept retrying those forever.
-     */
-    internal fun tombstoneAction(code: Int, attemptsSoFar: Int): TombstoneAction = when (code) {
-        HttpURLConnection.HTTP_OK,
-        HttpURLConnection.HTTP_NO_CONTENT,
-        HttpURLConnection.HTTP_NOT_FOUND,
-        HttpURLConnection.HTTP_GONE -> TombstoneAction.CLEAR
-        else -> if (attemptsSoFar + 1 >= MAX_DELETE_ATTEMPTS) {
-            TombstoneAction.GIVE_UP
-        } else {
-            TombstoneAction.RETRY
-        }
-    }
-
-    /**
-     * Keeps an unchanged, repeating failure to one line per interval. The sync retries far
-     * faster than a stuck server recovers, and the identical line every few seconds is what
-     * made the trace unreadable while a Nightscout receive failure was being diagnosed.
-     */
-    internal class RepeatedErrorLog(private val intervalMillis: Long) {
-        private var lastMessage: String? = null
-        private var lastLoggedAt = 0L
-        private var suppressed = 0
-
-        /**
-         * @return how many repeats were swallowed since the last line, or -1 to stay silent.
-         *         A changed message always speaks, so a new failure is never hidden behind an
-         *         old one's interval.
-         */
-        fun suppressedSince(message: String, nowMillis: Long): Int {
-            val elapsed = nowMillis - lastLoggedAt
-            val due = message != lastMessage || lastLoggedAt == 0L ||
-                elapsed >= intervalMillis || elapsed < 0
-            if (!due) {
-                suppressed++
-                return -1
-            }
-            val repeats = if (message == lastMessage) suppressed else 0
-            lastMessage = message
-            lastLoggedAt = nowMillis
-            suppressed = 0
-            return repeats
-        }
-
-        /** A success ends the episode, so the next failure reports immediately. */
-        fun reset() {
-            lastMessage = null
-            lastLoggedAt = 0L
-            suppressed = 0
-        }
-    }
-
-    private val receiveErrorLog = RepeatedErrorLog(RECEIVE_ERROR_LOG_INTERVAL_MILLIS)
-
-    /** Path only: the host is already known and repeating it just crowds the line. */
-    internal fun endpointPath(endpoint: String): String =
-        runCatching { URL(endpoint).path }.getOrNull()?.takeIf { it.isNotBlank() } ?: endpoint
 
     // Mirrors writetreatment(V3) acceptance: 200/201 always; 409 only on V3 (POST conflict).
     private fun isUploadOk(code: Int, useV3: Boolean): Boolean {
@@ -276,7 +276,11 @@ object JournalTreatmentUploader {
         var uploadOk = true
         var acceptedDocument = false
         var deleteFailureCode: Int? = null
+        var deleteFailureMessage = ""
         var uploadFailureCode: Int? = null
+        var uploadFailureMessage = ""
+        // A cycle that only waited out a hold attempted nothing, so it has nothing to report.
+        var uploadHeld = false
 
         // Deletes and creates are independent, so a refused delete must not cost us the
         // pending entries: it used to break out of the whole run and, since the tombstone
@@ -302,6 +306,7 @@ object JournalTreatmentUploader {
                         )
                         dao.recordFailedNightscoutDelete(tomb.entryId, attempts, System.currentTimeMillis())
                         deleteFailureCode = code
+                        deleteFailureMessage = serverMessage(NightPost.getLastPrimaryResponseBody())
                     }
                     TombstoneAction.GIVE_UP -> {
                         Log.e(
@@ -311,6 +316,7 @@ object JournalTreatmentUploader {
                         )
                         dao.clearPendingNightscoutDelete(tomb.entryId)
                         deleteFailureCode = code
+                        deleteFailureMessage = serverMessage(NightPost.getLastPrimaryResponseBody())
                     }
                 }
             }
@@ -330,6 +336,7 @@ object JournalTreatmentUploader {
 
                 if (sendBackoff.shouldHold(entry.id, System.currentTimeMillis())) {
                     // Same entry, same refusal a moment ago: reported then, not again now.
+                    uploadHeld = true
                     uploadOk = false
                     break
                 }
@@ -373,6 +380,8 @@ object JournalTreatmentUploader {
                 val now = System.currentTimeMillis()
                 if (!isUploadOk(result.code, useV3)) {
                     Log.e(LOG_ID, "upload failed entry id=${entry.id} code=${failureText(result.code, result.message)}")
+                    uploadFailureCode = result.code
+                    uploadFailureMessage = result.message
                     sendBackoff.recordFailure(entry.id, now)
                     uploadFailureCode = result.code
                     uploadOk = false
@@ -400,8 +409,8 @@ object JournalTreatmentUploader {
             }
         }
 
-        if (sendEnabled) {
-            recordSendStatus(uploadFailureCode, deleteFailureCode, acceptedDocument)
+        if (sendEnabled && !uploadHeld) {
+            recordSendStatus(uploadFailureCode, uploadFailureMessage, deleteFailureCode, deleteFailureMessage, acceptedDocument)
         }
 
         val receiveOk = if (receiveEnabled) {
@@ -421,15 +430,17 @@ object JournalTreatmentUploader {
      */
     private fun recordSendStatus(
         uploadFailureCode: Int?,
+        uploadFailureMessage: String,
         deleteFailureCode: Int?,
+        deleteFailureMessage: String,
         acceptedDocument: Boolean
     ) {
         val now = System.currentTimeMillis()
         when {
             uploadFailureCode != null ->
-                JournalSyncStatus.recordFailure(now, uploadFailureCode, JournalSyncFailure.UPLOAD)
+                JournalSyncStatus.recordFailure(now, uploadFailureCode, JournalSyncFailure.UPLOAD, uploadFailureMessage)
             deleteFailureCode != null ->
-                JournalSyncStatus.recordFailure(now, deleteFailureCode, JournalSyncFailure.DELETE)
+                JournalSyncStatus.recordFailure(now, deleteFailureCode, JournalSyncFailure.DELETE, deleteFailureMessage)
             else -> JournalSyncStatus.recordSuccess(now, acceptedDocument)
         }
     }

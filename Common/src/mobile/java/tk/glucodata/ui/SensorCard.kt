@@ -134,6 +134,9 @@ fun InfoRow(label: String, value: String) {
     }
 }
 
+internal fun localSensorCardTitle(sensorId: String, deviceDisplayName: String): String =
+    sensorId.ifBlank { deviceDisplayName }
+
 private fun formatSibionicsSensitivity(value: Float): String =
     String.format(Locale.getDefault(), "%.2f", value)
 
@@ -1841,7 +1844,8 @@ fun SensorCard(
                 Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                     val pausedText = stringResource(R.string.disabled_status)
 
-                    val displayName = sensor.displayName.ifBlank { sensor.serial }
+                    val displayName = if (sensor.isCloneSource) sensor.displayName.ifBlank { sensor.serial }
+                        else localSensorCardTitle(sensor.serial, sensor.displayName)
                     val badge = remember(sensor.vendor, sensor.sensorType, sensor.vendorModel) {
                         sensorBadge(sensor.vendor, sensor.sensorType, sensor.vendorModel)
                     }

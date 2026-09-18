@@ -36,36 +36,6 @@ class JournalTreatmentTransferTests {
     }
 
     /**
-     * What an update may carry. v3 answers a document that still names its own time with
-     * 400 "Field date cannot be modified by the client" and stops at the first such field,
-     * so they are removed together; what is left is what an update is for.
-     */
-    @Test
-    fun anUpdateCarriesNoFieldTheServerOwns() {
-        val json = org.json.JSONObject()
-            .put("date", 1_700_000_000_000L)
-            .put("created_at", "2023-11-14T22:13:20.000Z")
-            .put("utcOffset", 0)
-            .put("_id", "jng-j-1a7-18bd0a4b800")
-            .put("identifier", "jng-j-1a7-18bd0a4b800")
-            .put("eventType", "Correction Bolus")
-            .put("insulin", 4.0)
-            .put("notes", "kept")
-
-        JournalTreatmentTransfer.stripImmutableForUpdate(json)
-
-        assertFalse(json.has("date"))
-        assertFalse(json.has("created_at"))
-        assertFalse(json.has("utcOffset"))
-        assertFalse(json.has("_id"))
-        // The endpoint names the document; the body only says what changes.
-        assertFalse(json.has("identifier"))
-        assertEquals("Correction Bolus", json.optString("eventType"))
-        assertEquals(4.0, json.optDouble("insulin"), 0.001)
-        assertEquals("kept", json.optString("notes"))
-    }
-
-    /**
      * Shape taken from a live v3 /api/v3/treatments response. v3 answers with `identifier`
      * and the server-side srvCreated/srvModified; there is no `_id` at all, so nothing in the
      * import may depend on one being present.
@@ -124,6 +94,36 @@ class JournalTreatmentTransferTests {
         )
 
         assertEquals("jng-j-101", parsed!!.inputs.single().nsRemoteId)
+    }
+
+    /**
+     * What an update may carry. v3 answers a document that still names its own time with
+     * 400 "Field date cannot be modified by the client" and stops at the first such field,
+     * so they are removed together; what is left is what an update is for.
+     */
+    @Test
+    fun anUpdateCarriesNoFieldTheServerOwns() {
+        val json = org.json.JSONObject()
+            .put("date", 1_700_000_000_000L)
+            .put("created_at", "2023-11-14T22:13:20.000Z")
+            .put("utcOffset", 0)
+            .put("_id", "jng-j-1a7-18bd0a4b800")
+            .put("identifier", "jng-j-1a7-18bd0a4b800")
+            .put("eventType", "Correction Bolus")
+            .put("insulin", 4.0)
+            .put("notes", "kept")
+
+        JournalTreatmentTransfer.stripImmutableForUpdate(json)
+
+        assertFalse(json.has("date"))
+        assertFalse(json.has("created_at"))
+        assertFalse(json.has("utcOffset"))
+        assertFalse(json.has("_id"))
+        // The endpoint names the document; the body only says what changes.
+        assertFalse(json.has("identifier"))
+        assertEquals("Correction Bolus", json.optString("eventType"))
+        assertEquals(4.0, json.optDouble("insulin"), 0.001)
+        assertEquals("kept", json.optString("notes"))
     }
 
     @Test

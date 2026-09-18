@@ -296,7 +296,11 @@ object InsulinPenManager {
                         presetName!!,
                         read.mergeable,
                     )
-                    PenImportNotifier.imported(context, serial, outcome.total)
+                    if (outcome.inserted == 0 && outcome.merged > 0) {
+                        PenImportNotifier.mergedManual(context, serial, outcome.merged)
+                    } else {
+                        PenImportNotifier.imported(context, serial, outcome.total)
+                    }
                 }
 
                 is PenUnattendedImportPolicy.Plan.Review -> {

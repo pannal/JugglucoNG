@@ -91,6 +91,8 @@ import androidx.compose.material3.DateRangePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -103,7 +105,7 @@ import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -194,10 +196,12 @@ private data class TirRowDescriptor(
 @Composable
 fun StatsScreen(
     modifier: Modifier = Modifier,
-    viewModel: StatsViewModel = rememberStatsViewModel()
+    viewModel: StatsViewModel = rememberStatsViewModel(),
+    onOpenHypoEpisodes: (() -> Unit)? = null
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val isSwitchingRange by viewModel.isSwitchingRange.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isSwitchingRange by viewModel.isSwitchingRange.collectAsStateWithLifecycle()
+    val excludedEpisodes by viewModel.excludedEpisodesInRange.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val reportPrefs = remember(context) {
@@ -235,8 +239,8 @@ fun StatsScreen(
     val selectedReportStyle = StatsReportExporter.PdfVisualStyle.fromPref(reportStylePref)
     val view = LocalView.current
     LaunchedEffect(context) { StatsLayoutStore.ensureLoaded(context) }
-    val layout by StatsLayoutStore.state.collectAsState()
-    val editingLayout by StatsArrangeMode.editing.collectAsState()
+    val layout by StatsLayoutStore.state.collectAsStateWithLifecycle()
+    val editingLayout by StatsArrangeMode.editing.collectAsStateWithLifecycle()
     // Every ordinary way out of a mode, not just the button: system back, and simply
     // leaving the screen.
     BackHandler(enabled = editingLayout) { StatsArrangeMode.close() }
@@ -438,7 +442,9 @@ fun StatsScreen(
                             selectedTirBand = selectedTirBand,
                             onBandSelected = { selectedTirBand = it },
                             selectedDayDate = selectedDayDate,
-                            onDaySelected = { selectedDayDate = it.date }
+                            onDaySelected = { selectedDayDate = it.date },
+                            excludedEpisodes = excludedEpisodes,
+                            onOpenHypoEpisodes = onOpenHypoEpisodes
                         )
                     }
                 }
@@ -721,7 +727,9 @@ private fun StatsCardContent(
     selectedTirBand: TirBand?,
     onBandSelected: (TirBand?) -> Unit,
     selectedDayDate: java.time.LocalDate?,
-    onDaySelected: (DayBreakdown) -> Unit
+    onDaySelected: (DayBreakdown) -> Unit,
+    excludedEpisodes: Int = 0,
+    onOpenHypoEpisodes: (() -> Unit)? = null
 ) {
     when (card) {
         StatsCard.OVERVIEW -> GlycemicOverviewCard(
@@ -742,12 +750,34 @@ private fun StatsCardContent(
             unit = uiState.unit
         )
 
-        StatsCard.EPISODES -> EpisodesCard(
-            lows = uiState.summary.lowEpisodes,
-            highs = uiState.summary.highEpisodes,
-            episodes = uiState.summary.episodes,
-            unit = uiState.unit
-        )
+        StatsCard.EPISODES -> Column {
+            EpisodesCard(
+                lows = uiState.summary.lowEpisodes,
+                highs = uiState.summary.highEpisodes,
+                episodes = uiState.summary.episodes,
+                unit = uiState.unit
+            )
+            // The honest label: cleaned numbers must say they are cleaned, and the row
+            // is the door to the log where the cleaning is done and undone.
+            if (onOpenHypoEpisodes != null) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = onOpenHypoEpisodes,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (excludedEpisodes > 0) {
+                            stringResource(R.string.stats_excluded_episodes_label, excludedEpisodes)
+                        } else {
+                            stringResource(R.string.stats_open_hypo_log)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
+                }
+            }
+        }
 
         StatsCard.PATTERNS -> PatternsCard(
             agpByHour = uiState.summary.agpByHour,

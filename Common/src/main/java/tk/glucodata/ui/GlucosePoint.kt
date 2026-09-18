@@ -1,7 +1,7 @@
 package tk.glucodata.ui
 
-import tk.glucodata.GlucoseReadingSource
 import tk.glucodata.GlucoseUncertainty
+import tk.glucodata.GlucoseReadingSource
 
 /**
  * One point on the glucose timeline.
@@ -25,9 +25,9 @@ data class GlucosePoint(
     val rawValue: Float = 0f,
     val rate: Float? = null,
     val sensorSerial: String? = null,
-    val source: String = GlucoseReadingSource.SENSOR,
     val uncertainty: GlucoseUncertainty? = null,
     val sealedDisplayValue: Float? = null,
+    val source: String = GlucoseReadingSource.SENSOR,
     /**
      * The view mode in force when [sealedDisplayValue] was recorded — which
      * lane the number belongs to (0/2 auto, 1/3 raw). A record is a fact about

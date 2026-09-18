@@ -51,6 +51,15 @@ internal object CloneJournalRecoveryRecords {
         .put("createdAt", record.entry.createdAt)
         .put("updatedAt", record.entry.updatedAt)
         .put("nsRemoteId", record.entry.nsRemoteId ?: JSONObject.NULL)
+        .put(
+            "insulinCurveJsonSnapshot",
+            record.entry.insulinCurveJsonSnapshot ?: JSONObject.NULL,
+        )
+        .put("insulinCurveProfileId", record.entry.insulinCurveProfileId ?: JSONObject.NULL)
+        .put("insulinCurveModelVersion", record.entry.insulinCurveModelVersion ?: JSONObject.NULL)
+        .put("insulinCurveEvidence", record.entry.insulinCurveEvidence ?: JSONObject.NULL)
+        .put("insulinBodyWeightKg", record.entry.insulinBodyWeightKg?.toDouble() ?: JSONObject.NULL)
+        .put("insulinCurveWasApproximated", record.entry.insulinCurveWasApproximated)
         .put("insulinPreset", record.insulinPreset?.let(::encodePreset) ?: JSONObject.NULL)
         .put("food", record.food?.let(::encodeFood) ?: JSONObject.NULL)
 
@@ -94,6 +103,12 @@ internal object CloneJournalRecoveryRecords {
             "createdAt",
             "updatedAt",
             "nsRemoteId",
+            "insulinCurveJsonSnapshot",
+            "insulinCurveProfileId",
+            "insulinCurveModelVersion",
+            "insulinCurveEvidence",
+            "insulinBodyWeightKg",
+            "insulinCurveWasApproximated",
             "insulinPreset",
             "food",
         )
@@ -130,6 +145,14 @@ internal object CloneJournalRecoveryRecords {
         }
         val createdAt = payload.requirePositiveLong("createdAt")
         val updatedAt = payload.requirePositiveLong("updatedAt")
+        val insulinCurveModelVersion = payload.optionalInt("insulinCurveModelVersion")
+        require(insulinCurveModelVersion == null || insulinCurveModelVersion >= 0) {
+            "Invalid Clone recovery insulin curve model version"
+        }
+        val insulinBodyWeightKg = payload.optionalFiniteFloat("insulinBodyWeightKg")
+        require(insulinBodyWeightKg == null || insulinBodyWeightKg in 1f..1_000f) {
+            "Invalid Clone recovery insulin body weight"
+        }
         val entry = JournalEntryEntity(
             timestamp = payload.requirePositiveLong("timestamp"),
             sensorSerial = payload.optionalString("sensorSerial", MAX_SENSOR_SERIAL_LENGTH),
@@ -152,6 +175,23 @@ internal object CloneJournalRecoveryRecords {
             updatedAt = updatedAt,
             nsUploadedAt = null,
             nsRemoteId = payload.optionalString("nsRemoteId", MAX_REMOTE_ID_LENGTH),
+            insulinCurveJsonSnapshot = payload.optionalStringAllowEmpty(
+                "insulinCurveJsonSnapshot",
+                MAX_CURVE_LENGTH,
+            ),
+            insulinCurveProfileId = payload.optionalString(
+                "insulinCurveProfileId",
+                MAX_PROFILE_ID_LENGTH,
+            ),
+            insulinCurveModelVersion = insulinCurveModelVersion,
+            insulinCurveEvidence = payload.optionalString(
+                "insulinCurveEvidence",
+                MAX_ENUM_LENGTH,
+            ),
+            insulinBodyWeightKg = insulinBodyWeightKg,
+            insulinCurveWasApproximated = payload.requireBoolean(
+                "insulinCurveWasApproximated"
+            ),
         )
         return CloneJournalEntryRecord(
             recoveryId = recoveryId,
@@ -194,6 +234,9 @@ internal object CloneJournalRecoveryRecords {
         .put("countsTowardIob", preset.countsTowardIob)
         .put("sortOrder", preset.sortOrder)
         .put("useForCalculation", preset.useForCalculation)
+        .put("curveProfileId", preset.curveProfileId ?: JSONObject.NULL)
+        .put("curveModelVersion", preset.curveModelVersion)
+        .put("curveEvidence", preset.curveEvidence)
 
     private fun decodePreset(payload: JSONObject): JournalInsulinPresetEntity {
         payload.requireExactKeys(
@@ -207,6 +250,9 @@ internal object CloneJournalRecoveryRecords {
             "countsTowardIob",
             "sortOrder",
             "useForCalculation",
+            "curveProfileId",
+            "curveModelVersion",
+            "curveEvidence",
         )
         val onset = payload.requireInt("onsetMinutes")
         val duration = payload.requireInt("durationMinutes")
@@ -227,6 +273,11 @@ internal object CloneJournalRecoveryRecords {
             countsTowardIob = payload.requireBoolean("countsTowardIob"),
             sortOrder = payload.requireInt("sortOrder"),
             useForCalculation = payload.requireBoolean("useForCalculation"),
+            curveProfileId = payload.optionalString("curveProfileId", MAX_PROFILE_ID_LENGTH),
+            curveModelVersion = payload.requireInt("curveModelVersion").also { version ->
+                require(version >= 0) { "Invalid Clone recovery insulin curve model version" }
+            },
+            curveEvidence = payload.requireString("curveEvidence", MAX_ENUM_LENGTH),
         )
     }
 
@@ -383,6 +434,7 @@ internal object CloneJournalRecoveryRecords {
     private const val MAX_TITLE_LENGTH = 4_096
     private const val MAX_NOTE_LENGTH = 65_536
     private const val MAX_REMOTE_ID_LENGTH = 512
+    private const val MAX_PROFILE_ID_LENGTH = 512
     private const val MAX_DEPENDENCY_NAME_LENGTH = 512
     private const val MAX_DEPENDENCY_DURATION_MINUTES = 14 * 24 * 60
     private const val MAX_CURVE_LENGTH = 131_072

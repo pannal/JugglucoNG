@@ -27,6 +27,8 @@ data class JournalSyncState(
     val failingSince: Long = 0L,
     val failureCode: Int = 0,
     val failure: JournalSyncFailure = JournalSyncFailure.NONE,
+    /** The server's own reason, when it gave one ("Missing permission api:treatments:update"). */
+    val failureMessage: String = "",
     val lastAttemptAt: Long = 0L
 ) {
     val isFailing: Boolean get() = failure != JournalSyncFailure.NONE
@@ -43,6 +45,7 @@ internal fun applySyncSuccess(
     failingSince = 0L,
     failureCode = 0,
     failure = JournalSyncFailure.NONE,
+    failureMessage = "",
     lastAttemptAt = now
 )
 
@@ -50,15 +53,20 @@ internal fun applySyncFailure(
     state: JournalSyncState,
     now: Long,
     code: Int,
-    failure: JournalSyncFailure
+    failure: JournalSyncFailure,
+    message: String = ""
 ): JournalSyncState = state.copy(
     // Keep the first failure of the run: "failing since" is the number that shows
     // a sync path has been dead for days rather than for one cycle.
     failingSince = if (state.isFailing && state.failingSince > 0L) state.failingSince else now,
     failureCode = code,
     failure = failure,
+    failureMessage = message.take(MAX_FAILURE_MESSAGE_LENGTH),
     lastAttemptAt = now
 )
+
+/** Long enough for a permission sentence, short enough for a status line. */
+internal const val MAX_FAILURE_MESSAGE_LENGTH = 120
 
 /**
  * Last known health of the Nightscout *treatment* path, which is the JVM-side uploader and
@@ -73,6 +81,7 @@ object JournalSyncStatus {
     private const val KEY_FAILING_SINCE = "journal_sync_failing_since"
     private const val KEY_FAILURE_CODE = "journal_sync_failure_code"
     private const val KEY_FAILURE_KIND = "journal_sync_failure_kind"
+    private const val KEY_FAILURE_MESSAGE = "journal_sync_failure_message"
     private const val KEY_LAST_ATTEMPT = "journal_sync_last_attempt"
 
     @Volatile
@@ -89,6 +98,7 @@ object JournalSyncStatus {
             failingSince = getLong(KEY_FAILING_SINCE, 0L),
             failureCode = getInt(KEY_FAILURE_CODE, 0),
             failure = JournalSyncFailure.fromStorage(getInt(KEY_FAILURE_KIND, 0)),
+            failureMessage = getString(KEY_FAILURE_MESSAGE, "").orEmpty(),
             lastAttemptAt = getLong(KEY_LAST_ATTEMPT, 0L)
         )
     }
@@ -97,8 +107,8 @@ object JournalSyncStatus {
         store(applySyncSuccess(state(), now, acceptedDocument))
     }
 
-    fun recordFailure(now: Long, code: Int, failure: JournalSyncFailure) {
-        store(applySyncFailure(state(), now, code, failure))
+    fun recordFailure(now: Long, code: Int, failure: JournalSyncFailure, message: String = "") {
+        store(applySyncFailure(state(), now, code, failure, message))
     }
 
     private fun store(next: JournalSyncState) {
@@ -108,6 +118,7 @@ object JournalSyncStatus {
             .putLong(KEY_FAILING_SINCE, next.failingSince)
             .putInt(KEY_FAILURE_CODE, next.failureCode)
             .putInt(KEY_FAILURE_KIND, next.failure.storageValue)
+            .putString(KEY_FAILURE_MESSAGE, next.failureMessage)
             .putLong(KEY_LAST_ATTEMPT, next.lastAttemptAt)
             .apply()
     }

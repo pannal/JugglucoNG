@@ -395,10 +395,11 @@ class NightscoutFollowerManager(
                 ),
             )
             UiRefreshBus.requestDataRefresh()
+            refreshErrorLog.reset()
+            consecutiveFailures = 0
             scheduleRefresh(pollIntervalMillis())
         } catch (t: Throwable) {
-            // The poll retries every 30s, far faster than a stuck server recovers, so an
-            // unchanged failure used to write a stack trace every half minute.
+            // An unchanged failure used to write a stack trace on every retry.
             val message = "refresh($reason): ${t.message}"
             val repeats = refreshErrorLog.suppressedSince(message, System.currentTimeMillis())
             if (repeats == 0) {

@@ -1215,11 +1215,6 @@ public class SensorBluetooth {
                 && gatt.charcha[0] > gatt.constatchange[1];
     }
 
-    /** Wall-clock time of the last connection failure recorded for the sensor. */
-    public static long connectionStatusChangedAt(SuperGattCallback gatt) {
-        return gatt == null ? 0L : gatt.constatchange[1];
-    }
-
     /** Keep mirrored sensor records visible without claiming their physical transmitter. */
     public static void blockLocalCloneConnection(String sensorId) {
         if (sensorId == null || sensorId.isEmpty()) return;
@@ -1250,6 +1245,11 @@ public class SensorBluetooth {
             final String replacement = resolveReplacementSensorSerial(sensorId);
             setCurrentSensorSelection(replacement != null ? replacement : "");
         }
+    }
+
+    /** Wall-clock time of the last connection failure recorded for the sensor. */
+    public static long connectionStatusChangedAt(SuperGattCallback gatt) {
+        return gatt == null ? 0L : gatt.constatchange[1];
     }
 
     // --- KOTLIN SENSORS (AiDex) SUPPORT ---

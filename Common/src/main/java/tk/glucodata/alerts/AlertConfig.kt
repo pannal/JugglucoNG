@@ -19,7 +19,8 @@ enum class AlertType(val id: Int, val nameResId: Int) {
     PERSISTENT_HIGH(10, R.string.alert_persistent_high),
     SENSOR_EXPIRY(11, R.string.alert_sensor_expiry),
     FALLING_FAST(12, R.string.alert_falling_fast),
-    RISING_FAST(13, R.string.alert_rising_fast);
+    RISING_FAST(13, R.string.alert_rising_fast),
+    SENSOR_PRESSURE(14, R.string.alert_sensor_pressure);
 
     companion object {
         fun fromId(id: Int): AlertType? = entries.find { it.id == id }
@@ -42,6 +43,10 @@ enum class AlertType(val id: Int, val nameResId: Int) {
             SENSOR_EXPIRY,
             FALLING_FAST,
             RISING_FAST
+            // SENSOR_PRESSURE is deliberately absent: it is not an alarm anyone arms on
+            // its own, it is the cue of the sensor-pressure hold and nothing else can
+            // fire it. Its settings live inside that feature's card, so it never appears
+            // as a lone enabled alarm in the list, on the watch, or in SMS destinations.
         )
     }
 }
@@ -102,6 +107,17 @@ enum class AlertNotificationDismissAction(val displayName: String) {
     SNOOZE("Snooze")
 }
 
+/** Which action occupies the large primary button on the full-screen alarm. */
+enum class AlertDefaultAction {
+    DISMISS,
+    SNOOZE;
+
+    companion object {
+        fun fromStored(value: String?): AlertDefaultAction =
+            entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: DISMISS
+    }
+}
+
 /**
  * Configuration for a single alert type.
  */
@@ -157,6 +173,9 @@ data class AlertConfig(
     val soundDelayEnabled: Boolean = false,
     val soundDelaySeconds: Int = 0,
     
+    // Full-screen action settings. Dismiss preserves the existing button hierarchy.
+    val defaultAction: AlertDefaultAction = AlertDefaultAction.DISMISS,
+
     // Snooze settings
     val defaultSnoozeMinutes: Int = 15,
     
@@ -449,6 +468,21 @@ object AlertDefaults {
                 deliveryMode = AlertDeliveryMode.SYSTEM_ALARM,
                 hapticProfile = HapticProfile.SOFT,
                 defaultSnoozeMinutes = 30
+            )
+            // The cue of the sensor-pressure hold: two different actions deserve two
+            // different signals — "low" means glucose, this means take the pressure
+            // off the sensor, at a desk as much as in bed. Gentle on purpose (a
+            // position change, not a full wake-up), but through DND, because the hold
+            // also runs while its owner sleeps. Off until the hold is switched on,
+            // which arms it. Switching it back off is allowed and means a silent hold:
+            // the delay, the floor and the escalation stay, only the signal goes.
+            AlertType.SENSOR_PRESSURE -> AlertConfig(
+                type = type,
+                enabled = false,
+                deliveryMode = AlertDeliveryMode.NOTIFICATION_ONLY,
+                hapticProfile = HapticProfile.SOFT,
+                overrideDND = true,
+                defaultSnoozeMinutes = 5
             )
             else -> AlertConfig(type = type)
         }

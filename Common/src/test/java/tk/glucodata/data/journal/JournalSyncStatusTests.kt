@@ -75,6 +75,32 @@ class JournalSyncStatusTests {
         assertEquals(JournalSyncFailure.NONE, JournalSyncFailure.fromStorage(99))
     }
 
+    @Test
+    fun theServersReasonTravelsWithTheFailureAndLeavesWithIt() {
+        val refused = applySyncFailure(
+            JournalSyncState(),
+            now = firstFailure,
+            code = 403,
+            failure = JournalSyncFailure.UPLOAD,
+            message = "Missing permission api:treatments:update"
+        )
+        assertEquals("Missing permission api:treatments:update", refused.failureMessage)
+
+        val healed = applySyncSuccess(refused, now = laterFailure, acceptedDocument = true)
+        assertEquals("", healed.failureMessage)
+    }
+
+    @Test
+    fun aLongServerMessageIsCutToStatusLineLength() {
+        val refused = applySyncFailure(
+            JournalSyncState(),
+            now = firstFailure,
+            code = 500,
+            failure = JournalSyncFailure.UPLOAD,
+            message = "x".repeat(1000)
+        )
+        assertEquals(MAX_FAILURE_MESSAGE_LENGTH, refused.failureMessage.length)
+    }
     /**
      * "Failing since 17:22" reads as something being tried and refused over and over. It was
      * also what the app said after a single refusal that nothing had followed for hours,

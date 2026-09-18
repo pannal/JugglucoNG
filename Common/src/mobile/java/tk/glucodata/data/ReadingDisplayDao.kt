@@ -102,6 +102,12 @@ interface ReadingDisplayDao {
         """
         SELECT * FROM reading_display display
         WHERE display.timestamp > :afterTimestamp
+          AND EXISTS (
+              SELECT 1 FROM history_readings reading
+              WHERE reading.sensorSerial = display.sensorSerial
+                AND reading.timestamp >= display.timestamp
+                AND reading.timestamp < display.timestamp + 60000
+          )
         ORDER BY display.timestamp ASC
         LIMIT :limit
         """

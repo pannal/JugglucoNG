@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,6 +77,7 @@ import tk.glucodata.SensorIdentity
 import tk.glucodata.data.journal.JournalEntry
 import tk.glucodata.data.journal.JournalEntryType
 import tk.glucodata.ui.journal.JournalDoseProfile
+import tk.glucodata.ui.journal.rememberJournalEntryAction
 import tk.glucodata.ui.journal.JournalEntrySheet
 import tk.glucodata.ui.journal.JournalFoodLibraryScreen
 import tk.glucodata.ui.journal.JournalInsulinLibraryScreen
@@ -102,7 +104,9 @@ internal data class JournalEditorRequest(
     val existingEntry: JournalEntry? = null,
     val suggestedGlucoseMgDl: Float? = null,
     val suggestedChartAnchorGlucoseMgDl: Float? = null,
-    val suggestedAmountFraction: Float? = null
+    val suggestedAmountFraction: Float? = null,
+    /** A new entry started from a meal's "eaten" step, with the amounts already filled in. */
+    val prefill: tk.glucodata.data.journal.JournalEntryInput? = null
 )
 
 @Composable
@@ -112,6 +116,8 @@ private fun DashboardRoute(
     onTriggerCalibration: (CalibrationSheetState) -> Unit
 ) {
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
+    val newMealAction = tk.glucodata.ui.meal.rememberNewMealAction(navController)
+    val currentMeal = tk.glucodata.ui.meal.rememberCurrentMeal()
 
     DashboardScreen(
         viewModel = dashboardViewModel,
@@ -121,6 +127,10 @@ private fun DashboardRoute(
         onNavigateToMqAccount = { navController.navigate("settings/mq-account") },
         onNavigateToReadiness = { navController.navigate("settings/cgm-readiness") },
         onNavigateToAppUpdates = { navController.navigate("settings/app-updates") },
+        onNewMeal = newMealAction,
+        onOpenMeal = { id -> navController.navigate("journal/meals/$id") { launchSingleTop = true } },
+        currentMealLabel = currentMeal?.label,
+        onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
         onNavigateToQuietWindow = { navController.navigate("settings/alerts") },
         onNavigateToPredictionModelProfile = {
             navController.navigate("settings/predictive-simulation/model-profile")
@@ -131,6 +141,7 @@ private fun DashboardRoute(
 
 @Composable
 private fun HistoryRoute(
+    navController: androidx.navigation.NavController,
     dashboardViewModel: DashboardViewModel,
     title: String,
     browseMode: TimelineBrowseMode,
@@ -183,6 +194,13 @@ private fun HistoryRoute(
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
     var journalEditorRequest by remember { mutableStateOf<JournalEditorRequest?>(null) }
     var lastJournalType by rememberSaveable { mutableStateOf(JournalEntryType.INSULIN) }
+    val openMeal: (Long) -> Unit = { id ->
+        navController.navigate("journal/meals/$id") { launchSingleTop = true }
+    }
+    val openJournalEntry = rememberJournalEntryAction(openMeal) { entry ->
+        lastJournalType = entry.type
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
 
     // Journal entries are time-bound user events (insulin, food, fingersticks);
     // they must stay visible across sensor swaps. The History route deliberately
@@ -232,10 +250,7 @@ private fun HistoryRoute(
         onDeleteReading = { point ->
             dashboardViewModel.deleteHistoryReading(point, sensorName)
         },
-        onJournalEntryClick = { entry ->
-            lastJournalType = entry.type
-            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
-        },
+        onJournalEntryClick = openJournalEntry,
         onAddJournalEntry = { timestamp, suggestedType, suggestedDisplayGlucose ->
             val type = suggestedType ?: lastJournalType
             val suggestedGlucoseMgDl = suggestedDisplayGlucose?.let {
@@ -277,6 +292,7 @@ private fun HistoryRoute(
             ),
             initialType = request.type,
             existingEntry = request.existingEntry,
+            onOpenMeal = openMeal,
             onDismiss = { journalEditorRequest = null },
             onSave = { input ->
                 dashboardViewModel.saveJournalEntry(input)
@@ -351,6 +367,16 @@ private fun JournalRoute(
     val calibrations by tk.glucodata.data.calibration.CalibrationManager.calibrations.collectAsStateWithLifecycle()
     var journalEditorRequest by remember { mutableStateOf<JournalEditorRequest?>(null) }
     var lastJournalType by rememberSaveable { mutableStateOf(JournalEntryType.INSULIN) }
+    val openMeal: (Long) -> Unit = { id ->
+        navController.navigate("journal/meals/$id") { launchSingleTop = true }
+    }
+    val openJournalEntry = rememberJournalEntryAction(openMeal) { entry ->
+        lastJournalType = entry.type
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
+
+    val newMealAction = tk.glucodata.ui.meal.rememberNewMealAction(navController)
+    val currentMeal = tk.glucodata.ui.meal.rememberCurrentMeal()
 
     fun openJournalEditor(
         timestamp: Long,
@@ -403,15 +429,16 @@ private fun JournalRoute(
                 )
             )
         },
-        onJournalEntryClick = { entry ->
-            lastJournalType = entry.type
-            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
-        },
+        onJournalEntryClick = openJournalEntry,
         onAddJournalEntry = { timestamp, suggestedType, suggestedDisplayGlucose, suggestedAmountFraction ->
             openJournalEditor(timestamp, suggestedType, suggestedDisplayGlucose, suggestedAmountFraction)
         },
         onOpenFoodLibrary = { navController.navigate("settings/journal/foods") },
         onOpenInsulinLibrary = { navController.navigate("settings/journal/insulin") },
+        onOpenMeals = { navController.navigate("journal/meals") },
+        onNewMeal = newMealAction,
+        currentMealLabel = currentMeal?.label,
+        onOpenCurrentMeal = currentMeal?.let { meal -> { navController.navigate("journal/meals/${meal.id}") } },
         modifier = modifier,
         showTitle = showTitle,
         useStatusBarsPadding = useStatusBarsPadding,
@@ -425,45 +452,81 @@ private fun JournalRoute(
     )
 
     journalEditorRequest?.let { request ->
-        JournalEntrySheet(
-            unit = unit,
-            selectedTimestamp = request.timestamp,
-            suggestedGlucoseMgDl = request.suggestedGlucoseMgDl,
-            suggestedChartAnchorGlucoseMgDl = request.suggestedChartAnchorGlucoseMgDl,
-            suggestedAmountFraction = request.suggestedAmountFraction,
-            insulinPresets = journalInsulinPresets,
-            foods = journalFoods,
-            foodMacrosEnabled = journalFoodMacrosEnabled,
-            doseJournalEntries = journalEntries,
-            doseProfile = JournalDoseProfile(
-                enabled = journalEnabled && journalDoseCalculatorEnabled,
-                carbRatioGramsPerUnit = predictionCarbRatioGramsPerUnit,
-                insulinSensitivityMgDlPerUnit = predictionInsulinSensitivityMgDlPerUnit,
-                foodMacrosEnabled = journalFoodMacrosEnabled,
-                modelProfile = predictionModelProfile,
-                targetMgDl = predictionDoseTargetMgDl
-            ),
-            initialType = request.type,
-            existingEntry = request.existingEntry,
+        JournalEditorSheetHost(
+            dashboardViewModel = dashboardViewModel,
+            request = request,
+            onOpenMeal = openMeal,
             onDismiss = { journalEditorRequest = null },
-            onSave = { input ->
-                dashboardViewModel.saveJournalEntry(input)
-                lastJournalType = input.type
-                journalEditorRequest = null
-            },
-            onSaveEntries = { inputs ->
-                inputs.forEach(dashboardViewModel::saveJournalEntry)
-                inputs.firstOrNull()?.let { lastJournalType = it.type }
-                journalEditorRequest = null
-            },
-            onSaveFood = dashboardViewModel::saveJournalFood,
-            onDelete = { entryId ->
-                dashboardViewModel.deleteJournalEntry(entryId)
-                journalEditorRequest = null
-            },
-            sensorSerialProvider = { sensorName.ifBlank { null } }
+            onSaved = { type -> lastJournalType = type }
         )
     }
+}
+
+/**
+ * The journal entry editor wired to the dashboard view model: the journal tab and the meal screen
+ * both open it, so the dose calculator, food library and save/delete paths stay one implementation.
+ */
+@Composable
+internal fun JournalEditorSheetHost(
+    dashboardViewModel: DashboardViewModel,
+    request: JournalEditorRequest,
+    onOpenMeal: (Long) -> Unit,
+    onDismiss: () -> Unit,
+    onSaved: (JournalEntryType) -> Unit = {}
+) {
+    val unit by dashboardViewModel.unit.collectAsStateWithLifecycle()
+    val sensorName by dashboardViewModel.sensorName.collectAsStateWithLifecycle()
+    val journalEnabled by dashboardViewModel.journalEnabled.collectAsStateWithLifecycle()
+    val journalDoseCalculatorEnabled by dashboardViewModel.journalDoseCalculatorEnabled.collectAsStateWithLifecycle()
+    val journalFoodMacrosEnabled by dashboardViewModel.journalFoodMacrosEnabled.collectAsStateWithLifecycle()
+    val journalEntries by dashboardViewModel.journalEntries.collectAsStateWithLifecycle()
+    val journalInsulinPresets by dashboardViewModel.journalInsulinPresets.collectAsStateWithLifecycle()
+    val journalFoods by dashboardViewModel.journalFoods.collectAsStateWithLifecycle()
+    val predictionCarbRatioGramsPerUnit by dashboardViewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
+    val predictionInsulinSensitivityMgDlPerUnit by dashboardViewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
+    val predictionModelProfile by dashboardViewModel.predictionModelProfile.collectAsStateWithLifecycle()
+    val predictionDoseTargetMgDl by dashboardViewModel.predictionDoseTargetMgDl.collectAsStateWithLifecycle()
+
+    JournalEntrySheet(
+        unit = unit,
+        selectedTimestamp = request.timestamp,
+        suggestedGlucoseMgDl = request.suggestedGlucoseMgDl,
+        suggestedChartAnchorGlucoseMgDl = request.suggestedChartAnchorGlucoseMgDl,
+        suggestedAmountFraction = request.suggestedAmountFraction,
+        insulinPresets = journalInsulinPresets,
+        foods = journalFoods,
+        foodMacrosEnabled = journalFoodMacrosEnabled,
+        doseJournalEntries = journalEntries,
+        doseProfile = JournalDoseProfile(
+            enabled = journalEnabled && journalDoseCalculatorEnabled,
+            carbRatioGramsPerUnit = predictionCarbRatioGramsPerUnit,
+            insulinSensitivityMgDlPerUnit = predictionInsulinSensitivityMgDlPerUnit,
+            foodMacrosEnabled = journalFoodMacrosEnabled,
+            modelProfile = predictionModelProfile,
+            targetMgDl = predictionDoseTargetMgDl
+        ),
+        initialType = request.type,
+        existingEntry = request.existingEntry,
+        prefill = request.prefill,
+        onOpenMeal = onOpenMeal,
+        onDismiss = onDismiss,
+        onSave = { input ->
+            dashboardViewModel.saveJournalEntry(input)
+            onSaved(input.type)
+            onDismiss()
+        },
+        onSaveEntries = { inputs ->
+            inputs.forEach(dashboardViewModel::saveJournalEntry)
+            inputs.firstOrNull()?.let { onSaved(it.type) }
+            onDismiss()
+        },
+        onSaveFood = dashboardViewModel::saveJournalFood,
+        onDelete = { entryId ->
+            dashboardViewModel.deleteJournalEntry(entryId)
+            onDismiss()
+        },
+        sensorSerialProvider = { sensorName.ifBlank { null } }
+    )
 }
 
 @Composable
@@ -737,16 +800,15 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
         }
     }
 
-    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+    LifecycleStartEffect(currentRoute, dashboardViewModel) {
         dashboardViewModel.setCollectionMode(collectionModeForRoute(currentRoute))
+        onStopOrDispose {
+            dashboardViewModel.setCollectionMode(DashboardViewModel.CollectionMode.INACTIVE)
+        }
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         dashboardViewModel.onResume()
-    }
-
-    LaunchedEffect(currentRoute) {
-        dashboardViewModel.setCollectionMode(collectionModeForRoute(currentRoute))
     }
 
     // A screen asked for from outside Compose — a notification's tap — is parked in
@@ -791,7 +853,7 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
         route.startsWith("settings/") -> "settings"
         route.startsWith("sensors/") -> "sensors"
         route == "history" -> "dashboard"
-        route == "journal" -> "journal"
+        route == "journal" || route.startsWith("journal/") -> "journal"
         route == "calibrations" || route.startsWith("calibrations/") -> "dashboard"
         else -> null
     }
@@ -878,6 +940,7 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                     }
                     composable("history") {
                         HistoryRoute(
+                            navController = navController,
                             dashboardViewModel = dashboardViewModel,
                             title = stringResource(R.string.historyname),
                             browseMode = TimelineBrowseMode.HISTORY,
@@ -892,7 +955,21 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                             onTriggerCalibration = onTriggerCalibration,
                         )
                     }
-                    composable("stats") { tk.glucodata.ui.stats.StatsScreen() }
+                    composable("journal/meals") { tk.glucodata.ui.meal.MealsScreen(navController) }
+                    composable("journal/meals/{mealId}") { entry ->
+                        val mealId = entry.arguments?.getString("mealId")?.toLongOrNull()
+                        if (mealId != null) {
+                            tk.glucodata.ui.meal.MealScreen(mealId, navController, dashboardViewModel)
+                        }
+                    }
+                    composable("stats") {
+                        tk.glucodata.ui.stats.StatsScreen(
+                            onOpenHypoEpisodes = { navController.navigate("stats/hypo-episodes") }
+                        )
+                    }
+                    composable("stats/hypo-episodes") {
+                        tk.glucodata.ui.stats.HypoEpisodeLogScreen(navController)
+                    }
                     composable("sensors") {
                         SensorScreen(
                             onNavigateToMqAccount = { navController.navigate("settings/mq-account") },
@@ -1033,6 +1110,7 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                 }
                 composable("history") {
                     HistoryRoute(
+                        navController = navController,
                         dashboardViewModel = dashboardViewModel,
                         title = stringResource(R.string.historyname),
                         browseMode = TimelineBrowseMode.HISTORY,
@@ -1047,7 +1125,21 @@ fun MainApp(themeMode: ThemeMode, onThemeChanged: (ThemeMode) -> Unit) {
                         onTriggerCalibration = onTriggerCalibration,
                     )
                 }
-                composable("stats") { tk.glucodata.ui.stats.StatsScreen() }
+                composable("journal/meals") { tk.glucodata.ui.meal.MealsScreen(navController) }
+                composable("journal/meals/{mealId}") { entry ->
+                    val mealId = entry.arguments?.getString("mealId")?.toLongOrNull()
+                    if (mealId != null) {
+                        tk.glucodata.ui.meal.MealScreen(mealId, navController, dashboardViewModel)
+                    }
+                }
+                composable("stats") {
+                    tk.glucodata.ui.stats.StatsScreen(
+                        onOpenHypoEpisodes = { navController.navigate("stats/hypo-episodes") }
+                    )
+                }
+                composable("stats/hypo-episodes") {
+                    tk.glucodata.ui.stats.HypoEpisodeLogScreen(navController)
+                }
                 composable("sensors") {
                     SensorScreen(
                         onNavigateToMqAccount = { navController.navigate("settings/mq-account") },

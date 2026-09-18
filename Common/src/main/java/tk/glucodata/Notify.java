@@ -53,6 +53,8 @@ import android.app.KeyguardManager;
 import android.app.AlarmManager;
 import android.view.View;
 import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap; // Added Import
@@ -86,7 +88,8 @@ import tk.glucodata.alerts.AlertDisplayText;
 import tk.glucodata.alerts.AlertType;
 import tk.glucodata.alerts.SnoozeManager;
 import tk.glucodata.alerts.AlertConfig;
-import tk.glucodata.alerts.AlertNotificationDismissAction;
+import tk.glucodata.alerts.AlertDefaultAction;
+import tk.glucodata.alerts.AlertDefaults;
 import tk.glucodata.alerts.AlertRepository;
 import tk.glucodata.alerts.AlertStateTracker;
 import tk.glucodata.alerts.QuietWindow;
@@ -586,6 +589,12 @@ public class Notify {
         notificationManager = (NotificationManager) Applic.app.getSystemService(NOTIFICATION_SERVICE);
         createNotificationChannel(Applic.app);
         mkpaint();
+        if (!isWearable) {
+            // Notify is a process singleton; use the application context for its receiver.
+            androidx.core.content.ContextCompat.registerReceiver(Applic.app, screenOnReceiver,
+                    new IntentFilter(Intent.ACTION_SCREEN_ON), null, glucoseRefreshHandler,
+                    androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED);
+        }
     }
 
     private static final String NUMALARM = "MedicationReminder";
@@ -595,6 +604,7 @@ public class Notify {
     public static final String CHANNEL_LOSS = "LOSS";
     public static final String CHANNEL_MISSED_READING = "MISSED_READING";
     public static final String CHANNEL_SENSOR_EXPIRY = "SENSOR_EXPIRY";
+    public static final String CHANNEL_SENSOR_PRESSURE = "SENSOR_PRESSURE";
     // private static final String LOSSALARM = "LossofSensorAlarm";
     private static String GLUCOSENOTIFICATION = "glucoseNotification";
 
@@ -612,6 +622,8 @@ public class Notify {
                 return CHANNEL_HIGH;
             case 11:
                 return CHANNEL_SENSOR_EXPIRY;
+            case 14:
+                return CHANNEL_SENSOR_PRESSURE;
             default:
                 return GLUCOSEALARM;
         }
@@ -709,6 +721,17 @@ public class Notify {
             channelSensorExpiry.setShowBadge(false);
             channelSensorExpiry.setLockscreenVisibility(VISIBILITY_PUBLIC);
             notificationManager.createNotificationChannel(channelSensorExpiry);
+
+            NotificationChannel channelSensorPressure = new NotificationChannel(
+                    CHANNEL_SENSOR_PRESSURE,
+                    context.getString(R.string.alert_sensor_pressure),
+                    NotificationManager.IMPORTANCE_HIGH);
+            channelSensorPressure
+                    .setDescription(context.getString(R.string.sensor_pressure_channel_description));
+            channelSensorPressure.setSound(null, null);
+            channelSensorPressure.setShowBadge(false);
+            channelSensorPressure.setLockscreenVisibility(VISIBILITY_PUBLIC);
+            notificationManager.createNotificationChannel(channelSensorPressure);
         }
 
     }
@@ -905,8 +928,10 @@ public class Notify {
                 if (hasvalue) {
                     if (keeprunning.started)
                         novalue();
-                    else
+                    else {
                         notificationManager.cancel(glucosenotificationid);
+                        notificationChartsDeferred = false;
+                    }
                 }
             }
         } else {
@@ -1080,6 +1105,47 @@ public class Notify {
             return true;
         }
     }
+
+    private boolean isScreenOffChartPauseEnabled() {
+        return Applic.app.getSharedPreferences("tk.glucodata_preferences", Context.MODE_PRIVATE)
+                .getBoolean("notification_chart_pause_screen_off", false);
+    }
+
+    private volatile boolean notificationChartsDeferred;
+
+    private boolean canRenderNotificationCharts(boolean chartsEnabled) {
+        if (isWearable || !isScreenOffChartPauseEnabled()) {
+            notificationChartsDeferred = false;
+            return chartsEnabled;
+        }
+        final boolean interactive = isScreenInteractive();
+        notificationChartsDeferred = chartsEnabled && !interactive;
+        return chartsEnabled && interactive;
+    }
+
+    private final BroadcastReceiver screenOnReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!Intent.ACTION_SCREEN_ON.equals(intent.getAction()) || !notificationChartsDeferred
+                    || !isScreenInteractive() || !shouldKeepForegroundGlucoseNotification()) {
+                return;
+            }
+            try {
+                // Rebuild from the latest stored readings even if no new sensor reading arrives.
+                // This only replaces the service notification; it never re-evaluates alerts.
+                final CurrentDisplaySource.Snapshot current = resolveNotificationCurrentSnapshot();
+                if (current == null || current.getPrimaryValue() < 2.0f) {
+                    fornotify(getforgroundnotification());
+                } else {
+                    postForegroundGlucoseNotification(FOREGROUND_GLUCOSE_NOTIFICATION_KIND,
+                            current.getPrimaryValue(), format(usedlocale, glucoseformat, current.getPrimaryValue()),
+                            toLegacyGlucose(current));
+                }
+            } catch (Throwable th) {
+                Log.stack(LOG_ID, "screenOnReceiver", th);
+            }
+        }
+    };
 
     private final Runnable glucoseRefreshRunnable = new Runnable() {
         @Override
@@ -2266,9 +2332,20 @@ public class Notify {
 
         int defDuration = DEFAULT_ALERT_DURATION_SECONDS;
 
-        boolean defSound = (kind <= 8) ? Natives.alarmhassound(kind) : true;
-        boolean defFlash = (kind <= 8) ? Natives.alarmhasflash(kind) : true;
-        boolean defVibrate = (kind <= 8) ? Natives.alarmhasvibration(kind) : true;
+        // Types above the native range take their defaults from AlertDefaults, the same
+        // source the settings screen renders — an unstored flash toggle must sound and
+        // look the same in the test as on the card (SENSOR_PRESSURE showed flash off
+        // and flashed anyway).
+        final AlertType prefType = kind > 8 ? AlertType.Companion.fromId(kind) : null;
+        final AlertConfig prefDefault = prefType != null
+                ? AlertDefaults.INSTANCE.defaultConfig(prefType, Applic.unit == 1)
+                : null;
+        boolean defSound = (kind <= 8) ? Natives.alarmhassound(kind)
+                : (prefDefault == null || prefDefault.getSoundEnabled());
+        boolean defFlash = (kind <= 8) ? Natives.alarmhasflash(kind)
+                : (prefDefault != null && prefDefault.getFlashEnabled());
+        boolean defVibrate = (kind <= 8) ? Natives.alarmhasvibration(kind)
+                : (prefDefault == null || prefDefault.getVibrationEnabled());
 
         final int rawDuration = p.getInt("alert_" + kind + "_alarmDur", defDuration);
         final int duration = sanitizeAlarmDurationSeconds(rawDuration);
@@ -2873,6 +2950,7 @@ public class Notify {
     private void canceller() {
         glucoseRefreshHandler.removeCallbacks(glucoseRefreshRunnable);
         notificationManager.cancel(glucosenotificationid);
+        notificationChartsDeferred = false;
         notificationManager.cancel(numalarmid);
     }
 
@@ -3003,11 +3081,12 @@ public class Notify {
                 }
                 var GluNotBuilder = mkbuilderintent(type, intent, false);
                 // Wearables and companion apps often map "dismiss" to the notification's
-                // delete intent. The explicit notification buttons keep their fixed
-                // behavior; this preference only controls generic swipe/close events.
+                // delete intent. Use the same per-alarm default as the full-screen primary
+                // button; the explicit notification buttons keep their fixed behavior.
                 Intent swipeDismissIntent = new Intent(Applic.app, tk.glucodata.receivers.AlarmActionReceiver.class);
-                AlertNotificationDismissAction deleteAction = AlertRepository.INSTANCE.loadNotificationDismissAction();
-                swipeDismissIntent.setAction(deleteAction == AlertNotificationDismissAction.SNOOZE
+                AlertDefaultAction deleteAction = AlertRepository.INSTANCE.resolveDefaultAction(alertTypeId,
+                        customAlertId);
+                swipeDismissIntent.setAction(deleteAction == AlertDefaultAction.SNOOZE
                         ? tk.glucodata.receivers.AlarmActionReceiver.ACTION_SNOOZE
                         : tk.glucodata.receivers.AlarmActionReceiver.ACTION_DISMISS);
                 swipeDismissIntent.putExtra("alert_type_id", alertTypeId);
@@ -3445,8 +3524,6 @@ public class Notify {
         java.util.List<GlucosePoint> nativePoints = DisplayTrendSource.resolveTrendPoints(chartPoints, resolvedDisplay,
                 activeSensorSerial);
 
-        chartPoints = DisplayTrendSource.augmentHistory(chartPoints, resolvedDisplay, activeSensorSerial, startT);
-
         BatteryTrace.bump(
                 "notify.glucose.render",
                 20L,
@@ -3477,7 +3554,6 @@ public class Notify {
 
         // If ViewMode == 3 (Combined), we force appending Raw if available
         boolean isRawMode = (viewMode == 1 || viewMode == 3);
-        boolean hasCalibration = NightscoutCalibration.hasCalibrationForViewMode(activeSensorSerial, viewMode);
 
         final CurrentDisplaySource.Snapshot fallbackDisplay = resolvedDisplay != null
                 ? resolvedDisplay
@@ -3527,14 +3603,20 @@ public class Notify {
         boolean showIob = prefs.getBoolean("notification_show_iob", false);
         boolean showCob = prefs.getBoolean("notification_show_cob", false);
         boolean showDelta = prefs.getBoolean("notification_show_delta", false);
+        boolean matchArrowToDisplayedDelta = prefs.getBoolean(
+                GlucoseDelta.MATCH_ARROW_TO_DISPLAYED_DELTA_KEY,
+                GlucoseDelta.DEFAULT_MATCH_ARROW_TO_DISPLAYED_DELTA);
         int deltaIntervalMinutes = prefs.getInt("delta_interval_minutes", GlucoseDelta.DEFAULT_INTERVAL_MINUTES);
         boolean iobCobRiskColored = prefs.getBoolean("notification_iob_cob_risk_colored", false);
         boolean arrowForecastColored = prefs.getBoolean("glucose_arrow_forecast_colors_enabled", false);
         boolean showChart = prefs.getBoolean("notification_chart_enabled", true);
+        boolean showChartCollapsed = prefs.getBoolean("notification_chart_collapsed", false);
+        final boolean renderCharts = canRenderNotificationCharts(showChart || showChartCollapsed);
+        showChart &= renderCharts;
+        showChartCollapsed &= renderCharts;
         final boolean shadeNight = (Applic.app.getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-        boolean showChartCollapsed = prefs.getBoolean("notification_chart_collapsed", false);
         boolean showTargetRange = prefs.getBoolean("notification_chart_target_range", true);
 
         // Optional GDH-style traffic coloring of the value (and arrow): green
@@ -3551,6 +3633,34 @@ public class Notify {
         // glucose bitmap; the standalone arrow view would otherwise sit after
         // the peer values and look like it belongs to the last peer.
         boolean inlineMultiArrows = showArrow && !peerValueItems.isEmpty();
+
+        // Keep the delta as an independent readout unless the user chooses to match the
+        // arrow to it. Without a usable delta, keep the steadier regression rate.
+        String deltaText = "";
+        if (showDelta && nativePoints.size() >= 2) {
+            final GlucosePoint newest = nativePoints.get(nativePoints.size() - 1);
+            final float newestValue = (isRawMode && newest.rawValue > 0f) ? newest.rawValue : newest.value;
+            GlucosePoint previous = null;
+            for (int i = nativePoints.size() - 2; i >= 0; i--) {
+                final GlucosePoint p = nativePoints.get(i);
+                final float value = (isRawMode && p.rawValue > 0f) ? p.rawValue : p.value;
+                if (value > 0.1f && newest.timestamp - p.timestamp >= GlucoseDelta.minGapMillis(deltaIntervalMinutes)) {
+                    previous = p;
+                    break;
+                }
+            }
+            final float previousValue = previous == null ? Float.NaN
+                    : (isRawMode && previous.rawValue > 0f) ? previous.rawValue : previous.value;
+            final float displayedDelta = previous == null ? Float.NaN : GlucoseDelta.delta(
+                    newest.timestamp, newestValue, previous.timestamp, previousValue, deltaIntervalMinutes);
+            deltaText = GlucoseDelta.format(displayedDelta, isMmol);
+            if (matchArrowToDisplayedDelta && !deltaText.isEmpty())
+                rate = GlucoseDelta.rateMgdlPerMinute(displayedDelta, isMmol, deltaIntervalMinutes);
+            if (doLog)
+                Log.i(LOG_ID, "notification delta=" + deltaText
+                        + " points=" + nativePoints.size()
+                        + " gap=" + (previous == null ? -1L : (newest.timestamp - previous.timestamp)));
+        }
 
         // Arrow color: optionally driven by the 30-minute linear forecast
         // (value color says where you are, arrow color where you're heading).
@@ -3636,38 +3746,11 @@ public class Notify {
                         ? iobLine
                         : new android.text.SpannableStringBuilder(iobLine).append(" · ").append(sensorStatusText);
         }
-        // The "Δ" readout: measured change over the last ~5 minutes — a raw
-        // number to sanity-check the estimated arrow against. Leftmost, right
-        // next to the arrow. Walks back to the first point old enough for the
-        // window; the tail can hold near-duplicates (persisted vs live
-        // timestamp of the same reading), so never take blind indices.
-        if (showDelta && nativePoints.size() >= 2) {
-            final GlucosePoint newest = nativePoints.get(nativePoints.size() - 1);
-            final float newestValue = (isRawMode && newest.rawValue > 0f) ? newest.rawValue : newest.value;
-            GlucosePoint previous = null;
-            for (int i = nativePoints.size() - 2; i >= 0; i--) {
-                final GlucosePoint p = nativePoints.get(i);
-                final float value = (isRawMode && p.rawValue > 0f) ? p.rawValue : p.value;
-                if (value > 0.1f && newest.timestamp - p.timestamp >= GlucoseDelta.minGapMillis(deltaIntervalMinutes)) {
-                    previous = p;
-                    break;
-                }
-            }
-            final float previousValue = previous == null ? Float.NaN
-                    : (isRawMode && previous.rawValue > 0f) ? previous.rawValue : previous.value;
-            final String deltaText = previous == null ? "" : GlucoseDelta.format(
-                    GlucoseDelta.delta(newest.timestamp, newestValue, previous.timestamp, previousValue, deltaIntervalMinutes),
-                    isMmol);
-            if (doLog)
-                Log.i(LOG_ID, "notification delta=" + deltaText
-                        + " points=" + nativePoints.size()
-                        + " gap=" + (previous == null ? -1L : (newest.timestamp - previous.timestamp)));
-            if (!deltaText.isEmpty()) {
-                newStatusText = (newStatusText == null || newStatusText.length() == 0)
-                        ? "Δ " + deltaText
-                        : new android.text.SpannableStringBuilder("Δ ").append(deltaText)
-                                .append(" · ").append(newStatusText);
-            }
+        if (!deltaText.isEmpty()) {
+            newStatusText = (newStatusText == null || newStatusText.length() == 0)
+                    ? "Δ " + deltaText
+                    : new android.text.SpannableStringBuilder("Δ ").append(deltaText)
+                            .append(" · ").append(newStatusText);
         }
 
         // Apply Style to Status Text too
@@ -3765,6 +3848,13 @@ public class Notify {
                 (showChartCollapsed || showChart)
                         ? NotificationMultiSensorSource.peerSeries(peerCurrents, startT, isMmol)
                         : java.util.Collections.emptyList();
+        final NotificationPredictionBatch predictionBatch = (showChartCollapsed || showChart)
+                ? new NotificationPredictionBatch() : null;
+        final boolean hasCalibration = (showChartCollapsed || showChart)
+                && NightscoutCalibration.hasCalibrationForViewMode(activeSensorSerial, viewMode);
+        if (showChartCollapsed || showChart) {
+            chartPoints = DisplayTrendSource.augmentHistory(chartPoints, resolvedDisplay, activeSensorSerial, startT);
+        }
         // The resolved chart: values and main/secondary look decided once, by
         // the same builder the dashboard uses, from the same record. The
         // painter paints what it is handed.
@@ -3784,14 +3874,14 @@ public class Notify {
             // Use safeContext and explicit height
             chartBitmapCollapsed = NotificationChartDrawer.drawChartWithPrediction(safeContext, chartPoints, 0, collapsedHeight,
                     isMmol,
-                    viewMode, showTargetRange, hasCalibration, true, activeSensorSerial, peerChartSeries, chartModel);
+                    viewMode, showTargetRange, hasCalibration, true, activeSensorSerial, peerChartSeries, chartModel, predictionBatch);
         }
 
         if (showChart) {
             // Expanded chart: Use safely resolved density context (default 0 ->
             // 256*density)
             chartBitmapExpanded = NotificationChartDrawer.drawChartWithPrediction(safeContext, chartPoints, 0, 0, isMmol,
-                    viewMode, showTargetRange, hasCalibration, false, activeSensorSerial, peerChartSeries, chartModel);
+                    viewMode, showTargetRange, hasCalibration, false, activeSensorSerial, peerChartSeries, chartModel, predictionBatch);
         }
 
         if (showChartCollapsed && chartBitmapCollapsed != null) {
@@ -3877,8 +3967,6 @@ public class Notify {
         java.util.List<GlucosePoint> nativePoints = DisplayTrendSource.resolveTrendPoints(chartPoints, current,
                 activeSensorSerial);
 
-        chartPoints = DisplayTrendSource.augmentHistory(chartPoints, current, activeSensorSerial, startT);
-
         // Identify ViewMode for Startup
         int viewMode = 0;
         if (activeSensorSerial != null && SensorBluetooth.blueone != null) {
@@ -3927,7 +4015,7 @@ public class Notify {
         // Check if chart is enabled
         android.content.SharedPreferences prefs = Applic.app
                 .getSharedPreferences("tk.glucodata_preferences", Context.MODE_PRIVATE);
-        boolean showChart = prefs.getBoolean("notification_chart_enabled", true);
+        boolean showChart = canRenderNotificationCharts(prefs.getBoolean("notification_chart_enabled", true));
         float fontSize = prefs.getFloat("notification_font_size", 1.0f);
         int fontWeight = prefs.getInt("notification_font_weight", 400);
         int fontFamily = prefs.getInt("notification_font_family", 0); // 0=App, 1=System
@@ -3936,6 +4024,8 @@ public class Notify {
         Bitmap chartBitmapExpanded = null;
 
         if (showChart) {
+            chartPoints = DisplayTrendSource.augmentHistory(chartPoints, current, activeSensorSerial, startT);
+            final NotificationPredictionBatch predictionBatch = new NotificationPredictionBatch();
             // Create Safe Context for Startup Notification too
             Context safeContext = Applic.app;
             try {
@@ -3964,12 +4054,12 @@ public class Notify {
             chartBitmapCollapsed = NotificationChartDrawer.drawChartWithPrediction(safeContext, chartPoints, 0, collapsedHeight,
                     isMmol,
                     viewMode, true, false, true, activeSensorSerial,
-                    java.util.Collections.<NotificationChartDrawer.PeerSeries>emptyList(), startupModel);
+                    java.util.Collections.<NotificationChartDrawer.PeerSeries>emptyList(), startupModel, predictionBatch);
 
             // Expanded: Compact Mode = FALSE, Height 256dp (via 0)
             chartBitmapExpanded = NotificationChartDrawer.drawChartWithPrediction(safeContext, chartPoints, 0, 0, isMmol,
                     viewMode, true, false, false, activeSensorSerial,
-                    java.util.Collections.<NotificationChartDrawer.PeerSeries>emptyList(), startupModel);
+                    java.util.Collections.<NotificationChartDrawer.PeerSeries>emptyList(), startupModel, predictionBatch);
         }
 
         Bitmap arrowBitmap;

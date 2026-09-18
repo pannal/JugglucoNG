@@ -32,6 +32,7 @@ class CloneJournalRecoveryRecordsTests {
                 id = 0L,
                 insulinPresetId = null,
                 nsUploadedAt = null,
+                lvUploadedAt = null,
             ),
             decoded.entry,
         )
@@ -235,6 +236,13 @@ class CloneJournalRecoveryRecordsTests {
         updatedAt = 1_000_200L,
         nsUploadedAt = 1_000_300L,
         nsRemoteId = "test-nightscout-record",
+        lvUploadedAt = 1_000_400L,
+        insulinCurveJsonSnapshot = "0:0;30:1;300:0",
+        insulinCurveProfileId = "test-curve-profile",
+        insulinCurveModelVersion = 2,
+        insulinCurveEvidence = "verified",
+        insulinBodyWeightKg = 75f,
+        insulinCurveWasApproximated = false,
     )
 
     private fun preset() = JournalInsulinPresetEntity(
@@ -249,6 +257,9 @@ class CloneJournalRecoveryRecordsTests {
         countsTowardIob = true,
         sortOrder = 20,
         useForCalculation = true,
+        curveProfileId = "test-curve-profile",
+        curveModelVersion = 2,
+        curveEvidence = "verified",
     )
 
     private fun food() = JournalFoodEntity(

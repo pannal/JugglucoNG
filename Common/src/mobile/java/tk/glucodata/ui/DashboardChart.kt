@@ -65,15 +65,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.FirstPage
 import androidx.compose.material.icons.automirrored.filled.LastPage
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -150,6 +145,7 @@ import kotlinx.coroutines.launch
 import tk.glucodata.GlucoseRangeColors
 import tk.glucodata.SensorIdentity
 import tk.glucodata.R
+import tk.glucodata.ui.journal.journalActionIcon
 import tk.glucodata.DataSmoothing
 import tk.glucodata.data.journal.JournalActiveInsulinSummary
 import tk.glucodata.data.journal.JournalChartMarker
@@ -247,16 +243,12 @@ private fun buildDashboardChartModel(
     // timeline, and answering each from scratch is what made a rebuild cost
     // seconds once the store outgrew the per-value cache. Same numbers as
     // getCalibratedValue — see SeriesCalibrator.
-    val calibrators = HashMap<Pair<Boolean, String>, tk.glucodata.data.calibration.SeriesCalibrator?>()
-    val calibration = tk.glucodata.chart.HistoryChartModelBuilder.Calibration { base, timestamp, isRaw, sensorId ->
-        val calibrator = calibrators.getOrPut(isRaw to sensorId) {
-            if (tk.glucodata.data.calibration.CalibrationManager.hasActiveCalibration(isRaw, sensorId)) {
-                tk.glucodata.data.calibration.CalibrationManager.seriesCalibrator(isRaw, sensorId)
-            } else {
-                null
-            }
-        } ?: return@Calibration null
-        calibrator.calibrate(base, timestamp)
+    val calibration = cachedChartCalibration { isRaw, sensorId ->
+        if (tk.glucodata.data.calibration.CalibrationManager.hasActiveCalibration(isRaw, sensorId)) {
+            tk.glucodata.data.calibration.CalibrationManager.seriesCalibrator(isRaw, sensorId)
+        } else {
+            null
+        }
     }
     return tk.glucodata.chart.HistoryChartModelBuilder.build(
         inputs, ownership, calibration,
@@ -700,6 +692,7 @@ fun DashboardChartSection(
     peerPredictionSeries: Map<String, List<GlucosePredictionSeries>> = emptyMap(),
     journalMarkers: List<JournalChartMarker> = emptyList(),
     activeInsulinSummary: JournalActiveInsulinSummary? = null,
+    activeCarbsGrams: Float? = null,
     stateDoseHint: StateDoseHint? = null,
     activeInsulinFromRemote: Boolean = false,
     showEiob: Boolean = true,
@@ -753,6 +746,7 @@ fun DashboardChartSection(
                         peerPredictionSeries = peerPredictionSeries,
                         journalMarkers = journalMarkers,
                         activeInsulinSummary = activeInsulinSummary,
+                        activeCarbsGrams = activeCarbsGrams,
                         stateDoseHint = stateDoseHint,
                         activeInsulinFromRemote = activeInsulinFromRemote,
                         showEiob = showEiob,
@@ -828,6 +822,7 @@ fun InteractiveGlucoseChart(
     peerPredictionSeries: Map<String, List<GlucosePredictionSeries>> = emptyMap(),
     journalMarkers: List<JournalChartMarker> = emptyList(),
     activeInsulinSummary: JournalActiveInsulinSummary? = null,
+    activeCarbsGrams: Float? = null,
     stateDoseHint: StateDoseHint? = null,
     activeInsulinFromRemote: Boolean = false,
     showEiob: Boolean = true,
@@ -3664,7 +3659,7 @@ fun InteractiveGlucoseChart(
                     }
                 }
 
-            if (activeInsulinSummary != null || stateDoseHint != null) {
+            if (activeInsulinSummary != null || activeCarbsGrams != null || stateDoseHint != null) {
                 val summary = activeInsulinSummary
                 val unitsLabel = { units: Float ->
                     if (units % 1f < 0.05f) {
@@ -3808,6 +3803,16 @@ fun InteractiveGlucoseChart(
                                     }
                                 }
                             }
+                        }
+                        activeCarbsGrams?.let { grams ->
+                            Text(
+                                text = stringResource(
+                                    R.string.journal_cob_value,
+                                    stringResource(R.string.unit_carbs_value, unitsLabel(grams))
+                                ),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                         // The hint, or — collapsed and with nothing to suggest — how long the
                         // insulin still runs. Not both on one collapsed line: the hint already
@@ -4752,13 +4757,7 @@ private fun JournalMarkerChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = when (marker.type) {
-                    JournalEntryType.INSULIN -> Icons.Default.Vaccines
-                    JournalEntryType.CARBS -> Icons.Default.Restaurant
-                    JournalEntryType.FINGERSTICK -> Icons.Default.Bloodtype
-                    JournalEntryType.ACTIVITY -> Icons.Default.DirectionsRun
-                    JournalEntryType.NOTE -> Icons.AutoMirrored.Filled.Label
-                },
+                imageVector = marker.type.journalActionIcon(marker.mealId),
                 contentDescription = null,
                 tint = tint,
                 modifier = Modifier.size(14.dp)

@@ -4,6 +4,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import tk.glucodata.alerts.AlertConfig
+import tk.glucodata.alerts.AlertDefaultAction
 import tk.glucodata.alerts.AlertDeliveryMode
 import tk.glucodata.alerts.AlertType
 
@@ -58,6 +59,20 @@ class GlobalAlertSettingsCardTests {
         // sameMasterDraft(); otherwise the Apply button stays inert.
         val applied = soundOnlyDraft().copy(vibrationEnabled = true)
         val changedDraft = applied.copy(soundDelayEnabled = true, soundDelaySeconds = 30)
+
+        assertTrue(
+            shouldEnableApplyToAll(
+                draftConfig = changedDraft,
+                appliedDraft = applied,
+                allConfigs = mapOf(AlertType.LOW to changedDraft)
+            )
+        )
+    }
+
+    @Test
+    fun applyIsEnabledWhenOnlyDefaultActionChanged() {
+        val applied = soundOnlyDraft()
+        val changedDraft = applied.copy(defaultAction = AlertDefaultAction.SNOOZE)
 
         assertTrue(
             shouldEnableApplyToAll(

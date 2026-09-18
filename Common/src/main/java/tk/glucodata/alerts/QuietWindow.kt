@@ -41,7 +41,7 @@ import tk.glucodata.R
  *  - a silenced alarm that stays active, unacknowledged, for the breakthrough
  *    time sounds anyway — every kind, or the very high only, and a hypo always;
  *    the check rides on AlarmManager and the silenced episode's start is kept in
- *    prefs, so neither Doze nor a process kill stretches a hypo's silence;
+ *    prefs, so a restarted process can re-evaluate the alarm without restarting its silence cap;
  *  - it is visible: an ongoing notification with the end time and an "end now"
  *    action, a chip on the dashboard, and a quick-settings tile.
  */
@@ -242,6 +242,11 @@ object QuietWindow {
             val until = untilMs(now)
             if (until > 0L) {
                 scheduleExpiry(context, until)
+                for (type in AlertType.entries) {
+                    if (restoreForScheduledCheck(type.id, now)) {
+                        scheduleBreakthroughCheck(type.id, silencedEpisodes.remainingDelay(type.id, now, breakthroughMillis()))
+                    }
+                }
                 showActiveNotification(context, until, mode())
                 requestTileRefresh(context)
             }
@@ -348,18 +353,35 @@ object QuietWindow {
         }
     }
 
+    private fun restoreForScheduledCheck(kind: Int, nowMs: Long): Boolean {
+        if (!AlertDeliveryPolicy.quietWindowBreakthroughAppliesTo(kind, breakthroughScope())) return false
+        val store = prefsOrNull() ?: return false
+        return silencedEpisodes.restoreForScheduledCheck(
+            kind,
+            store.getLong(KEY_SILENCED_SINCE_PREFIX + kind, 0L),
+            store.getLong(KEY_SILENCED_LAST_PREFIX + kind, 0L),
+            nowMs,
+            MAX_DURATION_MS
+        )
+    }
+
     /** The armed check came round: deliver the alarm audibly if it is still active and unanswered. */
     @JvmStatic
     fun breakThroughIfStillActive(kind: Int) {
         val now = System.currentTimeMillis()
         if (untilMs(now) == 0L) return
+        restoreForScheduledCheck(kind, now)
         if (!silencedEpisodes.has(kind)) return
         // The scope may have been narrowed since the check was armed.
         if (!AlertDeliveryPolicy.quietWindowBreakthroughAppliesTo(kind, breakthroughScope())) return
         val type = AlertType.fromId(kind) ?: return
         if (!AlertStateTracker.isEpisodeActive(type)) {
-            // Cleared without resetState reaching us: the staleness rule retires the
-            // record on its own.
+            // The broadcast may be the first component after process death. A
+            // persisted silencing timestamp is not proof that the condition is
+            // still active. Rebuild the runtime from current data; any delivery
+            // then uses the restored cap through noteSilencedDelivery. Do not
+            // also call mksound here, which would duplicate that delivery.
+            AlertRuntimeManager.ensureMonitoring()
             return
         }
         if (SnoozeManager.isSnoozed(type) || AlertStateTracker.isDismissed(type)) {
@@ -563,6 +585,23 @@ internal class SilencedEpisodeTracker(private val staleMs: Long) {
         episodes[kind] = Episode(sinceMs, lastMs)
         return true
     }
+
+    /**
+     * Restore a scheduled check even at the 30-minute cap or after a delayed
+     * broadcast. Its condition must be re-evaluated before delivery. Explicit
+     * resolution/acknowledgement removes these persisted timestamps.
+     */
+    @Synchronized
+    fun restoreForScheduledCheck(kind: Int, sinceMs: Long, lastMs: Long, nowMs: Long, maxAgeMs: Long): Boolean {
+        if (episodes.containsKey(kind)) return false
+        if (sinceMs <= 0L || lastMs < sinceMs || lastMs > nowMs || nowMs - sinceMs > maxAgeMs) return false
+        episodes[kind] = Episode(sinceMs, nowMs)
+        return true
+    }
+
+    @Synchronized
+    fun remainingDelay(kind: Int, nowMs: Long, capMs: Long): Long =
+        episodes[kind]?.let { (it.sinceMs + capMs - nowMs).coerceAtLeast(0L) } ?: capMs
 
     /** Marks the episode as just seen, so the next delivery continues it whatever the gap. */
     @Synchronized

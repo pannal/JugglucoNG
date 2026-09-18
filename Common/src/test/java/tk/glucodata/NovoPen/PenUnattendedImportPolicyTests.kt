@@ -14,15 +14,7 @@ import tk.glucodata.NovoPen.PenUnattendedImportPolicy.Plan
 class PenUnattendedImportPolicyTests {
 
     private fun dose(seconds: Long, units: Float, priming: Boolean = false) =
-        PenDose(
-            // The pen's own counter is the dose's identity. These cases only need it to be
-            // distinct per dose, so it tracks the timestamp.
-            relativeSeconds = seconds,
-            timestampSeconds = seconds,
-            units = units,
-            flags = 0,
-            priming = priming,
-        )
+        PenDose(relativeSeconds = seconds, timestampSeconds = seconds, units = units, flags = 0, priming = priming)
 
     @Test
     fun airShotsAreLeftOutOfAnUnattendedImport() {

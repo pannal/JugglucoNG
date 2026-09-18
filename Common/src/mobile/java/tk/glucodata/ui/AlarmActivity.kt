@@ -22,9 +22,11 @@ import tk.glucodata.Natives
 import tk.glucodata.Notify
 import tk.glucodata.SensorBluetooth
 import tk.glucodata.alerts.AlertDisplayText
+import tk.glucodata.alerts.AlertDefaultAction
 import tk.glucodata.alerts.AlertRepository
 import tk.glucodata.alerts.AlertStateTracker
 import tk.glucodata.alerts.AlertType
+import tk.glucodata.alerts.CustomAlertRepository
 import tk.glucodata.ui.util.GlucoseFormatter
 import tk.glucodata.alerts.SnoozeManager
 import tk.glucodata.logic.CustomAlertManager
@@ -87,6 +89,7 @@ class AlarmActivity : ComponentActivity() {
                 severity = model.severity,
                 trendResult = model.trendResult,
                 timeText = model.timeText,
+                defaultAction = model.defaultAction,
                 onSnooze = {
                     Notify.cancelQueuedAlarmActivityLaunch(
                         Notify.resolveAlertKind(model.alertType?.id ?: -1),
@@ -160,6 +163,10 @@ class AlarmActivity : ComponentActivity() {
         }
         val alertType = AlertType.fromId(intent.getIntExtra(EXTRA_ALERT_TYPE_ID, -1))
         val customAlertId = intent.getStringExtra(Notify.EXTRA_CUSTOM_ALERT_ID)
+        val customConfig = customAlertId?.let { id ->
+            CustomAlertRepository.getAll().firstOrNull { it.id == id }
+        }
+        val standardConfig = alertType?.let { AlertRepository.loadConfig(it) }
 
         val glucoseSource = rawValue.ifBlank { rawMessage }
         val (parsedValueRaw, parsedValueMessage) = parseGlucoseString(glucoseSource)
@@ -199,7 +206,12 @@ class AlarmActivity : ComponentActivity() {
         }
 
         val timeText = DateFormat.getTimeFormat(this).format(System.currentTimeMillis())
-        val snoozeMinutes = alertType?.let { AlertRepository.loadConfig(it).defaultSnoozeMinutes } ?: 15
+        val snoozeMinutes = customConfig?.defaultSnoozeMinutes
+            ?: standardConfig?.defaultSnoozeMinutes
+            ?: 15
+        val defaultAction = customConfig?.defaultAction
+            ?: standardConfig?.defaultAction
+            ?: AlertDefaultAction.DISMISS
 
         return AlarmUiModel(
             primaryGlucose = primaryGlucose,
@@ -210,6 +222,7 @@ class AlarmActivity : ComponentActivity() {
             trendResult = trendResult,
             timeText = timeText,
             alertType = alertType,
+            defaultAction = defaultAction,
             snoozeMinutes = snoozeMinutes
         )
     }
@@ -383,6 +396,7 @@ class AlarmActivity : ComponentActivity() {
         val trendResult: TrendEngine.TrendResult,
         val timeText: String,
         val alertType: AlertType?,
+        val defaultAction: AlertDefaultAction,
         val snoozeMinutes: Int
     )
 

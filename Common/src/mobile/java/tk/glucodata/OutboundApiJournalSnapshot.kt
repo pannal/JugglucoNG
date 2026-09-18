@@ -28,6 +28,8 @@ import tk.glucodata.data.journal.JournalRepository
 import tk.glucodata.data.journal.JournalTreatmentTransfer
 import tk.glucodata.data.journal.isCloneJournalExportSource
 import tk.glucodata.data.prediction.PredictionModelProfileStore
+import tk.glucodata.logic.CompressionLowDetector
+import java.util.UUID
 
 object OutboundApiJournalSnapshot {
     private const val PREFS_NAME = "tk.glucodata_preferences"
@@ -98,6 +100,7 @@ object OutboundApiJournalSnapshot {
                     val now = System.currentTimeMillis()
                     val values = runCatching { buildBroadcastIob(now) }.getOrNull()
                     broadcastIobCache = BroadcastIobCache(now, values)
+                    GluciferSender.requestUpdate()
                     JournalIobAccess.pushWatchserver(now)
                     if (values != null) JugglucoSend.rebroadcastIob()
                     Notify.showoldglucose()
@@ -139,6 +142,40 @@ object OutboundApiJournalSnapshot {
         }
         broadcastIobCache = BroadcastIobCache(atMillis, fresh)
         return fresh
+    }
+
+    /**
+     * Whether the newest journal insulin dose is past its curve-derived activity peak
+     * at [timeMillis]: 1 = past, 0 = not yet, -1 = unknown. Resolved from src/main via
+     * reflection (JournalIobAccess) for the compression-low hold. "No doses inside the
+     * lookback window" is a vacuous 1 — with nothing on board there is no ramp-up to
+     * wait out, and the hold's separate IOB gate judges the amount. Unknown is returned
+     * on the main thread and on any failure; the hold treats it as "do not hold".
+     */
+    @JvmStatic
+    fun lastDosePeakPassed(timeMillis: Long): Int {
+        if (Looper.myLooper() == Looper.getMainLooper()) return -1
+        return runBlocking {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    val app = Applic.app ?: return@runCatching -1
+                    val prefs = app.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+                    if (!prefs.getBoolean(JOURNAL_ENABLED_KEY, true)) return@runCatching -1
+                    val dao = HistoryDatabase.getInstance(app).journalDao()
+                    val presetsById = dao.getInsulinPresets().map { toPresetModel(it) }.associateBy { it.id }
+                    val maxPresetDurationMs = presetsById.values
+                        .maxOfOrNull { it.durationMinutes.coerceAtLeast(0) }?.times(60_000L)
+                        ?: DEFAULT_ACTIVE_WINDOW_MS
+                    val startMillis = (timeMillis - maxOf(DEFAULT_ACTIVE_WINDOW_MS, maxPresetDurationMs) - 60_000L)
+                        .coerceAtLeast(0L)
+                    val entries = dao.getEntriesBetween(startMillis, timeMillis)
+                    val doses = JournalIobCalculator.dosesFromEntities(entries, presetsById)
+                    val newest = doses.maxByOrNull { it.timestampMillis } ?: return@runCatching 1
+                    val curve = newest.preset.curvePoints.map { it.minute to it.activity }
+                    if (CompressionLowDetector.dosePeakPassed(newest.timestampMillis, curve, timeMillis)) 1 else 0
+                }.getOrDefault(-1)
+            }
+        }
     }
 
     private suspend fun buildBroadcastIob(
@@ -313,6 +350,32 @@ object OutboundApiJournalSnapshot {
         }
     }
 
+    /** Only explicitly selected journal content; no IOB snapshot window truncation. */
+    @JvmStatic
+    fun gluciferJournalJson(days: Int, includeNotes: Boolean, atMillis: Long): String = runBlocking(Dispatchers.IO) {
+        val dao = HistoryDatabase.getInstance(Applic.app).journalDao()
+        val presets = dao.getInsulinPresets().associateBy { it.id }
+        val entries = dao.getGluciferEntries(atMillis - days.coerceIn(1, 90) * 86400000L,
+            atMillis, includeNotes, GluciferJournal.MAX_ENTRIES)
+        JSONArray().apply {
+            entries.forEach { entry ->
+                val kind = entry.entryType
+                val amount = entry.amount?.takeIf { it.isFinite() && it > 0f && it <= 100000f }
+                if (kind != "note" && amount == null) return@forEach
+                val label = when (kind) {
+                    "insulin" -> presets[entry.insulinPresetId]?.displayName ?: "Insulin"
+                    "carbs" -> "Carbohydrates"
+                    else -> "Note"
+                }
+                val value = JSONObject().put("id", "j${entry.id}").put("time_ms", entry.timestamp)
+                    .put("kind", kind).put("label", label.take(128))
+                if (kind != "note") value.put("amount", amount!!.toString().toDouble())
+                if (includeNotes) value.put("note", (entry.note ?: if (kind == "note") entry.title else "").take(256))
+                put(value)
+            }
+        }.toString()
+    }
+
     private suspend fun buildSnapshot(atMillis: Long): JSONObject {
         val database = HistoryDatabase.getInstance(Applic.app)
         val dao = database.journalDao()
@@ -352,64 +415,6 @@ object OutboundApiJournalSnapshot {
             .put("treatments", events)
             .put(OutboundApiInsulinTokens.JSON_ARRAY, insulinTypesJson(presets, entries, atMillis))
     }
-
-    /**
-     * One entry per active insulin type, feeding the per-type template tokens
-     * (see [OutboundApiInsulinTokens]). Archived types are left out: they are
-     * the ones the user turned off, and their tokens would only clutter the
-     * settings chips — insulin already injected with one still counts toward
-     * the aggregate IOB, which is computed elsewhere from the full preset list.
-     *
-     * The per-type IOB deliberately ignores `countsTowardIob`: that switch says
-     * whether a type belongs in the single `{iob}` number, and a user asking
-     * for their basal by name wants what is actually left of it. The totals are
-     * bounded by the entry window buildSnapshot loaded, which always spans at
-     * least the last 24 hours.
-     */
-    internal fun insulinTypesJson(
-        presets: List<JournalInsulinPreset>,
-        entries: List<JournalEntryEntity>,
-        atMillis: Long
-    ): JSONArray {
-        val active = presets.filterNot { it.isArchived }.sortedBy { it.sortOrder }
-        val slugs = OutboundApiInsulinTokens.assignSlugs(active.map { it.displayName })
-        val dayStartMillis = startOfDayMillis(atMillis)
-        val array = JSONArray()
-        active.forEachIndexed { index, preset ->
-            val doses = entries.mapNotNull { entry ->
-                if (JournalEntryType.fromStorage(entry.entryType) != JournalEntryType.INSULIN) return@mapNotNull null
-                if (entry.insulinPresetId != preset.id) return@mapNotNull null
-                if (entry.timestamp > atMillis) return@mapNotNull null
-                val units = entry.amount?.takeIf { it.isFinite() && it > 0f } ?: return@mapNotNull null
-                val snapshotPoints = tk.glucodata.data.journal.parseJournalCurve(entry.insulinCurveJsonSnapshot)
-                val points = snapshotPoints.takeIf { it.size >= 2 } ?: preset.curvePoints
-                JournalIobCalculator.Dose(entry.timestamp, units, preset, points)
-            }
-            val last = doses.maxByOrNull { it.timestampMillis }
-            val todayUnits = doses
-                .filter { it.timestampMillis >= dayStartMillis }
-                .sumOf { it.amountUnits.toDouble() }
-            array.put(
-                JSONObject()
-                    .put("slug", slugs[index])
-                    .put("name", preset.displayName)
-                    .put("iob", finiteOrNull(JournalIobCalculator.compute(doses, atMillis).iobUnits))
-                    .put("last_units", finiteOrNull(last?.amountUnits))
-                    .put("last_timestamp", last?.timestampMillis ?: 0L)
-                    .put("today_units", todayUnits)
-            )
-        }
-        return array
-    }
-
-    private fun startOfDayMillis(atMillis: Long): Long =
-        Calendar.getInstance().apply {
-            timeInMillis = atMillis
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
 
     private suspend fun buildCloneJournalSnapshot(atMillis: Long): JSONObject {
         val database = HistoryDatabase.getInstance(Applic.app)
@@ -539,6 +544,64 @@ object OutboundApiJournalSnapshot {
         if (imported > 0 || deleted > 0) UiRefreshBus.requestDataRefresh()
         return imported + deleted
     }
+
+    /**
+     * One entry per active insulin type, feeding the per-type template tokens
+     * (see [OutboundApiInsulinTokens]). Archived types are left out: they are
+     * the ones the user turned off, and their tokens would only clutter the
+     * settings chips — insulin already injected with one still counts toward
+     * the aggregate IOB, which is computed elsewhere from the full preset list.
+     *
+     * The per-type IOB deliberately ignores `countsTowardIob`: that switch says
+     * whether a type belongs in the single `{iob}` number, and a user asking
+     * for their basal by name wants what is actually left of it. The totals are
+     * bounded by the entry window buildSnapshot loaded, which always spans at
+     * least the last 24 hours.
+     */
+    internal fun insulinTypesJson(
+        presets: List<JournalInsulinPreset>,
+        entries: List<JournalEntryEntity>,
+        atMillis: Long
+    ): JSONArray {
+        val active = presets.filterNot { it.isArchived }.sortedBy { it.sortOrder }
+        val slugs = OutboundApiInsulinTokens.assignSlugs(active.map { it.displayName })
+        val dayStartMillis = startOfDayMillis(atMillis)
+        val array = JSONArray()
+        active.forEachIndexed { index, preset ->
+            val doses = entries.mapNotNull { entry ->
+                if (JournalEntryType.fromStorage(entry.entryType) != JournalEntryType.INSULIN) return@mapNotNull null
+                if (entry.insulinPresetId != preset.id) return@mapNotNull null
+                if (entry.timestamp > atMillis) return@mapNotNull null
+                val units = entry.amount?.takeIf { it.isFinite() && it > 0f } ?: return@mapNotNull null
+                val snapshotPoints = tk.glucodata.data.journal.parseJournalCurve(entry.insulinCurveJsonSnapshot)
+                val points = snapshotPoints.takeIf { it.size >= 2 } ?: preset.curvePoints
+                JournalIobCalculator.Dose(entry.timestamp, units, preset, points)
+            }
+            val last = doses.maxByOrNull { it.timestampMillis }
+            val todayUnits = doses
+                .filter { it.timestampMillis >= dayStartMillis }
+                .sumOf { it.amountUnits.toDouble() }
+            array.put(
+                JSONObject()
+                    .put("slug", slugs[index])
+                    .put("name", preset.displayName)
+                    .put("iob", finiteOrNull(JournalIobCalculator.compute(doses, atMillis).iobUnits))
+                    .put("last_units", finiteOrNull(last?.amountUnits))
+                    .put("last_timestamp", last?.timestampMillis ?: 0L)
+                    .put("today_units", todayUnits)
+            )
+        }
+        return array
+    }
+
+    private fun startOfDayMillis(atMillis: Long): Long =
+        Calendar.getInstance().apply {
+            timeInMillis = atMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
 
     private suspend fun importJournal(raw: String, sourcePrefix: String): Int {
         val trimmed = raw.trim()
@@ -723,7 +786,7 @@ object OutboundApiJournalSnapshot {
         return (elapsedMinutes / durationMinutes.coerceAtLeast(1f)).coerceIn(0f, 1f)
     }
 
-    private fun toPresetModel(entity: JournalInsulinPresetEntity): JournalInsulinPreset =
+    internal fun toPresetModel(entity: JournalInsulinPresetEntity): JournalInsulinPreset =
         JournalInsulinPreset(
             id = entity.id,
             displayName = entity.displayName,

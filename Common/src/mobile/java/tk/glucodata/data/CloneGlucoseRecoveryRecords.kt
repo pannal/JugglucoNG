@@ -7,7 +7,9 @@ internal object CloneGlucoseRecoveryRecords {
     const val DELETED_READING = "glucose_deleted"
     const val READING = "glucose_reading"
     const val UNCERTAINTY = "glucose_uncertainty"
-    const val DISPLAY = "glucose_display"
+    // Per-sensor display records from older builds cannot identify the winning
+    // main line. A distinct category rejects mixed-schema recovery before import.
+    const val DISPLAY = "glucose_main_display"
 
     val recordTypes: Set<String> = linkedSetOf(
         DELETED_READING,
@@ -135,6 +137,7 @@ internal object CloneGlucoseRecoveryRecords {
             recordedAt = payload.requirePositiveLong("recordedAt"),
         )
         require(row.isUsable) { "Invalid Clone recovery glucose display value" }
+        require(row.timestamp % 60_000L == 0L) { "Clone main display timestamp must identify a minute" }
         require(row.viewMode in 0..3) { "Invalid Clone recovery glucose display mode" }
         return row
     }

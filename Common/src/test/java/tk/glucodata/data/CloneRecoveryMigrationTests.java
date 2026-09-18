@@ -58,7 +58,7 @@ public class CloneRecoveryMigrationTests {
     private static int identityVersion() throws Exception { return migrationFor("ALTER TABLE journal_entries ADD COLUMN recoveryId TEXT"); }
     private static int tombstoneVersion() throws Exception { return migrationFor("CREATE TABLE IF NOT EXISTS clone_journal_recovery_tombstones"); }
     private static int receiptVersion() throws Exception { return migrationFor("CREATE TABLE IF NOT EXISTS clone_recovery_imports"); }
-    private Connection db() throws Exception {
+    static Connection db() throws Exception {
         Class.forName("org.sqlite.JDBC");
         Connection db = DriverManager.getConnection("jdbc:sqlite::memory:");
         String source = Files.readString(ROOT.resolve("Common/build/generated/ksp/mobileRelease/kotlin/tk/glucodata/data/HistoryDatabase_Impl.kt"));
@@ -69,11 +69,13 @@ public class CloneRecoveryMigrationTests {
         assertTrue("Read generated Room schema", count > 20);
         return db;
     }
-    private static void exec(Connection db, String sql) throws SQLException {
+    static void exec(Connection db, String sql) throws SQLException {
         try (Statement statement = db.createStatement()) { statement.execute(sql); }
     }
-    private static List<List<String>> query(Connection db, String sql) throws SQLException {
-        try (Statement statement = db.createStatement(); ResultSet result = statement.executeQuery(sql)) {
+    static List<List<String>> query(Connection db, String sql, Object... bindings) throws SQLException {
+        try (PreparedStatement statement = db.prepareStatement(sql)) {
+            for (int i = 0; i < bindings.length; i++) statement.setObject(i + 1, bindings[i]);
+            try (ResultSet result = statement.executeQuery()) {
             List<List<String>> rows = new ArrayList<>();
             while (result.next()) {
                 List<String> row = new ArrayList<>();
@@ -81,13 +83,17 @@ public class CloneRecoveryMigrationTests {
                 rows.add(row);
             }
             return rows;
+            }
         }
     }
-    private static Cursor cursor(Connection db, String sql) throws Exception {
-        List<List<String>> rows = query(db, sql);
+    private static Cursor cursor(Connection db, String sql, Object... bindings) throws Exception {
+        List<List<String>> rows = query(db, sql, bindings);
         List<String> columns = new ArrayList<>();
-        try (Statement statement = db.createStatement(); ResultSet result = statement.executeQuery(sql)) {
-            for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) columns.add(result.getMetaData().getColumnLabel(i));
+        try (PreparedStatement statement = db.prepareStatement(sql)) {
+            for (int i = 0; i < bindings.length; i++) statement.setObject(i + 1, bindings[i]);
+            try (ResultSet result = statement.executeQuery()) {
+                for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) columns.add(result.getMetaData().getColumnLabel(i));
+            }
         }
         int[] position = {-1};
         return (Cursor) Proxy.newProxyInstance(Cursor.class.getClassLoader(), new Class<?>[]{Cursor.class}, (proxy, method, args) -> {
@@ -109,19 +115,22 @@ public class CloneRecoveryMigrationTests {
             }
         });
     }
-    private static void migrate(Connection db, int from) throws Exception {
+    static void migrate(Connection db, int from) throws Exception {
+        migrate(db, from, from + 1);
+    }
+    static void migrate(Connection db, int from, int to) throws Exception {
         SupportSQLiteDatabase adapter = (SupportSQLiteDatabase) Proxy.newProxyInstance(
             SupportSQLiteDatabase.class.getClassLoader(), new Class<?>[]{SupportSQLiteDatabase.class}, (proxy, method, args) -> {
                 if (method.getName().equals("execSQL") && args.length == 1) { exec(db, (String) args[0]); return null; }
-                if (method.getName().equals("query") && args[0] instanceof String) return cursor(db, (String) args[0]);
+                if (method.getName().equals("query") && args[0] instanceof String) return cursor(db, (String) args[0], args.length > 1 ? (Object[]) args[1] : new Object[0]);
                 throw new UnsupportedOperationException(method.toString());
             });
         Class<?> database = Class.forName("tk.glucodata.data.HistoryDatabase");
-        Field field = database.getDeclaredField("MIGRATION_" + from + "_" + (from + 1));
+        Field field = database.getDeclaredField("MIGRATION_" + from + "_" + to);
         field.setAccessible(true);
         ((Migration) field.get(null)).migrate(adapter);
     }
-    private static SortedMap<String, String> schema(Connection db) throws Exception {
+    static SortedMap<String, String> schema(Connection db) throws Exception {
         SortedMap<String, String> schema = new TreeMap<>();
         for (List<String> row : query(db, "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'room_master_table' ORDER BY name")) {
             String name = row.get(0);
@@ -152,6 +161,36 @@ public class CloneRecoveryMigrationTests {
             ") VALUES(9,1000,'SENSOR',120,119" + (columns.contains("source") ? ",'sensor'" : "") +
             (columns.contains("firstStoredAt") ? ",0" : "") + ")");
     }
+    @Test public void mainDisplayMigrationPreservesOtherDataAndMatchesGeneratedRoomSchema() throws Exception {
+        try (Connection db = db()) {
+            SortedMap<String, String> expected = schema(db);
+            exec(db, "INSERT INTO history_readings(id,timestamp,sensorSerial,value,rawValue,source,firstStoredAt) VALUES(1,60023,'sensor-a',100,101,'sensor',60024)");
+            exec(db, "DROP TABLE reading_display");
+            exec(db, "CREATE TABLE reading_display(timestamp INTEGER NOT NULL,sensorSerial TEXT NOT NULL,displayMgdl REAL NOT NULL,viewMode INTEGER NOT NULL,calibrationFingerprint INTEGER NOT NULL,recordedAt INTEGER NOT NULL,PRIMARY KEY(sensorSerial,timestamp))");
+            exec(db, "INSERT INTO reading_display VALUES(60000,'sensor-a',100,0,0,70000),(60000,'sensor-b',110,0,0,70000)");
+            migrate(db, migrationFor("DROP TABLE IF EXISTS reading_display"));
+            assertEquals(expected, schema(db));
+            assertEquals(List.of(List.of("0")), query(db, "SELECT count(*) FROM reading_display"));
+            assertEquals(List.of(List.of("100.0", "101.0", "sensor")), query(db, "SELECT value,rawValue,source FROM history_readings WHERE id=1"));
+        }
+    }
+
+    @Test public void mainDisplayRecoveryUsesTheReadingMinuteAndTheOwningSensor() throws Exception {
+        try (Connection db = db()) {
+            exec(db, "INSERT INTO history_readings(id,timestamp,sensorSerial,value,rawValue,source,firstStoredAt) VALUES(1,60023,'sensor-a',100,101,'sensor',60024),(2,120023,'sensor-b',110,111,'sensor',120024)");
+            exec(db, "INSERT INTO reading_display VALUES(60000,'sensor-a',100,0,0,70000),(120000,'sensor-a',110,0,0,130000)");
+            String source = Files.readString(ROOT.resolve("Common/src/mobile/java/tk/glucodata/data/ReadingDisplayDao.kt"));
+            int start = source.indexOf("SELECT * FROM reading_display display");
+            assertTrue(start >= 0);
+            String sql = source.substring(start, source.indexOf("\"\"\"", start))
+                .replace(":afterTimestamp", "0").replace(":afterSensorSerial", "''").replace(":limit", "500");
+            List<List<String>> rows = query(db, sql);
+            assertEquals(1, rows.size());
+            assertEquals("60000", rows.get(0).get(0));
+            assertEquals("sensor-a", rows.get(0).get(1));
+        }
+    }
+
     @Test public void recoveryChainRetainsRowsAndAssignsUniqueIdentities() throws Exception {
         try (Connection expected = db(); Connection actual = db()) {
             beforeRecovery(actual);

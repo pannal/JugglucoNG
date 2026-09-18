@@ -625,6 +625,7 @@ class SensorViewModel : ViewModel() {
                         val sensorSerial = SensorIdentity.resolveAppSensorId(gatt.SerialNumber)
                             ?: gatt.SerialNumber
                             ?: "Unknown"
+                        val sensorIndex = Natives.getSensorIndexFromDataPtr(gatt.dataptr)
                         val isGattFailure = bleStatus.startsWith("Status=") &&
                             bleStatus.removePrefix("Status=").toIntOrNull()?.let { it != 0 } != false
                         val liveError = when {
@@ -644,7 +645,6 @@ class SensorViewModel : ViewModel() {
                             ?: persistedBleErrors.firstOrNull {
                                 SensorIdentity.matches(it.sensorId, sensorSerial)
                             }.takeIf { isActivelyReceiving }
-                        val sensorIndex = Natives.getSensorIndexFromDataPtr(gatt.dataptr)
                         val currentViewMode = nativeViewMode
                         val isActiveSensor = activeSensorSerial != null && SensorIdentity.matches(sensorSerial, activeSensorSerial)
     

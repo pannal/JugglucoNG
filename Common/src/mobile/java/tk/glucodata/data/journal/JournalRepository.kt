@@ -32,6 +32,10 @@ class JournalRepository {
             .flowOn(Dispatchers.Default)
     }
 
+    fun observeEntriesForMeal(mealId: Long): Flow<List<JournalEntry>> {
+        return dao.observeEntriesForMeal(mealId).map { entries -> entries.map(JournalEntryEntity::toModel) }
+    }
+
     fun observeInsulinPresets(): Flow<List<JournalInsulinPreset>> {
         return dao.observeInsulinPresets()
             .map { presets -> presets.map(JournalInsulinPresetEntity::toModel) }
@@ -193,7 +197,9 @@ class JournalRepository {
                     !isInsulin -> false
                     preserveCurveSnapshot -> existing?.insulinCurveWasApproximated ?: true
                     else -> resolvedCurve?.approximated ?: true
-                }
+                },
+                // An edit from the plain journal editor does not know about meals; keep the link.
+                mealId = input.mealId ?: existing?.mealId
             )
             val rowId = dao.upsertEntry(entity)
             if (isCloneJournalExportSource(entity.source)) {
@@ -213,6 +219,9 @@ class JournalRepository {
             } else {
                 tk.glucodata.OutboundApiJournalSnapshot.journalChanged()
             }
+        } else {
+            // Notes do not change IOB, but their journal delivery is still live.
+            tk.glucodata.GluciferSender.requestUpdate()
         }
         if (entity.glucoseValueMgDl != null || existing?.glucoseValueMgDl != null) {
             tk.glucodata.data.calibration.JournalCalibrationSync.onJournalChanged()
@@ -359,12 +368,24 @@ class JournalRepository {
         }
         if (cloneDeleteQueued || affectsIob(deletedType)) {
             tk.glucodata.OutboundApiJournalSnapshot.journalChanged()
+        } else {
+            tk.glucodata.GluciferSender.requestUpdate()
         }
         if (deletedGlucose != null) {
             tk.glucodata.data.calibration.JournalCalibrationSync.onJournalChanged()
         }
         // A deletion queues a tombstone, which is the uploader's to carry out.
         tk.glucodata.NightscoutUploadWake.afterJournalChange()
+    }
+
+    /**
+     * Deletes every entry logged for a meal, one by one through [deleteEntry] so each row gets
+     * its Nightscout tombstone and the IOB/calibration listeners fire as for a manual delete.
+     */
+    suspend fun deleteEntriesForMeal(mealId: Long): Int {
+        val ids = dao.getEntryIdsForMeal(mealId)
+        ids.forEach { deleteEntry(it) }
+        return ids.size
     }
 
     /** Applies sender tombstones without turning a receiver-side delete into outbound work. */
@@ -852,13 +873,14 @@ private fun JournalEntryEntity.toModel(): JournalEntry {
         sourceRecordId = sourceRecordId,
         createdAt = createdAt,
         updatedAt = updatedAt,
-        originSource = originSource?.let(JournalEntrySource::fromStorage),
+        mealId = mealId,
         insulinCurveJsonSnapshot = insulinCurveJsonSnapshot,
         insulinCurveProfileId = insulinCurveProfileId,
         insulinCurveModelVersion = insulinCurveModelVersion,
         insulinCurveEvidence = insulinCurveEvidence?.let { JournalCurveEvidence.fromStorage(it) },
         insulinBodyWeightKg = insulinBodyWeightKg,
-        insulinCurveWasApproximated = insulinCurveWasApproximated
+        insulinCurveWasApproximated = insulinCurveWasApproximated,
+        originSource = originSource?.let(JournalEntrySource::fromStorage),
     )
 }
 

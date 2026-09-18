@@ -80,7 +80,7 @@ class CloneGlucoseRecoveryRecordsTests {
     @Test
     fun displayRoundTrips() {
         val display = ReadingDisplay(
-            timestamp = 4_000_000L,
+            timestamp = 4_020_000L,
             sensorSerial = "test-sensor-display",
             displayMgdl = 121f,
             viewMode = 2,
@@ -94,6 +94,21 @@ class CloneGlucoseRecoveryRecordsTests {
                 CloneGlucoseRecoveryRecords.encode(display),
             ),
         )
+    }
+
+    @Test
+    fun oldPerSensorDisplayRecordsCannotBecomeMainLineRecords() = runBlocking {
+        val row = ReadingDisplay(timestamp = 4_020_000L, sensorSerial = "sensor", displayMgdl = 121f, viewMode = 2, calibrationFingerprint = -42L, recordedAt = 4_100_000L)
+        val payload = CloneGlucoseRecoveryRecords.encode(row)
+        assertIllegalArgument {
+            runBlocking {
+                CloneGlucoseRecoveryRecords.orderedValidator()(CloneRecoveryRecord("glucose_display", payload))
+            }
+        }
+        assertIllegalArgument {
+            CloneGlucoseRecoveryRecords.decodeDisplay(JSONObject(payload.toString()).put("timestamp", 4_020_001L))
+        }
+        CloneGlucoseRecoveryRecords.orderedValidator()(CloneRecoveryRecord(CloneGlucoseRecoveryRecords.DISPLAY, payload))
     }
 
     @Test

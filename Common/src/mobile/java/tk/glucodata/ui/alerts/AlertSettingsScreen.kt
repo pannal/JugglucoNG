@@ -57,6 +57,8 @@ import tk.glucodata.GlucoseRangeColors
 import tk.glucodata.Notify
 import tk.glucodata.R
 import tk.glucodata.alerts.*
+import androidx.compose.ui.draw.rotate
+import tk.glucodata.ui.components.SettingsSwitchItem
 import tk.glucodata.ui.components.SettingsItem
 import tk.glucodata.ui.components.StyledSwitch
 import tk.glucodata.ui.components.CardPosition as SettingsItemPosition
@@ -192,6 +194,28 @@ fun AlertSettingsScreen(
     // One Advanced state for every card on this screen.
     val advancedOpen = rememberSaveable { mutableStateOf(false) }
 
+    var notificationDismissAction by remember {
+        mutableStateOf(AlertRepository.loadNotificationDismissAction())
+    }
+    fun persistNotificationDismissAction(action: AlertNotificationDismissAction) {
+        notificationDismissAction = action
+        AlertRepository.saveNotificationDismissAction(action)
+    }
+    var acknowledgedHighCoverageEnabled by remember {
+        mutableStateOf(AlertRepository.loadAcknowledgedHighCoverageEnabled())
+    }
+    fun persistAcknowledgedHighCoverageEnabled(enabled: Boolean) {
+        acknowledgedHighCoverageEnabled = enabled
+        AlertRepository.saveAcknowledgedHighCoverageEnabled(enabled)
+    }
+    var returnToPreviousAppAfterAlarm by remember {
+        mutableStateOf(AlertRepository.loadReturnToPreviousAppAfterAlarm())
+    }
+    fun persistReturnToPreviousAppAfterAlarm(enabled: Boolean) {
+        returnToPreviousAppAfterAlarm = enabled
+        AlertRepository.saveReturnToPreviousAppAfterAlarm(enabled)
+    }
+
     CompositionLocalProvider(LocalAlertsAdvancedOpen provides advancedOpen) {
     Scaffold(
         topBar = {
@@ -249,6 +273,7 @@ fun AlertSettingsScreen(
                                 retryCount = draft.retryCount,
                                 soundDelayEnabled = draft.soundDelayEnabled,
                                 soundDelaySeconds = draft.soundDelaySeconds,
+                                defaultAction = draft.defaultAction,
                                 defaultSnoozeMinutes = draft.defaultSnoozeMinutes
                             )
                             persistConfigIfChanged(updated)
@@ -275,7 +300,9 @@ fun AlertSettingsScreen(
                                 soundUri = BundledAlertSounds.forAlert(
                                     draft.customSoundUri, context.packageName,
                                     if (alert.type == CustomAlertType.LOW) 0 else 1
-                                )
+                                ),
+                                defaultAction = draft.defaultAction,
+                                defaultSnoozeMinutes = draft.defaultSnoozeMinutes
                             )
                         }
                         saveCustomAlerts(updatedCustomAlerts)
@@ -457,6 +484,19 @@ fun AlertSettingsScreen(
                 )
             }
 
+            // Sensor-pressure hold (the compression-low gatekeeper): opt-in,
+            // thresholds, and the cue's own sound and haptics — the whole feature in
+            // one place, because its cue is not an alarm you arm by itself.
+            item(key = "sensor-pressure-hold") {
+                Spacer(Modifier.height(4.dp))
+                SensorPressureHoldCard(
+                    isMmol = isMmol,
+                    onPickCueSound = { currentUri, typeId, onPicked ->
+                        soundPickerRequest = Triple(currentUri, typeId, onPicked)
+                    }
+                )
+            }
+
             // === PREDICTIVE ALERTS SECTION ===
             item(key = "predictive-alerts-header") {
                 Spacer(Modifier.height(8.dp))
@@ -555,6 +595,69 @@ fun AlertSettingsScreen(
                     position = SettingsItemPosition.SINGLE,
                     onClick = { navController.navigate("settings/alerts/talker") }
                 )
+            }
+
+            item(key = "advanced") {
+                Spacer(Modifier.height(24.dp))
+                var advancedExpanded by advancedOpen
+                val chevron by animateFloatAsState(
+                    targetValue = if (advancedExpanded) 180f else 0f,
+                    label = "alertsAdvancedChevron"
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    SettingsItem(
+                        title = stringResource(R.string.advanced),
+                        icon = Icons.Default.Tune,
+                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        position = if (advancedExpanded) SettingsItemPosition.TOP else SettingsItemPosition.SINGLE,
+                        animatePosition = true,
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.ExpandMore,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.rotate(chevron)
+                            )
+                        },
+                        onClick = { advancedExpanded = !advancedExpanded }
+                    )
+                    AnimatedVisibility(visible = advancedExpanded) {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            SettingsSwitchItem(
+                                title = stringResource(R.string.notification_dismiss_action_title),
+                                subtitle = stringResource(R.string.notification_dismiss_action_summary),
+                                checked = notificationDismissAction == AlertNotificationDismissAction.SNOOZE,
+                                onCheckedChange = { snooze ->
+                                    persistNotificationDismissAction(
+                                        if (snooze) AlertNotificationDismissAction.SNOOZE
+                                        else AlertNotificationDismissAction.DISMISS
+                                    )
+                                },
+                                icon = Icons.Default.NotificationsOff,
+                                iconTint = MaterialTheme.colorScheme.secondary,
+                                position = SettingsItemPosition.MIDDLE
+                            )
+                            SettingsSwitchItem(
+                                title = stringResource(R.string.alarm_return_to_previous_app_title),
+                                subtitle = stringResource(R.string.alarm_return_to_previous_app_summary),
+                                checked = returnToPreviousAppAfterAlarm,
+                                onCheckedChange = { persistReturnToPreviousAppAfterAlarm(it) },
+                                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                                iconTint = MaterialTheme.colorScheme.secondary,
+                                position = SettingsItemPosition.MIDDLE
+                            )
+                            SettingsSwitchItem(
+                                title = stringResource(R.string.acknowledged_high_coverage_title),
+                                subtitle = stringResource(R.string.acknowledged_high_coverage_summary),
+                                checked = acknowledgedHighCoverageEnabled,
+                                onCheckedChange = { persistAcknowledgedHighCoverageEnabled(it) },
+                                icon = Icons.AutoMirrored.Filled.TrendingUp,
+                                iconTint = MaterialTheme.colorScheme.secondary,
+                                position = SettingsItemPosition.BOTTOM
+                            )
+                        }
+                    }
+                }
             }
 
             // Bottom padding
@@ -763,7 +866,9 @@ fun CustomAlertCard(
                         activeStartHour = alert.startTimeMinutes / 60,
                         activeStartMinute = alert.startTimeMinutes % 60,
                         activeEndHour = alert.endTimeMinutes / 60,
-                        activeEndMinute = alert.endTimeMinutes % 60
+                        activeEndMinute = alert.endTimeMinutes % 60,
+                        defaultAction = alert.defaultAction,
+                        defaultSnoozeMinutes = alert.defaultSnoozeMinutes
                     )
                     // Delete Button
                     OutlinedButton(
@@ -801,6 +906,8 @@ fun CustomAlertCard(
                                 retryEnabled = newConfig.retryEnabled,
                                 retryIntervalMinutes = newConfig.retryIntervalMinutes,
                                 retryCount = newConfig.retryCount,
+                                defaultAction = newConfig.defaultAction,
+                                defaultSnoozeMinutes = newConfig.defaultSnoozeMinutes,
                                 timeRangeEnabled = newConfig.timeRangeEnabled,
                                 startTimeMinutes = (newConfig.activeStartHour ?: 0) * 60 + (newConfig.activeStartMinute ?: 0),
                                 endTimeMinutes = (newConfig.activeEndHour ?: 0) * 60 + (newConfig.activeEndMinute ?: 0)
@@ -1982,6 +2089,7 @@ private fun getAlertIconAndColor(type: AlertType, isDark: Boolean): Pair<ImageVe
         AlertType.MISSED_READING -> Icons.Default.SignalWifiOff to Color(0xFF78909C)
         AlertType.LOSS -> Icons.Default.BluetoothDisabled to Color(0xFF90A4AE)
         AlertType.SENSOR_EXPIRY -> Icons.Default.Schedule to Color(0xFF7E57C2)
+        AlertType.SENSOR_PRESSURE -> Icons.Default.Notifications to Color(0xFF8D6E63)
         else -> Icons.Default.Notifications to Color(0xFF42A5F5)  // Default blue
     }
 }

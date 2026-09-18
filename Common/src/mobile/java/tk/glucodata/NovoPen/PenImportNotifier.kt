@@ -42,6 +42,11 @@ internal object PenImportNotifier {
         show(context, serial, text, openJournal = true)
     }
 
+    /** Nothing new to write because the doses were already in the journal by hand. */
+    fun mergedManual(context: Context, serial: String, count: Int) {
+        show(context, serial, context.getString(R.string.insulin_pen_merged_manual, count), openJournal = true)
+    }
+
     fun nothingNew(context: Context, serial: String) {
         show(context, serial, context.getString(R.string.insulin_pen_no_new_doses), openJournal = true)
     }

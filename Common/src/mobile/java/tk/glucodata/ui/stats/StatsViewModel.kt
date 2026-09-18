@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.LifecycleStartEffect
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,7 +32,9 @@ import tk.glucodata.Natives
 import tk.glucodata.R
 import tk.glucodata.SensorIdentity
 import tk.glucodata.UiRefreshBus
+import tk.glucodata.data.HistoryDatabase
 import tk.glucodata.data.HistoryRepository
+import tk.glucodata.data.HypoEpisodeMark
 import tk.glucodata.data.calibration.CalibrationManager
 import tk.glucodata.drivers.ManagedSensorRuntime
 import tk.glucodata.drivers.ManagedSensorViewModeStore
@@ -71,7 +74,15 @@ internal fun rememberStatsViewModel(): StatsViewModel {
             .filterIsInstance<ViewModelStoreOwner>()
             .firstOrNull()
     }
-    return viewModel(viewModelStoreOwner = owner ?: checkNotNull(LocalViewModelStoreOwner.current))
+    val model = viewModel<StatsViewModel>(
+        viewModelStoreOwner = owner ?: checkNotNull(LocalViewModelStoreOwner.current)
+    )
+    val consumer = remember(model) { Any() }
+    LifecycleStartEffect(model, consumer) {
+        model.acquireUiObservation(consumer)
+        onStopOrDispose { model.releaseUiObservation(consumer) }
+    }
+    return model
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -117,7 +128,8 @@ class StatsViewModel : ViewModel() {
         val lowMgDl: Float,
         val highMgDl: Float,
         val veryLowMgDl: Float,
-        val veryHighMgDl: Float
+        val veryHighMgDl: Float,
+        val exclusionRevision: Long
     )
 
     private data class StatsRangeProjection(
@@ -156,6 +168,22 @@ class StatsViewModel : ViewModel() {
     private val _historyPoints = MutableStateFlow<List<GlucosePoint>>(emptyList())
     private val _temperaturePoints = MutableStateFlow<List<TemperaturePoint>>(emptyList())
 
+    private val uiObservation: StatsUiObservationSession = StatsUiObservationSession(
+        parentScope = viewModelScope,
+        onStart = {
+            observeUiRefreshBus()
+            refreshFromNative()
+        },
+        onStop = {
+            // Keep displayed history and projection caches for an immediate return.
+            historyJob = null
+            availableRangeJob = null
+        },
+    )
+
+    internal fun acquireUiObservation(consumer: Any) = uiObservation.acquire(consumer)
+    internal fun releaseUiObservation(consumer: Any) = uiObservation.release(consumer)
+
     private var historyJob: Job? = null
     private var activeSerial: String? = null
     private var historyWindowStartMs: Long = Long.MAX_VALUE
@@ -182,6 +210,17 @@ class StatsViewModel : ViewModel() {
 
     private val screenProjectionCache = ProjectionCache()
     private val pinnedProjectionCache = ProjectionCache()
+
+    // Sensor-pressure exclusions: hypo episodes the user confirmed as artifacts in the
+    // hypo log. Only the user's toggle ever puts a mark here — the detector and the
+    // hold merely suggest. The revision joins the state combine so a flipped toggle
+    // refilters TIR, GMI and everything downstream immediately, and flipping it back
+    // restores the numbers because raw readings were never touched.
+    @Volatile
+    private var pressureMarks: List<HypoEpisodeMark> = emptyList()
+    private val _exclusionRevision = MutableStateFlow(0L)
+    private val _excludedEpisodesInRange = MutableStateFlow(0)
+    val excludedEpisodesInRange: StateFlow<Int> = _excludedEpisodesInRange.asStateFlow()
 
     /**
      * The window the dashboard strip is summarising. Its own, so that cycling the pill on
@@ -210,7 +249,8 @@ class StatsViewModel : ViewModel() {
         _viewMode,
         _calibrationRevision,
         _isLoading,
-        _hasSensor
+        _hasSensor,
+        _exclusionRevision
     ) { values ->
         BaseInput(
             range = values[0] as StatsTimeRange?,
@@ -290,11 +330,10 @@ class StatsViewModel : ViewModel() {
     )
 
     init {
-        observeUiRefreshBus()
+        observePressureMarks()
         if (pendingRestoredCustomClamp) {
             clampRestoredCustomRangeWhenAvailable()
         }
-        refreshFromNative()
     }
 
     internal fun setPinnedWindow(window: PinnedWindow?) {
@@ -344,7 +383,7 @@ class StatsViewModel : ViewModel() {
     }
 
     private fun observeUiRefreshBus() {
-        viewModelScope.launch {
+        uiObservation.scope?.launch {
             UiRefreshBus.events.collect { event ->
                 when (event) {
                     UiRefreshBus.Event.DataChanged -> refreshFromNative()
@@ -358,12 +397,14 @@ class StatsViewModel : ViewModel() {
         val clampedDays = reportDays.coerceIn(1, MAX_REPORT_DAYS)
         val cutoff = System.currentTimeMillis() - (clampedDays.toLong() * DAY_MS)
         val reportHistory = resolveHistoryForStartTime(cutoff)
+        // The exported report is the document a clinician reads: it must carry the same
+        // pressure exclusions the screen shows, or the two disagree about the same window.
         val filteredHistory = resolveStatsDisplayHistory(
             history = reportHistory,
             viewMode = _viewMode.value,
             unit = _unit.value
         ).filter {
-            it.timestamp >= cutoff && isStatsValueValid(it.value)
+            it.timestamp >= cutoff && isStatsValueValid(it.value) && !isPressureExcluded(it.timestamp)
         }
         val filteredTemperature = _temperaturePoints.value.filter { it.timestamp >= cutoff }
 
@@ -393,7 +434,7 @@ class StatsViewModel : ViewModel() {
     }
 
     fun refreshFromNative() {
-        viewModelScope.launch {
+        uiObservation.scope?.launch {
             _calibrationRevision.value = CalibrationManager.getRevision()
             val unit = resolveUnit()
             _unit.value = unit
@@ -447,6 +488,7 @@ class StatsViewModel : ViewModel() {
     }
 
     private fun subscribeToHistory(serial: String, startTime: Long) {
+        val observationScope = uiObservation.scope ?: return
         historyJob?.cancel()
         val previousSerial = activeSerial
         val previousWindowStart = historyWindowStartMs
@@ -456,7 +498,7 @@ class StatsViewModel : ViewModel() {
         activeSerial = serial
         historyWindowStartMs = startTime
 
-        historyJob = viewModelScope.launch {
+        historyJob = observationScope.launch {
             refreshAvailableRangeAsync()
             // Native backfill can be slow on reopen; don't block already-persisted Room data.
             launch(Dispatchers.IO) {
@@ -490,7 +532,7 @@ class StatsViewModel : ViewModel() {
     }
 
     private fun refreshDisplayState() {
-        viewModelScope.launch {
+        uiObservation.scope?.launch {
             _calibrationRevision.value = CalibrationManager.getRevision()
             val unit = resolveUnit()
             _unit.value = unit
@@ -575,6 +617,7 @@ class StatsViewModel : ViewModel() {
     }
 
     private fun resubscribeToRequestedWindow() {
+        if (uiObservation.scope == null) return
         val serial = activeSerial ?: resolveStatsSensorSerial() ?: return
         val requestedStartTime = resolveSubscriptionStartTime()
         if (serial != activeSerial || needsHistoryWindowExpansion(requestedStartTime)) {
@@ -583,8 +626,9 @@ class StatsViewModel : ViewModel() {
     }
 
     private fun refreshAvailableRangeAsync() {
+        val observationScope = uiObservation.scope ?: return
         availableRangeJob?.cancel()
-        availableRangeJob = viewModelScope.launch(Dispatchers.IO) {
+        availableRangeJob = observationScope.launch(Dispatchers.IO) {
             _availableRange.value = loadAvailableRange()
         }
     }
@@ -890,7 +934,8 @@ class StatsViewModel : ViewModel() {
             lowMgDl = targets.lowMgDl,
             highMgDl = targets.highMgDl,
             veryLowMgDl = targets.veryLowMgDl,
-            veryHighMgDl = targets.veryHighMgDl
+            veryHighMgDl = targets.veryHighMgDl,
+            exclusionRevision = _exclusionRevision.value
         )
         if (cache.key == cacheKey) {
             return cache.value
@@ -904,7 +949,10 @@ class StatsViewModel : ViewModel() {
             useCache = useDisplayCache
         )
         val filteredHistory = displayHistory.filter { point ->
-            isStatsValueValid(point.value)
+            isStatsValueValid(point.value) && !isPressureExcluded(point.timestamp)
+        }
+        if (cache === screenProjectionCache) {
+            _excludedEpisodesInRange.value = countExcludedEpisodes(activeRange)
         }
         val projection = StatsRangeProjection(
             filteredHistory = filteredHistory,
@@ -963,9 +1011,39 @@ class StatsViewModel : ViewModel() {
             viewMode = viewMode,
             unit = unit,
             useCache = false
-        ).mapNotNull { point -> point.value.takeIf { isStatsValueValid(it) } }
+        ).mapNotNull { point ->
+            point.value.takeIf { isStatsValueValid(it) && !isPressureExcluded(point.timestamp) }
+        }
         if (values.size < currentReadingCount * MIN_COMPARISON_COVERAGE) return null
         return StatsAnalytics.periodScalars(values, targets)
+    }
+
+    private fun isPressureExcluded(timestamp: Long): Boolean {
+        val marks = pressureMarks
+        if (marks.isEmpty()) return false
+        return marks.any { timestamp >= it.episodeKeyMs && timestamp <= it.endMs }
+    }
+
+    private fun countExcludedEpisodes(activeRange: StatsDateRange?): Int {
+        val marks = pressureMarks
+        if (marks.isEmpty()) return 0
+        if (activeRange == null) return marks.size
+        return marks.count {
+            it.episodeKeyMs <= activeRange.endMillis && it.endMs >= activeRange.startMillis
+        }
+    }
+
+    private fun observePressureMarks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = Applic.app ?: return@launch
+            runCatching {
+                HistoryDatabase.getInstance(app).hypoEpisodeDao().observePressureMarks()
+                    .collect { marks ->
+                        pressureMarks = marks
+                        _exclusionRevision.value += 1L
+                    }
+            }.onFailure { Log.e(tag, "observePressureMarks failed", it as? Exception ?: Exception(it)) }
+        }
     }
 
     private fun filterHistoryForRange(

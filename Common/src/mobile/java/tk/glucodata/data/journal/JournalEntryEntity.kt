@@ -12,6 +12,7 @@ import androidx.room.ColumnInfo
         Index(value = ["entryType"]),
         Index(value = ["insulinPresetId"]),
         Index(value = ["foodId"]),
+        Index(value = ["mealId"]),
         Index(value = ["sourceRecordId"], unique = true),
         Index(value = ["recoveryId"], unique = true)
     ]
@@ -42,17 +43,22 @@ data class JournalEntryEntity(
     val updatedAt: Long,
     val nsUploadedAt: Long? = null,
     val nsRemoteId: String? = null,
+    /**
+     * When this row last went out to LibreView, so an unchanged entry is not resent on
+     * every upload pass. Tracked separately from [nsUploadedAt] because the two
+     * destinations succeed and fail independently.
+     */
+    val lvUploadedAt: Long? = null,
+    /**
+     * Correlates this fact (eaten, injected) with the meal it belongs to. The meal holds the
+     * composition; the journal stays the log. Nullable, and never set by the meal itself.
+     */
+    val mealId: Long? = null,
     val insulinCurveJsonSnapshot: String? = null,
     val insulinCurveProfileId: String? = null,
     val insulinCurveModelVersion: Int? = null,
     val insulinCurveEvidence: String? = null,
     val insulinBodyWeightKg: Float? = null,
     @ColumnInfo(defaultValue = "0")
-    val insulinCurveWasApproximated: Boolean = false,
-    /**
-     * When this row last went out to LibreView, so an unchanged entry is not resent on
-     * every upload pass. Tracked separately from [nsUploadedAt] because the two
-     * destinations succeed and fail independently.
-     */
-    val lvUploadedAt: Long? = null
+    val insulinCurveWasApproximated: Boolean = false
 )

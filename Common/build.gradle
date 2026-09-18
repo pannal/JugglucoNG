@@ -23,6 +23,13 @@ ext {
     GMSWEAR      = '20.0.1'
 }
 
+def requestedAbiProperty = providers.gradleProperty('jugglucoAbi').getOrNull()
+def requestedAbis = requestedAbiProperty == null
+        ? []
+        : requestedAbiProperty.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+def supportedAbis = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64']
+def unsupportedAbis = requestedAbis.findAll { !supportedAbis.contains(it) }
+
 android {
     buildFeatures.buildConfig = true
     buildFeatures.resValues = true
@@ -59,9 +66,7 @@ android {
         // of the two, and the other is most of what is left. The property replaces this list
         // rather than narrowing it, so -PjugglucoAbi=x86_64 still builds an emulator APK.
         ndk {
-            abiFilters(*(project.hasProperty('jugglucoAbi')
-                    ? project.property('jugglucoAbi').split(',').collect { it.trim() }
-                    : ['arm64-v8a', 'armeabi-v7a']))
+            abiFilters(*(requestedAbis.isEmpty() ? ['arm64-v8a', 'armeabi-v7a'] : requestedAbis))
         }
 
         applicationId = "tk.glucodata.ng"
@@ -91,6 +96,7 @@ android {
         buildConfigField 'String', 'BUILD_TIME', 'new java.text.SimpleDateFormat("HH:mm:ss dd-MMM-yyyy").format(new java.util.Date(' + System.currentTimeMillis() + 'L))'
         buildConfigField 'int', 'isRelease', '0'
         buildConfigField 'int', 'isReleaseID', '0'
+        buildConfigField 'boolean', 'EXPERIMENTAL_LIBRE3_SOURCE', 'false'
 
         // Every sensor backend is compiled into every build. These used to be
         // flavour dimensions (libreVersion / SiBionics / DexCom), but only one
@@ -160,10 +166,22 @@ android {
                 cFlags "-DRELEASEID=1", "-DRELEASE=1", "-DNORAWSTREAM=1", "-DRELEASEDIR=1"
             }
         }
+        l3experimental {
+            initWith release
+            matchingFallbacks = ['release']
+            minifyEnabled = false
+            shrinkResources = false
+            versionNameSuffix = '-L3-SOURCE-EXPERIMENTAL'
+            resValue "string", "app_name", "Glucifer L3 Source Experimental"
+            buildConfigField 'boolean', 'EXPERIMENTAL_LIBRE3_SOURCE', 'true'
+            externalNativeBuild.cmake {
+                arguments "-DEXPERIMENTAL_LIBRE3_SOURCE=TRUE"
+            }
+        }
         releasedub {
             versionNameSuffix = 'DUB'
             applicationIdSuffix = ".dub"
-            resValue "string", "app_name", "JugglucoNG Dub"
+            resValue "string", "app_name", "Glucifer Dub"
             signingConfig = signingConfigs.alg
             minifyEnabled = true
             shrinkResources = true
@@ -182,7 +200,7 @@ android {
         releasedub2 {
             versionNameSuffix = 'DUB2'
             applicationIdSuffix = ".dub2"
-            resValue "string", "app_name", "JugglucoNG Dub 2"
+            resValue "string", "app_name", "Glucifer Dub 2"
             signingConfig = signingConfigs.alg
             minifyEnabled = true
             shrinkResources = true
@@ -302,12 +320,17 @@ android {
     }
 }
 
+if (requestedAbiProperty != null && (requestedAbis.isEmpty() || !unsupportedAbis.isEmpty())) {
+    def invalid = unsupportedAbis.isEmpty() ? requestedAbiProperty : unsupportedAbis.join(', ')
+    throw new GradleException("Unsupported jugglucoAbi '${invalid}'. Expected a comma-separated subset of: ${supportedAbis.join(', ')}")
+}
+
 // APK filenames. The default is "Common-mobile-release.apk" -- module name first,
 // no version. Produce JugglucoNG-<version>[-wear][-<build type>].apk instead, e.g.
 // JugglucoNG-1.0.9-Alpha.apk / JugglucoNG-1.0.9-Alpha-dub.apk.
 androidComponents {
     onVariants(selector().all()) { variant ->
-        def buildTypeTag = [release: '', releasedub: 'dub', releasedub2: 'dub2', debug: 'debug']
+        def buildTypeTag = [release: '', l3experimental: 'l3-source-experimental', releasedub: 'dub', releasedub2: 'dub2', debug: 'debug']
                 .get(variant.buildType, variant.buildType)
         def isWear = variant.productFlavors.any { flavor -> flavor.second == 'wear' }
         def parts = [isWear ? 'wear' : '', buildTypeTag].findAll { it }
@@ -389,6 +412,8 @@ dependencies {
     mobileImplementation "androidx.camera:camera-view:$cameraXVersion"
     mobileImplementation 'com.google.guava:guava:33.7.1-android'
     mobileImplementation 'com.google.mlkit:barcode-scanning:17.3.0'
+    // On-device text recognition for reading nutrition labels when a barcode is unknown (meals).
+    mobileImplementation 'com.google.mlkit:text-recognition:16.0.1'
     mobileImplementation 'com.github.luben:zstd-jni:1.5.7-12@aar'
 
     // ---- wear ----

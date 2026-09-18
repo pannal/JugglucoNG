@@ -1,7 +1,7 @@
 <resources>
     <string name="language">so</string>
     <string name="languagename">Luuqad</string>
-    <string name="app_name">JugglucoNG</string>
+    <string name="app_name">Glucifer</string>
 
     <string name="ok">OK</string>
     <string name="cancel">Ka noqo</string>
@@ -15,7 +15,7 @@
     <string name="kerfstok_missing_message">Kerfstok laguma rakibin saacadda. Waxaad ka heli kartaa dukaanka Garmin Connect IQ.</string>
 
     <string name="alarm_description">Gulukoos aad u hooseeya ama aad u sareysa</string>
-    <string name="loss_description">Juggluco waxa lumiyay xidhiidhkii dareenka</string>
+    <string name="loss_description">Glucifer waxa lumiyay xidhiidhkii dareenka</string>
     <string name="numalarm_description">Xusuusin ku saabsan qaadashada daawo, cunista ama jimicsiga</string>
     <string name="notification_description">Waxay ogeysiisaa qiimaha gulukooska ee hadda jira</string>
     <string name="ongoing_description">Barnaamijka socda</string>
@@ -222,7 +222,7 @@
     <string name="health_connect_title">Health Connect</string>
     <string name="health_connect_desc">U dir akhrinta gulukooska Health Connect si ay u isticmaalaan abka caafimaadka ee la jaanqaadi kara</string>
     <string name="sensorpermission">Oggolaanshaha dareemayaasha</string>
- <string name="sensorpermissionmessage">Waxaa loo baahan yahay si loo muujiyo garaaca wadnaha. Ka daar Dejimaha qalabka > Apps > Oggolaanshaha > Juggluco.</string>
+ <string name="sensorpermissionmessage">Waxaa loo baahan yahay si loo muujiyo garaaca wadnaha. Ka daar Dejimaha qalabka > Apps > Oggolaanshaha > Glucifer.</string>
  <string name="floatglucose">Gulukoos sabaynaysa</string>
  <string name="floatglucoseshort">@string/floatglucose</string>
 
@@ -244,7 +244,7 @@
 
  <string name="finish">Xiriirka ka jar</string>
  <string name="finishsensormessage">Jooji isticmaalka dareemahan baahinta?</string>
- 
+
  <string name="email">Iimayl:</string>
  <string name="getaccountid">Hel aqoonsiga Koontada</string>
 
@@ -342,7 +342,7 @@
 <string name="resendwarning">Dhammaan xogta dib ayaa loo soo diri doonaa taas oo waqti qaadanaysa oo cawaaqib u yeelan karta Libreview iyo Kerfstok</string>
 <string name="parseip">Khalad kala saarida IP</string>
 <string name="toomanyhosts">Tirada ugu badan ee martigaliyayaasha ayaa dhaaftay</string>
-<string name="senthosts">Juggluco waxay u dirtaa ugu badnaan 6 martigaliyayaasha</string>
+<string name="senthosts">Glucifer waxay u dirtaa ugu badnaan 6 martigaliyayaasha</string>
     <string name="hostname">Magaca martida</string>
    <string name="clampnow">Hadda isku dheji</string>
     <string name="sendfrom">"Ka soo dir:"</string>
@@ -380,7 +380,7 @@
    <string name="photomessage">Sawir shaxanka xogta Dexcom G7/ONE+ ama Sibionics GS1 ama muraayadda QR code.</string>
    <string name="dexfuture">Saadaal (Dexcom)</string>
    <string name="initializing">Bilaabida</string> 
-   <string name="startjuggluco">Juggluco ku shaqeeya telifoonka?\n\nWIFI iyo Bluetooth ma shaqeeyaa?</string> 
+   <string name="startjuggluco">Glucifer ku shaqeeya telifoonka?\n\nWIFI iyo Bluetooth ma shaqeeyaa?</string>
    <string name="connected">Ku xidhan!</string> 
    <string name="useclose">Xir badhanka</string> 
    <string name="alarmclock">\u23F0</string> 
@@ -404,7 +404,7 @@
     <string name="autoqr">Si toos ah QR</string>
     <string name="autoqrmessage">U soo dir xogta taleefankan talefan kale ee shabakada gurigaaga.
 Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo bandhigi doontaa koodka QR kaas oo lagu sawiri karo qalab kale oo Android ah. Sawirka QR code ee leh menu bidix → Sawirka taleefanka kale wuxuu dhalin doonaa xiriir, kaas oo uu ka heli doono dhammaan xogta taleefankan.</string>
-    
+
     <string name="googlescan">Sawirka Google</string>
     <string name="usedweight">DIGNIIN: Miisaanka (%.1f) maaha 0</string>
 
@@ -580,7 +580,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="scans">Iskaanada</string>
     <string name="stream">Gudbin</string>
     <string name="exchanges">Xog-isweydaarsiga</string>
-    
+
     <!-- Main UI Strings -->
     <string name="dashboard">Dashboard-ka</string>
     <string name="stats">Tirakoobka</string>
@@ -593,7 +593,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="add_sensor">Kudar Sensor</string>
     <string name="sensors_title">Dareemayaasha</string>
     <string name="add_sensor_title">Kudar Sensor</string>
-    
+
     <!-- Sensor Screen Strings -->
     <string name="calibration_algorithm">Calibration Algorithm</string>
     <string name="restart_autocal_title">Dib u bilow toosinta tooska ah?</string>
@@ -610,24 +610,24 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="trend_rising">Isbeddelka ayaa kor u kacaya boqolkiiba %1$s.</string>
     <string name="trend_falling">Isbeddelku wuxuu hoos u dhacayaa boqolkiiba %1$s.</string>
     <string name="trend_unchanged">Isbeddelku weli waxba kama beddelin.</string>
-    
+
     <!-- Duration Strings (ViewModel) -->
     <string name="in_use">%1$s oo la isticmaalo</string>
     <string name="remaining">%1$s haray</string>
     <string name="expired">dhacay</string>
     <string name="days_short">%1$dd</string>
     <string name="hours_short">%1$dh</string>
-    
+
     <!-- Settings Strings -->
     <string name="theme_title">Dulucda</string>
     <string name="theme_system">Nidaamka Default</string>
     <string name="theme_light">Iftiin</string>
     <string name="theme_dark">Madow</string>
-    
+
     <string name="advanced_title">Sareeye</string>
     <string name="debug_logs">Diiwaanka qaladka</string>
     <string name="nightscout_config">Nightscout Config</string>
-    
+
     <!-- LibreView Settings -->
     <string name="libreview_config">LibreView</string>
     <string name="libreview_desc">Ku xidh Abbott LibreView</string>
@@ -645,10 +645,10 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="libreview_get_account_id">Hel aqoonsiga Koontada</string>
     <string name="libreview_status">Xaalada</string>
     <string name="libreview_russia">Gobolka Ruushka</string>
-    
+
     <string name="low_label">Hoose</string>
     <string name="high_label">Sare</string>
-    
+
     <!-- Sensor Management Strings -->
     <string name="disconnect_sensor_title">Isku xirka Sensor?</string>
     <string name="disconnect_sensor_desc">Tani waxay si joogto ah u joojin doontaa fadhiga dareemayaasha.</string>
@@ -667,21 +667,21 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="reconnect_sensor_title">Dib u xidhid Sensor?</string>
     <string name="reconnect_sensor_desc">Tani waxay dib u dajin doontaa isku xidhka waxayna isku dayi doontaa in dib loo xidho.</string>
     <string name="reconnect">Dib u xidhidh</string>
-    
+
     <string name="forget_sensor_title">Ma ilowdaa Dareemka?</string>
     <string name="forget_sensor_desc">Tani waxay ka saari doontaa dareenka liiska. Waxaa laga yaabaa inay dib u soo baxdo haddii mar kale la sawiro.</string>
-    
+
     <string name="reset_sensor_title">Dareemka dib u deji?</string>
     <string name="reset_sensor_desc">Tani waxay dib u dajin doontaa dareenka Sibionics 2. Sii wad?</string>
     <string name="reset_sensor">Dib u dabee dareen</string>
-    
+
     <string name="reset_all_title">Dib u deji dhammaan?</string>
     <string name="reset_all_desc">Nadiifi dhammaan xogtii hore, habaynta, oo dib u deji shideeyaha?</string>
     <string name="reset_all">Dib u habeyn dhammaan</string>
-    
+
     <string name="unified_reset_desc">Tani waxay dib u bilaabi doontaa dareemayaasha oo dib u dajin doona algorithm-kalibration-ka.</string>
     <string name="keep_auto_calibration">Hayso xogta is-habaynta</string>
-    
+
     <string name="enabled_status">Hawl gal</string>
     <string name="disabled_status">Dansan</string>
     <string name="last_ble_status">Heerka BLE ee u dambeeyay</string>
@@ -695,12 +695,12 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="auto_reset_title">Dib u dejin toos ah</string>
     <string name="auto_reset_days">%1$d maalmood</string>
     <string name="auto_reset_never">Marna</string>
-    
+
     <!-- Sensor Onboarding Strings -->
     <string name="no_sensor_title">Ma jiro Sensor ku xidhan</string>
     <string name="no_sensor_description">Ku xidh kormeeraha gulukoosta ee joogtada ah si aad u bilowdo la socodka heerarka gulukoostaada.</string>
 
-    
+
     <!-- Sibionics Setup Wizard -->
     <string name="sibionics_setup_title">Dejinta Sibionics</string>
     <string name="scan_sensor_qr">Sawirka Sensor code QR</string>
@@ -710,7 +710,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
 
     <string name="connecting">Isku xidhka...</string>
     <string name="setup_complete">Dejinta oo Dhamaystiran</string>
-    
+
     <!-- Libre Setup Wizard -->
     <string name="libre_setup_title">Habaynta Libre</string>
     <string name="libre_nfc_instruction">Ku hay taleefankaaga meel u dhow dareenka si aad u sawirto</string>
@@ -724,7 +724,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="libre_setup_libreview_note_title">Libre 3 + LibreView</string>
     <string name="libre_setup_advanced_options_desc">Hagaajin dabeecadda iskaanka ee tijaabada ah ee Libre 3 ka hor inta aanad lammaanin.</string>
     <string name="libre3_nfc_command_title">Libre 3 NFC</string>
-    <string name="libre3_nfc_command_desc">Dooro amarka uu soo diro Juggluco inta lagu jiro iskaanka Libre 3 NFC</string>
+    <string name="libre3_nfc_command_desc">Dooro amarka uu soo diro Glucifer inta lagu jiro iskaanka Libre 3 NFC</string>
     <string name="libre3_nfc_command_auto">Baabuur</string>
     <string name="libre3_nfc_command_auto_desc">Adeegso hab-dhaqanka iskaanka Libre 3 ee caadiga ah ee Juggluco</string>
     <string name="libre3_nfc_command_activate">A0 Daar</string>
@@ -736,7 +736,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="libreview_account_missing_desc">Geli waraaqaha aqoonsiga oo codso aqoonsiga Koontada ee dareemayaasha Libre 3</string>
     <string name="libre_setup_account_id_obtained">Aqoonsiga xisaabta ee la helay</string>
     <string name="libre_setup_account_id_timeout">Waqtigu dhamaaday Hubi aqoonsiga oo isku day mar kale.</string>
-    
+
     <!-- Dexcom Setup Wizard -->
     <string name="dexcom_setup_title">Dexcom Dejinta</string>
     <string name="dexcom_scan_instruction">Sawir shaxanka xogta ee dareenkaaga Dexcom</string>
@@ -806,7 +806,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="scheduled_backup_acknowledge">Xaqiiji oo kaydka ugu cusub u adeegso saldhigga isbarbardhigga</string>
     <string name="backup_integrity_channel">Digniinaha saxnaanta kaydka</string>
     <string name="backup_integrity_channel_desc">Digniino halis ah marka kayd otomaatig ahi yeelan karo xog aad uga yar</string>
-    <string name="backup_integrity_notification_title">Hubi kaydkaaga JugglucoNG</string>
+    <string name="backup_integrity_notification_title">Hubi kaydkaaga Glucifer</string>
     <string name="backup_integrity_notification_text">Kaydka ugu cusub si lama filaan ah ayuu u yar yahay. Kaydkii hore waa la hayay. Fur dejinta kaydka si aad u hubiso.</string>
     <string name="export_everything">Wax walba</string>
     <string name="export_history_data_desc">Taariikhda gulukooska, gelida joornaalka, iyo horudhaca insulinta</string>
@@ -822,7 +822,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="import_data">Soo dejinta Xogta</string>
     <string name="import_data_desc">Soo deji kaydinta ama faylka Libreview</string>
     <string name="import_data_settings">Soo dejinta Xogta/Dejinta</string>
-    <string name="import_data_settings_desc">Soo celi taariikhda CSV ama dhoofinta JugglucoNG</string>
+    <string name="import_data_settings_desc">Soo celi taariikhda CSV ama dhoofinta Glucifer</string>
     <string name="settings_import_confirm_title">Dejinta soo dejinta?</string>
     <string name="settings_import_confirm_message">Tani waxay beddeshaa habaynta abka, aqoonsiga, furayaasha aaladaha, iyo qaabaynta muraayadda, ka dib waxay dib u bilaabataa abka.</string>
     <string name="settings_import_successful">Dejinta waa la soo dejiyay Dib u bilaabaya...</string>
@@ -835,7 +835,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="patient_id_label">Aqoonsiga bukaanka</string>
     <string name="patient_dob_label">Taariikhda dhalashada</string>
     <string name="patient_clinician_label">Kooxda daryeelka</string>
-    
+
     <string name="danger_zone">Aagga Khatarta</string>
     <string name="clear_history">Nadiifi Taariikhda</string>
     <string name="clear_history_desc_long">Ka saar dhammaan akhrinta gulukooska. Lama soo celin karo</string>
@@ -848,7 +848,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="factory_reset_confirm">Dib u habayn warshadeed?</string>
     <string name="clean_history_confirm">Taariikhda tirtiri?</string>
     <string name="clean_data_confirm">Masaar xogta Appka?</string>
-    
+
     <string name="turbo_title">Turbo (mudnaanta sare)</string>
     <string name="turbo_desc">Codsadaa mudnaanta isku xirka sare</string>
     <string name="autoconnect_title">AutoConnect</string>
@@ -878,7 +878,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="preview_window_never">Marna</string>
     <string name="debug_logs_desc">Eeg trace.log iyo logcat</string>
 
-    
+
     <string name="unit_mg">mg/dL</string>
     <string name="unit_mmol">mmol/L</string>
     <string name="alert_mode">Habka Feejignaanta</string>
@@ -903,12 +903,12 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
 
     <!-- Hardcoded Strings Extracted -->
     <string name="import_history">Soo dejinta Taariikhda</string>
-    <string name="import_history_desc">Ka soo deji xogta gulukooska dhoofinta JugglucoNG ama faylka CSV</string>
+    <string name="import_history_desc">Ka soo deji xogta gulukooska dhoofinta Glucifer ama faylka CSV</string>
     <string name="get_started_desc">Ku bilow adiga oo ku dara dareenkaaga</string>
     <string name="select_sensor">Dooro Nooca Sensor</string>
     <string name="or_divider">"ama"</string>
     <string name="no_sensors_connected">Ma jiro dareemayaal ku xiran</string>
-    
+
     <string name="enter_sensor_codes">Geli codes Sensor</string>
     <string name="enter_sensor_label_desc">Geli koodka ku daabacan calaamadda dareemayaasha</string>
     <string name="batch_code_label">Koodhka Dufcaddii (10)</string>
@@ -916,12 +916,12 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="serial_number_label">Lambarka Taxanaha ah</string>
     <string name="serial_number_supporting">Koodhka labaad (10-20 chars), tusaale. %1$s</string>
     <string name="confirm">Xaqiiji</string>
-    
+
     <string name="enter_transmitter_code">Geli Koodhka Gudbinta</string>
     <string name="enter_transmitter_desc">Ka geli aqoonsiga gudbiyaha ee summada</string>
     <string name="transmitter_id_label">Aqoonsiga gudbiyaha</string>
     <string name="transmitter_id_supporting">8-12 xaraf oo ka soo jeeda calaamadda gudbiyaha</string>
-    
+
     <string name="scan_sensor_title">Sawir code-ka QR</string>
     <string name="scan_sensor_instruction">Ka sawir koodka QR ee sanduuqa dareenka guud ee Sibionics.</string>
     <string name="scan_sensor_instruction_sibionics2">Sawir koodhka isku xirka ee ku yaal gudbiyaha Sibionics 2, ama hoos kaga dooro gudbiyaha Bluetooth-ka.</string>
@@ -929,10 +929,10 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="select_gallery_button">Ka dooro Gallery</string>
     <string name="skip_fake_sensor">Ka bood (Isticmaal sensor been abuur ah)</string>
     <string name="enter_code_manually">Gacanta u geli Koodhka</string>
-    
+
     <string name="choose_sibionics_variant">Dooro nooca ku qoran baakadka.</string>
     <string name="continue_action">Sii wad</string>
-    
+
     <string name="sensor_init_failed">Dareemida bilawga waa fashilantay</string>
     <string name="sensor_lost_restart">Khalad: Dareemuhu waa lumay Fadlan dib u bilow habaynta</string>
     <string name="invalid_device_name">"Magaca aaladda aan sax ahayn:"</string>
@@ -943,7 +943,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sibionics_code_not_for_type">Koodkan kuma eka %1$s. Dib u noqo oo dooro nooca dareemaha ku habboon.</string>
     <string name="sibionics_serial_wrong_type">Lambarkan taxanaha lama mid aha %1$s. Dib u noqo oo dooro nooca dareemaha ku habboon.</string>
     <string name="no_qr_found">Ma jiro summada QR ee sawirka laga helay</string>
-    
+
     <!-- ComposeHost Strings -->
     <string name="go">Tag</string>
     <string name="filter_by_date">Ku sifee taariikhda</string>
@@ -956,14 +956,14 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="export_history_title">Taariikhda dhoofinta</string>
     <string name="export_history_sub">Ku keydi akhrinta gulukooska CSV ama faylka qoraalka</string>
     <string name="import_history_title">Soo dejinta Taariikhda</string>
-    <string name="import_history_sub">Soo celi akhrinta gulukooska dhoofinta JugglucoNG ama faylka CSV</string>
-    
+    <string name="import_history_sub">Soo celi akhrinta gulukooska dhoofinta Glucifer ama faylka CSV</string>
+
     <string name="clear_history_title">Taariikhda tirtiri?</string>
     <string name="clear_history_confirmation">Tani waxay ka saari doontaa dhammaan akhrinta gulukooska ee kaydka xogta. Tallaabadan lama noqon karo.</string>
     <string name="delete_reading_title">Ma tirtirtaa Akhriska?</string>
     <string name="delete_reading_confirmation">Ka saar akhriska gulukoosta taariikhda deegaanka. Tallaabadan lama noqon karo.</string>
     <string name="clear_button">Cad</string>
-    
+
     <string name="clear_app_data_title">Masaar xogta Appka?</string>
     <string name="clear_app_data_intro">Tani waxay meesha ka saari doontaa:</string>
     <string name="all_glucose_readings">• Dhammaan akhrinta gulukooska</string>
@@ -973,13 +973,13 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="settings_preserved">Dejinta waa la ilaalin doonaa</string>
     <string name="cannot_be_undone_warning">Tallaabadan lama noqon karo.</string>
     <string name="clear_data_button">Nadiifi Xogta</string>
-    
+
     <string name="factory_reset_title">⚠️ Dib u habayn warshadeed?</string>
     <string name="factory_reset_intro">Tani waxay meesha ka saaraysaa wax walba:</string>
     <string name="factory_reset_outcome">Abka waxa uu ku noqon doona gobolka ugu horeeya</string>
     <string name="cannot_be_undone_critical">Tan lama soo celin karo!</string>
     <string name="reset_everything_button">Dib u habeyn wax walba</string>
-    
+
     <string name="alert_sound">Digniin Dhawaaq</string>
     <string name="about_text">GPL-3.0 • Fargeeto Juggluco</string>
     <string name="refreshing">Dib u cusbooneysiin...</string>
@@ -988,7 +988,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="juggluco_native">Juggluco u dhashay</string>
     <string name="window_label">daaqada</string>
     <string name="auto_restart_algorithm">Algorithm dib u bilow otomaatig ah</string>
-    
+
     <string name="status_bluetooth_off">Bluetooth dansan</string>
     <string name="status_connection_failed">Xidhiidhku wuu fashilmay</string>
     <string name="status_connected">Ku xidhan</string>
@@ -996,7 +996,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="status_waiting_for_data">Ku xidhan, sugitaanka xogta...</string>
     <string name="status_raw_values_received">Ku xidhan, qiyam cayriin ayaa la helay</string>
     <string name="status_invalid_glucose_from_sensor">Gulukoos aan sax ahayn oo ka timaadda dareemayaasha</string>
-    
+
     <string name="select_sensor_type">Dooro nooca dareenka</string>
     <string name="choose_theme">Dooro mawduuc</string>
     <string name="sibionics_sensor_picker_desc">Sawirka QR</string>
@@ -1179,7 +1179,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="aidex_not_recognized">%1$s • looma aqoonsan AiDex</string>
     <string name="aidex_selectable_unrecognized">%1$s • Qalabka AiDex-qoyska la dooran karo</string>
     <string name="aidex_detected_via_ff30">%1$s • lagu dooran karo ogaanshaha FF30</string>
-    
+
     <!-- Statistics Screen Strings -->
     <string name="statistics_title">Tirakoobka</string>
     <string name="statistics_subtitle">Falanqaynta gulukoostaada</string>
@@ -1212,14 +1212,14 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="range">Range</string>
     <string name="start_tracking">Bilow la socoshada gulukoostaada si aad u aragto tirakoob</string>
     <string name="loading_data">Soodejinaya...</string>
-    
+
     <!-- Variability Labels -->
     <string name="variability_excellent">Aad u fiican</string>
     <string name="variability_very_good">Aad u Wanaagsan</string>
     <string name="variability_good">Wacan</string>
     <string name="variability_moderate">Dhexdhexaad</string>
     <string name="variability_high">Sare</string>
-    
+
     <!-- Insight Messages -->
     <string name="insight_excellent_control">Xakameyn heer sare ah!</string>
     <string name="insight_excellent_control_desc">Waxaad ku bixinaysaa %1$d%% inta u dhaxaysa - oo ka sarreeya 70%% bartilmaameedka!</string>
@@ -1235,7 +1235,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="insight_great_a1c_desc">Qiyaasta A1C (GMI): %1$.1f%% - waa inta la beegsanayo!</string>
     <string name="insight_a1c_estimate">Qiyaasta A1C</string>
     <string name="insight_a1c_estimate_desc">GMI: %1$.1f%%. Waxoogaa ka sarreeya 7%% bartilmaameedka.</string>
-    
+
     <!-- GVI and PSG (xDrip-style metrics) -->
     <string name="gvi_title">Tusaha Kala-duwanaanta Gulukoosta</string>
     <string name="gvi_description">Wuxuu cabbiraa xasilloonida gulukooska iyo qaababka kala duwanaanshiyaha</string>
@@ -1250,7 +1250,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="psg_elevated">Saldhig Sare</string>
     <string name="psg_low">Saldhig Hoose</string>
     <string name="psg_unstable">Qaabka Aan Degenayn</string>
-    
+
     <!-- Time Range Labels -->
     <string name="range_1d">1D</string>
     <string name="range_3d">3D</string>
@@ -1258,19 +1258,19 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="range_14d">14D</string>
     <string name="range_30d">30D</string>
     <string name="range_90d">90D</string>
-    
+
     <string name="range_all">DHAMMAAN</string>
     <!-- Time Labels -->
     <string name="time_12am">12 subaxnimo</string>
     <string name="time_6am">6 subaxnimo</string>
     <string name="time_12pm">12 duhurnimo</string>
     <string name="time_6pm">6 galabnimo</string>
-    
+
     <!-- Detail Modal -->
     <string name="view_details">Daawo Faahfaahinta</string>
     <string name="percentage_format">%1$d%%</string>
     <string name="value_with_unit">%1$s %2$s</string>
-    
+
     <!-- Additional Statistics Strings -->
     <string name="low">Hoose</string>
     <string name="high">Sare</string>
@@ -1287,7 +1287,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="tir">TIR</string>
     <string name="total_readings">Wadarta Akhriska</string>
     <string name="cv">CV</string>
-    
+
     <!-- Stats Screen Redesign -->
     <string name="lowest">Ugu hooseeya</string>
     <string name="highest">Ugu sarreeya</string>
@@ -1525,7 +1525,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="hours_remaining">%1$d saacadood ayaa hadhay</string>
     <string name="import_failed_with_error">Soo dejintu waa fashilantay: %1$s</string>
     <string name="import_no_glucose">Faylkan kuma jiro xog gulukoos</string>
-    <string name="import_unsupported_file">Faylkan lama taageero. Dooro dhoofinta JugglucoNG ama CSV taariikhda gulukooska.</string>
+    <string name="import_unsupported_file">Faylkan lama taageero. Dooro dhoofinta Glucifer ama CSV taariikhda gulukooska.</string>
     <string name="import_profile_merge">Soo dejinta profile (ku biir)</string>
     <string name="import_profile_replace">Soo rar astaanta guud (bedel)</string>
     <string name="import_summary">La soo dejiyay: %1$d, la booday: %2$d, beddelay: %3$d</string>
@@ -1572,7 +1572,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_follow_status_idle">Nightscoout raaca</string>
     <string name="nightscout_follow_status_following">Ka dib Nightscout</string>
     <string name="nightscout_follow_use_v3_api">Isticmaal API v3 raacitaanka</string>
-    <string name="nightscout_follow_use_v3_api_desc">Waxay ka akhridaa /api/v3 halkii /api/v1. Token-ka gelitaanka wuxuu u baahan yahay api:entries:read, api:treatments:read iyo api:devicestatus:read. Doorarka la beddelay waxay shaqeeyaan oo keliya beddelka token-ka ee xiga: dib u bilow abka haddii 403 sii socoto.</string>
+    <string name="nightscout_follow_use_v3_api_desc">Waxay ka akhridaa /api/v3 halkii /api/v1. Token-ka gelitaanka wuxuu u baahan yahay api:entries:read, api:treatments:read iyo api:devicestatus:read. Doorarka la beddelay waxay shaqeeyaan oo keliya beddelka token-ka ee xiga: isticmaal \"Cusboonaysii token-ka\" haddii 403 sii socoto.</string>
     <string name="nightscout_follow_status_syncing">Nightscout oo soo kicinaysa</string>
     <string name="nightscout_follow_status_paused">Habeenimadii raacdayaashii waa hakad</string>
     <string name="nightscout_follow_status_config_needed">Geli Nightscout URL</string>
@@ -1704,7 +1704,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="report_iqr_short">IQR</string>
     <string name="report_not_enough_daily_trend">Xog maalmeed kuma filna in la sameeyo isbeddel.</string>
     <string name="report_no_readings_day">Akhris ma jiro maalintan.</string>
-    <string name="report_page1_title">JugglucoNG CGM Warbixinta Caafimaadka</string>
+    <string name="report_page1_title">Glucifer CGM Warbixinta Caafimaadka</string>
     <string name="report_page1_subtitle">Range %1$s · Akhriska %2$d · Daaqada %3$s ilaa %4$s</string>
     <string name="report_estimated_a1c">Qiyaasta A1C</string>
     <string name="report_below_target">Hoosta bartilmaameedka</string>
@@ -1719,7 +1719,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="report_above_duration">Kor: %1$s</string>
     <string name="report_agp_section_title">Xogta gulukooska ambalaaska ah (boqolkiiba 24)</string>
     <string name="report_reference_targets">Tixraaca yoolalka: GMI &lt;7.0%%, CV &lt;= 36%%, Time in range&gt;= 70%%</string>
-    <string name="report_page2_title">JugglucoNG CGM Isbeddellada Maalinlaha ah iyo Fasiraadda</string>
+    <string name="report_page2_title">Glucifer CGM Isbeddellada Maalinlaha ah iyo Fasiraadda</string>
     <string name="report_page2_subtitle">Kala duwanaanshiyaha maalinlaha ah, burburka cabbirka, iyo qoraallada tarjumaada</string>
     <string name="report_daily_average_trend">Dhaqdhaqaaqa celceliska maalinlaha ah</string>
     <string name="report_detailed_metrics">Qiyaasta faahfaahsan</string>
@@ -1734,7 +1734,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="report_no_generated_insights_message">Ma jiraan digniino qaabaysan oo dheeraad ah oo loo sameeyay muddadan.</string>
     <string name="report_agp_consensus_title">Tixraaca la isku raacsan yahay ee AGP</string>
     <string name="report_agp_consensus_body">Bartilmaameedyada lagu sheegay warbixintan waxay raacaan qaabka AGP-ga heshiis caalami ah: TIR 70-180 mg/dL (3.9-10.0 mmol/L), TBR &lt;70 iyo &lt;54 mg/dL, TAR&gt;180 and&gt;250 mg/dL, with CV goal &lt;=36%%.</string>
-    <string name="report_page3_title">JugglucoNG Lifaaqa I - AGP iyo Miisaska maalinlaha ah</string>
+    <string name="report_page3_title">Glucifer Lifaaqa I - AGP iyo Miisaska maalinlaha ah</string>
     <string name="report_page3_subtitle">Boqolleyda saacadle ah iyo natiijooyinka heerka maalinta</string>
     <string name="report_hourly_agp_table">Shaxda profile AGP ee saacadle ah</string>
     <string name="report_hour">Saacada</string>
@@ -1743,7 +1743,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="report_no_hourly_agp">Ma jiraan sanduuqyo AGP-ga oo saacadle ah oo laga heli karo xadkan.</string>
     <string name="report_daily_outcomes_table">Shaxda natiijooyinka maalinlaha ah</string>
     <string name="report_showing_latest_days">Muujinaya %1$d ugu dambeeyay ee %2$d maalmood.</string>
-    <string name="report_page4_title">JugglucoNG Lifaaqa II - Dhacdooyinka iyo Xogaha Maalinlaha ah</string>
+    <string name="report_page4_title">Glucifer Lifaaqa II - Dhacdooyinka iyo Xogaha Maalinlaha ah</string>
     <string name="report_page4_subtitle">Halbeegyada muujinta Hypo/hyper iyo jaantusyada profile-heer-maalin</string>
     <string name="report_hypo_hyper_events">Dhacdooyinka soo-gaadhista hypo/hyper</string>
     <string name="report_hours_per_day">Saacadaha/maalintii</string>
@@ -1803,7 +1803,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="insight_unstable_days">Maalmo Aan degganayn oo Soo noqnoqda</string>
     <string name="insight_unstable_days_desc">Maalmaha %1$d ee daaqadan waxay lahaayeen wax ka yar 50%% inta u dhaxaysa.</string>
     <string name="mq_fetch_calibration_on_add">Soo celi kalfadhiga iibiyaha marka lagu daro</string>
-    <string name="mq_fetch_calibration_on_add_desc">Haddii koodka QR ama aqoonsiga Glutec ee la kaydiyay la heli karo, Juggluco wuxuu isku dayaa inuu soo celiyo xaaladda fadhiga MQ inta lagu jiro dejinta.</string>
+    <string name="mq_fetch_calibration_on_add_desc">Haddii koodka QR ama aqoonsiga Glutec ee la kaydiyay la heli karo, Glucifer wuxuu isku dayaa inuu soo celiyo xaaladda fadhiga MQ inta lagu jiro dejinta.</string>
     <string name="mq_bootstrap_button">Soo celi fadhiga iibiyaha</string>
     <string name="mq_bootstrap_dialog_title">Soo celi fadhiga iibiyaha</string>
     <string name="mq_bootstrap_dialog_desc">Ka soo celi xaalada fadhiga iibiyaha ee Glutec. Geli dareemaha QR halkan haddii loo baahdo; koontada, isku xidhka, iyo dejinta API waxay ku nool yihiin Koontada MQ/Glutec.</string>
@@ -1836,9 +1836,9 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="mq_account_session_valid">Fadhigu waa ansax</string>
     <string name="mq_account_session_invalid">Fadhigu ma ansaxayo</string>
     <string name="mq_manual_calibration_title">Habaynta gacanta</string>
-    <string name="mq_manual_calibration_desc">Deegaanka ilaa Juggluco. Geli qiimaha gulukooska farta ku dheggan %1$s. Waxay u baahan tahay xidhmo MQ ah oo dhawaan nool ah.</string>
+    <string name="mq_manual_calibration_desc">Deegaanka ilaa Glucifer. Geli qiimaha gulukooska farta ku dheggan %1$s. Waxay u baahan tahay xidhmo MQ ah oo dhawaan nool ah.</string>
     <string name="mq_follower_title">raace Glutec</string>
-    <string name="mq_follower_desc">Raac akoon kale oo Glutec ah dhexda daruuraha iibiyaha. Daar tan waxay ku abuurtaa dareemaha akhriska-kaliya ee Juggluco.</string>
+    <string name="mq_follower_desc">Raac akoon kale oo Glutec ah dhexda daruuraha iibiyaha. Daar tan waxay ku abuurtaa dareemaha akhriska-kaliya ee Glucifer.</string>
     <string name="mq_follower_account_label">Koontada raacda</string>
     <string name="mq_follower_account_desc">Geli lambarka taleefanka Glutec ama akoon si aad u raacdo.</string>
     <string name="mq_follower_enabled_summary">Dabagal on</string>
@@ -2666,11 +2666,11 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="nightscout_upload_iob_desc">Nightscout wuxuu markaas muujinayaa qiimahan halkii uu ka isticmaali lahaa xisaabtiisa ku salaysan borofaylka. eIOB iyo COB sidoo kale waxaa lagu diraa meel gaar ah. Token-ka gelitaanka wuxuu u baahan yahay api:devicestatus:create.</string>
     <string name="journal_iob_source_remote">Qiimayaasha qalabka xogta diraya (Nightscout)</string>
     <string name="ottai_cloud_already_binding">Akoonka Ottai weli waxaa ku xiran dareeme kale. Ka fur app-ka Ottai ama halkan ka saar dareemahaas si xiriirka loo sii daayo, dabadeed mar kale isku day.</string>
-    <string name="ottai_cloud_unbind_hint">Tani waxay beddeshaa oo keliya koontada daruurta. JugglucoNG kuma xirmayo dareemaha la doortay, mana joojinayo, tirtirayo ama wax ka beddelayo.</string>
+    <string name="ottai_cloud_unbind_hint">Tani waxay beddeshaa oo keliya koontada daruurta. Glucifer kuma xirmayo dareemaha la doortay, mana joojinayo, tirtirayo ama wax ka beddelayo.</string>
     <string name="ottai_cloud_unbind_title">Dareemahan si joogto ah ma looga furaa?</string>
-    <string name="ottai_cloud_unbind_message">%1$s si joogto ah ayaa looga saari doonaa koontadan Ottai. Koontadu mar dambe ma heli karto aqoonsiyadiisa, dareemuhuna kama shaqayn doono app-ka rasmiga ah ee Ottai. Aqoonsiyada iyo xaaladda dareemaha ee hore loogu kaydiyay JugglucoNG lama beddeli doono. Tallaabadan dib looma celin karo.</string>
+    <string name="ottai_cloud_unbind_message">%1$s si joogto ah ayaa looga saari doonaa koontadan Ottai. Koontadu mar dambe ma heli karto aqoonsiyadiisa, dareemuhuna kama shaqayn doono app-ka rasmiga ah ee Ottai. Aqoonsiyada iyo xaaladda dareemaha ee hore loogu kaydiyay Glucifer lama beddeli doono. Tallaabadan dib looma celin karo.</string>
     <string name="ottai_cloud_unbind_confirm">Si joogto ah uga fur</string>
-    <string name="ottai_cloud_unbind_success">Dareemaha si joogto ah ayaa looga furay Ottai. Dareemaha iyo aqoonsiyada ku kaydsan JugglucoNG lama beddelin.</string>
+    <string name="ottai_cloud_unbind_success">Dareemaha si joogto ah ayaa looga furay Ottai. Dareemaha iyo aqoonsiyada ku kaydsan Glucifer lama beddelin.</string>
     <string name="ottai_cloud_unbind_failed">Dareemaha lagama furi karin Ottai.</string>
     <string name="ottai_cloud_binding_checking">Xiriirka daruurta Ottai waa la hubinayaa…</string>
     <string name="ottai_cloud_binding_bound">Xaaladda daruurta: waxay ku xiran tahay koontadan Ottai</string>
@@ -2733,7 +2733,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sms_max_per_hour">Ugu badnaan fariimo saacaddii</string>
     <string name="sms_max_per_day">Ugu badnaan fariimo maalintii</string>
     <string name="sms_sent_today">Waxaa la diray 24-kii saac ee la soo dhaafay: %1$d</string>
-    <string name="sms_permission_desc">JugglucoNG wuxuu u baahan yahay ogolaansho uu SMS ku diro ka hor inta aanay meeshan shaqayn.</string>
+    <string name="sms_permission_desc">Glucifer wuxuu u baahan yahay ogolaansho uu SMS ku diro ka hor inta aanay meeshan shaqayn.</string>
     <string name="sms_permission_grant">Ogolow</string>
     <string name="sms_no_telephony">Qalabkani ma diri karo SMS.</string>
     <string name="sms_preview_title">Horudhac</string>
@@ -2751,7 +2751,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="sms_event_no_data">Xog dareeme lama helin %1$d daq</string>
     <string name="sms_event_all_clear">Nabad ayaa jirta</string>
     <string name="sms_event_relay">Cusboonaysiin (xiriir xog ma jiro)</string>
-    <string name="sms_event_test">Fariin tijaabo ah oo ka timid JugglucoNG</string>
+    <string name="sms_event_test">Fariin tijaabo ah oo ka timid Glucifer</string>
     <string name="sms_body_no_reading">Weli akhris ma jiro</string>
 
     <!-- In-app updates (GitHub releases) -->
@@ -2791,13 +2791,13 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="app_updates_verifying_title">Soo dejinta ayaa la hubinayaa</string>
     <string name="app_updates_verifying_body">Saxeexa iyo nooca ayaa la hubinayaa ka hor rakibaadda.</string>
     <string name="app_updates_ready_title">%1$s waa diyaar u yahay rakibaad</string>
-    <string name="app_updates_ready_body">Android ayaa ku weydiin doona xaqiijin. JugglucoNG wuu xirmi doonaa oo dib u furmi doonaa; xiriirka dareemayaasha ayaa iskiis u soo noqonaya.</string>
+    <string name="app_updates_ready_body">Android ayaa ku weydiin doona xaqiijin. Glucifer wuu xirmi doonaa oo dib u furmi doonaa; xiriirka dareemayaasha ayaa iskiis u soo noqonaya.</string>
     <string name="app_updates_up_to_date_title">Waxaad haysataa nooca ugu dambeeyay</string>
     <string name="app_updates_last_checked">Markii ugu dambeysay la hubiyay %1$s</string>
     <string name="app_updates_never_checked">waligeed</string>
     <string name="app_updates_error_title">Hubinta cusboonaysiinta way fashilantay</string>
-    <string name="app_updates_permission_title">U ogolow JugglucoNG inuu wax rakibo</string>
-    <string name="app_updates_permission_body">Android wuxuu u baahan yahay ogolaansho hal mar ah ka hor inta JugglucoNG uusan rakibin cusboonaysiintiisa.</string>
+    <string name="app_updates_permission_title">U ogolow Glucifer inuu wax rakibo</string>
+    <string name="app_updates_permission_body">Android wuxuu u baahan yahay ogolaansho hal mar ah ka hor inta Glucifer uusan rakibin cusboonaysiintiisa.</string>
     <string name="app_updates_permission_action">Fur goobaha</string>
     <string name="app_updates_unsupported_store_title">Cusboonaysiintu waxay ka timaadaa suuqa abka</string>
     <string name="app_updates_unsupported_store_body">Nuqulkan waxaa rakibay %1$s, oo iskiis u maamula cusboonaysiinta.</string>
@@ -2808,11 +2808,11 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="app_updates_error_parse">Isha cusboonaysiintu waxay soo celisay wax aan la filayn.</string>
     <string name="app_updates_error_no_artifact">Nooca ugu dambeeyay wax la soo dejiyo uma laha dhismahan.</string>
     <string name="app_updates_error_checksum">Waxa la soo dejiyay kuma habboonayn checksum-kiisa waana la tirtiray.</string>
-    <string name="app_updates_error_signature">APK-ga la soo dejiyay waxaa lagu saxeexay fure kale waana la tirtiray. Kaliya ka rakib JugglucoNG bogga rasmiga ah ee sii deynta.</string>
+    <string name="app_updates_error_signature">APK-ga la soo dejiyay waxaa lagu saxeexay fure kale waana la tirtiray. Kaliya ka rakib Glucifer bogga rasmiga ah ee sii deynta.</string>
     <string name="app_updates_error_package">APK-ga la soo dejiyay wuxuu ka tirsan yahay ab kale.</string>
     <string name="app_updates_error_downgrade">Noocaas kama cusla nooca la rakibay.</string>
     <string name="app_updates_error_storage">Meel bannaan oo ku filan lama hayo soo dejinta.</string>
-    <string name="app_updates_error_install_permission">JugglucoNG weli looma ogola inuu abab rakibo.</string>
+    <string name="app_updates_error_install_permission">Glucifer weli looma ogola inuu abab rakibo.</string>
     <string name="app_updates_error_install_failed">Rakibaaddu ma dhammaystirmin.</string>
     <string name="app_updates_error_cancelled">Rakibaadda waa la joojiyay.</string>
     <string name="app_updates_source_title">Isha cusboonaysiinta</string>
@@ -2983,7 +2983,7 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="anytime_history_action">Taariikh</string>
     <string name="nightscout_follow_interval_title">Hubi qiimayaal cusub</string>
     <string name="nightscout_follow_interval_desc">Inta jeer ee raacuhu weydiiyo server-ka. Waxay sidoo kale tahay sida uu qiime u duugoobi karo, sidaas darteedna sida uu digniin ku salaysan qiime la raacayo u soo daahi karto. Raacuhu ma laha dareeme u gaar ah oo taleefanka soo jeeda ka dhiga, sidaas darteed hubin kastaa waa toosin.</string>
-    <string name="nightscout_follow_interval_doze">Ka hooseeya 9 daqiiqo, Android weli wuu kala fogayn karaa hubinnada inta taleefanku shaqo la\'yahay. In Juggluco laga saaro wanaajinta baytariga waxay ilaalinaysaa waqtiga aad dooratay.</string>
+    <string name="nightscout_follow_interval_doze">Ka hooseeya 9 daqiiqo, Android weli wuu kala fogayn karaa hubinnada inta taleefanku shaqo la\'yahay. In Glucifer laga saaro wanaajinta baytariga waxay ilaalinaysaa waqtiga aad dooratay.</string>
 
     <!-- Web server TLS certificate -->
     <string name="webserver_https_subtitle">Sirdoonka HTTPS</string>
@@ -3062,4 +3062,302 @@ Marka la cadaadiyo OK waxay dhalin doontaa xidhiidh teleefankan oo waxa ay soo b
     <string name="clone_network_summary">Adeegayaal iyo raadinta gudaha</string>
     <string name="clone_connections_empty">Weli ma jiraan aalado lammaansan.</string>
     <string name="clone_background_desc">Waxay isticmaashaa batari badan</string>
+    <string name="meal_title">Cuntooyin</string>
+    <string name="meal_open_link">Fur cuntada: %1$s</string>
+    <string name="meal_new">Cunto cusub</string>
+    <string name="meal_current_prefix">Cuntada hadda: %1$s</string>
+    <string name="meal_default_label">Cunto</string>
+    <string name="meal_suggested_breakfast">Quraac</string>
+    <string name="meal_suggested_lunch">Qado</string>
+    <string name="meal_suggested_dinner">Casho</string>
+    <string name="meal_suggested_snack">Cunto fudud</string>
+    <string name="meal_empty">Weli cunto ma jirto. Samee mid markaad karinayso, iskaan garee waxa gala, oo diiwaangeli waxaad cunto markaad cunayso.</string>
+    <string name="meal_open_section">Furan</string>
+    <string name="meal_archived_section">La dhammeeyey</string>
+    <string name="meal_items_count">%1$d shay</string>
+    <string name="meal_carbs_short">%1$s g karbohaydrayt</string>
+    <string name="meal_label_title">Magac</string>
+    <string name="meal_rename">Magac beddel</string>
+    <string name="meal_archive">U calaamadee la dhammeeyey</string>
+    <string name="meal_unarchive">Dib u fur</string>
+    <string name="meal_delete">Tirtir cuntada</string>
+    <string name="meal_delete_confirm">Ma tirtirtaa cuntadan iyo shaygeeda? Qoraallada xusuusqorka way hadhayaan.</string>
+    <string name="meal_delete_only">Tirtir cuntada keliya</string>
+    <string name="meal_delete_all">Tirtir dhammaan</string>
+    <string name="meal_delete_all_count">Tirtir dhammaan (+%1$d qoraal xusuusqor)</string>
+    <string name="meal_delete_confirm_entries">Ma tirtirtaa cuntadan iyo shaygeeda? “Tirtir dhammaan” wuxuu kaloo tirtirayaa %1$d qoraal ee xusuusqorka loo diiwaangeliyey; “Tirtir cuntada keliya” wuu hayaa.</string>
+    <string name="meal_scan_product">Iskaan garee baarkoodhka</string>
+    <string name="meal_scan_again">Mar kale iskaan garee</string>
+    <string name="meal_add_manual">Gacanta ku dar</string>
+    <string name="meal_enter_barcode">Geli baarkoodhka</string>
+    <string name="meal_barcode_hint">Tirooyinka EAN / UPC</string>
+    <string name="meal_lookup">Raadi</string>
+    <string name="meal_lookup_running">Waxaa la raadinayaa %1$s…</string>
+    <string name="meal_lookup_not_found">Alaab looma helin %1$s. Qiyamka gacanta ku geli.</string>
+    <string name="meal_lookup_offline">Raadinta khadka tooska ah way damsan tahay, %1$s-na kaydka kuma jiro. Qiyamka gacanta ku geli.</string>
+    <string name="meal_lookup_failed">Raadintu way guuldareysatay (%1$s). Isku day mar kale ama qiyamka gacanta ku geli.</string>
+    <string name="meal_source_off">Open Food Facts</string>
+    <string name="meal_source_manual">Gacanta</string>
+    <string name="meal_composition">Isku-dhis</string>
+    <string name="meal_composition_empty">Weli waxba miiska ma saarna. Iskaan garee alaab ama gacanta ku dar.</string>
+    <string name="meal_item_unresolved">Cadadka ayaa maqan</string>
+    <string name="meal_totals">Cuntada oo dhan</string>
+    <string name="meal_servings_label">Qaybo</string>
+    <string name="meal_servings_hint">Immisa qaybood ayuu dheriga yahay?</string>
+    <string name="meal_cooked_weight_label">Miisaanka la kariyey (g)</string>
+    <string name="meal_cooked_weight_hint">Ikhtiyaari: hal mar miisaan dheriga si aad saxanka garaam ugu geliso.</string>
+    <string name="meal_per_serving">Qaybtii</string>
+    <string name="meal_unresolved_items">%1$d shay ayaa weli cadad u baahan</string>
+    <string name="meal_eaten">La cunay</string>
+    <string name="meal_eat_amount_label">Intee?</string>
+    <string name="meal_eat_hint">tus. 1 qayb, 1/3, 250 g</string>
+    <string name="meal_eat_next_step">Tallaabada xigta: qoraalka xusuusqorka oo leh waqtiga hadda iyo talada qiyaasta ee hadda.</string>
+    <string name="meal_eat_continue">U gudub xusuusqorka</string>
+    <string name="meal_eat_note_format">%1$s ee %2$s</string>
+    <string name="meal_entries_section">Loo diiwaangeliyey cuntadan</string>
+    <string name="meal_entries_empty">Weli waxba lama diiwaangelin. Iskaan garayn ma aha cunid — diiwaangeli markaad cunayso.</string>
+    <string name="meal_quantity_label">Cadad</string>
+    <string name="meal_quantity_hint">tus. 70 g, 1 koob, 1/3, 2 qaybood, 2 xabbo</string>
+    <string name="meal_quantity_unparsed">Cadadka lama akhrin karin</string>
+    <string name="meal_quantity_ambiguous">Tiro keliya — halbeeggee?</string>
+    <string name="meal_need_density">Cufnaan (g halkii ml) ayaa loo baahan yahay si mugga iyo miisaanka loo beddelo</string>
+    <string name="meal_need_net_quantity">Cabbirka baakadda ayaa loo baahan yahay qayb ka mid ah baakadda</string>
+    <string name="meal_need_serving_size">Cabbirka qaybta ayaa loo baahan yahay (g ama ml)</string>
+    <string name="meal_need_piece_weight">Miisaanka hal xabbo ayaa loo baahan yahay (g)</string>
+    <string name="meal_need_servings_per_batch">Marka hore deji tirada qaybaha</string>
+    <string name="meal_need_batch_weight">Marka hore geli miisaanka la kariyey</string>
+    <string name="meal_answer_density">Cufnaan (g/ml)</string>
+    <string name="meal_answer_net_quantity">Cabbirka baakadda</string>
+    <string name="meal_answer_serving_size">Cabbirka qaybta</string>
+    <string name="meal_answer_piece_weight">Hal xabbo (g)</string>
+    <string name="meal_answer_remembered">Waa loo xasuustay alaabtan.</string>
+    <string name="meal_carbs">Karbohaydrayt</string>
+    <string name="meal_protein">Borotiin</string>
+    <string name="meal_fat">Dufan</string>
+    <string name="meal_fiber">Fiber</string>
+    <string name="meal_kcal">kcal</string>
+    <string name="meal_basis_per_100g">100 g kasta</string>
+    <string name="meal_basis_per_100ml">100 ml kasta</string>
+    <string name="meal_basis_per_serving">qaybtii</string>
+    <string name="meal_basis_per_batch">dheriga oo dhan</string>
+    <string name="meal_plausibility_macros">Makrooyinku waxay ka badan yihiin 100 g — hubi qiyamka</string>
+    <string name="meal_plausibility_energy">Tamartu kuma habboona makrooyinka — hubi qiyamka</string>
+    <string name="meal_plausibility_invalid">Qiyamka nafaqada waa khalad</string>
+    <string name="meal_add_to_meal">Ku dar cuntada</string>
+    <string name="meal_update_item">Cusboonaysii</string>
+    <string name="meal_remove_item">Ka saar</string>
+    <string name="meal_edit_values">Wax ka beddel qiyamka</string>
+    <string name="meal_done_editing">Dhammaad</string>
+    <string name="meal_add_unresolved_hint">Hadda waad ku dari kartaa, qiimaha maqanna goor dambe buuxi.</string>
+    <string name="meal_product_name">Magaca alaabta</string>
+    <string name="meal_product_brand">Summad (ikhtiyaari)</string>
+    <string name="meal_product_basis">Qiyamku waxay khuseeyaan</string>
+    <string name="meal_product_values_hint">Laga soo qaaday calaamadda: 100 g / 100 ml ama qaybtii.</string>
+    <string name="meal_product_net_quantity">Waxa ku jira baakadda (g ama ml)</string>
+    <string name="meal_product_package_pieces">Waxa ku jira baakadda (xabbo, tus. 6 sausages)</string>
+    <string name="meal_product_serving">Cabbirka qaybta (g ama ml)</string>
+    <string name="meal_serving_word">qayb</string>
+    <string name="meal_piece_word">xabbo</string>
+    <string name="meal_package_word">baakad</string>
+    <string name="meal_online_lookup_title">Khadka tooska ah ka raadi alaabta la iskaan gareeyey</string>
+    <string name="meal_online_lookup_desc">Baarkoodhka keliya ayaa loo dirayaa Open Food Facts; jawaabaha qalabka ayaa lagu kaydiyaa</string>
+    <string name="meal_settings_entry">Cuntooyin &amp; iskaanka alaabta</string>
+    <string name="meal_settings_entry_desc">Iskaan garee baarkoodh, samee cunto, diiwaangeli waxaad cunto</string>
+    <string name="meal_recent_title">Alaabta dhowaan</string>
+    <string name="meal_recent_search">Raadi magac, summad ama baarkoodh</string>
+    <string name="meal_recent_empty">Weli waxba lama iskaan garayn lamana darin.</string>
+    <string name="meal_ocr_title">Akhri calaamadda</string>
+    <string name="meal_ocr_intro">Sawir shaxda nafaqada; ku dar dhinaca hore magaca iyo cabbirka baakadda, iyo dhinac kasta oo kale oo aad u baahan tahay. Wax walba waxaa lagu akhriyaa taleefankan.</string>
+    <string name="meal_ocr_intro_barcode">Weli alaab looma helin %1$s. Sawir shaxda nafaqada; ku dar dhinaca hore magaca iyo cabbirka baakadda, iyo dhinac kasta oo kale. Qiyamka waxaa lagu kaydinayaa baarkoodhkan hoostiisa.</string>
+    <string name="meal_ocr_take_photo">Sawir qaad</string>
+    <string name="meal_ocr_from_gallery">Ka soo qaad galeriga</string>
+    <string name="meal_ocr_reading">waa la akhrinayaa…</string>
+    <string name="meal_ocr_failed">lama akhrin karin</string>
+    <string name="meal_ocr_lines">%1$d sadar</string>
+    <string name="meal_ocr_name_candidates">Magac (mid dooro, ama tallaabada xigta ku beddel)</string>
+    <string name="meal_ocr_no_table">Shaxda nafaqada weli lama aqoonsan — isku day sawir ka cad oo shaxda ah, ama qiyamka gacanta ku geli tallaabada xigta.</string>
+    <string name="meal_ocr_confirm_hint">Tallaabada xigta: hubi qiime kasta ka hor inta aan la isticmaalin.</string>
+    <string name="meal_ocr_use_values">Isticmaal qiyamkan</string>
+    <string name="meal_ocr_kind_front">Dhinaca hore</string>
+    <string name="meal_ocr_kind_nutrition">Shaxda nafaqada</string>
+    <string name="meal_ocr_kind_ingredients">Walxaha</string>
+    <string name="meal_ocr_kind_other">Dhinac kale</string>
+    <string name="meal_ocr_button">Sawir calaamadda</string>
+    <string name="meal_ocr_attach_barcode_title">Ma ku xiraa baarkoodh?</string>
+    <string name="meal_ocr_attach_barcode_text">Hadda iskaan garee baarkoodhka alaabta, qiyamkanna waxaa lagu kaydinayaa hoostiisa marka xigta.</string>
+    <string name="meal_ocr_attach_barcode_scan">Iskaan garee baarkoodhka</string>
+    <string name="meal_ocr_attach_barcode_skip">Hadda maya</string>
+    <string name="meal_source_ocr">Sawirka calaamadda</string>
+    <string name="meal_contribute_title">U dir alaabta cusub Open Food Facts</string>
+    <string name="meal_contribute_desc">Markaad xaqiijiso qiyamka laga akhriyey calaamad, waxaa lagu soo geliyaa akoonkaaga OFF (xog furan, ODbL). Si caadi ah waa damsan yahay.</string>
+    <string name="meal_contribute_user">Magaca isticmaalaha OFF</string>
+    <string name="meal_contribute_password">Furaha OFF</string>
+    <string name="meal_contribute_photos_title">Sidoo kale soo geli sawirrada calaamadda</string>
+    <string name="meal_contribute_photos_desc">Sawirradu waxay ka mid noqdaan xogta furan (CC BY-SA)</string>
+    <string name="meal_contribute_sent">Waxaa loo diray Open Food Facts</string>
+    <string name="meal_contribute_failed">Looma diri karin Open Food Facts: %1$s</string>
+    <string name="meal_contribute_send">U dir Open Food Facts</string>
+    <string name="meal_contribute_send_again">Mar kale u dir Open Food Facts</string>
+    <string name="meal_contribute_sent_on">Waxaa loo diray Open Food Facts %1$s</string>
+    <string name="meal_send_photos_intro">Ku dar ama dib u qaad sawirrada calaamadda ee soo gelinta: dhinaca hore, shaxda nafaqada, walxaha, dhinacyo kale.</string>
+    <string name="meal_send_use_photos">Isticmaal sawirrada</string>
+    <string name="meal_send_photos_status">%1$d sawir ayaa loo kaydiyey alaabtan</string>
+    <string name="meal_send_no_photos">Sawir lama kaydin; qiyamka ayaa la dirayaa sawir la’aan haddii aadan ku darin.</string>
+    <string name="meal_send_add_photos">Ku dar sawirro</string>
+    <string name="meal_send_now">Hadda dir</string>
+    <string name="meal_ocr_next_photo">Sawirka xiga: %1$s</string>
+    <string name="meal_ocr_hint_front">magac, summad iyo cadadka saafiga ah</string>
+    <string name="meal_ocr_hint_nutrition">shaxda leh tiirka 100 g / 100 ml</string>
+    <string name="meal_ocr_hint_ingredients">liiska walxaha</string>
+    <string name="meal_ocr_hint_other">dhinac kasta oo kale oo macluumaad faa’iido leh</string>
+    <string name="meal_send_fields_title">Xogta la dirayo</string>
+    <string name="meal_send_sending">Waa la dirayaa…</string>
+    <string name="meal_send_result_ok">Waa la diray. Sawirro: %1$d la diray, %2$d guuldareystay.</string>
+    <string name="meal_send_result_failed">Guuldareystay: %1$s</string>
+    <string name="meal_contribute_log_title">Diiwaanka soo gelinta</string>
+    <string name="meal_contribute_log_empty">Weli wax soo gelin ah ma jiro.</string>
+    <string name="meal_contribute_last">Soo gelintii ugu dambeysay %1$s: %2$s</string>
+    <string name="meal_saturated_fat">Dufan la wada buuxiyey</string>
+    <string name="meal_salt">Cusbo</string>
+    <string name="meal_sugars">Sonkor</string>
+    <string name="meal_off_category">Qayb (Open Food Facts)</string>
+    <string name="meal_off_category_hint">tus. Shukulaato, Badarka quraacda</string>
+    <string name="meal_send_nutriscore_missing">Nutri-Score, Open Food Facts wali wuxuu u baahan yahay: %1$s</string>
+    <string name="meal_crop_title">Jar sawirka</string>
+    <string name="meal_crop_hint">Jiid geesaha si calaamadda keliya u hadho — waxay caawisaa aqoonsiga qoraalka waxayna Open Food Facts siisaa sawir nadiif ah. Taabo sawir yar dambe si aad mar kale u jarto.</string>
+    <string name="meal_crop_apply">Jar</string>
+    <string name="meal_crop_skip">Sidiisa u isticmaal</string>
+    <string name="meal_product_barcode">Baarkoodh (ikhtiyaari)</string>
+    <string name="meal_product_barcode_hint">Baarkoodh lagu daro, alaabta ayaa loo kaydiyaa iskaanka xiga waxaana loo diri karaa Open Food Facts.</string>
+    <string name="alert_sensor_pressure">Cadaadiska Dareemaha</string>
+    <string name="sensor_pressure_channel_description">Digniin fudud marka digniinta hoose si kooban loo hakiyo iyadoo loo malaynayo cadaadis dareemaha saaran</string>
+    <string name="sensor_pressure_cue_message">Waxaa suurtagal ah cadaadis dareemaha saaran — beddel jiritaankaaga ama ka fogee. Digniinta hoose si kooban ayaa loo hakiyay, waxayna dhici doontaa haddii qiimuhu aanu soo kabsan.</string>
+    <string name="sensor_pressure_hold_title">Hakinta cadaadiska dareemaha</string>
+    <string name="sensor_pressure_hold_resolved_text">Digniin hoose ayaa la hakiyay %1$d min waxayna ku xallisantay daaweyn la\'aan — waxay u badan tahay cadaadis dareemaha.</string>
+    <string name="sensor_pressure_hold_escalated_text">Digniin hoose oo la hakiyay ayaa dhacday %1$d min kadib — qiimuhu ma soo kabsan.</string>
+    <string name="sensor_pressure_hold_self_disabled_text">Hakinta cadaadiska dareemaha ayaa iskeed isu damisay %1$d dhacdo oo kor u kacay kadib. Hab qiyaas ah oo had iyo jeer kor u kaca kuuma shaqaynayo — dib uga shid dejinta digniinaha haddii aad rabto inaad sii tijaabiso.</string>
+    <string name="sensor_pressure_hold_summary_text">14-kii maalmood ee u dambeeyay: %1$d la hakiyay, %2$d cadaadis ahaan loo xalliyay, %3$d kor u kacay.</string>
+    <string name="sensor_pressure_hold_section_title">Hakinta Cadaadiska Dareemaha</string>
+    <string name="experimental_badge">Tijaabo</string>
+    <string name="sensor_pressure_hold_optin_title">Maamul digniinaha la doortay marka cadaadis laga shakiyo</string>
+    <string name="sensor_pressure_hold_optin_description">Dareemaha ku jiifsashada ama ku tiirsanaantu waxay cadaadin kartaa unugyada oo waxay abuuri kartaa hoos u dhac lama filaan ah iyo soo kabasho degdeg ah. Digniinaha saadaasha iyo isbeddelka degdegga ah ee la doortay waxay sugaan xaqiijinta dhaqdhaqaaqa. Hoose iyo Aad u hooseeya waxay adeegsadaan baaraha buuxa, waqtiga ugu badan iyo xadka hoose ee adag. Qiyaas ama karbohaydraytyo gurmad ah oo aan la gelin ayaa hoos u dhac dhab ah ka dhigi kara cadaadis. Shid kaliya haddii aad si joogto ah wax u qorto oo aad aqbasho khatartan.</string>
+    <string name="sensor_pressure_hold_self_disabled_notice">Iskeed ayay isu damisay %1$d hakin oo kor u kacay kadib. Dib u shid si aad dib ugu tijaabiso diiwaan cusub.</string>
+    <string name="sensor_pressure_hold_max_hold_label">Waqtiga hakinta ugu badan</string>
+    <string name="sensor_pressure_hold_max_hold_description">Digniintu had iyo jeer way dhacdaa intaas daqiiqo kadib, wax kasta oo qaabku sheego.</string>
+    <string name="sensor_pressure_hold_warning_long_hold">Ka sarreeya %1$d min waxaad xad badbaado oo dhab ah ku beddelaysaa aamusnaan — daqiiqo kasta oo la hakiyo waa daqiiqo hoos u dhac dhab ah oo suurtagal ah.</string>
+    <string name="sensor_pressure_hold_floor_label">Xad hoose oo adag</string>
+    <string name="sensor_pressure_hold_floor_description">Qiimahan ama ka hooseeya digniintu isla markiiba way dhacdaa — hakin ma jirto, qiimayn ma jirto.</string>
+    <string name="sensor_pressure_hold_floor_very_low">Raac xadka Aad u Hooseeya</string>
+    <string name="sensor_pressure_hold_floor_custom">Qiime gaar ah</string>
+    <string name="sensor_pressure_hold_floor_off">Xad hoose ma jiro</string>
+    <string name="sensor_pressure_hold_floor_off_warning">Xad hoose la\'aan hakintu waxay socon kartaa waqtigeeda oo dhan xitaa marka hypo daran la joogo. Tani waxay saaraysaa ilaalinta ugu xooggan.</string>
+    <string name="sensor_pressure_hold_self_disable_label">Iskeed isu dami kadib</string>
+    <string name="sensor_pressure_hold_self_disable_description">Intaas hakin oo kor u kacday ayaa si toos ah u damisa astaantan — hab qiyaas ah oo had iyo jeer khaldan waa inuu iskiis isu joojiyaa, ma aha inuu sugo in la ilaaliyo.</string>
+    <string name="sensor_pressure_hold_never">Waligeed</string>
+    <string name="sensor_pressure_hold_never_warning">Astaantu waxay sii wadi doontaa hakinta digniinaha si kasta oo ay u khaldanto. Diiwaannada adigu hubi.</string>
+    <string name="sensor_pressure_hold_advanced">Xadadka ogaanshaha…</string>
+    <string name="sensor_pressure_hold_advanced_hide">Qari xadadka ogaanshaha</string>
+    <string name="sensor_pressure_hold_advanced_description">Waxa hoos u dhac ka dhigaya cadaadis laga shakiyo. Qiimayaasha caadiga ah waa qiyaaso taxaddar leh — ku hagaaji dhacdooyinkaaga oo natiijada ku qiimee diiwaannada hakinta. Qiimayaashu waa mg/dL sababtoo ah xisaabtu waxay ku shaqaysaa halbeegyada dareemaha.</string>
+    <string name="tuning_suspect_rate_label">Xawaaraha hoos u dhaca ee shakiga leh</string>
+    <string name="tuning_suspect_rate_description">Hoos u dhacu waa inuu celcelis ahaan ugu yaraan xawaarahan gaaraa si loogu tiriyo mid aan jirka ka iman. Hoose = hakimo badan, oo ay ku jiraan hoos u dhacyo dhab ah oo dhaqso ah.</string>
+    <string name="tuning_min_depth_label">Qoto-dheerida ugu yar ee hoos u dhaca</string>
+    <string name="tuning_min_depth_description">Wadarta hoos u dhaca ka hor inta aan la hakin. Hoos u dhacyada ka yar waxaa loo arkaa buuq.</string>
+    <string name="tuning_flat_window_label">Daaqadda deggan</string>
+    <string name="tuning_flat_window_description">Inta daqiiqo ee hoos u dhaca ka horreysa ee la hubiyo qalooc deggan oo xasilloon. Hoos u dhacyada cadaadisku waxay ka soo baxaan nasasho; hoos u dhacyada dhabta ahi badanaa way is muujiyaan.</string>
+    <string name="tuning_flat_span_label">Daboolidda daaqadda deggan</string>
+    <string name="tuning_flat_span_description">Ugu yaraan intaas daqiiqo oo daaqadda deggan ah waa inay dhab ahaantii akhris lahaadaan — hal muunad oo ka dambaysa farqi xog ma aha caddayn nasasho.</string>
+    <string name="tuning_flat_min_rate_label">Xadka jiirada deggan</string>
+    <string name="tuning_flat_min_rate_description">Qaloocu hoos u dhaca ka horreeya wuxuu deggan yahay ilaa inta uusan ka dhaqso badan hoos u dhacayn. Qalooc hore hoos u socda wuxuu hoos u dhac kasta oo lama filaan ah ka dhigaa mid jirka ka iman kara.</string>
+    <string name="tuning_flat_dip_label">Dulqaadka hoos u dhaca deggan</string>
+    <string name="tuning_flat_dip_description">Akhris intan ka hooseeya barta uu hoos u dhacu ka bilaabmay oo daaqadda deggan ku dhex jira waxay ka dhigan tahay xasillooni la\'aan dhow (tusaale hoos u dhac hadda la daaweeyay) — markaas hakin ma jirto.</string>
+    <string name="tuning_unexplained_factor_label">Isku-dhufashada xadka insulinta</string>
+    <string name="tuning_unexplained_factor_description">Hoos u dhacu waa inuu ka qoto dheeraadaa waxa insulinta jirkaaga ku jirta keeni karto (IOB × dareenka), oo lagu dhuftay isku-dhufashadan. Sare = adag, hakimo yar.</string>
+    <string name="tuning_unexplained_factor_warning">Ka hooseeya ×1.0 xitaa hoos u dhacyada insulintaadu si buuxda u sharaxdo waa la hakin karaa. Taasi waxay ka soo horjeedaa fikradda oo dhan ee albaabka.</string>
+    <string name="tuning_max_gap_label">Xadka farqiga xogta</string>
+    <string name="tuning_max_gap_description">God diiwaangelin oo intan ka ballaaran oo meel kasta oo qaabka ah ku jira wuxuu baabi\'inayaa hakinta — qalooc la malaynayo ma aha mid la arkay.</string>
+    <string name="tuning_recovery_window_label">Daaqadda soo kabashada</string>
+    <string name="tuning_recovery_window_description">Kala-soocidda dib-u-eegista ee diiwaanka dhacdooyinka: qiimuhu waa inuu ku soo laabtaa meel u dhow heerkii uu ka bilaabmay daaqaddan gudaheeda, haddii kale hoos u dhaca waxaa loo tiriyaa mid dhab ah.</string>
+    <string name="tuning_recovery_band_label">Xadka soo kabashada</string>
+    <string name="tuning_recovery_band_description">Diiwaanka dhacdooyinka: soo kabsaday waxaa loola jeedaa in dib loogu soo laabtay masaafadan heerkii ka horreeyay hoos u dhaca.</string>
+    <string name="tuning_carb_grams_label">Xadka iska-indhatirka karbohaydraytka</string>
+    <string name="tuning_carb_grams_description">Karbohaydraytyada buugga xusuusta ee ka yar qaddarkan looma tiriyo sharraxaad soo kabasho.</string>
+    <string name="hypo_episode_log_title">Dhacdooyinka Hypo</string>
+    <string name="hypo_episode_log_empty">Dhacdo ka hooseysa xadka ma jirin 30-kii maalmood ee u dambeeyay.</string>
+    <string name="hypo_episode_log_explainer">Dhacdo kasta oo ka hooseysa xadka ee 30-kii maalmood ee u dambeeyay. Ku calaamadee dhacdo cadaadis dareemaha si looga saaro tirakoobka — akhrisyada ceeriin waa sidoodii, dib u celinta badhankuna waxay soo celisaa tirooyinka. Talooyinku waxay ka yimaadaan ogaanshaha cadaadiska iyo digniinaha la hakiyay; waxba lama saaro ilaa aad xaqiijiso.</string>
+    <string name="hypo_episode_log_range">%1$s–%2$s · %3$d min · ugu hooseeya %4$s</string>
+    <string name="hypo_episode_log_pressure_toggle">Cadaadis</string>
+    <string name="hypo_episode_log_suggested">Waxay u egtahay cadaadis dareemaha</string>
+    <string name="hypo_episode_log_excluded_note">Waa laga saaray tirakoobka</string>
+    <string name="stats_excluded_episodes_label">%1$d dhacdo oo laga saaray cadaadis dareemaha ahaan</string>
+    <string name="stats_open_hypo_log">Dhacdooyinka hypo</string>
+    <string name="tuning_carb_lookback_label">Dib-u-eegista karbohaydraytka</string>
+    <string name="tuning_carb_lookback_description">Karbohaydraytyada la qoray ilaa intan ka hor hoos u dhaca ayaa weli loo tiriyaa inay sharxaan soo kabasho — wax cunista isla ka hor inta hoos u dhacu diiwaangashan waa sida uu u eg yahay hoos u dhac dhab ah oo la daaweeyay.</string>
+    <string name="sensor_pressure_hold_optin_summary">Marka hoos u dhac ama soo kabasho lama filaan ahi u ekaato cadaadiska dareemaha, digniinaha la doortay wax yar ayay sugaan. Haddii dhaqdhaqaaqu sii socdo, digniinta caadiga ah ayaa dhacaysa. Tani si buuxda ayay u aaminaysaa buuggaaga xusuusta.</string>
+    <string name="sensor_pressure_early_warning_wait">Kaliya marka baaruhu helo hoos-u-dhac degdeg ah oo aan la sharxi karin, digniinaha la doortay ee saadaasha, isbeddelka degdegga ah, Sare iyo Aad u sarreeya waxay sugaan ilaa %1$d daqiiqo. Soo kabashadu waxay tuurtaa digniinta hoos u socota, leexashaduna waxay tuurtaa digniinta kor u socota. Hoose iyo Aad u hooseeya waxay adeegsadaan baaraha iyo xadka hoose ee adag.</string>
+    <string name="sensor_pressure_covered_alarms_title">Digniinaha la maamulo</string>
+    <string name="sensor_pressure_covered_alarms_description">Dooro digniinaha dib loo dhigi karo. Sida caadiga ah Hoose, labada saadaal iyo labada digniin ee isbeddelka degdegga ah ayaa la doortaa. Calaamadda ka saar si digniintu aanay isu beddelin.</string>
+    <string name="sensor_pressure_covered_alarms_none_warning">Wax digniin ah lama dooran, sidaas darteed muuqaalkani ma hakin karo mana xaqiijin karo digniin.</string>
+    <string name="sensor_pressure_very_low_floor_notice">Aad u hooseeya isla markiiba ayuu dhacayaa inta xadka hoose ee adag uu raacayo xadkiisa. Si loo hakiyo, si ula kac ah u dooro xad gaar ah oo ka hooseeya ama xad la\'aan.</string>
+    <string name="sensor_pressure_hold_optin_more">Sida ay u shaqeyso iyo waxa khatarta ah</string>
+    <string name="sensor_pressure_hold_optin_less">Muuji wax yar</string>
+    <string name="hypo_episode_log_pressure_toggle_long">Ku calaamadee cadaadis dareemaha</string>
+    <string name="hypo_episode_log_counted_note">Waa lagu tiriyay tirakoobka</string>
+    <string name="hypo_episode_log_chart_caption">Hadhka: dhacdada. 30 min oo macluumaad ah dhinac kasta. Xariiqyada: xadadkaaga hoose iyo kuwa aad u hooseeya.</string>
+    <string name="hypo_episode_log_no_trace">Akhris lama diiwaan gelin dhacdadan.</string>
+    <string name="sensor_pressure_hold_expand">Muuji dejinta</string>
+    <string name="sensor_pressure_hold_collapse">Qari dejinta</string>
+    <string name="sensor_pressure_cue_disabled_warning">Marka digniinta fudud la damiyo, hakintu waa mid aamusan: digniinaha hoose weli waa la hakiyaa oo weli way dhacayaan haddii qiimuhu soo kaban waayo, kaliya calaamad ma heshid inta la sugayo.</string>
+    <string name="sensor_pressure_cue_settings_title">Digniinta fudud</string>
+    <string name="sensor_pressure_cue_settings_description">Sida digniinta fudud u dhawaaqdo oo loo dareemo inta digniinta hoose la hakinayo. Waxay u ciyaartaa astaantan oo keliya, sidaas darteed way la shidmaysaa oo la damaysaa.</string>
+    <string name="libre3_activation_legacy_fallback">Hawlgelinta il-furan ee Libre 3 lama xaqiijin karin; habkii la tijaabiyey ayaa la isticmaalayaa.</string>
+    <string name="libre3_source_experimental_warning">Nooca amniga Libre 3 ee tijaabada ah. Hayso APK-ga caadiga ah si aad ugu noqoto.</string>
+    <string name="journal_cob_value">COB %1$s</string>
+    <string name="glucifer_delivery_failed">Dirista Glucifer HA way fashilantay; isku day kale ayaa sugaya</string>
+    <string name="glucifer_not_acknowledged">Glucifer HA ma xaqiijin xogta; isku day kale ayaa sugaya</string>
+    <string name="glucifer_qr_confirm">Ma la isticmaalaa qaataha %1$s?</string>
+    <string name="glucifer_qr_invalid">Koodhkan QR ma laha cinwaanka qaataha Home Assistant.</string>
+    <string name="glucifer_warmup">Dareemaha ayaa kululaanaya</string>
+    <string name="glucifer_journal">Iswaafaji diiwaanka</string>
+    <string name="glucifer_journal_help">Waxay dirtaa diiwaannada insuliinta iyo karbohaydraytka marka la abuuro, la beddelo ama la tirtiro. Damintu waxay tirtirtaa diiwaanka Home Assistant marka xiriirka xiga guulaysto.</string>
+    <string name="glucifer_journal_days">Muddada la hayo taariikhda diiwaanka</string>
+    <string name="glucifer_journal_notes">Ku dar qoraallada iyo diiwaannada qoraalka</string>
+    <string name="glucifer_journal_failed">Helitaanka diiwaanka lama xaqiijin</string>
+    <string name="glucifer_days">%1$d maalmood</string>
+    <string name="glucifer_history">Buuxi taariikhda gulukoosta (ilaa 7 maalmood)</string>
+    <string name="glucifer_history_failed">Helitaanka taariikhda lama xaqiijin</string>
+    <string name="glucifer_title" translatable="false">Glucifer HA</string>
+    <string name="glucifer_description">U dir xogta la doortay Home Assistant</string>
+    <string name="glucifer_glucose_required">Gulukoosta iyo waqtiga cabbirka mar walba waa la diraa. Hoos ka dooro xog kasta iyo digniin kasta oo dheeraad ah.</string>
+    <string name="glucifer_delta">Isbeddelka gulukoosta (5 daqiiqo)</string>
+    <string name="glucifer_rate">Xawaaraha isbeddelka</string>
+    <string name="glucifer_raw">Gulukoosta ceeriin</string>
+    <string name="glucifer_auto">Gulukoosta si toos ah loo saxay</string>
+    <string name="glucifer_done">Dhammee</string>
+    <string name="glucifer_saved_help">Isbeddellada si toos ah ayaa loo kaydiyaa. Daar goobtan, dir farriin tijaabo ah, dabadeed taabo Dhammee.</string>
+    <string name="glucifer_live_bypass">Dhacdooyinka tooska ahi waxay dhaafaan muddada gadaasha</string>
+    <string name="glucifer_hours">%1$d saac</string>
+    <string name="glucifer_min_interval">Waqtiga ugu yar ee u dhexeeya codsiyada gadaasha</string>
+    <string name="glucifer_fallback_interval">Hubi xogta ka maqantay kadib</string>
+    <string name="glucifer_fallback_help">Marka muddadan ay dhaafto iyada oo aan diris toos ahi guulaysan, hubi xogta is beddeshay. Xog aan is beddelin lama diro.</string>
+    <string name="glucifer_background_spacing_help">Waxay xaddidaysaa xawaaraha dirista xogta gadaasha ee sugaysa. Ma bilowdo cusboonaysiin xilliyo go’an. Dhacdooyinka tooska ah ayaa mudnaan leh.</string>
+    <string name="glucifer_all_spacing_help">Waxay kala fogaysaa cusboonaysiinta tooska ah iyo codsiyada gadaasha. Xogta sugaysa waxay sugtaa dhammaadka nasashada.</string>
+    <string name="glucifer_all_spacing_title">Nasashada u dhexaysa dhammaan codsiyada</string>
+    <string name="glucifer_live_bypass_help">Shidan: akhrisyada cusub, isbeddellada diiwaanka iyo digniinaha dhaqso ayaa loo diraa, ugu badnaan hal mar ilbiriqsikii. Demman: nasashada hoose iyagana way khusaysaa.</string>
+    <string name="glucifer_minutes">%1$d daq</string>
+    <string name="glucifer_seconds">%1$d s</string>
+    <string name="glucifer_phone_battery">Heerka batteriga taleefanka</string>
+    <string name="glucifer_sensor_id">Aqoonsiga dareemaha</string>
+    <string name="glucifer_sensor_generation">Jiilka dareemaha</string>
+    <string name="notification_chart_pause_screen_off">Hakadi jaantuska marka shaashaddu dansan tahay</string>
+    <string name="notification_chart_pause_screen_off_summary">Dib ayaa loo sawiraa marka shaashaddu shidanto. Jaantusku muddo kooban ayuu qarsoomi karaa.</string>
+    <string name="alarm_default_action">Ficilka caadiga ah</string>
+    <string name="alarm_default_action_desc">Waxay dejisaa badhanka weyn ee shaashadda buuxda iyo waxa dhacaya marka ogeysiiska la xaaqo</string>
+    <string name="alarm_return_to_previous_app_title">Digniinta ka dib ku noqo abka hore</string>
+    <string name="alarm_return_to_previous_app_summary">Digniin shaashad-buuxa ka dib, ku noqo abka aad isticmaalaysay halkii aad ka furi lahayd Glucifer</string>
+    <string name="notification_dismiss_action_title">Dib u dhig marka la siibo</string>
+    <string name="notification_dismiss_action_summary">Ogeysiis digniin oo la siibay waa la dib u dhigayaa halkii la xiri lahaa</string>
+    <string name="acknowledged_high_coverage_title">Digniinaha kor u kaca ee la xaqiijiyey waxay daboolaan Sare</string>
+    <string name="acknowledged_high_coverage_summary">Ka dib markaad diiddo ama dib u dhigto Kor u kac degdeg ah, Sare la saadaaliyey ama Sare, digniinaha kale way aamusnaanayaan muddada kore. Aad u sareeya mar walba wuu dhacaa.</string>
+    <string name="match_arrow_to_displayed_delta_title">Fallaadhaha ku waafaji delta</string>
+    <string name="match_arrow_to_displayed_delta_desc">Marka delta la muujiyo, u isticmaal isla muddada fallaadhaha dashboard-ka iyo ogeysiiska</string>
 </resources>

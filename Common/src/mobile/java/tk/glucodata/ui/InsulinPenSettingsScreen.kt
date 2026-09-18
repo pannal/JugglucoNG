@@ -62,8 +62,8 @@ import kotlinx.coroutines.launch
 import tk.glucodata.Applic
 import tk.glucodata.InsulinPen
 import tk.glucodata.InsulinPenManager
-import tk.glucodata.PenDuplicateEntry
 import tk.glucodata.NovoPen.PenImportNotificationPolicy
+import tk.glucodata.PenDuplicateEntry
 import tk.glucodata.R
 import tk.glucodata.data.journal.JournalInsulinPreset
 import tk.glucodata.data.journal.JournalRepository
@@ -71,8 +71,8 @@ import tk.glucodata.ui.components.CardPosition
 import tk.glucodata.ui.components.MasterSwitchCard
 import tk.glucodata.ui.components.SectionLabel
 import tk.glucodata.ui.components.SettingsItem
-import tk.glucodata.ui.components.StableModalBottomSheet
 import tk.glucodata.ui.components.SettingsSwitchItem
+import tk.glucodata.ui.components.StableModalBottomSheet
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date

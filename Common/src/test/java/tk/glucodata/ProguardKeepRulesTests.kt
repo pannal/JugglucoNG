@@ -67,23 +67,24 @@ class ProguardKeepRulesTests {
     }
 
     @Test
+    fun theLibreviewJournalBridgeIsKept() {
+        // Two name-based hops with nothing R8 can see: journalentries.cpp does FindClass on
+        // LibreviewJournal, and LibreviewJournal does Class.forName on LibreviewJournalEntries.
+        // Losing either sends LibreView an empty food/insulin array and says nothing.
+        val text = activeRules()
+        assertTrue(text.contains("-keep class tk.glucodata.LibreviewJournal { *; }"))
+        assertTrue(text.contains("-keepnames class tk.glucodata.data.journal.LibreviewJournalEntries"))
+        listOf("prepare(boolean)", "foodEntries()", "insulinEntries()", "noteEntries()", "commit()", "discard()")
+            .forEach { assertTrue("proguard-rules.my must keep $it", text.contains(it)) }
+    }
+
+    @Test
     fun mlKitDynamicComponentsAreKeptForR8FullMode() {
         val text = activeRules()
         assertTrue(
             "ML Kit registrars and their factories must survive AGP 9 full-mode optimization",
             text.contains("-keep class com.google.mlkit.** { *; }"),
         )
-    }
-
-    @Test
-    fun theLibreviewJournalBridgeIsKept() {
-        // Two name-based hops with nothing R8 can see: journalentries.cpp does FindClass on
-        // LibreviewJournal, and LibreviewJournal does Class.forName on LibreviewJournalEntries.
-        val text = activeRules()
-        assertTrue(text.contains("-keep class tk.glucodata.LibreviewJournal { *; }"))
-        assertTrue(text.contains("-keepnames class tk.glucodata.data.journal.LibreviewJournalEntries"))
-        listOf("prepare(boolean)", "foodEntries()", "insulinEntries()", "noteEntries()", "commit()", "discard()")
-            .forEach { assertTrue("proguard-rules.my must keep $it", text.contains(it)) }
     }
 
     @Test

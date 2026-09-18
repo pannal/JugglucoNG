@@ -134,6 +134,37 @@ class QuietWindowTests {
     }
 
     @Test
+    fun scheduledRecoveryKeepsTheOriginalCapAfterProcessDeath() {
+        val restarted = SilencedEpisodeTracker(staleMs = 30 * minute)
+        assertTrue(restarted.restoreForScheduledCheck(0, now, now + minute, now + 6 * minute, 24 * hour))
+        assertEquals(4 * minute, restarted.remainingDelay(0, now + 6 * minute, 10 * minute))
+        assertEquals(now, restarted.note(0, now + 6 * minute))
+    }
+
+    @Test
+    fun scheduledRecoveryDoesNotGrantANewCapWhenTheBroadcastIsLate() {
+        for (elapsed in listOf(30 * minute, 35 * minute)) {
+            val restarted = SilencedEpisodeTracker(staleMs = 30 * minute)
+            assertTrue(restarted.restoreForScheduledCheck(0, now, now, now + elapsed, 24 * hour))
+            assertEquals(0L, restarted.remainingDelay(0, now + elapsed, 30 * minute))
+            assertEquals(now, restarted.note(0, now + elapsed))
+        }
+    }
+
+    @Test
+    fun scheduledRecoveryRejectsClearedCorruptAndExpiredRecords() {
+        val restarted = SilencedEpisodeTracker(staleMs = 30 * minute)
+        assertFalse(restarted.restoreForScheduledCheck(0, 0, 0, now, 24 * hour))
+        assertFalse(restarted.restoreForScheduledCheck(0, now, now - 1, now, 24 * hour))
+        assertFalse(restarted.restoreForScheduledCheck(0, now, now + 1, now, 24 * hour))
+        assertFalse(restarted.restoreForScheduledCheck(0, now, now, now + 25 * hour, 24 * hour))
+        assertFalse(restarted.has(0))
+        restarted.note(0, now)
+        assertFalse(restarted.restoreForScheduledCheck(0, now - minute, now, now, 24 * hour))
+        assertEquals(now, restarted.note(0, now))
+    }
+
+    @Test
     fun customAlertsHaveTheirOwnEpisodeKey() {
         assertEquals(1000, QuietWindow.customEpisodeKind(0))
         assertEquals(1001, QuietWindow.customEpisodeKind(1))

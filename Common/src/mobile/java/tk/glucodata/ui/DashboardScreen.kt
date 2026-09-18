@@ -81,6 +81,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.graphics.RectangleShape
@@ -163,8 +164,10 @@ import tk.glucodata.data.prediction.StateDoseHintEvaluation
 import tk.glucodata.data.prediction.PredictiveSimulationSettings
 import tk.glucodata.data.prediction.buildGlucosePrediction
 import tk.glucodata.ui.journal.JournalDoseProfile
+import tk.glucodata.ui.journal.rememberJournalEntryAction
 import tk.glucodata.ui.journal.JournalEntrySheet
 import tk.glucodata.ui.journal.JournalExpandableFab
+import tk.glucodata.ui.journal.rememberJournalCob
 import tk.glucodata.ui.journal.JournalFloatingActionMenu
 import tk.glucodata.ui.journal.JournalInlineChip
 import tk.glucodata.ui.journal.JournalSettingsScreen
@@ -285,6 +288,10 @@ fun DashboardScreen(
     onNavigateToMqAccount: () -> Unit = {},
     onNavigateToReadiness: () -> Unit = {},
     onNavigateToAppUpdates: () -> Unit = {},
+    onNewMeal: (() -> Unit)? = null,
+    onOpenMeal: ((Long) -> Unit)? = null,
+    currentMealLabel: String? = null,
+    onOpenCurrentMeal: (() -> Unit)? = null,
     onNavigateToQuietWindow: () -> Unit = {},
     onNavigateToPredictionModelProfile: () -> Unit = {},
     onTriggerCalibration: (CalibrationSheetState) -> Unit = {}
@@ -294,6 +301,7 @@ fun DashboardScreen(
     // push the whole dashboard down by one gap whenever there is no update to announce.
     val appUpdateBannerVisible = rememberAppUpdateBannerVisible()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val view = LocalView.current
     val dashboardPrefs = remember(context) {
         context.getSharedPreferences("tk.glucodata_preferences", Context.MODE_PRIVATE)
@@ -308,12 +316,12 @@ fun DashboardScreen(
     LaunchedEffect(timeRange) {
         dashboardPrefs.edit().putString("dashboard_chart_time_range", timeRange.name).apply()
     }
-    val currentGlucose by viewModel.currentGlucose.collectAsState()
-    val currentRate by viewModel.currentRate.collectAsState()
-    val sensorName by viewModel.sensorName.collectAsState()
-    val daysRemaining by viewModel.daysRemaining.collectAsState()
-    val glucoseHistory by viewModel.glucoseHistory.collectAsState()
-    val timelineExtents by viewModel.timelineExtents.collectAsState()
+    val currentGlucose by viewModel.currentGlucose.collectAsStateWithLifecycle()
+    val currentRate by viewModel.currentRate.collectAsStateWithLifecycle()
+    val sensorName by viewModel.sensorName.collectAsStateWithLifecycle()
+    val daysRemaining by viewModel.daysRemaining.collectAsStateWithLifecycle()
+    val glucoseHistory by viewModel.glucoseHistory.collectAsStateWithLifecycle()
+    val timelineExtents by viewModel.timelineExtents.collectAsStateWithLifecycle()
     // Only once there is data to draw: with bounds alone the chart would compose
     // empty and paint its axes over nothing for the frames before the first
     // readings land, where it used to appear complete in one frame. The live
@@ -321,21 +329,21 @@ fun DashboardScreen(
     val chartDataBounds = remember(timelineExtents, glucoseHistory.isEmpty()) {
         timelineExtents?.takeIf { glucoseHistory.isNotEmpty() }?.let { ChartDataBounds(it.earliestMs, it.latestMs) }
     }
-    val multiSensorDisplay by viewModel.multiSensorDisplay.collectAsState()
-    val mainSensorOwnership by viewModel.mainSensorOwnership.collectAsState()
-    val peerCurrentReadings by viewModel.peerCurrentReadings.collectAsState()
-    val selectedSensorIds by viewModel.selectedSensorIds.collectAsState()
-    val sensorViewModes by viewModel.sensorViewModes.collectAsState()
+    val multiSensorDisplay by viewModel.multiSensorDisplay.collectAsStateWithLifecycle()
+    val mainSensorOwnership by viewModel.mainSensorOwnership.collectAsStateWithLifecycle()
+    val peerCurrentReadings by viewModel.peerCurrentReadings.collectAsStateWithLifecycle()
+    val selectedSensorIds by viewModel.selectedSensorIds.collectAsStateWithLifecycle()
+    val sensorViewModes by viewModel.sensorViewModes.collectAsStateWithLifecycle()
     // Multi-sensor mode is active whenever more than one sensor is selected —
     // stable across new readings, so per-row tinting never flashes uncolored.
     val multiSensorActive = selectedSensorIds.size > 1
-    val unit by viewModel.unit.collectAsState()
-    val graphLow by viewModel.graphLow.collectAsState()
-    val graphHigh by viewModel.graphHigh.collectAsState()
-    val targetLow by viewModel.targetLow.collectAsState()
-    val targetHigh by viewModel.targetHigh.collectAsState()
-    val veryLowThreshold by viewModel.veryLowThreshold.collectAsState()
-    val veryHighThreshold by viewModel.veryHighThreshold.collectAsState()
+    val unit by viewModel.unit.collectAsStateWithLifecycle()
+    val graphLow by viewModel.graphLow.collectAsStateWithLifecycle()
+    val graphHigh by viewModel.graphHigh.collectAsStateWithLifecycle()
+    val targetLow by viewModel.targetLow.collectAsStateWithLifecycle()
+    val targetHigh by viewModel.targetHigh.collectAsStateWithLifecycle()
+    val veryLowThreshold by viewModel.veryLowThreshold.collectAsStateWithLifecycle()
+    val veryHighThreshold by viewModel.veryHighThreshold.collectAsStateWithLifecycle()
     // Read outside the lazy list: an item that renders nothing still costs the list's
     // inter-item spacing, so the row has to be omitted rather than emitted empty.
     val showPinnedStats = tk.glucodata.ui.stats.hasPinnedStats()
@@ -345,10 +353,10 @@ fun DashboardScreen(
     val pinnedStatsWindow = rememberSaveable {
         mutableStateOf(tk.glucodata.ui.stats.PinnedWindow.TODAY)
     }
-    val chartSmoothingMinutes by viewModel.chartSmoothingMinutes.collectAsState()
-    val dataSmoothingGraphOnly by viewModel.dataSmoothingGraphOnly.collectAsState()
-    val dataSmoothingCollapseChunks by viewModel.dataSmoothingCollapseChunks.collectAsState()
-    val dataSmoothingExchangeOnly by viewModel.dataSmoothingExchangeOnly.collectAsState()
+    val chartSmoothingMinutes by viewModel.chartSmoothingMinutes.collectAsStateWithLifecycle()
+    val dataSmoothingGraphOnly by viewModel.dataSmoothingGraphOnly.collectAsStateWithLifecycle()
+    val dataSmoothingCollapseChunks by viewModel.dataSmoothingCollapseChunks.collectAsStateWithLifecycle()
+    val dataSmoothingExchangeOnly by viewModel.dataSmoothingExchangeOnly.collectAsStateWithLifecycle()
     // The chart's window and the reading's window, resolved once from the same switches.
     // The chart is presentation; everything else on this screen is what the app is going
     // to reason with, so it gets the window the notification and the alarms use.
@@ -361,45 +369,46 @@ fun DashboardScreen(
         graphOnly = dataSmoothingGraphOnly,
         exchangeOutputsOnly = dataSmoothingExchangeOnly
     )
-    val previewWindowMode by viewModel.previewWindowMode.collectAsState()
-    val journalEnabled by viewModel.journalEnabled.collectAsState()
-    val journalEiobDisplayEnabled by viewModel.journalEiobDisplayEnabled.collectAsState()
-    val journalQuickAddAlwaysNow by viewModel.journalQuickAddAlwaysNow.collectAsState()
-    val journalDashboardQuickAdd by viewModel.journalDashboardQuickAddButton.collectAsState()
-    val glucoseRangeColorsDisplayEnabled by viewModel.glucoseValueRangeColorsEnabled.collectAsState()
-    val glucoseArrowForecastEnabled by viewModel.glucoseArrowForecastColorsEnabled.collectAsState()
-    val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsState()
-    val dashboardShowDelta by viewModel.dashboardShowDelta.collectAsState()
-    val dashboardRowsShowDelta by viewModel.dashboardRowsShowDelta.collectAsState()
-    val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsState()
-    val journalDoseCalculatorEnabled by viewModel.journalDoseCalculatorEnabled.collectAsState()
-    val stateDoseHintEnabled by viewModel.stateDoseHintEnabled.collectAsState()
-    val stateDoseHintHorizonMinutes by viewModel.stateDoseHintHorizonMinutes.collectAsState()
-    val stateDoseHintCorrectInRange by viewModel.stateDoseHintCorrectInRange.collectAsState()
-    val stateDoseHintProfileNoticeAck by viewModel.stateDoseHintProfileNoticeAck.collectAsState()
-    val predictionModelProfileSaved by viewModel.predictionModelProfileSaved.collectAsState()
-    val journalFoodMacrosEnabled by viewModel.journalFoodMacrosEnabled.collectAsState()
-    val journalFoodLibraryEnabled by viewModel.journalFoodLibraryEnabled.collectAsState()
-    val predictiveSimulationEnabled by viewModel.predictiveSimulationEnabled.collectAsState()
-    val predictionTrendMomentumEnabled by viewModel.predictionTrendMomentumEnabled.collectAsState()
-    val predictionCarbRatioGramsPerUnit by viewModel.predictionCarbRatioGramsPerUnit.collectAsState()
-    val predictionInsulinSensitivityMgDlPerUnit by viewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsState()
-    val predictionModelProfile by viewModel.predictionModelProfile.collectAsState()
-    val predictionDoseTargetMgDl by viewModel.predictionDoseTargetMgDl.collectAsState()
-    val predictionCarbAbsorptionGramsPerHour by viewModel.predictionCarbAbsorptionGramsPerHour.collectAsState()
-    val predictionHorizonMinutes by viewModel.predictionHorizonMinutes.collectAsState()
-    val journalEntries by viewModel.journalEntries.collectAsState()
-    val journalInsulinPresets by viewModel.journalInsulinPresets.collectAsState()
-    val journalFoods by viewModel.journalFoods.collectAsState()
-    val sensorStatus by viewModel.sensorStatus.collectAsState()
-    val sensorProgress by viewModel.sensorProgress.collectAsState()
-    val viewMode by viewModel.viewMode.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val activeSensorList by viewModel.activeSensorList.collectAsState()
-    val sensorHoursRemaining by viewModel.sensorHoursRemaining.collectAsState()
-    val currentDay by viewModel.currentDay.collectAsState()
-    val predictionCalibrationRefresh by UiRefreshBus.revision.collectAsState(initial = 0L)
-    val calibrationRevision by tk.glucodata.data.calibration.CalibrationManager.revision.collectAsState()
+    val previewWindowMode by viewModel.previewWindowMode.collectAsStateWithLifecycle()
+    val journalEnabled by viewModel.journalEnabled.collectAsStateWithLifecycle()
+    val journalEiobDisplayEnabled by viewModel.journalEiobDisplayEnabled.collectAsStateWithLifecycle()
+    val journalQuickAddAlwaysNow by viewModel.journalQuickAddAlwaysNow.collectAsStateWithLifecycle()
+    val journalDashboardQuickAdd by viewModel.journalDashboardQuickAddButton.collectAsStateWithLifecycle()
+    val glucoseRangeColorsDisplayEnabled by viewModel.glucoseValueRangeColorsEnabled.collectAsStateWithLifecycle()
+    val glucoseArrowForecastEnabled by viewModel.glucoseArrowForecastColorsEnabled.collectAsStateWithLifecycle()
+    val appChartRangeColorsEnabled by viewModel.glucoseAppChartRangeColorsEnabled.collectAsStateWithLifecycle()
+    val dashboardShowDelta by viewModel.dashboardShowDelta.collectAsStateWithLifecycle()
+    val dashboardRowsShowDelta by viewModel.dashboardRowsShowDelta.collectAsStateWithLifecycle()
+    val matchArrowToDisplayedDelta by viewModel.matchArrowToDisplayedDelta.collectAsStateWithLifecycle()
+    val deltaIntervalMinutes by viewModel.deltaIntervalMinutes.collectAsStateWithLifecycle()
+    val journalDoseCalculatorEnabled by viewModel.journalDoseCalculatorEnabled.collectAsStateWithLifecycle()
+    val stateDoseHintEnabled by viewModel.stateDoseHintEnabled.collectAsStateWithLifecycle()
+    val stateDoseHintHorizonMinutes by viewModel.stateDoseHintHorizonMinutes.collectAsStateWithLifecycle()
+    val stateDoseHintCorrectInRange by viewModel.stateDoseHintCorrectInRange.collectAsStateWithLifecycle()
+    val stateDoseHintProfileNoticeAck by viewModel.stateDoseHintProfileNoticeAck.collectAsStateWithLifecycle()
+    val predictionModelProfileSaved by viewModel.predictionModelProfileSaved.collectAsStateWithLifecycle()
+    val journalFoodMacrosEnabled by viewModel.journalFoodMacrosEnabled.collectAsStateWithLifecycle()
+    val journalFoodLibraryEnabled by viewModel.journalFoodLibraryEnabled.collectAsStateWithLifecycle()
+    val predictiveSimulationEnabled by viewModel.predictiveSimulationEnabled.collectAsStateWithLifecycle()
+    val predictionTrendMomentumEnabled by viewModel.predictionTrendMomentumEnabled.collectAsStateWithLifecycle()
+    val predictionCarbRatioGramsPerUnit by viewModel.predictionCarbRatioGramsPerUnit.collectAsStateWithLifecycle()
+    val predictionInsulinSensitivityMgDlPerUnit by viewModel.predictionInsulinSensitivityMgDlPerUnit.collectAsStateWithLifecycle()
+    val predictionModelProfile by viewModel.predictionModelProfile.collectAsStateWithLifecycle()
+    val predictionDoseTargetMgDl by viewModel.predictionDoseTargetMgDl.collectAsStateWithLifecycle()
+    val predictionCarbAbsorptionGramsPerHour by viewModel.predictionCarbAbsorptionGramsPerHour.collectAsStateWithLifecycle()
+    val predictionHorizonMinutes by viewModel.predictionHorizonMinutes.collectAsStateWithLifecycle()
+    val journalEntries by viewModel.journalEntries.collectAsStateWithLifecycle()
+    val journalInsulinPresets by viewModel.journalInsulinPresets.collectAsStateWithLifecycle()
+    val journalFoods by viewModel.journalFoods.collectAsStateWithLifecycle()
+    val sensorStatus by viewModel.sensorStatus.collectAsStateWithLifecycle()
+    val sensorProgress by viewModel.sensorProgress.collectAsStateWithLifecycle()
+    val viewMode by viewModel.viewMode.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val activeSensorList by viewModel.activeSensorList.collectAsStateWithLifecycle()
+    val sensorHoursRemaining by viewModel.sensorHoursRemaining.collectAsStateWithLifecycle()
+    val currentDay by viewModel.currentDay.collectAsStateWithLifecycle()
+    val predictionCalibrationRefresh by UiRefreshBus.revision.collectAsStateWithLifecycle(initialValue = 0L)
+    val calibrationRevision by tk.glucodata.data.calibration.CalibrationManager.revision.collectAsStateWithLifecycle()
 
     // Initialize Calibration Manager
     LaunchedEffect(Unit) {
@@ -411,7 +420,7 @@ fun DashboardScreen(
         tk.glucodata.data.calibration.JournalCalibrationSync.onAppStart()
     }
     // The alarm quiet window: a header chip while one runs, nothing otherwise.
-    val quietWindowUntilMs by viewModel.quietWindowUntilMs.collectAsState()
+    val quietWindowUntilMs by viewModel.quietWindowUntilMs.collectAsStateWithLifecycle()
     // State for wizards (matching SensorScreen pattern)
     var showSibionicsWizard by remember { mutableStateOf(false) }
     var showLibreWizard by remember { mutableStateOf(false) }
@@ -477,6 +486,7 @@ fun DashboardScreen(
         }
     }
     val activeInsulinFromRemote = remoteInsulin != null && activeInsulinSummary != null
+    val activeCarbsGrams = if (journalEnabled) rememberJournalCob(journalNow, scopedJournalEntries) else null
     val predictionSettings = remember(
         predictiveSimulationEnabled,
         predictionTrendMomentumEnabled,
@@ -672,6 +682,13 @@ fun DashboardScreen(
             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         }
     }
+
+    val openJournalEntry = rememberJournalEntryAction(onOpenMeal) { entry ->
+        lastJournalType = entry.type
+        clearJournalAction()
+        journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+    }
+
     fun showJournalAction(suggestion: ChartTimelineTapSuggestion) {
         if (journalActionTimestamp != null && !suggestion.forceMenu) {
             clearJournalAction(withHaptic = true)
@@ -695,12 +712,15 @@ fun DashboardScreen(
         }
     }
 
-    LaunchedEffect(journalEnabled) {
-        journalNow = System.currentTimeMillis()
-        if (!journalEnabled) return@LaunchedEffect
-        while (true) {
-            delay(30_000L)
+    LaunchedEffect(journalEnabled, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             journalNow = System.currentTimeMillis()
+            if (journalEnabled) {
+                while (true) {
+                    delay(30_000L)
+                    journalNow = System.currentTimeMillis()
+                }
+            }
         }
     }
 
@@ -906,6 +926,7 @@ fun DashboardScreen(
             ),
             initialType = request.type,
             existingEntry = request.existingEntry,
+            onOpenMeal = onOpenMeal,
             onDismiss = { journalEditorRequest = null },
             onSave = { input ->
                 viewModel.saveJournalEntry(input)
@@ -947,7 +968,7 @@ fun DashboardScreen(
                     if (tail.timestamp >= previous.timestamp) tail else glucoseHistory.maxByOrNull { it.timestamp }
                 }
             }
-            val refreshRevision by UiRefreshBus.revision.collectAsState(initial = 0L)
+            val refreshRevision by UiRefreshBus.revision.collectAsStateWithLifecycle(initialValue = 0L)
             val hasSensorContext = sensorName.isNotBlank() || activeSensorList.isNotEmpty() || sensorStatus.isNotBlank()
             val dashboardCurrentSnapshot = remember(
                 refreshRevision,
@@ -965,12 +986,15 @@ fun DashboardScreen(
                 initialValue = System.currentTimeMillis(),
                 key1 = hasSensorContext,
                 key2 = dashboardCurrentSnapshot?.timeMillis,
-                key3 = latestPoint?.timestamp
+                key3 = lifecycleOwner
             ) {
                 if (!hasSensorContext) return@produceState
-                while (true) {
-                    delay(15_000L)
+                lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     value = System.currentTimeMillis()
+                    while (true) {
+                        delay(15_000L)
+                        value = System.currentTimeMillis()
+                    }
                 }
             }
             val dashboardDataState = remember(
@@ -1453,6 +1477,7 @@ fun DashboardScreen(
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
                             showDelta = dashboardShowDelta,
+                            matchArrowToDisplayedDelta = matchArrowToDisplayedDelta,
                             deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             quietWindowUntilMs = quietWindowUntilMs,
@@ -1529,9 +1554,8 @@ fun DashboardScreen(
                                 journalPresetsById = journalPresetsById,
                                 journalChipExpanded = false,
                                 onJournalEntryClick = { entry ->
-                                    lastJournalType = entry.type
                                     clearJournalAction()
-                                    journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                    openJournalEntry(entry)
                                 },
                                 showLeadingAction = journalEnabled,
                                 leadingActionEmphasis = if (index == 0) 1f else 0.38f,
@@ -1615,6 +1639,7 @@ fun DashboardScreen(
                                     journalMarkers = journalChartMarkers,
                                     activeInsulinSummary = activeInsulinSummary,
                                     stateDoseHint = stateDoseHint,
+                                    activeCarbsGrams = activeCarbsGrams,
                                     activeInsulinFromRemote = activeInsulinFromRemote,
                                     showEiob = journalEiobDisplayEnabled,
                                     appChartRangeColors = appChartRangeColorsEnabled,
@@ -1663,8 +1688,7 @@ fun DashboardScreen(
                                     onJournalMarkerClick = { entryId ->
                                         journalEntriesById[entryId]?.let { entry ->
                                             clearJournalAction()
-                                            lastJournalType = entry.type
-                                            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                            openJournalEntry(entry)
                                         }
                                     },
                                     onViewportSnapshotChanged = { dashboardChartViewport = it }
@@ -1674,6 +1698,7 @@ fun DashboardScreen(
                                 JournalFloatingActionMenu(
                                     visible = journalEnabled,
                                     selectedTimestamp = actionTimestamp,
+                                    onDismissRequest = { clearJournalAction() },
                                     viewportSnapshot = dashboardChartViewport,
                                     onTypeSelected = {
                                         lastJournalType = it
@@ -1758,6 +1783,7 @@ fun DashboardScreen(
                             veryHighThreshold = veryHighThreshold,
                             valueRangeColorsEnabled = glucoseRangeColorsDisplayEnabled,
                             showDelta = dashboardShowDelta,
+                            matchArrowToDisplayedDelta = matchArrowToDisplayedDelta,
                             deltaIntervalMinutes = deltaIntervalMinutes,
                             arrowForecastColorsEnabled = glucoseArrowForecastEnabled,
                             quietWindowUntilMs = quietWindowUntilMs,
@@ -1853,6 +1879,7 @@ fun DashboardScreen(
                                     journalMarkers = journalChartMarkers,
                                     activeInsulinSummary = activeInsulinSummary,
                                     stateDoseHint = stateDoseHint,
+                                    activeCarbsGrams = activeCarbsGrams,
                                     activeInsulinFromRemote = activeInsulinFromRemote,
                                     showEiob = journalEiobDisplayEnabled,
                                     appChartRangeColors = appChartRangeColorsEnabled,
@@ -1902,8 +1929,7 @@ fun DashboardScreen(
                                     onJournalMarkerClick = { entryId ->
                                         journalEntriesById[entryId]?.let { entry ->
                                             clearJournalAction()
-                                            lastJournalType = entry.type
-                                            journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                            openJournalEntry(entry)
                                         }
                                     },
                                     onViewportSnapshotChanged = { dashboardChartViewport = it }
@@ -1913,6 +1939,7 @@ fun DashboardScreen(
                                 JournalFloatingActionMenu(
                                     visible = journalEnabled,
                                     selectedTimestamp = actionTimestamp,
+                                    onDismissRequest = { clearJournalAction() },
                                     viewportSnapshot = dashboardChartViewport,
                                     onTypeSelected = {
                                         lastJournalType = it
@@ -1986,9 +2013,8 @@ fun DashboardScreen(
                                 journalPresetsById = journalPresetsById,
                                 journalChipExpanded = false,
                                 onJournalEntryClick = { entry ->
-                                    lastJournalType = entry.type
                                     clearJournalAction()
-                                    journalEditorRequest = JournalEditorRequest(entry.type, entry.timestamp, entry)
+                                    openJournalEntry(entry)
                                 },
                                 showLeadingAction = journalEnabled,
                                 leadingActionEmphasis = if (index == 0) 1f else 0.38f,
@@ -2086,6 +2112,9 @@ fun DashboardScreen(
 
             if (journalEnabled && journalDashboardQuickAdd) {
                 JournalExpandableFab(
+                    onMealSelected = onNewMeal,
+                    currentMealLabel = currentMealLabel,
+                    onCurrentMealSelected = onOpenCurrentMeal,
                     expanded = dashboardFabExpanded,
                     onExpandedChange = {
                         dashboardFabExpanded = it

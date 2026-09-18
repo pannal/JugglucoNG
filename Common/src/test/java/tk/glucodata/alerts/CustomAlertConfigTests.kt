@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.json.JSONObject
 
 class CustomAlertConfigTests {
 
@@ -57,5 +58,53 @@ class CustomAlertConfigTests {
 
         assertTrue(alert.isActiveTime(0))
         assertTrue(alert.isActiveTime(23 * 60 + 59))
+    }
+
+    @Test
+    fun missingDefaultActionPreservesExistingDismissButton() {
+        val restored = CustomAlertConfig.fromJson(JSONObject().put("type", "HIGH"))
+
+        assertEquals(AlertDefaultAction.DISMISS, restored.defaultAction)
+        assertEquals(15, restored.defaultSnoozeMinutes)
+    }
+
+    @Test
+    fun missingDefaultActionCanUseLegacyNotificationPreferenceDuringMigration() {
+        val restored = CustomAlertConfig.fromJson(
+            JSONObject().put("type", "HIGH"),
+            missingDefaultAction = AlertDefaultAction.SNOOZE
+        )
+
+        assertEquals(AlertDefaultAction.SNOOZE, restored.defaultAction)
+    }
+
+    @Test
+    fun storedDefaultActionOverridesLegacyMigrationFallback() {
+        val restored = CustomAlertConfig.fromJson(
+            JSONObject()
+                .put("type", "HIGH")
+                .put("defaultAction", "DISMISS"),
+            missingDefaultAction = AlertDefaultAction.SNOOZE
+        )
+
+        assertEquals(AlertDefaultAction.DISMISS, restored.defaultAction)
+    }
+
+    @Test
+    fun defaultActionAndSnoozeDurationRoundTrip() {
+        val configured = CustomAlertConfig(
+            defaultAction = AlertDefaultAction.SNOOZE,
+            defaultSnoozeMinutes = 35
+        )
+
+        val restored = CustomAlertConfig.fromJson(configured.toJson())
+
+        assertEquals(AlertDefaultAction.SNOOZE, restored.defaultAction)
+        assertEquals(35, restored.defaultSnoozeMinutes)
+    }
+
+    @Test
+    fun unknownStoredDefaultActionFallsBackToDismiss() {
+        assertEquals(AlertDefaultAction.DISMISS, AlertDefaultAction.fromStored("later"))
     }
 }
